@@ -1,0 +1,12 @@
+# Project
+.vscode
+api_key*
+.api_key*
+
+# Python
+__pycache__
+*.pyc
+
+# Sphinx
+_build
+
