@@ -63,7 +63,7 @@ setup(
     install_requires=install_requires,
     # tests_require=tests_require,
     project_urls={
-        # "Documentation": "...", # TODO Link to docs
+        "Documentation": "https://energyquantified-python.readthedocs.io",
         "Source": "https://github.com/energyquantified/eq-python-client",
     },
     classifiers=classifiers

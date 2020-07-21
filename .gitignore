@@ -1,4 +1,7 @@
 # Project
+build/
+dist/
+*.egg-info/
 .vscode
 api_key*
 .api_key*

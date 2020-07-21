@@ -29,7 +29,8 @@ home page. Trial users do get access to 30 days of history.
 
 ## Documentation
 
-TODO: Insert to readthedocs here.
+Find the [documentation](https://energyquantified-python.readthedocs.io) at
+readthedocs.
 
 ## Installation
 
@@ -45,8 +46,9 @@ pip install --upgrade energyquantified
 
 ## Example usage
 
-Look at this short example on how to initialize the client, search for time
-series and download data. More details available in the (TODO: Link) documentation.
+How to initialize the client, search for data series and download data.
+More details available in the
+[documentation](https://energyquantified-python.readthedocs.io).
 
 ```python
 from datetime import date, timedelta
