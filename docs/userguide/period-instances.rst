@@ -2,8 +2,7 @@ Period-based instances
 ======================
 
 This page shows how to load period-based series instances. All examples below
-expects you to have an initialized and authenticated instance of the
-client called ``eq``.
+expects you to have an initialized instance of the client called ``eq``.
 
 Operations described here are available under ``eq.period_instances.*``.
 
@@ -20,15 +19,15 @@ to any of the following:
     We recommend reading the section on
     :doc:`period-based series <../userguide/periods>`
     before continuing to learn how to convert a
-    :py:class:`energyquantified.data.Periodseries` to a
-    :py:class:`energyquantified.data.Timeseries`.
+    :py:class:`Periodseries <energyquantified.data.Periodseries>` into a
+    :py:class:`Timeseries <energyquantified.data.Timeseries>`.
 
 
 A note on REMIT data
 --------------------
 
-We generate a new instances when new outage messages arrive. The series start
-at 1 January 2019 and goes up to 5 years into the future.
+We generate new instances when new outage messages arrive. The series' start
+on 1 January 2019 and goes up to 5 years into the future.
 
 So the instance's issue date will be the same as the issue date
 for the latest outage message and the tag will be the outage
@@ -37,17 +36,17 @@ message ID.
 All REMIT curves for powerplants and aggregated production capacity are
 period-based series instances.
 
-(Exchange capacities reported via REMIT are plain time series.)
+(Exchange capacities reported via REMIT are stored as
+:class:`Timeseries <energyquantified.data.Timeseries>`.)
 
 
 Get the latest instance
 -----------------------
 
-``eq.instances.latest(curve, begin=None, end=None)``
+Method reference: :py:meth:`eq.period_instances.latest() <energyquantified.api.PeriodInstancesAPI.latest>`
 
-Load the latest instance like shown below. Unlike the operations for
-``eq.instances.*``-operations, you must specify **begin** and **end** for
-period-based instances.
+Load the latest instance like shown below. **curve**, **begin** and
+**end** are required parameters:
 
    >>> from datetime import date
    >>> periodseries = eq.period_instances.latest(
@@ -80,7 +79,7 @@ March at 12:54 CEST. Here we print the instance only for clarity:
 Get a specific instance
 -----------------------
 
-``eq.instances.latest(curve, begin=None, end=None, issued=None, tag=None)``
+Method reference: :py:meth:`eq.period_instances.get() <energyquantified.api.PeriodInstancesAPI.get>`
 
 If you know the **issue date** and **tag** for an instance, you can load
 it like seen below. You must always specify the issue date, but you can
@@ -109,8 +108,7 @@ an instance for the REMIT message published on 30 March 2020 at 12:54 CEST:
 Load instances
 --------------
 
-``eq.instances.load(curve, begin=None, end=None, issued_at_latest=None,
-issued_at_earliest=None, tags=None, exclude_tags=None, limit=3)``
+Method reference: :py:meth:`eq.period_instances.load() <energyquantified.api.PeriodInstancesAPI.load>`
 
 To load multiple period-based series instances, you need to specify the
 **curve**, **begin** and **end**.
@@ -161,6 +159,8 @@ Here we load the 10 instances from the very end of 2019:
 
 List instances
 ^^^^^^^^^^^^^^
+
+Method reference: :py:meth:`eq.period_instances.list() <energyquantified.api.PeriodInstancesAPI.list>`
 
 Similar to the ``load()``-method, but this method only lists the *instances*
 instead of loading the series with data:

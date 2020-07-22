@@ -1,7 +1,7 @@
 
 # Terminology and data models
 
-This page describes commonly used terms used in the API and in the
+This page describes commonly used terms used in the API and the
 Python client.
 
 ## Curve
@@ -11,12 +11,11 @@ identifies data series in the API. The Curve-model contains all the
 meta-information which makes up its name, such as categories, areas,
 unit and others.
 
-A curve has a resolution, which describes the frequency of the data and
-the time-zone in which the date-times are specified.
+A curve has a resolution (see below).
 
 **Curve types**
 
-Another important detail is the `curve_type` attribute. This attribute
+Another essential detail is the `curve_type` attribute. This attribute
 describes what kind of data the curve stores. There different types are:
 
  * `TIMESERIES`
@@ -32,9 +31,8 @@ Some data series, such as those that contain forecasts, are not only one
 series, but a collection of many series. We call each of these
 series *instances*.
 
-The instances must be identified somehow. Energy Quantified uses two
-attributes to identify an instance: An **issue date** (date-time) and a
-**tag** (string).
+The instances are identified by the combination of two attributes: An
+**issue date** (date-time) and a **tag** (string).
 
 For instance, Energy Quantified's forecasts based on the weather
 forecast [ECMWF](https://www.ecmwf.int/) uses `tag = 'ec'` and the
@@ -51,13 +49,13 @@ Time series that are instances have an `instance` attribute.
 
 ## Place
 
-Place is a rather generic concept: It represents anything that has a
+The Place model is a rather generic: It represents anything that has a
 geographical location, and therefore it has a latitude and longitude.
 
 Places have a `type` attribute describing what you may find in this
 place! These types are currently:
 
- * `producer` – Powerplant. Where available you will also get a `fuel`
+ * `producer` – Powerplant. Where available, you will also get a `fuel`
     attribute with the production type (wind, solar, nuclear, etc.).
  * `consumer` – Factory or otherwise large consumer of power
  * `weatherstation` – A weather station
@@ -65,7 +63,7 @@ place! These types are currently:
     critical locations)
 
 Curves may be linked to a place (for instance actual production for a
-nuclear power plant). And a place have a list of all curves connected to
+nuclear power plant). And a place has a list of all curves connected to
 it.
 
 ## Resolution, time-zone and frequency
@@ -76,7 +74,7 @@ intervals for **frequencies**.
 
 ### Frequency
 
-A frequency as a duration of time. We use mostly **ISO-8601**-style naming of
+A frequency is a time step. We use mostly **ISO-8601**-style naming of
 frequencies, but with a few exceptions. See
 [Duration (Wikipedia)](https://en.wikipedia.org/wiki/ISO_8601#Durations)
 for an excellent explanation of the format.
@@ -93,12 +91,12 @@ for an excellent explanation of the format.
  * `PT10M` – 10 minutes
  * `PT5M` – 5 minutes
 
-The `SEASON` frequency is used for gas contracts. It starts at 1 April (summer)
-or 1 October (winter) and lasts six months.
+The `SEASON` frequency is used for gas market contracts. It starts on 1
+April (summer) or 1 October (winter) and lasts six months.
 
 Besides, the following frequency constant is used when data does not follow a
-regular interval. It is an invalid frequency for operations that involve the
-Timeseries model.
+fixed interval (such as tick data). It is an invalid frequency for operations
+that involve the Timeseries model.
 
  * `NONE` – No frequency specified (i.e. tick data)
 
@@ -124,8 +122,9 @@ We use the [pytz](https://pypi.org/project/pytz/) library for time-zones.
 
 ### Resolution
 
-The combination of a frequency and a time-zone. All time series have a
-resolution. Only resolutions with iterable frequencies are iterable.
+It is a combination of a frequency and a time-zone. All time series have a
+resolution. Only resolutions with iterable frequencies are iterable (meaning
+all frequencies other than `NONE`).
 
 With Energy Quantified's Python library, you can do something like this:
 
@@ -143,7 +142,7 @@ With Energy Quantified's Python library, you can do something like this:
     2020-01-04 00:00:00+00:00
 
 Of course, you could use `datetime.timedelta` from the standard Python
-library do achieve a similar result. However, `timedelta` does not handle
+library to achieve a similar result. However, `timedelta` does not handle
 the transition from/to daylight saving time, so using the `Resolution` will
 make sure that the date-times get the right offset from UTC.
 
@@ -174,7 +173,7 @@ input values.
 You can also apply filters on which *hours* you want to include in aggregations.
 
 In the power markets, one typically make a distinction between **base**
-and **peak** hours. Some weekly contracts traditionally also separates
+and **peak** hours. Some weekly contracts traditionally also separate
 workdays from weekends. Here are some explanations:
 
  * `BASE` – All hours
@@ -195,7 +194,7 @@ should keep the following in mind:
 
 ## Time series
 
-Time series is a data series with date-times as index. Time series
+A time series is a data series with date-times as the index. Time series
 in Energy Quantified's API has a **fixed** interval (i.e. 15-minute, hourly,
 daily). For time series with varying duration per item, see
 [Period series](#period-series).
@@ -212,33 +211,33 @@ Date         Value
 ...
 ```
 
-Time series data can have variable number of values per date-time:
+Time series data can have a varying number of values per date-time:
 
  * **Single-value**: Each `date-time` has one corresponding value.
  * **Scenarios**: Each `date-time` has multiple values.
  * **Scenarios with mean value**: Each `date-time` has multiple values and a
-   corrsponding mean value of those scenarios.
+   mean value of those scenarios.
 
 Scenarios are sometimes also referred to as **ensembles**. This terminology
 comes from meteorology, where forecasts with multiple scenarios are called
-ensembles. For instance, the ECMWF ensemble forecast has 51 scenarios and the
+ensembles. For instance, the ECMWF ensemble forecast has 51 scenarios, and the
 GFS ensemble forecast has 21 scenarios.
 
 ## Period series
 
-While the [Time series](#time-series) class is great for representing
+While the [Time series](#time-series) class is excellent for representing
 fixed-interval data, some time series data can be stored and served more
 efficient.
 
 For instance, there are plenty of capacity plans published in the power
 markets (i.e. [REMIT](https://www.energyquantified.com/features/remit)).
 Another example is assumptions on installed capacity on different fuel types
-in the future. Such data often has the same value over a longer period of time,
+in the future. Such data often have the same value over an extended period,
 and the value changes sporadically.
 
 So Energy Quantified created what we call a **period series** for this, which
-is a collection of date-time ranges with a begin and an end date-times and a
-corresponding value.
+is a collection of date-time ranges with a **begin** date-time, an **end**
+date-time, and a corresponding **value**.
 
 The Energy Quantified Python client also supports converting any such period
 series to a time series in your preferred resolution.
@@ -255,18 +254,18 @@ Begin       End          Value
 ...
 ```
 
-Period-based series have two different type of periods:
+Period-based series has two different types of periods:
 
  * **Period with a value**: Each period has one corresponding value, like in
    the example table above.
  * **Period with a value and a capacity**: Each period has a current value
    and a total installed capacity. These types of values appear mostly in
    REMIT data, where the value is the currently available production capacity,
-   while the total installed capacity is also provided for reference.
+   while the total installed capacity is provided for reference.
 
 ## OHLC
 
-The end-of-day statistics for financial contracts. OHLC stands for *open,
+End-of-day statistics for financial contracts. OHLC stands for *open,
 high, low and close*, and is a summary of trades for a day.
 OHLC is typically used to illustrate movements in the price of a financial
 instrument and can be seen in financial charts looking like candlesticks.
@@ -277,14 +276,15 @@ prices for gas markets, carbon emissions (EUA), brent oil and coal (API2).
 
 ![OHLC chart](../_static/ohlc_chart.png "OHLC chart")
 
-**Example:** Nord Pool future contract for a front quarter.
+**Example:** Nord Pool future contract for a front quarter contract (Q1).
 
 ## SRMC, dark- and spark spreads
 
 ### SRMC
 
 In the power market, the **short-run marginal cost** of running power plants. See
-[short-run marginal cost](https://en.wikipedia.org/wiki/Cost_curve#Short-run_marginal_cost_curve_(SRMC)) on Wikipedia for a more widespread defintion.
+[short-run marginal cost](https://en.wikipedia.org/wiki/Cost_curve#Short-run_marginal_cost_curve_(SRMC)) on Wikipedia for a broader
+definition.
 
 ### Dark- and spark spreads
 

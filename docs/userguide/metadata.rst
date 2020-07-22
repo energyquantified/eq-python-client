@@ -2,8 +2,7 @@ Metadata
 ========
 
 This page describes how to search for data in the API. All examples below
-expects you to have an initialized and authenticated instance of the client
-called ``eq``.
+expects you to have an initialized instance of the client called ``eq``.
 
 Operations described here are available under ``eq.metadata.*``.
 
@@ -17,7 +16,9 @@ operation as the data search on Energy Quantified's web application.
 Searching for curves in the API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When looking for curves, specify ``q`` to use fulltext search:
+Method reference: :py:meth:`eq.metadata.curves() <energyquantified.api.MetadataAPI.curves>`
+
+When looking for curves, specify ``q`` to do a free-text search:
 
    >>> eq.metadata.curves(q='nuclear germany forecast')
    [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE>]
@@ -46,9 +47,9 @@ See :meth:`energyquantified.api.MetadataAPI.curves` for a full reference.
 Pagination
 ^^^^^^^^^^
 
-The curve search response from the server is returned as a special ``Page`` type,
-which is a ``list`` with extra flavour. Let's do a curve search that
-returns many curves:
+The curve search returns as a ``Page`` type, which is similar to Python
+``list`` – but with extra flavour. Let's do a curve search that returns
+many curves:
 
     >>> page1 = eq.metadata.curves(area=Area.DE, page_size=10)
     >>> page1.total_items
@@ -65,7 +66,7 @@ You can now go to the next page and previous page like so:
     >>> page2 = page1.get_next_page()
     >>> page1 = page2.get_previous_page()
 
-You can of course also return a specific page directly when searching:
+You can, of course, also return a specific page directly when searching:
 
     >>> page61 = eq.metadata.curves(area=Area.DE, page_size=10, page=61)
     >>> page61
@@ -77,13 +78,15 @@ You can of course also return a specific page directly when searching:
      <Curve: "DE Hydro Snow-and-Groundwater MWh D Normal", curve_type=TIMESERIES>,
      <Curve: "DE Nuclear Capacity Available MW REMIT", curve_type=INSTANCE_PERIOD>]
 
-Metadata is cached. So, if you try to load the same page twice, it is loaded
+Metadata is cached. So, if you try to load the same page twice, it is fetched
 from the cache, and thus not hitting the server.
 
 Places
 ------
 
-Similar to the curve search, you can look up places with fulltext search:
+Method reference: :py:meth:`eq.metadata.places() <energyquantified.api.MetadataAPI.places>`
+
+Similar to the curve search, you can look up places with a free-text search:
 
    >>> nuclear_powerplants = eq.metadata.places(q='nuclear germany')
    >>> nuclear_powerplants
@@ -100,8 +103,8 @@ You can also filter by attributes:
     <Place: key="pp-grohnde", name="Grohnde", kind=PRODUCER, fuels=['Nuclear'], location=[52.035641, 9.413497]>,
     ...
 
-Places are not very useful by themselves, but they have a list of all curves
-they are referring to. Here you can see the actual production curve and the
+Places are not very useful by themselves, but they have a list of all referenced
+curves. Here you can see the actual production curve and the
 REMIT capacity curve for the German nuclear powerplant Brokdorf:
 
    >>> brokdorf = nuclear_powerplants[0]
@@ -113,6 +116,11 @@ See :meth:`energyquantified.api.MetadataAPI.places` for a full reference.
 
 Categories
 ----------
+
+Method references:
+:py:meth:`eq.metadata.categories() <energyquantified.api.MetadataAPI.categories>`
+and
+:py:meth:`eq.metadata.exact_categories() <energyquantified.api.MetadataAPI.exact_categories>`
 
 Curve names are, among other attributes, built by combining categories. You
 can list categories by using the `categories()`-method. It will

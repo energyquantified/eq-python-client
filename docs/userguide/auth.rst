@@ -31,7 +31,7 @@ and write the API key to it:
    aaaa-bbbb-cccc-dddd
 
 Then you can initialize the client like and provide the API key with a
-parameter called **api_key_file**. Make sure to provide the full path,
+parameter called **api_key_file**. Make sure to provide the full path
 or the relative path to the directory where you run your program from:
 
    >>> from energyquantified import EnergyQuantified

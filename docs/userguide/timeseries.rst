@@ -2,7 +2,7 @@ Time series
 ===========
 
 This page shows how to load time series data. All examples below expects you
-to have an initialized and authenticated instance of the client called ``eq``.
+to have an initialized instance of the client called ``eq``.
 
 Operations described here are available under ``eq.timeseries.*``.
 
@@ -15,20 +15,22 @@ to any of the following:
 Load time series data
 ---------------------
 
-Loading time series data is quite straight-forward. You need to specify three
-parameters at minimum: **curve**, **begin** and **end**.
+Method reference: :py:meth:`eq.timeseries.load() <energyquantified.api.TimeseriesAPI.load>`
+
+Loading time series data is quite straight-forward. You must at least specify
+these three parameters: **curve**, **begin** and **end**.
 
 So, let's load data for a curve called ``DE Wind Power Production MWh/h 15min Actual``
 from 1 January 2020 at 00:00 (inclusive) to 6 January 2020 at 00:00 (exclusive).
 
-In the example below we specified the curve as a string. You can either supply
-the **curve name** or you can supply a **Curve** object. The same goes
-for the date parameters, where the allowed types are: **date**, **datetime**
-or an *ISO-8601*-formatted **string**.
+In the example below, we specified the curve as a string. You can either supply
+the **curve name** or a **Curve** object. The same goes for the date parameters,
+where the allowed types are: **date**, **datetime** or an *ISO-8601*-formatted
+**string**.
 
-(Keep in mind that if you do not have a paid subscription on Energy Quantified, you
-will only be able to load data 30 days back from *today*. So in that case you should
-adjust the begin and end dates accordingly.)
+(Keep in mind that if you do not have a paid subscription on Energy Quantified,
+you will only be able to load data 30 days back from *today*. So, in that case,
+you should adjust the begin and end dates accordingly.)
 
    >>> from datetime import date
    >>> timeseries = eq.timeseries.load(
@@ -61,12 +63,12 @@ The response is an :class:`energyquantified.data.Timeseries` instance:
 Aggregation
 ^^^^^^^^^^^
 
-Notice that the wind actual curve in the above examples is in a 15-minute
+Notice that the actual wind curve in the above examples is in a 15-minute
 resolution. Energy Quantified do not a copy of that curve in hourly, daily
 or any other resolution.
 
-If you would like to get the data in, say, daily resolution, simply
-supply an extra argument, ``frequency``, when loading the time series data:
+If you would like to get the data in, say, daily resolution, supply an
+extra argument, ``frequency``, when loading the time series data:
 
    >>> from energyquantified.time import Frequency
    >>> timeseries = eq.timeseries.load(
@@ -86,7 +88,7 @@ supply an extra argument, ``frequency``, when loading the time series data:
     <Value: date=2020-01-04 00:00:00+01:00, value=33299.36>,
     <Value: date=2020-01-05 00:00:00+01:00, value=13151.01>]
 
-You can also decide the aggregation method. Let's load the maximum wind
+You can also decide on the aggregation method. Let's load the maximum wind
 production per day:
 
    >>> from energyquantified.time import Frequency
@@ -106,8 +108,9 @@ production per day:
     <Value: date=2020-01-04 00:00:00+01:00, value=40671>,
     <Value: date=2020-01-05 00:00:00+01:00, value=18274>]
 
-There is also support for hourly filters, such as ``BASE`` and ``PEAK``. This
-is how you can load the mean wind production during peak hours:
+There is also support for hourly filters, such as ``BASE`` and ``PEAK``. So,
+to load the daily *mean* wind production during *peak hours*, you can do like
+so:
 
    >>> from energyquantified.time import Frequency
    >>> from energyquantified.metadata import Aggregation, Filter
@@ -133,11 +136,14 @@ will automatically use futures peak (8-20 on workdays only) in the aggregation.
 Load time series scenarios
 --------------------------
 
-Energy Quantified provides climate data, where we run the weather data for different
-years through our models (as of this writing, the weather years 1980-2019).
-Using the same method as above, ``eq.timeseries.load()``, we can load this data.
+Energy Quantified provides climate data, where we run the weather data for
+different years through our models (as of this writing, the weather years
+1980-2019).
 
-For scenario-based time series, the values in
+By using the same method as above, ``eq.timeseries.load()``, we can load
+this data.
+
+For the scenario-based time series, the values in
 ``timeseries.data[]`` are slightly different: It will consist of
 ``ScenarioValue`` items instead of ``Value`` items.
 

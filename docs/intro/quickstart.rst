@@ -9,7 +9,7 @@ Quantified's Python library.
 2-minute guide
 ^^^^^^^^^^^^^^
 
-First, make sure that **energyquantified** is :doc:`installed and up-to-date <install>`
+First, make sure that ``energyquantified`` is :doc:`installed and up-to-date <install>`
 on your workstation.
 
 **Getting started**
@@ -21,7 +21,7 @@ Import the library, create a client and supply the API key:
 
 **Search for curves (data series)**
 
-Energy Quantified allows you to search for curves in two ways. By freetext
+Energy Quantified allows you to search for curves in two ways. By free-text
 search:
 
    >>> curves = eq.metadata.curves(q='wind power germany actual')
@@ -48,7 +48,7 @@ When you have found your curve, you can download it. As these curves are of
 
 When specifying the ``curve`` parameter in the ``load()``-function, you can
 either provide a Curve instance and a string. Same for the dates (either
-provide a date instance, or an ISO-8601-like string ``YYYY-MM-DD``).
+provide a Python date, datetime, or an ISO-8601-like string ``YYYY-MM-DD``).
 
    >>> from datetime import date
    >>> timeseries = eq.timeseries.load(
@@ -84,7 +84,7 @@ your own database, or perhaps start doing some data analysis.
 
 **Use pandas for data analysis**
 
-(You need to install pandas separately to do this.) Convert any time series
+(You need to install ``pandas`` separately to do this.) Convert any time series
 to a ``pandas.DataFrame`` like so:
 
    >>> df = timeseries.to_dataframe(name='series')
@@ -101,7 +101,7 @@ to a ``pandas.DataFrame`` like so:
 Mini-guide to pandas and matplotlib
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Before you continue:** You need to install **pandas** and **matplotlib** to
+**Before you continue:** You need to install ``pandas`` and ``matplotlib`` to
 follow this mini-guide.
 
 **Load some data:**
@@ -146,11 +146,11 @@ like so:
    <BLANKLINE>
    [668 rows x 1 columns]
 
-You can then concaternate these two into one ``DataFrame``.
+You can then concatenate these two into one ``DataFrame``.
 Supplying ``axis=1`` means that you concatenate *columns*, which in this case
 add the columns next to each other while maintaining the dates. (Using
-``axis=0`` will concatenate on the index, which in this case is the data
-column. That will yield an unwanted result.)
+``axis=0`` will concatenate on the index, which in this case are the dates.
+That will yield an unwanted result.)
 
    >>> df = pd.concat([dfw, dfs], axis=1)
    >>> df
@@ -197,8 +197,8 @@ You can also perform aggregations:
    2020-03-31 00:00:00+02:00   5968.635417  7462.677083
 
 And you can add the wind and solar production together to create a sum
-of renewables. The result will be a ``pandas.Series``, as the ``Freq: D``
-in the bottom is an indication of.
+of renewables. The result will be a ``pandas.Series``, as indicated by the
+``Freq: D`` in the bottom.
 
    >>> df2['de wind'] + df2['de solar']
    date
