@@ -312,7 +312,9 @@ class InstancesAPI(BaseAPI):
         them together and return a continuous time series.
 
         By default, this method selects the day-ahead instances (forecasts),
-        but you can set ``days_ahead`` to anything between 1 and 10.
+        but you can set ``days_ahead`` to 0 or higher. 0 means intraday,
+        1 means the day-ahead (default), 2 means the day after day-ahead,
+        and so on.
 
         You may control the time of the day the instance is issued by setting
         exactly one of the follow parameters: ``time_of_day``,
@@ -327,7 +329,8 @@ class InstancesAPI(BaseAPI):
         :type begin: date, datetime, str, required
         :param end: The end date-time
         :type end: date, datetime, str, required
-        :param days_ahead: The number of leading days (1-10), defaults to 1
+        :param days_ahead: The number of leading days (0 or higher),\
+            defaults to 1
         :type days_ahead: int, optional
         :param issued: Whether to select the earliest or latest matching\
             instance per day, allowed values "earliest" | "latest",\
@@ -362,7 +365,7 @@ class InstancesAPI(BaseAPI):
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
         self._add_str(params, "tag", tag, required=True)
-        self._add_int(params, "days-ahead", days_ahead, min=1, max=10, required=True)
+        self._add_int(params, "days-ahead", days_ahead, min=0, max=10000, required=True)
         self._add_str(params, "issued", issued, allowed_values=['earliest', 'latest'], required=True)
         self._add_time(params, "time-of-day", time_of_day)
         self._add_time(params, "after-time-of-day", after_time_of_day)

@@ -181,10 +181,16 @@ and Tuesday's forecast for Wednesday, and so on.
 Energy Quantified's API has solved this by via an operation we call *relative
 forecasts*.
 
-The relative forecasts work for **1-10 days ahead**. You *must* filter on the
-**tag**, and you *can* filter on the **time-of-day** the forecast was issued.
-When there isn't any forecast issued for a specific day, then that day will
-have no values.
+The relative forecasts work for **0 or more days ahead**:
+
+   - ``days_ahead=0`` means forecasts for intraday
+   - ``days_ahead=1`` means forecasts for day ahead
+   - ``days_ahead=2`` means forecasts for day after day ahead
+   - `... and so on`
+
+You *must* filter on the **tag**, and you *can* filter on the **time-of-day**
+the forecast was issued. When there isn't any forecast issued for a specific
+day, then that day will have no values.
 
    >>> from datetime import datetime, time
    >>> day_ahead_forecast = eq.instances.relative(
@@ -192,7 +198,7 @@ have no values.
    >>>    begin=datetime(2020, 6, 1, 0, 0, 0),
    >>>    end=datetime(2020, 6, 5, 0, 0, 0),
    >>>    tag='ec',
-   >>>    days_ahead=1,  # The day-ahead forecast (1-10 allowed)
+   >>>    days_ahead=1,  # The day-ahead forecast (0 or higher allowed)
    >>>    time_of_day=time(0, 0),  # Issued at exactly 00:00
    >>>    frequency=Frequency.P1D
    >>> )
