@@ -297,6 +297,21 @@ class Periodseries(Series):
             data=data
         )
 
+    def print(self, file=sys.stdout):
+        """
+        Utility method to print a period-based series to any file handle
+        (defaults to stdout).
+        """
+        print(f"Periodseries:", file=file)
+        if self.curve:
+            print(f"  Curve: {repr(self.curve)}", file=file)
+        if self.instance:
+            print(f"  Instance: {self.instance}", file=file)
+        print(f"  Resolution: {self.resolution}", file=file)
+        print(f"", file=file)
+        for d in self.data:
+            d.print(file=file)
+
 
 class _PeriodsToTimeseriesIterator:
     """
