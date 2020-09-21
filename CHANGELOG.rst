@@ -1,6 +1,17 @@
 Changelog
 =========
 
+0.2
+---
+
+A small release with two improvements.
+
+**Improvements**
+
+- Add ``Periodseries#print()`` method.
+- Increase 1-10 days-ahead constraints for relative queries to 0-10000.
+
+
 0.1
 ---
 
