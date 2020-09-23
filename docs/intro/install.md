@@ -15,16 +15,6 @@ pip install energyquantified
 pip install --upgrade energyquantified
 ```
 
-Or you could use **conda**:
-
-```bash
-# Install package
-conda install energyquantified
-
-# Update package
-conda update energyquantified
-```
-
 The `energyquantified` package does not automatically pull in `pandas` or
 any other data analysis libraries, because they are **not** required to use
 this package.
