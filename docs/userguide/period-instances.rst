@@ -13,14 +13,10 @@ to any of the following:
 
 .. important::
 
-    All operations under ``eq.period_instances.*`` return
-    period-based series or lists of period-based series.
-
     We recommend reading the section on
     :doc:`period-based series <../userguide/periods>`
-    before continuing to learn how to convert a
-    :py:class:`Periodseries <energyquantified.data.Periodseries>` into a
-    :py:class:`Timeseries <energyquantified.data.Timeseries>`.
+    before continuing, as all operations here return
+    period-based series or lists of period-based series.
 
 
 A note on REMIT data
