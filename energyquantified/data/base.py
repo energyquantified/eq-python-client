@@ -25,7 +25,7 @@ class Series:
         :return: The ``curve.name`` if it exists, otherwise ``None``
         :rtype: str, NoneType
         """
-        return curve.name if self.curve else None
+        return self.curve.name if self.curve else None
 
     def has_data(self):
         """
