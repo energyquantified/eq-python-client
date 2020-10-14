@@ -3,7 +3,14 @@ from datetime import date, datetime, time
 
 from requests import exceptions
 
-from ..metadata import Area, Curve, DataType, Aggregation, Filter
+from ..metadata import (
+    Area,
+    Curve,
+    DataType,
+    Aggregation,
+    Filter,
+    ContractPeriod,
+)
 from ..time import Frequency
 
 from ..exceptions import (
@@ -311,5 +318,24 @@ class BaseAPI:
         else:
             raise ValidationError(
                 reason=f"Not a valid Filter: '{var}'",
+                parameter=name
+            )
+
+    @staticmethod
+    def _add_contract_period(params, name, var, required=False):
+        if var is None and not required:
+            return
+        if isinstance(var, str):
+            if not ContractPeriod.is_valid_tag(var):
+                raise ValidationError(
+                    reason=f"Not a valid ContractPeriod: '{var}'",
+                    parameter=name
+                )
+            params[name] = var
+        elif isinstance(var, ContractPeriod):
+            params[name] = var.tag
+        else:
+            raise ValidationError(
+                reason=f"Not a valid ContractPeriod: '{var}'",
                 parameter=name
             )

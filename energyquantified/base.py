@@ -1,8 +1,12 @@
 from .http import Session
 
 from .api import (
-    InstancesAPI, MetadataAPI, TimeseriesAPI,
-    PeriodsAPI, PeriodInstancesAPI
+    InstancesAPI,
+    MetadataAPI,
+    TimeseriesAPI,
+    PeriodsAPI,
+    PeriodInstancesAPI,
+    OhlcAPI
 )
 from .exceptions import UnauthorizedError, InitializationError
 
@@ -97,6 +101,9 @@ class EnergyQuantified:
         #: See :py:class:`energyquantified.api.PeriodInstancesAPI`. For
         #: loading instances of period-based series.
         self.period_instances = PeriodInstancesAPI(self)
+        #: See :py:class:`energyquantified.api.OhlcAPI`. For loading
+        #: OHLC data in various ways
+        self.ohlc = OhlcAPI(self)
 
     def is_api_key_valid(self):
         """
