@@ -4,14 +4,20 @@ Changelog
 0.3-dev
 -------
 
+Introducing support for OHLC data (open, high, low, close).
+
 **Improvements**
 
+- Implement all operations in the OHLC API.
+- Add data and metadata classes for OHLC.
+- Add the ``Series#contract``-field,
+- Add documentation for OHLC.
 - Add new curve data type: ``DataType.SCENARIO``.
 
 **Bugfixes**
 
-- Fix runtime error in ``Series#name()`` (superclass of ``Timeseries``
-  and ``Periodseries``).
+- Fix runtime error in ``Series#name()`` (``Series`` is superclass of
+  ``Timeseries`` and ``Periodseries``).
 
 
 0.2

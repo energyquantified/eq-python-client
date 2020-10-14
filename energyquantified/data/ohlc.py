@@ -117,14 +117,14 @@ class OHLCSeries(Series):
 
 class OHLCList(list):
     """
-    A collection of OHLC data provided in a list. Can contain all sorts
-    of contracts (yearly, monthly, weekly etc.) for a specific market.
+    A collection of OHLC data . Can contain all sorts of contracts
+    (yearly, monthly, weekly etc.) for a specific market.
     """
 
     def __init__(self, elements, curve=None):
         super().__init__(elements)
         # --- Public members ---
-        #: The current page
+        #: The curve holding these OHLC objects
         self.curve = curve
 
     def __str__(self):
