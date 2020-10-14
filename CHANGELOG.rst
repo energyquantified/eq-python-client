@@ -1,6 +1,19 @@
 Changelog
 =========
 
+0.3-dev
+-------
+
+**Improvements**
+
+- Add new curve data type: ``DataType.SCENARIO``.
+
+**Bugfixes**
+
+- Fix runtime error in ``Series#name()`` (superclass of ``Timeseries``
+  and ``Periodseries``).
+
+
 0.2
 ---
 
