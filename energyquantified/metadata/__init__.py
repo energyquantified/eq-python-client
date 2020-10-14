@@ -3,6 +3,12 @@ from .curve import Curve, CurveType, DataType
 from .instance import Instance
 from .place import Place, PlaceType
 from .options import Aggregation, Filter
+from .ohlc import (
+    OHLCField,
+    ContractPeriod,
+    ContinuousContract,
+    SpecificContract
+)
 
 
 __all__ = [
@@ -22,4 +28,9 @@ __all__ = [
     # Options
     "Aggregation",
     "Filter",
+    # OHLC
+    "OHLCField",
+    "ContractPeriod",
+    "ContinuousContract",
+    "SpecificContract"
 ]

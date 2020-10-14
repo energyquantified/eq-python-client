@@ -1,79 +1,82 @@
 from collections import namedtuple
+from dataclasses import dataclass
+from datetime import date
 import enum
 
 from .base import Series
+from ..metadata import ContractPeriod, OHLCField
 from ..time import Frequency
 
 
-_periods_lookup = {}
 
-class Period(enum.Enum):
+@dataclass(frozen=True)
+class Product:
     """
-    Enumerator of contract periods available in for OHLC contracts
-    in the API.
+    An energy product description with a trading date and the
+    contract in detail.
     """
-    YEAR = ("year", Frequency.P1Y)
-    MDEC = ("mdec", Frequency.P1Y)
-    SEASON = ("season", Frequency.SEASON)
-    QUARTER = ("quarter", Frequency.P3M)
-    MONTH = ("month", Frequency.P1M)
-    WEEK = ("week", Frequency.P1W)
-    DAY = ("day", Frequency.P1D)
+    traded: date
+    period: ContractPeriod
+    front: int
+    delivery: date
 
-    def __init__(self, tag, frequency):
-        self.tag = tag
-        self.frequency = frequency
-        _periods_lookup[self.tag.lower()] = self
+    def __str__(self):
+        return (
+            f"<Product: traded={self.traded.isoformat()}, "
+            f"period={self.period.name}, "
+            f"front={self.front}, "
+            f"delivery={self.delivery.isoformat()}>"
+        )
 
-    @staticmethod
-    def by_tag(tag):
-        return _periods_lookup[tag.lower()]
-
-
-_Product = namedtuple("Product", ("traded", "period", "front", "delivery"))
-class Product(_Product):
-    pass
+    def __repr__(self):
+        return self.__str__()
 
 
-_OHLC = namedtuple("OHLC", (
-    "product",
-    "open",
-    "high",
-    "low",
-    "close",
-    "settlement",
-    "volume",
-    "open_interest"
-))
-class OHLC(_OHLC):
-    pass
-
-
-_ohlcfield_lookup = {}
-
-class OHLCField(enum.Enum):
+@dataclass(frozen=True)
+class OHLC:
     """
-    A field in an OHLC object. Used to specify which field to load or
-    to perform an operation on.
+    A summary for a trading day on a contract.
     """
-    OPEN = ("open",)
-    HIGH = ("high",)
-    LOW = ("low",)
-    CLOSE = ("close",)
-    settlement = ("settlement",)
-    volume = ("volume",)
-    OPEN_INTEREST = ("open_interest",)
+    product: Product
+    open: float
+    high: float
+    low: float
+    close: float
+    settlement: float
+    volume: float
+    open_interest: float
 
-    def __init__(self, tag):
-        self.tag = tag
-        _ohlcfield_lookup[tag.lower()] = self
+    def get_field(self, field):
+        """
+        Get an OHLC field from this object.
 
-    def get_value(self, ohlc):
-        return getattr(ohlc, self.tag)
+        :param field: A OHLC field
+        :type field: OHLCField | str
+        :raises ValueError: When the `field` parameter isn't a valid OHLC field
+        :return: The value on the given OHLC field or None if it isn't set
+        :rtype: float
+        """
+        if isinstance(field, str) and OHLCField.is_valid_tag(field):
+            return getattr(self, field, default=None)
+        elif isinstance(field, OHLCField):
+            return getattr(self, field.tag, default=None)
+        else:
+            raise ValueError(f'Unknown field: {field}')
 
-    @staticmethod
-    def by_tag(tag):
-        return _ohlcfield_lookup[tag.lower()]
+    def __str__(self):
+        return (
+            f"<OHLC: {self.product}, "
+            f"open={self.open or ''}, "
+            f"high={self.high or ''}, "
+            f"low={self.low or ''}, "
+            f"close={self.close or ''}, "
+            f"settlement={self.settlement or ''}, "
+            f"volume={self.volume or ''}, "
+            f"open_interest={self.open_interest or ''}>"
+        )
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class OHLCSeries(Series):
@@ -83,7 +86,7 @@ class OHLCSeries(Series):
     """
 
     def __init__(self, contract=None, data=None, *args, **kwargs):
-        assert contract, "contract is required"  # TODO Check instanceof
+        assert contract, "contract is required"
         super().__init__(*args, **kwargs)
         self.contract = contract
         self.data = data or []
@@ -112,21 +115,20 @@ class OHLCSeries(Series):
             raise ValueError("OHLCSeries has no values")
 
 
-class OHLCData:
+class OHLCList(list):
     """
     A collection of OHLC data provided in a list. Can contain all sorts
     of contracts (yearly, monthly, weekly etc.) for a specific market.
     """
 
-    def __init__(self, curve=None, data=None):
+    def __init__(self, elements, curve=None):
+        super().__init__(elements)
+        # --- Public members ---
+        #: The current page
         self.curve = curve
-        self.data = data or []
 
     def __str__(self):
-        return f"<OHLCData: curve=\"{self.curve}\", items={len(self.data)}>"
-
-    def __iter__(self):
-        return (item for item in self.data or [])
+        return f"<OHLCData: curve=\"{self.curve}\", items={len(self)}>"
 
     def has_data(self):
         return bool(self.data)

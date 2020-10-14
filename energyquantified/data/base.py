@@ -5,7 +5,12 @@ class Series:
     Base class for Timeseries and Periodseries.
     """
 
-    def __init__(self, curve=None, resolution=None, instance=None):
+    def __init__(
+            self,
+            curve=None,
+            resolution=None,
+            instance=None,
+            contract=None):
         # --- Members ---
         #: The curve
         self.curve = curve
@@ -13,6 +18,8 @@ class Series:
         self.resolution = resolution
         #: The instance (if any)
         self.instance = instance
+        #: The contract for OHLC operations resulting in a time series
+        self.contract = contract
         #: The data
         self.data = []
 
