@@ -79,3 +79,32 @@ class OhlcAPI(BaseAPI):
         # HTTP request
         response = self._get(url, params=params)
         return parse_ohlc_response(response.json())
+
+    def latest(
+            self,
+            curve,
+            date=None):
+        """
+        Select all OHLC for specific trading day, while defaulting to the
+        latest available OHLC data.
+
+        If ``date`` is given, this method will try to fetch OHLC data for
+        that trading day. When there is no data for the given day, OHLC data
+        will be loaded for the closest trading day earlier in time with data.
+
+        :param curve: The curve or curve name
+        :type curve: :py:class:`energyquantified.metadata.Curve`, str
+        :param date: The trading date, defaults to today
+        :type date: date, str, required
+        :return: A list of OHLC objects
+        :rtype: :py:class:`energyquantified.data.OHLCList`
+        """
+        # Build URL
+        safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
+        url = f"/ohlc/{safe_curve}/latest/"
+        # Parameters
+        params = {}
+        self._add_date(params, "date", date)
+        # HTTP request
+        response = self._get(url, params=params)
+        return parse_ohlc_response(response.json())

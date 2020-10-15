@@ -79,49 +79,13 @@ class OHLC:
         return self.__str__()
 
 
-class OHLCSeries(Series):
-    """
-    A series of OHLC data where a continuous front contract or a contract
-    with a specified delivery date is provided.
-    """
-
-    def __init__(self, contract=None, data=None, *args, **kwargs):
-        assert contract, "contract is required"
-        super().__init__(*args, **kwargs)
-        self.contract = contract
-        self.data = data or []
-
-    def __str__(self):
-        items = []
-        items.append(f"curve=\"{self.curve}\"")
-        items.append(f"contract=\"{self.contract}\"")
-        if self.has_data():
-            items.append(f"begin=\"{self.begin().isoformat()}\"")
-            items.append(f"end=\"{self.end().isoformat()}\"")
-        else:
-            items.append("EMPTY")
-        return f"<OHLCSeries: {', '.join(items)}>"
-
-    def begin(self):
-        if self.data:
-            return self.data[0].date
-        else:
-            raise ValueError("OHLCSeries has no values")
-
-    def end(self):
-        if self.data:
-            return self.resolution >> self.data[-1].date
-        else:
-            raise ValueError("OHLCSeries has no values")
-
-
 class OHLCList(list):
     """
     A collection of OHLC data . Can contain all sorts of contracts
     (yearly, monthly, weekly etc.) for a specific market.
     """
 
-    def __init__(self, elements, curve=None):
+    def __init__(self, elements, curve=None, contract=None):
         super().__init__(elements)
         # --- Public members ---
         #: The curve holding these OHLC objects
