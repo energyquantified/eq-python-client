@@ -45,7 +45,7 @@ def parse_timeseries(json):
     # Parse the contract
     contract = json.get("contract")
     if contract:
-        contract = parse_contract(instance)
+        contract = parse_contract(contract)
     # Parse scenario names
     scenario_names = json.get("scenario_names") or None
     # Parse data

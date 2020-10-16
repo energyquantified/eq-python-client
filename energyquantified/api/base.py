@@ -10,6 +10,7 @@ from ..metadata import (
     Aggregation,
     Filter,
     ContractPeriod,
+    OHLCField,
 )
 from ..time import Frequency
 
@@ -124,6 +125,21 @@ class BaseAPI:
         if transform_func:
             text = transform_func(text)
         return urllib.parse.quote(text)
+
+    @staticmethod
+    def _urlencode_ohlc_field(ohlc_field, name):
+        if ohlc_field is None:
+            raise ValidationError(
+                reason="Provide an OHLCField",
+                parameter=name
+            )
+        if isinstance(ohlc_field, str):
+            field_string = ohlc_field
+        elif isinstance(ohlc_field, OHLCField):
+            field_string = ohlc_field.tag
+        else:
+            raise ValidationError(reason="Provide an OHLCField", parameter=name)
+        return urllib.parse.quote(field_string)
 
     @staticmethod
     def _add_datetime(params, name, var, required=False):
