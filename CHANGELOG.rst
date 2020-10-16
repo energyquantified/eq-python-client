@@ -8,7 +8,7 @@ Introducing support for OHLC data (open, high, low, close).
 
 **Improvements**
 
-- Implement operations in the OHLC API: ``latest()``. ``load()``,
+- Implement operations in the OHLC API: ``load()``, ``latest()``.
   ``load_delivery_as_timeseries()``, and ``load_front_as_timeseries()``
 - Add data and metadata classes for OHLC: ``OHLCField``, ``ContractPeriod``,
   ``Product``, ``OHLC``, ``OHLCList``, and ``Contract``.

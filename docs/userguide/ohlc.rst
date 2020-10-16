@@ -94,7 +94,7 @@ You can also filter on **period**. Say that we only want monthly contracts:
    >>>    'NP Futures Power Base EUR/MWh Nasdaq OHLC',
    >>>    begin=date(2020, 1, 1),
    >>>    end=date(2020, 1, 6),
-   >>>    period=ContractPeriod.MONTH # Only monthly contracts
+   >>>    period=ContractPeriod.MONTH  # Only monthly contracts
    >>> )
 
 Which will give you:
@@ -124,7 +124,7 @@ And then you can also filter on **front** to get the continuous front contract:
    >>>    begin=date(2020, 1, 1),
    >>>    end=date(2020, 1, 10),
    >>>    period=ContractPeriod.MONTH,
-   >>>    front=1  # Give me the front contract only for all trading days
+   >>>    front=1   # The front contract only
    >>> )
 
    >>> ohlc_list
@@ -144,7 +144,7 @@ contract:
    >>>    begin=date(2020, 1, 1),
    >>>    end=date(2020, 1, 10),
    >>>    period=ContractPeriod.MONTH,
-   >>>    delivery=date(2020, 6, 1)
+   >>>    delivery=date(2020, 6, 1)  # The June contract
    >>> )
 
    >>> ohlc_list
@@ -214,7 +214,7 @@ additional **field** parameter:
    >>>    end=date(2020, 1, 10),
    >>>    period=ContractPeriod.MONTH,
    >>>    front=1,  # Front month
-   >>>    field=OHLCField.CLOSE  # We want to load the CLOSE price
+   >>>    field=OHLCField.CLOSE  # Load the closing price
    >>> )
 
 The result is a time series in daily resolution. Energy Quantified's
