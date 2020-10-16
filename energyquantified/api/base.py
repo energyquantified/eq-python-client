@@ -35,7 +35,7 @@ class BaseAPI:
             json = response.json()
             raise ValidationError(
                 reason=json.get("message"),
-                parameter=json.get("field")
+                parameter=json.get("parameter")
             )
         if response.status_code == 401:
             # Authentication error
