@@ -18,6 +18,8 @@ Introducing support for OHLC data (open, high, low, close).
 
 - Fix runtime error in ``Series#name()`` (``Series`` is superclass of
   ``Timeseries`` and ``Periodseries``).
+- ``ValidationError`` exceptions occuring on the server-side didn't include
+  which parameter that failed due to a bug in the JSON error message parser.
 
 
 0.2
