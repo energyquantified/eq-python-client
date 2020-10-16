@@ -91,6 +91,7 @@ The user guide
    userguide/instances
    userguide/periods
    userguide/period-instances
+   userguide/ohlc
 
 
 Other

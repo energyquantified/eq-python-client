@@ -59,6 +59,12 @@ class ContractPeriod(enum.Enum):
         """
         return tag.lower() in _periods_lookup
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
+
 
 _ohlcfield_lookup = {}
 
@@ -125,6 +131,12 @@ class OHLCField(enum.Enum):
         """
         return tag.lower() in _ohlcfield_lookup
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
+
 
 @dataclass(frozen=True)
 class ContinuousContract:
@@ -182,6 +194,9 @@ class ContinuousContract:
             f"field={self.field.name}>"
         )
 
+    def __repr__(self):
+        return self.__str__()
+
 
 @dataclass(frozen=True)
 class SpecificContract:
@@ -233,6 +248,9 @@ class SpecificContract:
         return (
             f"<SpecificContract: "
             f"period={self.period.name}, "
-            f"delivery={self.data.isoformat()}, "
+            f"delivery={self.delivery.isoformat()}, "
             f"field={self.field.name}>"
         )
+
+    def __repr__(self):
+        return self.__str__()
