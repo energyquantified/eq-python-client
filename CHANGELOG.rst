@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.3-dev
--------
+0.3
+---
 
 Introducing support for OHLC data (open, high, low, close).
 
