@@ -8,9 +8,12 @@ Introducing support for OHLC data (open, high, low, close).
 
 **Improvements**
 
-- Implement all operations in the OHLC API.
-- Add data and metadata classes for OHLC.
-- Add the ``Series#contract``-field,
+- Implement operations in the OHLC API: ``latest()``. ``load()``,
+  ``load_delivery_as_timeseries()``, and ``load_front_as_timeseries()``
+- Add data and metadata classes for OHLC: ``OHLCField``, ``ContractPeriod``,
+  ``Product``, ``OHLC``, ``OHLCList``, and ``Contract``.
+- Add member ``Series#contract``, which is a reference to a set by the
+  ``load_*_as_timeseries()``-operations.
 - Add documentation for OHLC.
 - Add new curve data type: ``DataType.SCENARIO``.
 

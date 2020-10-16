@@ -50,7 +50,7 @@ Features
 - Full-text search and keyword search for curves and powerplants
 - Forecasts- and time series data
 - Period-based data
-- *(TODO)* OHLC data
+- OHLC data
 - *(TODO)* SRMC, dark- and spark spreads
 - *(TODO)* Shows your subscription for each series
 - Support for time-zones, resolutions and aggregations
