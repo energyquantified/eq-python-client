@@ -12,7 +12,8 @@ Changelog
 
 - Fix runtime error in ``Series#name()`` (superclass of ``Timeseries``
   and ``Periodseries``).
-
+- ``ValidationError`` exceptions occuring on the server-side didn't include
+  which parameter that failed due to a bug in the JSON error message parser.
 
 0.2
 ---
