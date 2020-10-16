@@ -3,7 +3,15 @@ from datetime import date, datetime, time
 
 from requests import exceptions
 
-from ..metadata import Area, Curve, DataType, Aggregation, Filter
+from ..metadata import (
+    Area,
+    Curve,
+    DataType,
+    Aggregation,
+    Filter,
+    ContractPeriod,
+    OHLCField,
+)
 from ..time import Frequency
 
 from ..exceptions import (
@@ -117,6 +125,21 @@ class BaseAPI:
         if transform_func:
             text = transform_func(text)
         return urllib.parse.quote(text)
+
+    @staticmethod
+    def _urlencode_ohlc_field(ohlc_field, name):
+        if ohlc_field is None:
+            raise ValidationError(
+                reason="Provide an OHLCField",
+                parameter=name
+            )
+        if isinstance(ohlc_field, str):
+            field_string = ohlc_field
+        elif isinstance(ohlc_field, OHLCField):
+            field_string = ohlc_field.tag
+        else:
+            raise ValidationError(reason="Provide an OHLCField", parameter=name)
+        return urllib.parse.quote(field_string)
 
     @staticmethod
     def _add_datetime(params, name, var, required=False):
@@ -311,5 +334,24 @@ class BaseAPI:
         else:
             raise ValidationError(
                 reason=f"Not a valid Filter: '{var}'",
+                parameter=name
+            )
+
+    @staticmethod
+    def _add_contract_period(params, name, var, required=False):
+        if var is None and not required:
+            return
+        if isinstance(var, str):
+            if not ContractPeriod.is_valid_tag(var):
+                raise ValidationError(
+                    reason=f"Not a valid ContractPeriod: '{var}'",
+                    parameter=name
+                )
+            params[name] = var
+        elif isinstance(var, ContractPeriod):
+            params[name] = var.tag
+        else:
+            raise ValidationError(
+                reason=f"Not a valid ContractPeriod: '{var}'",
                 parameter=name
             )

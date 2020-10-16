@@ -4,16 +4,26 @@ Changelog
 0.3-dev
 -------
 
+Introducing support for OHLC data (open, high, low, close).
+
 **Improvements**
 
+- Implement operations in the OHLC API: ``load()``, ``latest()``.
+  ``load_delivery_as_timeseries()``, and ``load_front_as_timeseries()``
+- Add data and metadata classes for OHLC: ``OHLCField``, ``ContractPeriod``,
+  ``Product``, ``OHLC``, ``OHLCList``, and ``Contract``.
+- Add member ``Series#contract``, which is a reference to a set by the
+  ``load_*_as_timeseries()``-operations.
+- Add documentation for OHLC.
 - Add new curve data type: ``DataType.SCENARIO``.
 
 **Bugfixes**
 
-- Fix runtime error in ``Series#name()`` (superclass of ``Timeseries``
-  and ``Periodseries``).
+- Fix runtime error in ``Series#name()`` (``Series`` is superclass of
+  ``Timeseries`` and ``Periodseries``).
 - ``ValidationError`` exceptions occuring on the server-side didn't include
   which parameter that failed due to a bug in the JSON error message parser.
+
 
 0.2
 ---

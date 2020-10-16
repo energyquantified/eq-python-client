@@ -49,6 +49,11 @@ Here are the different API section classes:
 .. autoclass:: energyquantified.api.PeriodInstancesAPI
    :inherited-members:
 
+------
+
+.. autoclass:: energyquantified.api.OhlcAPI
+   :inherited-members:
+
 
 Data types
 ----------
@@ -108,7 +113,19 @@ Base class for series
 OHLC data classes
 ^^^^^^^^^^^^^^^^^
 
-*(TODO: Add OHLC data classes.)*
+.. autoclass:: energyquantified.data.Product
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.data.OHLC
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.data.OHLCList
+   :show-inheritance:
+   :members:
 
 
 Metadata
@@ -166,6 +183,26 @@ Metadata
 ------
 
 .. autoclass:: energyquantified.metadata.Filter
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.ContractPeriod
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.OHLCField
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.ContinuousContract
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.SpecificContract
    :inherited-members:
 
 

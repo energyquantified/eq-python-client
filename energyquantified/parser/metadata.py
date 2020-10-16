@@ -3,7 +3,8 @@ from dateutil import parser
 
 from ..exceptions import ParseException
 from ..metadata import (
-    Curve, Instance, Area, DataType, CurveType, Place, PlaceType
+    Curve, Instance, Area, DataType, CurveType, Place, PlaceType,
+    ContractPeriod, ContinuousContract, SpecificContract, OHLCField
 )
 from ..time import Frequency, Resolution, UTC, to_timezone
 from ..time.timezone import LOCAL_TZ
@@ -145,4 +146,31 @@ def parse_place(json):
         location=location,
         children=children,
         curves=curves,
+    )
+
+
+def parse_contract(json):
+    contract_type = json.get("type")
+
+    field = OHLCField.by_tag(json.get("field"))
+    period = ContractPeriod.by_tag(json.get("period"))
+
+    if contract_type == "CONTINUOUS":
+        front = json.get("front")
+        return ContinuousContract(
+            field=field,
+            period=period,
+            front=front
+        )
+
+    if contract_type == "SPECIFIC":
+        delivery = parser.isoparse(json.get("delivery")).date()
+        return SpecificContract(
+            field=field,
+            period=period,
+            delivery=delivery
+        )
+
+    raise ParseException(
+        f"Unknown contract.type in JSON: {contract_type}"
     )
