@@ -25,7 +25,7 @@ curve = curves[0]
 # the original resolution (which is 15-minute/PT15M).
 resolution = Resolution(Frequency.P1D, CET)
 de_wind_actuals_daily = eq.timeseries.load(
-    curve,
+    curve,  # or you can use curve_name
     begin=resolution.shift(today(), -15),
     end=resolution.shift(today(), +1),
     frequency=Frequency.P1D # Daily frequency
