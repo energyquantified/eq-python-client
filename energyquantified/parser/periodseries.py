@@ -3,6 +3,7 @@ from dateutil import parser
 from ..data import Period, CapacityPeriod, Periodseries
 from ..exceptions import ParseException
 from ..time import to_timezone
+from ..utils import PeriodseriesList
 from .metadata import parse_curve, parse_instance, parse_resolution
 
 
@@ -15,7 +16,7 @@ def parse_periodseries_list(json):
         raise ParseException(
             f"Expected list of period-based series JSON objects, found: {type(json)}"
         )
-    return [parse_periodseries(json_obj) for json_obj in json]
+    return PeriodseriesList(parse_periodseries(json_obj) for json_obj in json)
 
 
 def parse_periodseries(json):
