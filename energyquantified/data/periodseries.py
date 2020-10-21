@@ -222,8 +222,8 @@ class Periodseries(Series):
     :type data: list[]
     """
 
-    def __init__(self, data=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, data=None, **kwargs):
+        super().__init__(**kwargs)
         assert isinstance(self.resolution, Resolution), (
             "Periodseries.resolution is required"
         )

@@ -301,6 +301,9 @@ class Timeseries(Series):
 
     :param curve: The curve, defaults to None
     :type curve: Curve, optional
+    :param name: A name which is used as column name when converted to \
+        a `pandas.DataFrame`, defaults to None
+    :type name: str, optional
     :param resolution: The resolution of the time series, defaults to None
     :type resolution: Resolution, optional
     :param instance: The instance, defaults to None
@@ -311,8 +314,8 @@ class Timeseries(Series):
     :type scenario_names: list[str], optional
     """
 
-    def __init__(self, data=None, scenario_names=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, data=None, scenario_names=None, **kwargs):
+        super().__init__(**kwargs)
         assert isinstance(self.resolution, Resolution), (
             "Timeseries.resolution is required"
         )

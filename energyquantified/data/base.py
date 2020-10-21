@@ -8,12 +8,14 @@ class Series:
     def __init__(
             self,
             curve=None,
+            name=None,
             resolution=None,
             instance=None,
             contract=None):
         # --- Members ---
         #: The curve
         self.curve = curve
+        self._name = None
         #: The resolution
         self.resolution = resolution
         #: The instance (if any)
