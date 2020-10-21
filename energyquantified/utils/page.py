@@ -38,6 +38,33 @@ class Page(list):
         self.total_pages = last_page
         self._page_load_func = page_load_func
 
+    def append(self, value):
+        raise NotImplementedError("Page does not support append")
+
+    def extend(self, iterable):
+        raise NotImplementedError("Page does not support extend")
+
+    def __setitem__(self, key, value):
+        raise NotImplementedError("Page does not support __setitem__")
+
+    def __delitem__(self, key):
+        raise NotImplementedError("Page does not support __delitem__")
+
+    def __add__(self, rhs):
+        raise NotImplementedError("Page does not support __add__")
+
+    def __iadd__(self, rhs):
+        raise NotImplementedError("Page does not support __iadd__")
+
+    def __mul__(self, rhs):
+        raise NotImplementedError("Page does not support multiply")
+
+    def __rmul__(self, rhs):
+        raise NotImplementedError("Page does not support multiply")
+
+    def __imul__(self, rhs):
+        raise NotImplementedError("Page does not support multiply")
+
     def has_next_page(self):
         """
         Check if there is a next page.
