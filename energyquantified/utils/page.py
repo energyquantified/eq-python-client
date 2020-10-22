@@ -44,6 +44,18 @@ class Page(list):
     def extend(self, iterable):
         raise NotImplementedError("Page does not support extend")
 
+    def insert(self, index, value):
+        raise NotImplementedError("Page does not support insert")
+
+    def remove(self, value):
+        raise NotImplementedError("Page does not support remove")
+
+    def pop(self, index=-1):
+        raise NotImplementedError("Page does not support pop")
+
+    def clear(self):
+        raise NotImplementedError("Page does not support clear")
+
     def __setitem__(self, key, value):
         raise NotImplementedError("Page does not support __setitem__")
 
