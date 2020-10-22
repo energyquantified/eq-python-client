@@ -81,7 +81,7 @@ ax1 = plt.subplot2grid((6, 1), (0,0), rowspan=5, colspan=1)
 ax2 = plt.subplot2grid((6, 1), (5,0), rowspan=1, colspan=1, sharex=ax1)
 ax1.xaxis_date()
 
-# Add OHLC and moving averages top upper plot
+# Add OHLC and moving averages to upper plot
 candlestick_ohlc(
     ax1,
     df[['traded', 'open', 'high', 'low', 'close']].values,
