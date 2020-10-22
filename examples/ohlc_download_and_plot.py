@@ -48,7 +48,7 @@ quarter_delivery = (
 # Verify API key (optional)
 assert eq.is_api_key_valid(), "API key is not valid"
 
-# Download data for the last 200 days
+# Download data
 ohlc_list = eq.ohlc.load(
     'NP Futures Power Base EUR/MWh Nasdaq OHLC',
     begin=begin,
