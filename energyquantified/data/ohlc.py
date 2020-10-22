@@ -6,6 +6,7 @@ import enum
 from .base import Series
 from ..metadata import ContractPeriod, OHLCField
 from ..time import Frequency
+from ..utils.pandas import ohlc_list_to_dataframe
 
 
 
@@ -153,4 +154,4 @@ class OHLCList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        raise NotImplementedError("OHLCList#to_dataframe() not implemented")
+        return ohlc_list_to_dataframe(self)

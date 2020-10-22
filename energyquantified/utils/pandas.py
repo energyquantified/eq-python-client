@@ -12,6 +12,20 @@ def _get_timeseries_class():
         _timeseries_class = Timeseries
     return _timeseries_class
 
+_ohlc_list_class = None
+def _get_ohlc_list_class():
+    """
+    Private utility class for lazy-loading the OHLCList class.
+
+    :return: The OHLCList class
+    :rtype: class
+    """
+    global _ohlc_list_class
+    if not _ohlc_list_class:
+        from energyquantified.data import OHLCList
+        _ohlc_list_class = OHLCList
+    return _ohlc_list_class
+
 
 _value_type_class = None
 def _get_value_type_class():
@@ -111,3 +125,37 @@ def timeseries_to_dataframe(timeseries, name=None):
             f"{timeseries.value_type()}"
         )
     return df
+
+
+def ohlc_list_to_dataframe(ohlc_list):
+    """
+    Convert an :py:class:`energyquantified.data.OHLCList` to a
+    ``pandas.DataFrame``.
+
+    :param ohlc_list: A list of OHLC objects
+    :type ohlc_list: OHLCList
+    :return: A DataFrame
+    :rtype: pandas.DataFrame
+    :raises ImportError: When pandas is not installed on the system
+    """
+    # Checks
+    assert_pandas_installed()
+    assert isinstance(ohlc_list, _get_ohlc_list_class()), (
+        "ohlc_list must be an instance of energyquantified.data.OHLCList"
+    )
+    # Conversion
+    return pd.DataFrame.from_records((
+        {
+            "traded": ohlc.product.traded,
+            "period": ohlc.product.period.tag,
+            "front": ohlc.product.front,
+            "delivery": ohlc.product.delivery,
+            "open": ohlc.open,
+            "high": ohlc.high,
+            "low": ohlc.low,
+            "close": ohlc.close,
+            "settlement": ohlc.settlement,
+            "volume": ohlc.volume,
+            "open_interest": ohlc.open_interest,
+        } for ohlc in ohlc_list
+    ))
