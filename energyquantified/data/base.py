@@ -34,7 +34,22 @@ class Series:
         :return: The ``curve.name`` if it exists, otherwise ``None``
         :rtype: str, NoneType
         """
-        return self.curve.name if self.curve else None
+        if self._name:
+            return self._name
+        if self.curve:
+            return self.curve.name
+        return None
+
+    def set_name(self, name):
+        """
+        Set a custom name (defaults to using ``curve.name``).
+
+        :param name: An user-defined name
+        :type name: str
+        """
+        assert name is None or isinstance(name, str),\
+            "name must be None or a string"
+        self._name = name
 
     def has_data(self):
         """

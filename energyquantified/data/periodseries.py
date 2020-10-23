@@ -290,12 +290,14 @@ class Periodseries(Series):
         )
         # Convert
         data = [Value(dt, value) for dt, value in iterator]
-        return Timeseries(
+        timeseries = Timeseries(
             curve=self.curve,
             resolution=resolution,
             instance=self.instance,
             data=data
         )
+        timeseries.set_name(self._name)
+        return timeseries
 
     def to_df(self, frequency=None, name=None):
         """
