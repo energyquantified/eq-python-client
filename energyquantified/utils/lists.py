@@ -177,7 +177,9 @@ class PeriodseriesList(list):
         """
         # Verify parameters
         assert isinstance(frequency, Frequency), "Must be a frequency"
-        raise NotImplementedError("TimeseriesList#to_dataframe() not implemented")
+        # Convert to time series then to data frame
+        timeseries_list = self.to_timeseries(frequency=frequency)
+        return timeseries_list.to_dataframe()
 
     def append(self, periodseries):
         _validate_periodseries(periodseries)
