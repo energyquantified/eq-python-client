@@ -57,6 +57,20 @@ class TimeseriesList(list):
         # Perform operation
         return super().append(timeseries)
 
+    def extend(self, iterable):
+        # Asserts
+        _validate_timeseries_list(iterable)
+        self._frequency = _check_and_get_frequency_list(iterable, self._frequency)
+         # Perform operation
+        return super().extend(iterable)
+
+    def insert(self, index, timeseries):
+        # Asserts
+        _validate_timeseries(timeseries)
+        self._frequency = _check_and_get_frequency(timeseries, self._frequency)
+         # Perform operation
+        return super().insert(index, timeseries)
+
     def __add__(self, rhs):
         # Asserts
         _validate_timeseries_list(rhs)
@@ -166,6 +180,18 @@ class PeriodseriesList(list):
     def append(self, periodseries):
         _validate_periodseries(periodseries)
         return super().append(periodseries)
+
+    def extend(self, iterable):
+        # Asserts
+        _validate_periodseries_list(iterable)
+         # Perform operation
+        return super().extend(iterable)
+
+    def insert(self, index, periodseries):
+        # Asserts
+        _validate_periodseries(periodseries)
+         # Perform operation
+        return super().insert(index, periodseries)
 
     def __add__(self, rhs):
         _validate_periodseries_list(rhs)
