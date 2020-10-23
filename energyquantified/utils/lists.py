@@ -1,6 +1,8 @@
 from energyquantified.data import Timeseries, Periodseries
 from energyquantified.time import Frequency
 
+from energyquantified.utils.pandas import timeseries_list_to_dataframe
+
 
 class TimeseriesList(list):
     """
@@ -11,14 +13,14 @@ class TimeseriesList(list):
     :type iterable: iterable
     """
 
-    def __init__(self, iterable=()):
-        # Get frequency
-        self._frequency = _find_frequency(iterable)
-        # Asserts
-        _validate_timeseries_list(iterable)
-        _check_and_get_frequency_list(iterable, self._frequency)
+    def __init__(self, iterable=(), frequency=None):
         # Initialize list
         super().__init__(iterable)
+        # Get frequency
+        self._frequency = frequency
+        # Asserts
+        _validate_timeseries_list(self)
+        _check_and_get_frequency_list(self, self._frequency)
 
     @property
     def frequency(self):
@@ -48,7 +50,7 @@ class TimeseriesList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        raise NotImplementedError("TimeseriesList#to_dataframe() not implemented")
+        return timeseries_list_to_dataframe(self)
 
     def append(self, timeseries):
         # Asserts
@@ -76,14 +78,14 @@ class TimeseriesList(list):
         _validate_timeseries_list(rhs)
         self._frequency = _check_and_get_frequency_list(rhs, self._frequency)
         # Perform operation
-        return TimeseriesList(list.__add__(self, rhs))
+        return TimeseriesList(list.__add__(self, rhs), frequency=self._frequency)
 
     def __iadd__(self, rhs):
         # Asserts
         _validate_timeseries_list(rhs)
         self._frequency = _check_and_get_frequency_list(rhs, self._frequency)
         # Perform operation
-        return TimeseriesList(list.__iadd__(self, rhs))
+        return TimeseriesList(list.__iadd__(self, rhs), frequency=self._frequency)
 
     def __setitem__(self, key, timeseries):
         # Asserts
@@ -102,13 +104,13 @@ class TimeseriesList(list):
         raise NotImplementedError("TimeseriesList does not support multiply")
 
     def copy(self):
-        return TimeseriesList(self)
+        return TimeseriesList(self, frequency=self._frequency)
 
     def __getitem__(self, item):
         result = list.__getitem__(self, item)
-        try:
-            return TimeseriesList(result)
-        except TypeError:
+        if isinstance(result, list):
+            return TimeseriesList(result, frequency=self._frequency)
+        else:
             return result
 
 
@@ -219,9 +221,9 @@ class PeriodseriesList(list):
 
     def __getitem__(self, item):
         result = list.__getitem__(self, item)
-        try:
+        if isinstance(result, list):
             return PeriodseriesList(result)
-        except TypeError:
+        else:
             return result
 
 

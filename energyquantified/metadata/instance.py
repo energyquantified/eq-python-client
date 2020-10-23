@@ -26,6 +26,9 @@ class Instance:
         #: When this instance was modified (if available)
         self.modified = modified
 
+    def as_dataframe_column_header(self):
+        return f"{self.issued:%Y-%m-%d %H:%M} {self.tag}"
+
     def __repr__(self):
         return self.__str__()
 
