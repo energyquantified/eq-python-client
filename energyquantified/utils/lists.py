@@ -124,8 +124,10 @@ class PeriodseriesList(list):
     """
 
     def __init__(self, iterable=()):
-        _validate_periodseries_list(iterable)
+        # Initialize list
         super().__init__(iterable)
+        # Asserts
+        _validate_periodseries_list(iterable)
 
     def to_timeseries(self, frequency=None):
         """
