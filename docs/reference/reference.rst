@@ -248,7 +248,19 @@ time-zones in the European power markets.
 Utils
 -----
 
+.. autoclass:: energyquantified.utils.TimeseriesList
+   :show-inheritance:
+   :inherited-members:
+
+-----
+
 .. autoclass:: energyquantified.utils.Page
+   :show-inheritance:
+   :inherited-members:
+
+-----
+
+.. autoclass:: energyquantified.utils.PeriodseriesList
    :show-inheritance:
    :inherited-members:
 

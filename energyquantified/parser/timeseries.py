@@ -3,6 +3,7 @@ from dateutil import parser
 from ..data import Timeseries, Value, ScenariosValue, MeanScenariosValue
 from ..exceptions import ParseException
 from ..time import to_timezone
+from ..utils import TimeseriesList
 from .metadata import (
     parse_curve,
     parse_instance,
@@ -20,15 +21,13 @@ def parse_timeseries_list(json):
         raise ParseException(
             f"Expected list of time series JSON objects, found: {type(json)}"
         )
-    return [parse_timeseries(json_obj) for json_obj in json]
+    return TimeseriesList(parse_timeseries(json_obj) for json_obj in json)
 
 
 def parse_timeseries(json):
     """
     Parse a JSON response from the API into a Timeseries object with
     Curve, Resolution, Instance and Contract.
-
-    TODO: Contract
     """
     # Parse the Resolution
     resolution = json.get("resolution")

@@ -222,8 +222,8 @@ class Periodseries(Series):
     :type data: list[]
     """
 
-    def __init__(self, data=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, data=None, **kwargs):
+        super().__init__(**kwargs)
         assert isinstance(self.resolution, Resolution), (
             "Periodseries.resolution is required"
         )
@@ -290,12 +290,65 @@ class Periodseries(Series):
         )
         # Convert
         data = [Value(dt, value) for dt, value in iterator]
-        return Timeseries(
+        timeseries = Timeseries(
             curve=self.curve,
             resolution=resolution,
             instance=self.instance,
             data=data
         )
+        timeseries.set_name(self._name)
+        return timeseries
+
+    def to_df(self, frequency=None, name=None):
+        """
+        Alias for :meth:`Periodseries.to_dataframe`.
+
+        Convert this period-based to a ``pandas.DataFrame`` as a time series
+        in the given frequency.
+
+        Using :py:meth:`Periodseries.to_timeseries` to convert this
+        period-based series to a regular time series first. When periods
+        overlap the same step in the resulting time series, a weighted
+        average is calculated down to second-precision.
+
+        :param frequency: The frequency of the resulting ``pandas.DataFrame``\
+            time series
+        :type frequency: Frequency, required
+        :param name: Set a name for the column in the ``pandas.DataFrame``,\
+            defaults to ``value``
+        :type name: str, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_dataframe(frequency=frequency, name=name)
+
+    def to_dataframe(self, frequency=None, name=None):
+        """
+        Convert this period-based to a ``pandas.DataFrame`` as a time series
+        in the given frequency.
+
+        Using :py:meth:`Periodseries.to_timeseries` to convert this
+        period-based series to a regular time series first. When periods
+        overlap the same step in the resulting time series, a weighted
+        average is calculated down to second-precision.
+
+        :param frequency: The frequency of the resulting ``pandas.DataFrame``\
+            time series
+        :type frequency: Frequency, required
+        :param name: Set a name for the column in the ``pandas.DataFrame``,\
+            defaults to ``value``
+        :type name: str, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        # Verify parameters
+        assert isinstance(frequency, Frequency), "Must be a frequency"
+        # Conversion
+        timeseries = self.to_timeseries(frequency=frequency)
+        df = timeseries.to_dataframe(name=name)
+        return df
 
     def print(self, file=sys.stdout):
         """

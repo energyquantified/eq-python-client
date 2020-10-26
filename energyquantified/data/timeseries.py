@@ -301,6 +301,9 @@ class Timeseries(Series):
 
     :param curve: The curve, defaults to None
     :type curve: Curve, optional
+    :param name: A name which is used as column name when converted to \
+        a `pandas.DataFrame`, defaults to None
+    :type name: str, optional
     :param resolution: The resolution of the time series, defaults to None
     :type resolution: Resolution, optional
     :param instance: The instance, defaults to None
@@ -311,8 +314,8 @@ class Timeseries(Series):
     :type scenario_names: list[str], optional
     """
 
-    def __init__(self, data=None, scenario_names=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, data=None, scenario_names=None, **kwargs):
+        super().__init__(**kwargs)
         assert isinstance(self.resolution, Resolution), (
             "Timeseries.resolution is required"
         )
@@ -344,7 +347,6 @@ class Timeseries(Series):
             num_scenarios = self.data[0].num_scenarios()
             self.scenario_names = [f'e{i:02}' for i in range(num_scenarios)]
 
-
     def has_scenarios(self):
         """
         Check whether or not this time series has scenarios.
@@ -355,6 +357,28 @@ class Timeseries(Series):
         return (
             len(self.scenario_names) > 0 or
             (self.data and self.data[0].has_scenarios())
+        )
+
+    def total_values_per_item(self):
+        """
+        Get the total number of values per item:
+
+         * A regular time series has one value per item
+         * A scenario-based time series will return number of scenarios
+         * A forecast with mean and ensembles will return 1 + number of ensembles
+
+        :return: Total number of values per date-time in this time series
+        :rtype: int
+        """
+        value_type = self.value_type()
+        if value_type == ValueType.VALUE:
+            return 1
+        if value_type == ValueType.SCENARIOS:
+            return len(self.scenario_names)
+        if value_type == ValueType.MEAN_AND_SCENARIOS:
+            return 1 + len(self.scenario_names)
+        raise ValueError(
+            f"Timeseries has unknown value type: {value_type}"
         )
 
     def value_type(self):

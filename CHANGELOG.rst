@@ -1,6 +1,46 @@
 Changelog
 =========
 
+0.4-dev
+-------
+
+Improve pandas integration with more utility methods.
+
+**Improvements**
+
+- ``Page`` objects are now immutable (for curve and place search responses).
+- Add ``Series.set_name()`` to let users set a custom name for time series'
+  and period-based series'.
+- Add ``TimeseriesList`` with a ``to_dataframe()`` method for converting a list
+  of time series to a pandas data frame. It subclasses Python's built-in list
+  and overrides it's methods with extra validations.
+- Add ``PeriodseriesList``. Similar to ``TimeseriesList``, it subclasses
+  Python's list. It has two methods: (1) ``to_timeseries()`` which converts
+  this list to a ``TimeseriesList``, and (2) ``to_dataframe(frequency)`` which
+  converts this list to a data frame.
+- Add ``Periodseries#to_dataframe(frequency)``. Previously, you would have to
+  first convert the period-based series to a time series and then call
+  ``to_dataframe``.
+- Update headers in pandas data frame.
+- Add ``OHLCList#to_dataframe()`` – convert OHLC data to a data frame.
+- Update documentation where applicable with short description on how to
+  convert time series, period-based and OHLC data to data frames.
+- Add own chapter on how to convert data to ``pandas.DataFrame``.
+
+**Breaking change**
+
+With better pandas integration, we changed column headers for data frames. As
+of v0.4, time series have three columns header levels:
+
+ 1. Curve name
+ 2. Instance or contract
+ 3. Scenario (ensemble)
+
+We did this to better describe the data when converted from time series' to
+pandas data frames. Refer to the chapter on pandas integration for more
+details.
+
+
 0.3
 ---
 

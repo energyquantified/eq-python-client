@@ -26,6 +26,16 @@ class Instance:
         #: When this instance was modified (if available)
         self.modified = modified
 
+    def as_dataframe_column_header(self):
+        """
+        Create a string fitting for a column header in the a
+        ``pandas.DataFrame``.
+
+        :return: A DataFrame column header text for an instance
+        :rtype: str
+        """
+        return f"{self.issued:%Y-%m-%d %H:%M} {self.tag}"
+
     def __repr__(self):
         return self.__str__()
 

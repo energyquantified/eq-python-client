@@ -8,12 +8,14 @@ class Series:
     def __init__(
             self,
             curve=None,
+            name=None,
             resolution=None,
             instance=None,
             contract=None):
         # --- Members ---
         #: The curve
         self.curve = curve
+        self._name = None
         #: The resolution
         self.resolution = resolution
         #: The instance (if any)
@@ -32,7 +34,36 @@ class Series:
         :return: The ``curve.name`` if it exists, otherwise ``None``
         :rtype: str, NoneType
         """
-        return self.curve.name if self.curve else None
+        if self._name:
+            return self._name
+        if self.curve:
+            return self.curve.name
+        return None
+
+    def set_name(self, name):
+        """
+        Set a custom name (defaults to using ``curve.name``).
+
+        :param name: An user-defined name
+        :type name: str
+        """
+        assert name is None or isinstance(name, str),\
+            "name must be None or a string"
+        self._name = name
+
+    def instance_or_contract_dataframe_column_header(self):
+        """
+        Get the instance or contract for this time series, in a format
+        fitting for a ``pandas.DataFrame`` column header.
+
+        :return: An instance or contract column header for a data frame
+        :rtype: str, NoneType
+        """
+        if self.instance:
+            return self.instance.as_dataframe_column_header()
+        if self.contract:
+            return self.contract.as_dataframe_column_header()
+        return ''
 
     def has_data(self):
         """

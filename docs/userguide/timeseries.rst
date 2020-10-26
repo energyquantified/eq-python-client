@@ -32,11 +32,11 @@ where the allowed types are: **date**, **datetime** or an *ISO-8601*-formatted
 you will only be able to load data 30 days back from *today*. So, in that case,
 you should adjust the begin and end dates accordingly.)
 
-   >>> from datetime import date
    >>> timeseries = eq.timeseries.load(
    >>>    'DE Wind Power Production MWh/h 15min Actual',
-   >>>    begin=date(2020, 1, 1),   # or begin='2020-01-01'
-   >>>    end=date(2020, 1, 6)      # or end='2020-01-06'
+   >>>    begin='2020-01-01',
+   >>>    end='2020-01-06',
+   >>>    frequency='P1D'
    >>> )
 
 The response is an :class:`energyquantified.data.Timeseries` instance:
@@ -163,6 +163,64 @@ a **value**. The **scenarios** attribute is a tuple of the scenario values:
     <ScenariosValue: date=2020-01-02 00:00:00+01:00, scenarios=(14084.11, 36558.41, 12050.44, 23045.63, 37403.62, 16366.81, 20389.57, 27540.21, 43248.82, 2857.44, 1323.8, 40489.66, 37816.43, 14020.06, 24317.02, 29949.58, 8307.4, 8963.91, 31400.21, 22819.79, 15685.59, 26084.74, 20688.21, 23337.25, 12612.22, 40286.53, 3514.48, 30465.93, 15903.16, 4044.47, 7726.84, 18038.68, 26574.65, 25633, 29554.52, 40121.31, 25454.32, 18422.81, 21586.78, 30514.11)>,
     ...
 
+Convert to pandas
+-----------------
+
+Convert :py:class:`~energyquantified.data.Timeseries` objects to pandas by
+calling on :py:meth:`~energyquantified.data.Timeseries.to_dataframe`.
+
+   >>> from datetime import date
+   >>> timeseries = eq.timeseries.load(
+   >>>    'DE Wind Power Production MWh/h 15min Actual',
+   >>>    begin=date(2020, 1, 1),   # or begin='2020-01-01'
+   >>>    end=date(2020, 1, 6)      # or end='2020-01-06'
+   >>> )
+
+   >>> timeseries.to_dataframe()
+   <BLANKLINE>
+                             DE Wind Power Production MWh/h 15min Actual
+   <BLANKLINE>
+   <BLANKLINE>
+   date
+   2020-01-01 00:00:00+01:00                                        6387
+   2020-01-01 00:15:00+01:00                                        6383
+   2020-01-01 00:30:00+01:00                                        6640
+   2020-01-01 00:45:00+01:00                                        6882
+   2020-01-01 01:00:00+01:00                                        6945
+   ...                                                               ...
+   2020-01-05 22:45:00+01:00                                       17810
+   2020-01-05 23:00:00+01:00                                       17814
+   2020-01-05 23:15:00+01:00                                       17741
+   2020-01-05 23:30:00+01:00                                       17878
+   2020-01-05 23:45:00+01:00                                       18086
+   <BLANKLINE>
+   [480 rows x 1 columns]
+
+You can also convert a scenario-based :py:class:`~energyquantified.data.Timeseries`
+the same way. Notice that the data frame is quite wide (one column for each of the
+40 weather years).
+
+   >>> from energyquantified.time import Frequency
+   >>> timeseries = eq.timeseries.load(
+   >>>    'DE Wind Power Production MWh/h 15min Climate',
+   >>>    begin=date(2020, 1, 1),
+   >>>    end=date(2020, 1, 6),
+   >>>    frequency=Frequency.P1D,
+   >>> )
+
+   >>> timeseries.to_dataframe()
+                             DE Wind Power Production MWh/h 15min Climate                                                              ...
+                                                                                                                                       ...
+                                                                    y1980     y1981     y1982     y1983     y1984     y1985     y1986  ...     y2013     y2014     y2015     y2016     y2017     y2018     y2019
+   date                                                                                                                                ...
+   2020-01-01 00:00:00+01:00                                     18988.74  41907.79   7712.76  21450.40  41017.22  22006.53  12535.50  ...  27228.76  23010.97  25048.93   8048.41  20949.78  32833.12  36763.43
+   2020-01-02 00:00:00+01:00                                     14084.11  36558.41  12050.44  23045.63  37403.62  16366.81  20389.57  ...  25633.00  29554.52  40121.31  25454.32  18422.81  21586.78  30514.11
+   2020-01-03 00:00:00+01:00                                      7873.27  43711.02  32098.95  27374.06  41876.88  14908.12  16926.51  ...  34269.27  30967.48  32760.37  28027.87  34048.88  41116.13  12741.31
+   2020-01-04 00:00:00+01:00                                     21656.69  29342.87  37587.62  37932.09  37568.10  23106.95  14855.93  ...  31147.11  26070.96  29673.18  22516.77  38706.61  28198.13  23159.46
+   2020-01-05 00:00:00+01:00                                     11519.42  25586.94  28376.84  27198.14  25825.25  14052.56  17758.41  ...  15360.48  19578.57  17022.69  17374.12  15594.41  24443.66  26612.74
+   <BLANKLINE>
+   [5 rows x 40 columns]
+
 -----
 
 Next steps
@@ -172,3 +230,5 @@ Learn how to load
 :doc:`time series instances <../userguide/instances>`,
 :doc:`period-based series <../userguide/periods>`, and
 :doc:`period-based series instances <../userguide/period-instances>`.
+
+Also see the chapter on :doc:`pandas integration <../userguide/pandas>`.
