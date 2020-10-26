@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.4-dev
--------
+0.4
+---
 
 Improve pandas integration with more utility methods.
 
@@ -13,7 +13,7 @@ Improve pandas integration with more utility methods.
   and period-based series'.
 - Add ``TimeseriesList`` with a ``to_dataframe()`` method for converting a list
   of time series to a pandas data frame. It subclasses Python's built-in list
-  and overrides it's methods with extra validations.
+  and overrides its methods with extra validations.
 - Add ``PeriodseriesList``. Similar to ``TimeseriesList``, it subclasses
   Python's list. It has two methods: (1) ``to_timeseries()`` which converts
   this list to a ``TimeseriesList``, and (2) ``to_dataframe(frequency)`` which
@@ -21,9 +21,9 @@ Improve pandas integration with more utility methods.
 - Add ``Periodseries#to_dataframe(frequency)``. Previously, you would have to
   first convert the period-based series to a time series and then call
   ``to_dataframe``.
-- Update headers in pandas data frame.
+- Update headers in pandas data frames.
 - Add ``OHLCList#to_dataframe()`` for converting OHLC data to a data frame.
-- Update documentation where applicable with short description on how to
+- Update documentation where applicable with a short description on how to
   convert time series, period-based series and OHLC data to data frames.
 - Add own chapter on how to convert data to ``pandas.DataFrame``.
 - Add own chapter on packages and where to find the different classes and
