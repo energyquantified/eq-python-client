@@ -126,19 +126,11 @@ def _timeseries_to_dataframe_value(timeseries, name):
     :rtype: pandas.DataFrame
     """
     # Column headers
-    columns = None
-    if timeseries.instance:
-        columns = [
-            [name],
-            [timeseries.instance.as_dataframe_column_header()],
-            ['']
-        ]
-    else:
-        columns = [
-            [name],
-            [''],
-            ['']
-        ]
+    columns = [
+        [name],
+        [timeseries.instance_or_contract_dataframe_column_header()],
+        ['']
+    ]
     # Convert a time series of (date, value)
     df = pd.DataFrame.from_records(
         ((v.value,) for v in timeseries),
@@ -163,19 +155,11 @@ def _timeseries_to_dataframe_scenarios(timeseries, name):
     """
     width = timeseries.total_values_per_item()
     # Column headers
-    columns = None
-    if timeseries.instance:
-        columns = [
-            [name] * width,
-            [timeseries.instance.as_dataframe_column_header()] * width,
-            timeseries.scenario_names
-        ]
-    else:
-        columns = [
-            [name] * width,
-            [''] * width,
-            timeseries.scenario_names
-        ]
+    columns = [
+        [name] * width,
+        [timeseries.instance_or_contract_dataframe_column_header()] * width,
+        timeseries.scenario_names
+    ]
     # Convert a time series of (date, scenarios[])
     df = pd.DataFrame.from_records(
         (v.scenarios for v in timeseries.data),
@@ -200,19 +184,11 @@ def _timeseries_to_dataframe_mean_and_scenarios(timeseries, name):
     """
     width = timeseries.total_values_per_item()
     # Column headers
-    columns = None
-    if timeseries.instance:
-        columns = [
-            [name] * width,
-            [timeseries.instance.as_dataframe_column_header()] * width,
-            [''] + timeseries.scenario_names
-        ]
-    else:
-        columns = [
-            [name] * width,
-            [''] * width,
-            [''] + timeseries.scenario_names
-        ]
+    columns = [
+        [name] * width,
+        [timeseries.instance_or_contract_dataframe_column_header()] * width,
+        [''] + timeseries.scenario_names
+    ]
     # Convert a time series of (date, scenarios[])
     df = pd.DataFrame.from_records(
         ((v.value, *v.scenarios) for v in timeseries.data),

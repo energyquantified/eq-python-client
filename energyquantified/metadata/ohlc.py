@@ -186,6 +186,16 @@ class ContinuousContract:
         """
         return False
 
+    def as_dataframe_column_header(self):
+        """
+        Create a string fitting for a column header in the a
+        ``pandas.DataFrame``.
+
+        :return: A DataFrame column header text for this contract
+        :rtype: str
+        """
+        return f"{self.period.tag} front-{self.front} {self.field.tag}"
+
     def __str__(self):
         return (
             f"<ContinuousContract: "
@@ -243,6 +253,16 @@ class SpecificContract:
         :rtype: bool
         """
         return True
+
+    def as_dataframe_column_header(self):
+        """
+        Create a string fitting for a column header in the a
+        ``pandas.DataFrame``.
+
+        :return: A DataFrame column header text for this contract
+        :rtype: str
+        """
+        return f"{self.period.tag} {self.delivery.isoformat()} {self.field.tag}"
 
     def __str__(self):
         return (

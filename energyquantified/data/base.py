@@ -51,6 +51,20 @@ class Series:
             "name must be None or a string"
         self._name = name
 
+    def instance_or_contract_dataframe_column_header(self):
+        """
+        Get the instance or contract for this time series, in a format
+        fitting for a ``pandas.DataFrame`` column header.
+
+        :return: An instance or contract column header for a data frame
+        :rtype: str, NoneType
+        """
+        if self.instance:
+            return self.instance.as_dataframe_column_header()
+        if self.contract:
+            return self.contract.as_dataframe_column_header()
+        return ''
+
     def has_data(self):
         """
         Check if this series has any data.
