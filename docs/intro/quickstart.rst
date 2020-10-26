@@ -90,6 +90,8 @@ to a ``pandas.DataFrame`` like so:
    >>> df = timeseries.to_dataframe(name='series')
    >>> df
                               series
+   <BLANKLINE>
+   <BLANKLINE>
    date
    2020-01-01 00:00:00+01:00    6387
    2020-01-01 00:15:00+01:00    6383
@@ -131,6 +133,8 @@ like so:
    >>> df_wind = wind.to_dataframe(name='de wind')
    >>> df_wind
                               de wind
+   <BLANKLINE>
+   <BLANKLINE>
    date
    2020-03-25 00:00:00+01:00    25049
    2020-03-25 00:15:00+01:00    24810
@@ -155,6 +159,8 @@ That will yield an unwanted result.)
    >>> df = pd.concat([dfw, dfs], axis=1)
    >>> df
                               de wind  de solar
+   <BLANKLINE>
+   <BLANKLINE>
    date
    2020-03-25 00:00:00+01:00    25049         0
    2020-03-25 00:15:00+01:00    24810         0
@@ -187,6 +193,8 @@ You can also perform aggregations:
    >>> df2 = df.resample('D').mean()
    >>> df2
                                    de wind     de solar
+   <BLANKLINE>
+   <BLANKLINE>
    date
    2020-03-25 00:00:00+01:00  18112.416667  9349.697917
    2020-03-26 00:00:00+01:00  18977.197917  7868.750000

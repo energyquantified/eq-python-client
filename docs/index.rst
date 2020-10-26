@@ -78,8 +78,8 @@ Getting started
    intro/quickstart
 
 
-The user guide
-^^^^^^^^^^^^^^
+User guide
+^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 2
@@ -92,6 +92,7 @@ The user guide
    userguide/periods
    userguide/period-instances
    userguide/ohlc
+   userguide/pandas
 
 
 Other

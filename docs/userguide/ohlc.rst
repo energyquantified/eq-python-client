@@ -189,6 +189,21 @@ There is no filtering for
 :py:meth:`eq.ohlc.latest() <energyquantified.api.OhlcAPI.latest>`, like there
 is for :py:meth:`eq.ohlc.load() <energyquantified.api.OhlcAPI.load>`.
 
+Convert an OHLC list to a data frame
+------------------------------------
+
+Convert a :class:`OHLCList <energyquantified.data.OHLCList>` to a
+``pandas.DataFrame`` like this:
+
+   >>> latest_list.to_dataframe()
+           traded   period  front    delivery   open   high    low  close  settlement  volume  open_interest
+   0   2020-10-15      day      1  2020-10-16    NaN    NaN    NaN    NaN       23.24     0.0            0.0
+   1   2020-10-15      day      2  2020-10-17    NaN    NaN    NaN    NaN       19.00     0.0            0.0
+   2   2020-10-15      day      3  2020-10-18    NaN    NaN    NaN    NaN       16.00     0.0            0.0
+   3   2020-10-15    month      1  2020-11-01  23.50  23.50  22.30  22.30       22.35   343.0        10104.0
+   4   2020-10-15    month      2  2020-12-01  25.65  25.65  24.40  24.40       24.40    68.0         9772.0
+   5   2020-10-15    month      3  2021-01-01    NaN    NaN    NaN    NaN       28.65     0.0          192.0
+   ...
 
 Load an OHLC field as a time series
 -----------------------------------

@@ -35,8 +35,16 @@ Let's start by loading the latest instances for the German wind power forecasts:
     <Timeseries: resolution=<Resolution: frequency=PT15M, timezone=CET>, curve="DE Wind Power Production MWh/h 15min Forecast", instance=<Instance: issued="2020-06-25 12:00:00+00:00", tag="ec">, begin="2020-06-25 14:00:00+02:00", end="2020-07-05 14:00:00+02:00">,
     <Timeseries: resolution=<Resolution: frequency=PT15M, timezone=CET>, curve="DE Wind Power Production MWh/h 15min Forecast", instance=<Instance: issued="2020-06-25 06:00:00+00:00", tag="gfs-ens">, begin="2020-06-25 08:00:00+02:00", end="2020-07-11 08:00:00+02:00">]
 
-Notice that the returned time series' has ``instance`` attributes (with
-``issued`` (issue date) and ``tag``). This is what identifies the instances:
+The return type from ``load()`` is a
+:py:class:`~energyquantified.utils.TimeseriesList`. This is a subclass of Python's
+built-in list. It has extra validations so that all time series in the list have
+the same frequency (hourly, daily, etc.), and it has a method called
+:py:meth:`~energyquantified.utils.TimeseriesList.to_dataframe` which converts the
+list of time series to a ``pandas.DataFrame``.
+
+Notice that each time series in the list has an ``instance`` attribute (with
+``issued`` (issue date) and ``tag``). This is what identifies the instances
+(or forecasts, if you will):
 
    >>> [f.instance for f in forecasts]
    [<Instance: issued="2020-06-25 12:00:00+00:00", tag="gfs-ens">,
