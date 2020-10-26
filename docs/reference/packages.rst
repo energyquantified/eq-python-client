@@ -107,7 +107,7 @@ Date and time utilities.
  * :py:meth:`local_tz() <energyquantified.time.local_tz>`: Get your the local
    time zone on your workstation.
 
- * Useful functions to get dates and datetimes:
+ * Useful functions to get dates and date-times:
 
     * :py:meth:`now() <energyquantified.time.now>`: Get a time zone aware
       date-time of the current time.

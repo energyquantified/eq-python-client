@@ -24,8 +24,10 @@ Improve pandas integration with more utility methods.
 - Update headers in pandas data frame.
 - Add ``OHLCList#to_dataframe()`` for converting OHLC data to a data frame.
 - Update documentation where applicable with short description on how to
-  convert time series, period-based and OHLC data to data frames.
+  convert time series, period-based series and OHLC data to data frames.
 - Add own chapter on how to convert data to ``pandas.DataFrame``.
+- Add own chapter on packages and where to find the different classes and
+  enumerators.
 
 **Breaking change**
 
