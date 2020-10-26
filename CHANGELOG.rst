@@ -22,7 +22,7 @@ Improve pandas integration with more utility methods.
   first convert the period-based series to a time series and then call
   ``to_dataframe``.
 - Update headers in pandas data frame.
-- Add ``OHLCList#to_dataframe()`` – convert OHLC data to a data frame.
+- Add ``OHLCList#to_dataframe()`` for converting OHLC data to a data frame.
 - Update documentation where applicable with short description on how to
   convert time series, period-based and OHLC data to data frames.
 - Add own chapter on how to convert data to ``pandas.DataFrame``.
@@ -30,7 +30,7 @@ Improve pandas integration with more utility methods.
 **Breaking change**
 
 With better pandas integration, we changed column headers for data frames. As
-of v0.4, time series have three columns header levels:
+of v0.4, data frames have three column header levels for time series data:
 
  1. Curve name
  2. Instance or contract

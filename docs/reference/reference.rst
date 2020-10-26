@@ -69,6 +69,12 @@ Time series classes
    :show-inheritance:
    :inherited-members:
 
+-----
+
+.. autoclass:: energyquantified.data.TimeseriesList
+   :show-inheritance:
+   :inherited-members:
+
 ------
 
 .. autoclass:: energyquantified.data.ValueType
@@ -91,6 +97,12 @@ Period-based series classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: energyquantified.data.Periodseries
+   :show-inheritance:
+   :inherited-members:
+
+-----
+
+.. autoclass:: energyquantified.data.PeriodseriesList
    :show-inheritance:
    :inherited-members:
 
@@ -248,19 +260,7 @@ time-zones in the European power markets.
 Utils
 -----
 
-.. autoclass:: energyquantified.utils.TimeseriesList
-   :show-inheritance:
-   :inherited-members:
-
------
-
 .. autoclass:: energyquantified.utils.Page
-   :show-inheritance:
-   :inherited-members:
-
------
-
-.. autoclass:: energyquantified.utils.PeriodseriesList
    :show-inheritance:
    :inherited-members:
 

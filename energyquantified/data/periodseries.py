@@ -6,7 +6,7 @@ import sys
 from ..time import Resolution, Frequency
 from ..utils.pandas import timeseries_to_dataframe
 from .base import Series
-from .timeseries import Timeseries, Value
+from .timeseries import TimeseriesList, Timeseries, Value
 
 
 class Period(namedtuple("Period", ("begin", "end", "value"))):
@@ -465,4 +465,140 @@ class _PeriodsToTimeseriesIterator:
         return (
             sum(avail * weight for avail, weight in available_weights)
             / sum_weights
+        )
+
+
+# Period-based series list with helpers
+
+
+
+class PeriodseriesList(list):
+    """
+    A list of Periodseries objects. Have methods for converting them to a
+    :py:class:`TimeseriesList` or a `pandas.DataFrame`.
+
+    :param iterable: Any iterable of `Periodseries`
+    :type iterable: iterable
+    """
+
+    def __init__(self, iterable=()):
+        # Initialize list
+        super().__init__(iterable)
+        # Asserts
+        _validate_periodseries_list(iterable)
+
+    def to_timeseries(self, frequency=None):
+        """
+        Convert all period-based series in this list to time series.
+
+        When periods overlap the same step in the resulting time series,
+        a weighted average is calculated down to second-precision.
+
+        :param frequency: The frequency of the resulting time series
+        :type frequency: Frequency, required
+        :return: A list of time series
+        :rtype: TimeseriesList
+        """
+        # Verify parameters
+        assert isinstance(frequency, Frequency), "Must be a frequency"
+        # Convert all period-based series to time series
+        return TimeseriesList(
+            periodseries.to_timeseries(frequency=frequency)
+            for periodseries in self
+        )
+
+    def to_df(self, frequency=None):
+        """
+        Alias for :meth:`Timeseries.to_dataframe`.
+
+        Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param frequency: The frequency of the resulting time series'
+        :type frequency: Frequency, required
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_dataframe(frequency=frequency)
+
+    def to_dataframe(self, frequency=None):
+        """
+        Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param frequency: The frequency of the resulting time series'
+        :type frequency: Frequency, required
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        # Verify parameters
+        assert isinstance(frequency, Frequency), "Must be a frequency"
+        # Convert to time series then to data frame
+        timeseries_list = self.to_timeseries(frequency=frequency)
+        return timeseries_list.to_dataframe()
+
+    def append(self, periodseries):
+        _validate_periodseries(periodseries)
+        return super().append(periodseries)
+
+    def extend(self, iterable):
+        # Asserts
+        _validate_periodseries_list(iterable)
+         # Perform operation
+        return super().extend(iterable)
+
+    def insert(self, index, periodseries):
+        # Asserts
+        _validate_periodseries(periodseries)
+         # Perform operation
+        return super().insert(index, periodseries)
+
+    def __add__(self, rhs):
+        _validate_periodseries_list(rhs)
+        return PeriodseriesList(list.__add__(self, rhs))
+
+    def __iadd__(self, rhs):
+        _validate_periodseries_list(rhs)
+        return PeriodseriesList(list.__iadd__(self, rhs))
+
+    def __setitem__(self, key, periodseries):
+        _validate_periodseries(periodseries)
+        return super().__setitem__(periodseries)
+
+    def __mul__(self, rhs):
+        raise NotImplementedError("PeriodseriesList does not support multiply")
+
+    def __rmul__(self, rhs):
+        raise NotImplementedError("PeriodseriesList does not support multiply")
+
+    def __imul__(self, rhs):
+        raise NotImplementedError("PeriodseriesList does not support multiply")
+
+    def copy(self):
+        return PeriodseriesList(self)
+
+    def __getitem__(self, item):
+        result = list.__getitem__(self, item)
+        if isinstance(result, list):
+            return PeriodseriesList(result)
+        else:
+            return result
+
+
+def _validate_periodseries(periodseries):
+    assert isinstance(periodseries, Periodseries), (
+        f"Element is not a Periodseries. Expects all "
+        f"elements to be Periodseries objects."
+    )
+
+
+def _validate_periodseries_list(periodseries_list):
+    for index, periodseries in enumerate(periodseries_list):
+        assert isinstance(periodseries, Periodseries), (
+            f"Element {index} is not a Periodseries. Expects all "
+            f"elements to be Periodseries objects."
         )

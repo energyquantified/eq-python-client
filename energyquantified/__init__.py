@@ -23,9 +23,6 @@ from .__version__ import (
 
 # The client implementation
 from .base import EnergyQuantified
-from .metadata import *
-from .time import *
-
 
 
 __all__ = [

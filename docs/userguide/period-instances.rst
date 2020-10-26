@@ -125,18 +125,18 @@ do something like this:
     <Periodseries: resolution=<Resolution: frequency=NONE, timezone=CET>, curve="DE Nuclear Capacity Available MW REMIT", instance=<Instance: issued="2020-07-13 19:07:48+00:00", tag="fj6UVXudDMsgXhzVIxWuFQ">, begin="2020-01-01 00:00:00+01:00", end="2020-06-01 00:00:00+02:00">]
 
 The return type from ``load()`` is a
-:py:class:`~energyquantified.utils.PeriodseriesList`. This is a subclass of Python's
+:py:class:`~energyquantified.data.PeriodseriesList`. This is a subclass of Python's
 built-in list with two helpful methods:
 
- * :py:meth:`~energyquantified.utils.PeriodseriesList.to_timeseries` converts
+ * :py:meth:`~energyquantified.data.PeriodseriesList.to_timeseries` converts
    the list of :py:meth:`~energyquantified.data.Periodseries` to a
-   :py:class:`~energyquantified.utils.TimeseriesList` of
+   :py:class:`~energyquantified.data.TimeseriesList` of
    :py:class:`~energyquantified.data.Timeseries`. It requires you to specify a
    **frequency** for the output time series.
 
- * :py:meth:`~energyquantified.utils.PeriodseriesList.to_dataframe` converts the
+ * :py:meth:`~energyquantified.data.PeriodseriesList.to_dataframe` converts the
    list of period-bsed series to a ``pandas.DataFrame``. Like the
-   :py:meth:`~energyquantified.utils.PeriodseriesList.to_timeseries` method
+   :py:meth:`~energyquantified.data.PeriodseriesList.to_timeseries` method
    above, it also requires you to specify a **frequency** for the time series in
    the output data frame.
 

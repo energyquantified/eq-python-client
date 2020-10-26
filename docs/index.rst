@@ -101,6 +101,7 @@ Other
 .. toctree::
    :maxdepth: 2
 
+   reference/packages
    reference/reference
    reference/changelog
 

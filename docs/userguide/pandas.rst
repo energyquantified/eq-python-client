@@ -167,8 +167,8 @@ Convert a list of series to a data frame
 ----------------------------------------
 
 Responses from ``eq.instances.load()`` and ``eq.period_instances.load()``
-respectively return a :py:class:`~energyquantified.utils.TimeseriesList` and a
-:py:class:`~energyquantified.utils.PeriodseriesList`.
+respectively return a :py:class:`~energyquantified.data.TimeseriesList` and a
+:py:class:`~energyquantified.data.PeriodseriesList`.
 
 Both list implementations subclasses Python's built-in list, so you can call
 ``append()``, ``extend()``, ``pop()``, ``remove()`` and more on them. They

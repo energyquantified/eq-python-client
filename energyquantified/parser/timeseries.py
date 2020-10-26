@@ -1,9 +1,14 @@
 from dateutil import parser
 
-from ..data import Timeseries, Value, ScenariosValue, MeanScenariosValue
+from ..data import (
+    Timeseries,
+    TimeseriesList,
+    Value,
+    ScenariosValue,
+    MeanScenariosValue
+)
 from ..exceptions import ParseException
 from ..time import to_timezone
-from ..utils import TimeseriesList
 from .metadata import (
     parse_curve,
     parse_instance,
