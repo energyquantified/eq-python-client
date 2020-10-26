@@ -1,7 +1,7 @@
 .. _reference:
 
-Reference
-=========
+Full reference
+==============
 
 .. module:: energyquantified
 
@@ -69,6 +69,12 @@ Time series classes
    :show-inheritance:
    :inherited-members:
 
+-----
+
+.. autoclass:: energyquantified.data.TimeseriesList
+   :show-inheritance:
+   :inherited-members:
+
 ------
 
 .. autoclass:: energyquantified.data.ValueType
@@ -91,6 +97,12 @@ Period-based series classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: energyquantified.data.Periodseries
+   :show-inheritance:
+   :inherited-members:
+
+-----
+
+.. autoclass:: energyquantified.data.PeriodseriesList
    :show-inheritance:
    :inherited-members:
 
@@ -248,19 +260,7 @@ time-zones in the European power markets.
 Utils
 -----
 
-.. autoclass:: energyquantified.utils.TimeseriesList
-   :show-inheritance:
-   :inherited-members:
-
------
-
 .. autoclass:: energyquantified.utils.Page
-   :show-inheritance:
-   :inherited-members:
-
------
-
-.. autoclass:: energyquantified.utils.PeriodseriesList
    :show-inheritance:
    :inherited-members:
 
@@ -272,36 +272,40 @@ in module ``energyquantified.exceptions``.
 
 **API exceptions**
 
-.. autoexception:: energyquantified.exceptions.api.APIError
+.. autoexception:: energyquantified.exceptions.APIError
 
 ------
 
-.. autoexception:: energyquantified.exceptions.api.HTTPError
+.. autoexception:: energyquantified.exceptions.HTTPError
 
 ------
 
-.. autoexception:: energyquantified.exceptions.api.ValidationError
+.. autoexception:: energyquantified.exceptions.ValidationError
 
 ------
 
-.. autoexception:: energyquantified.exceptions.api.NotFoundError
+.. autoexception:: energyquantified.exceptions.NotFoundError
 
 ------
 
-.. autoexception:: energyquantified.exceptions.api.UnauthorizedError
+.. autoexception:: energyquantified.exceptions.UnauthorizedError
 
 ------
 
-.. autoexception:: energyquantified.exceptions.api.ForbiddenError
+.. autoexception:: energyquantified.exceptions.ForbiddenError
 
 ------
 
-.. autoexception:: energyquantified.exceptions.api.InternalServerError
+.. autoexception:: energyquantified.exceptions.InternalServerError
+
+**Initialization errors**
+
+.. autoexception:: energyquantified.exceptions.InitializationError
 
 **Pagination exceptions**
 
-.. autoexception:: energyquantified.exceptions.page.PageError
+.. autoexception:: energyquantified.exceptions.PageError
 
 **Parser exceptions**
 
-.. autoexception:: energyquantified.exceptions.parser.ParseException
+.. autoexception:: energyquantified.exceptions.ParseException

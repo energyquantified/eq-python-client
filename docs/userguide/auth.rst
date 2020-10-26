@@ -43,6 +43,6 @@ read the file, or if the file is empty.
 -----
 
 Next step
-^^^^^^^^^
+---------
 
 See how to :doc:`discover data <../userguide/metadata>`.

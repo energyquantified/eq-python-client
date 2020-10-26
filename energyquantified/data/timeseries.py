@@ -474,3 +474,156 @@ class Timeseries(Series):
         print(f"", file=file)
         for d in self.data:
             d.print(file=file)
+
+
+# Time series list implementation with helpers
+
+
+class TimeseriesList(list):
+    """
+    A list of Timeseries objects. All time series must have the same
+    frequency.
+
+    :param iterable: Any iterable of time series
+    :type iterable: iterable
+    """
+
+    def __init__(self, iterable=(), frequency=None):
+        # Initialize list
+        super().__init__(iterable)
+        # Get frequency
+        self._frequency = frequency
+        # Asserts
+        _validate_timeseries_list(self)
+        _check_and_get_frequency_list(self, self._frequency)
+
+    @property
+    def frequency(self):
+        return self._frequency
+
+    def to_df(self):
+        """
+        Alias for :meth:`Timeseries.to_dataframe`.
+
+        Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_dataframe()
+
+    def to_dataframe(self):
+        """
+        Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return timeseries_list_to_dataframe(self)
+
+    def append(self, timeseries):
+        # Asserts
+        _validate_timeseries(timeseries)
+        self._frequency = _check_and_get_frequency(timeseries, self._frequency)
+        # Perform operation
+        return super().append(timeseries)
+
+    def extend(self, iterable):
+        # Asserts
+        _validate_timeseries_list(iterable)
+        self._frequency = _check_and_get_frequency_list(iterable, self._frequency)
+         # Perform operation
+        return super().extend(iterable)
+
+    def insert(self, index, timeseries):
+        # Asserts
+        _validate_timeseries(timeseries)
+        self._frequency = _check_and_get_frequency(timeseries, self._frequency)
+         # Perform operation
+        return super().insert(index, timeseries)
+
+    def __add__(self, rhs):
+        # Asserts
+        _validate_timeseries_list(rhs)
+        self._frequency = _check_and_get_frequency_list(rhs, self._frequency)
+        # Perform operation
+        return TimeseriesList(list.__add__(self, rhs), frequency=self._frequency)
+
+    def __iadd__(self, rhs):
+        # Asserts
+        _validate_timeseries_list(rhs)
+        self._frequency = _check_and_get_frequency_list(rhs, self._frequency)
+        # Perform operation
+        return TimeseriesList(list.__iadd__(self, rhs), frequency=self._frequency)
+
+    def __setitem__(self, key, timeseries):
+        # Asserts
+        _validate_timeseries(timeseries)
+        self._frequency = _check_and_get_frequency(timeseries, self._frequency)
+        # Perform operation
+        return super().__setitem__(timeseries)
+
+    def __mul__(self, rhs):
+        raise NotImplementedError("TimeseriesList does not support multiply")
+
+    def __rmul__(self, rhs):
+        raise NotImplementedError("TimeseriesList does not support multiply")
+
+    def __imul__(self, rhs):
+        raise NotImplementedError("TimeseriesList does not support multiply")
+
+    def copy(self):
+        return TimeseriesList(self, frequency=self._frequency)
+
+    def __getitem__(self, item):
+        result = list.__getitem__(self, item)
+        if isinstance(result, list):
+            return TimeseriesList(result, frequency=self._frequency)
+        else:
+            return result
+
+
+def _find_frequency(timeseries_list):
+    if timeseries_list:
+        return timeseries_list[0].resolution.frequency
+    return None
+
+
+def _check_and_get_frequency(timeseries, frequency=None):
+    if frequency:
+        assert timeseries.resolution.frequency == frequency, (
+            f"Items in TimeseriesList must have frequency {frequency}, but "
+            f"the Timeseries has {timeseries.resolution.frequency}."
+        )
+
+
+def _check_and_get_frequency_list(timeseries_list, frequency=None):
+    if not frequency:
+        frequency = _find_frequency(timeseries_list)
+    if frequency:
+        for index, timeseries in enumerate(timeseries_list):
+            assert timeseries.resolution.frequency == frequency, (
+                f"Element {index} does not match the frequency of "
+                f"the other Timeseries objects."
+            )
+
+
+def _validate_timeseries(timeseries):
+    assert isinstance(timeseries, Timeseries), (
+        f"Element is not a Timeseries. Expects all "
+        f"elements to be Timeseries objects."
+    )
+
+
+def _validate_timeseries_list(timeseries_list):
+    for index, timeseries in enumerate(timeseries_list):
+        assert isinstance(timeseries, Timeseries), (
+            f"Element {index} is not a Timeseries. Expects all "
+            f"elements to be Timeseries objects."
+        )
