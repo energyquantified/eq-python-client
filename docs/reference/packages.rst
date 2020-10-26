@@ -1,7 +1,7 @@
 Packages
 ========
 
-This page lists note-worthy classes and data models in different packages.
+This page lists note-worthy classes and data models.
 
 ``energyquantified``
 --------------------
@@ -9,7 +9,7 @@ This page lists note-worthy classes and data models in different packages.
 The top-level package with one class:
 
  * :py:class:`EnergyQuantified <energyquantified.EnergyQuantified>`: The main
-   main client class.
+   client class.
 
 ``energyquantified.data``
 -------------------------

@@ -82,8 +82,8 @@ always remain the same.
 
 -----
 
-Read more
-^^^^^^^^^
+Next steps
+----------
 
 Learn how to load
 :doc:`time series <../userguide/timeseries>`,

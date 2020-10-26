@@ -224,7 +224,7 @@ the same way. Notice that the data frame is quite wide (one column for each of t
 -----
 
 Next steps
-^^^^^^^^^^
+----------
 
 Learn how to load
 :doc:`time series instances <../userguide/instances>`,

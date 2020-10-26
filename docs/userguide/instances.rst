@@ -296,7 +296,7 @@ instead of loading the time series data:
 -----
 
 Next steps
-^^^^^^^^^^
+----------
 
 Learn how to load
 :doc:`time series <../userguide/timeseries>`,

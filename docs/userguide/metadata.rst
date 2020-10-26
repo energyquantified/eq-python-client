@@ -163,7 +163,7 @@ As with other metadata, the responses are cached.
 -----
 
 Next steps
-^^^^^^^^^^
+----------
 
 Learn how to load :doc:`time series <../userguide/timeseries>`,
 :doc:`time series instances <../userguide/instances>`,

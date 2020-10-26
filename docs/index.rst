@@ -95,16 +95,23 @@ User guide
    userguide/pandas
 
 
-Other
-^^^^^
+Reference
+^^^^^^^^^
 
 .. toctree::
    :maxdepth: 2
 
    reference/packages
    reference/reference
-   reference/changelog
 
+
+Other
+^^^^^
+
+.. toctree::
+   :maxdepth: 2
+
+   reference/changelog
 
 Indices and tables
 ^^^^^^^^^^^^^^^^^^

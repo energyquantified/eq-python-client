@@ -197,7 +197,7 @@ instead of loading the period-based series with data:
 -----
 
 Next steps
-^^^^^^^^^^
+----------
 
 Learn how to load
 :doc:`time series <../userguide/timeseries>`,

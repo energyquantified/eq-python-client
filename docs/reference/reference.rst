@@ -1,7 +1,7 @@
 .. _reference:
 
-Reference
-=========
+Full reference
+==============
 
 .. module:: energyquantified
 
