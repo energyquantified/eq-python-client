@@ -6,7 +6,7 @@ import sys
 
 
 from ..time import Resolution
-from ..utils.pandas import timeseries_to_dataframe
+from ..utils.pandas import timeseries_to_dataframe, timeseries_list_to_dataframe
 from .base import Series
 
 

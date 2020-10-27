@@ -4,7 +4,6 @@ import numbers
 import sys
 
 from ..time import Resolution, Frequency
-from ..utils.pandas import timeseries_to_dataframe
 from .base import Series
 from .timeseries import TimeseriesList, Timeseries, Value
 
