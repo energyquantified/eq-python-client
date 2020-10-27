@@ -1,6 +1,15 @@
 Changelog
 =========
 
+
+0.4.1
+-----
+
+**Bugfixes**
+
+- Fix a crash in ``TimeseriesList#to_dataframe()``.
+
+
 0.4
 ---
 
