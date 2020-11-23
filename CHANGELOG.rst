@@ -2,6 +2,19 @@ Changelog
 =========
 
 
+0.4.2
+-----
+
+**Improvements**
+
+- Update border configurations (such as the AELGrO cable between Belgium
+  and Germany, for instance).
+
+**Bugfixes**
+
+- Add missing area (SEM).
+
+
 0.4.1
 -----
 
