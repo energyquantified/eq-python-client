@@ -114,7 +114,7 @@ class Area:
         #: True when this area is a control area/TSO area, otherwise False
         self.control_area = control_area
         #: True when this area is outside of the supported region (used
-        # for exchange areas)
+        #: for exchange areas)
         self.external = external
         # Lookups and ordering
         Area.__lookup_tags[tag.lower()] = self
@@ -131,6 +131,7 @@ class Area:
         #: smaller areas)
         self.children = set()
         # Convert tag to variable name ("-" becomes "_")
+        self._variable = self.tag.replace('-', '_')
         setattr(Area, self.tag.replace("-", "_"), self)
 
     _ordering_nb = []
@@ -374,10 +375,12 @@ CH = Area(tag="CH", name="Switzerland", country=True, price_area=True)
 
 # National Grid
 GB = Area(tag="GB", name="Great Britain", country=True, price_area=True)
-# SONI
+
+# Single Electricity Market (IE + NIE). IE = EirGrid. NIE = SONI.
+SEM = Area(tag="SEM", name="Single Electricity Market – Ireland", country=False, price_area=True)
 NIE = Area(tag="NIE", name="Northern Ireland", country=True, price_area=True, control_area=True)
-# EirGrid
 IE = Area(tag="IE", name="Ireland", country=True, price_area=True, control_area=True)
+SEM._add_children(NIE, IE)
 
 
 ## Central Eastern Europe
@@ -403,6 +406,7 @@ IT_CNOR = Area(tag="IT-CNOR", name="Italy – Central-Northern", price_area=True
 IT_CSUD = Area(tag="IT-CSUD", name="Italy – Central-Southern", price_area=True)
 IT_SARD = Area(tag="IT-SARD", name="Italy – Sardegna", price_area=True)
 IT_SICI = Area(tag="IT-SICI", name="Italy – Sicily", price_area=True)
+IT_CALA = Area(tag="IT-CALA", name="Italy – Calabria", price_area=True)
 IT._add_children(IT_NORD, IT_SUD, IT_CNOR, IT_CSUD, IT_SARD, IT_SICI)
 
 
@@ -436,7 +440,7 @@ MT = Area(tag="MT", name="Malta", country=True, external=True)
 ## Nordic borders
 
 NO1._add_borders((NO2, "I"), (NO3, "I"), (NO5, "I"), (SE3, "I"))
-NO2._add_borders((DK1, "I"), (NL, "I"), (NO1, "I"), (NO5, "I"))
+NO2._add_borders((DE, "I"), (DK1, "I"), (NL, "I"), (NO1, "I"), (NO5, "I"))
 NO3._add_borders((NO1, "I"), (NO4, "I"), (NO5, "I"), (SE2, "I"))
 NO4._add_borders((FI, "N"), (NO3, "I"), (SE1, "I"), (SE2, "I"))
 NO5._add_borders((NO1, "I"), (NO2, "I"), (NO3, "I"))
@@ -446,8 +450,8 @@ SE2._add_borders((NO3, "I"), (NO4, "I"), (SE1, "I"), (SE3, "I"))
 SE3._add_borders((DK1, "I"), (FI, "I"), (NO1, "I"), (SE2, "I"), (SE4, "I"))
 SE4._add_borders((DE, "I"), (DK2, "I"), (LT, "I"), (PL, "I"), (SE3, "I"))
 
-DK1._add_borders((DE, "I"), (DK2, "EI"), (NL, "I"), (NO2, "I"), (SE3, "I"))
-DK2._add_borders((DE, "I"), (DK1, "EI"), (SE4, "I"))
+DK1._add_borders((DE, "I"), (DK2, "I"), (NL, "I"), (NO2, "I"), (SE3, "I"))
+DK2._add_borders((DE, "I"), (DK1, "I"), (SE4, "I"))
 
 FI._add_borders((EE, "I"), (NO4, "N"), (RU, "E"), (SE1, "I"), (SE3, "I"))
 
@@ -455,30 +459,32 @@ FI._add_borders((EE, "I"), (NO4, "N"), (RU, "E"), (SE1, "I"), (SE3, "I"))
 ## Baltic borders
 
 EE._add_borders((FI, "I"), (LV, "I"), (RU, "N"))
-LV._add_borders((EE, "I"), (LT, "I"), (RU, "N"))
-LT._add_borders((BY, "E"), (LV, "I"), (PL, "I"), (RU_KGD, "E"), (SE4, "I"))
+LV._add_borders((EE, "I"), (LT, "I"), (RU, "E"))
+LT._add_borders((BY, "N"), (LV, "I"), (PL, "I"), (RU_KGD, "E"), (SE4, "I"))
 
 
 ## Central Western Europe
 
 DE._add_borders(
     (AT, "F"),
+    (BE, "F"),
     (CH, "E"),
     (CZ, "E"),
     (DK1, "I"),
     (DK2, "I"),
-    (FR, "EF"),
-    (NL, "EF"),
+    (FR, "F"),
+    (NL, "F"),
+    (NO2, "I"),
     (PL, "E"),
     (SE4, "I"),
 )
 AT._add_borders((CH, "E"), (CZ, "E"), (DE, "F"), (HU, "E"), (IT_NORD, "EI"), (SI, "EI"))
 FR._add_borders(
-    (BE, "F"), (CH, "E"), (DE, "EF"), (ES, "EI"), (GB, "EI"), (IT_NORD, "EI")
+    (BE, "F"), (CH, "E"), (DE, "F"), (ES, "EI"), (GB, "EI"), (IT_NORD, "EI")
 )
 FR_COR._add_borders((IT_SARD, "I"))
-NL._add_borders((BE, "F"), (DE, "EF"), (DK1, "I"), (GB, "EI"), (NO2, "I"))
-BE._add_borders((FR, "F"), (GB, "EI"), (NL, "F"))
+NL._add_borders((BE, "F"), (DE, "F"), (DK1, "I"), (GB, "EI"), (NO2, "I"))
+BE._add_borders((DE, "F"), (FR, "F"), (GB, "EI"), (NL, "F"))
 CH._add_borders((AT, "E"), (DE, "E"), (FR, "E"), (IT_NORD, "E"))
 
 
@@ -540,8 +546,8 @@ TR._add_borders((BG, "E"), (GR, "E"))
 
 ## Others
 
-RU._add_borders((EE, "N"), (FI, "E"), (LV, "N"))
+RU._add_borders((EE, "N"), (FI, "E"), (LV, "E"))
 RU_KGD._add_borders((LT, "E"))
-BY._add_borders((LT, "E"))
+BY._add_borders((LT, "N"))
 UA._add_borders((HU, "E"), (PL, "E"), (RO, "E"), (SK, "E"))
 MT._add_borders((IT_SICI, "I"))
