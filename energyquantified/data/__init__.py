@@ -13,6 +13,7 @@ from .periodseries import (
     CapacityPeriod
 )
 from .ohlc import Product, OHLC, OHLCList
+from .srmc import SRMC, SRMCOptions
 
 
 __all__ = [
@@ -32,4 +33,7 @@ __all__ = [
     "Product",
     "OHLC",
     "OHLCList",
+    # SRMC
+    "SRMCOptions",
+    "SRMC",
 ]
