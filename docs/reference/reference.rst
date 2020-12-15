@@ -54,6 +54,11 @@ Here are the different API section classes:
 .. autoclass:: energyquantified.api.OhlcAPI
    :inherited-members:
 
+------
+
+.. autoclass:: energyquantified.api.SrmcAPI
+   :inherited-members:
+
 
 Data types
 ----------

@@ -9,7 +9,7 @@ This page lists note-worthy classes and data models.
 The top-level package with one class:
 
  * :py:class:`EnergyQuantified <energyquantified.EnergyQuantified>`: The main
-   client class.
+   client class. Use this class to access API operations.
 
 ``energyquantified.data``
 -------------------------

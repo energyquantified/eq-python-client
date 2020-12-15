@@ -152,7 +152,9 @@ def parse_place(json):
 def parse_contract(json):
     contract_type = json.get("type")
 
-    field = OHLCField.by_tag(json.get("field"))
+    field = json.get("field")
+    if field:
+        field = OHLCField.by_tag()
     period = ContractPeriod.by_tag(json.get("period"))
 
     if contract_type == "CONTINUOUS":

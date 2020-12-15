@@ -164,9 +164,9 @@ class ContinuousContract:
         The front number (1 is the closest contract, 2 is the second closest,
         and so on)
     """
-    field: OHLCField
     period: ContractPeriod
     front: int
+    field: OHLCField = None
 
     def is_continuous(self):
         """
@@ -201,7 +201,7 @@ class ContinuousContract:
             f"<ContinuousContract: "
             f"period={self.period.name}, "
             f"front={self.front}, "
-            f"field={self.field.name}>"
+            f"field={self.field.name if self.field else ''}>"
         )
 
     def __repr__(self):
@@ -232,9 +232,9 @@ class SpecificContract:
 
         The delivery date of the contract
     """
-    field: OHLCField
     period: ContractPeriod
     delivery: date
+    field: OHLCField = None
 
     def is_continuous(self):
         """
@@ -269,7 +269,7 @@ class SpecificContract:
             f"<SpecificContract: "
             f"period={self.period.name}, "
             f"delivery={self.delivery.isoformat()}, "
-            f"field={self.field.name}>"
+            f"field={self.field.name if self.field else ''}>"
         )
 
     def __repr__(self):
