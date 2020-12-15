@@ -12,12 +12,22 @@ class SRMCOptions:
     """
     A data class with all factors for an SRMC calculations.
     """
+    #: The fuel type. Set to either COAL or GAS.
     fuel_type: str = None
+    #: (For coal) Conversion factor between API#2 tonnes and megawatthours.
     api2_tonne_to_mwh: float = None
+    #: (For gas) Conversion from pence/therm to GBP/MWh.
     gas_therm_to_mwh: float = None
+    #: (For gas) Gas contracts are traded with the assumption of effectiveness
+    #: in higher-heating value, but the power market uses lower-heating
+    #: value. Defaults to 0.9.
     hhv_to_lhv: float = None
+    #: The energy efficiency factor.
     efficiency: float = None
+    #: The carbon emission factor.
     carbon_emissions: float = None
+    #: (optional) When set, carbon tax is calculated according to tax rules
+    #: in given area. Typically used for Great Britain's flat carbon tax.
     carbon_tax_area: Area = None
 
     def __str__(self):
@@ -54,11 +64,22 @@ class SRMC:
     either contain a list of OHLC objects, a time series, or a period-based
     series.
     """
+    #: The curve used as input to this SRMC calculation
     curve: Curve = None
+    #: (optional) The contract when the calculation was done for historical
+    #: closing prices – either a front contract (continuous front contract),
+    #: or a specific contract such as Year-2020, Year-2021, Q3-2020 etc.
     contract: Union[ContinuousContract, SpecificContract] = None
+    #: The factors used in the SRMC calculation.
     options: SRMCOptions = None
+    #: (optional) The OHLC data when the result of the calculation returns
+    #: a list of OHLC objects.
     ohlc: OHLCList = None
+    #: (optional) The time series when the result of the calculation returns
+    #: a time series.
     timeseries: Timeseries = None
+    #: (optional) The period-based series when the result of the calculation
+    #: returns a period series.
     periodseries: Periodseries = None
 
     def has_ohlc(self):

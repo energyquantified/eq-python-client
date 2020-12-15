@@ -122,6 +122,7 @@ Base class for series
    :show-inheritance:
    :inherited-members:
 
+
 OHLC data classes
 ^^^^^^^^^^^^^^^^^
 
@@ -138,6 +139,19 @@ OHLC data classes
 .. autoclass:: energyquantified.data.OHLCList
    :show-inheritance:
    :members:
+
+
+SRMC data classes
+^^^^^^^^^^^^^^^^^
+
+.. autoclass:: energyquantified.data.SRMC
+   :show-inheritance:
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.data.SRMCOptions
+   :inherited-members:
 
 
 Metadata
