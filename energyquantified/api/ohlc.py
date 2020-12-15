@@ -4,6 +4,7 @@ from ..exceptions import ValidationError
 from ..metadata import CurveType, OHLCField
 from ..parser.ohlc import parse_ohlc_response
 from ..parser.timeseries import parse_timeseries
+from ..parser.periodseries import parse_periodseries
 
 
 # Tuple of supported values for Curve.curve_type in the time series API
@@ -209,3 +210,46 @@ class OhlcAPI(BaseAPI):
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
+
+    def latest_as_periods(
+            self,
+            curve,
+            field=OHLCField.SETTLEMENT,
+            date=None):
+        """
+        Load all OHLC rows from a single trading day, sort them, and
+        merge/convert them to a continuous series.
+
+        It defaults to using the latest prices available, therefore
+        "latest_as_period".
+
+        If ``date`` is given, this method will try to fetch OHLC data for
+        that trading day. When there is no data for the given day, OHLC data
+        will be loaded for the closest trading day earlier in time with data.
+
+        By default, this method uses the settlement price. Select another
+        field, such as close price, by setting the `field` parameter.
+
+        This operation works for curves with ``curve_type = OHLC`` only.
+
+        :param curve: The curve or curve name
+        :type curve: :py:class:`energyquantified.metadata.Curve`, str
+        :param field: The field to generate the series from, \
+            defaults to OHLCField.SETTLEMENT
+        :type field: OHLCField, str, optional
+        :param date: The trading date, defaults to today
+        :type date: date, str, required
+        :return: A period-based series
+        :rtype: :py:class:`energyquantified.data.Periodseries`
+        """
+        # Build URL
+        safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
+        # Parameters
+        params = {}
+        self._add_date(params, "date", date)
+        # Build URL
+        field = self._urlencode_ohlc_field(field, "field")
+        url = f"/ohlc/{safe_curve}/latest/periods/{field}/"
+        # HTTP request
+        response = self._get(url, params=params)
+        return parse_periodseries(response.json())

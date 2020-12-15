@@ -1,5 +1,6 @@
 import urllib
 from datetime import date, datetime, time
+import numbers
 
 from requests import exceptions
 
@@ -229,6 +230,25 @@ class BaseAPI:
             params[name] = var
         else:
             raise ValidationError(reason="Provide an integer", parameter=name)
+
+    @staticmethod
+    def _add_number(params, name, var, required=False, min=None, max=None):
+        if var is None and not required:
+            return
+        if isinstance(var, numbers.Number):
+            if min is not None and var < min:
+                raise ValidationError(
+                    reason=f"Must be higher than {min}, was {var}",
+                    parameter=name
+                )
+            if max is not None and var > max:
+                raise ValidationError(
+                    reason=f"Must be lower than {max}, was {var}",
+                    parameter=name
+                )
+            params[name] = var
+        else:
+            raise ValidationError(reason="Provide a number", parameter=name)
 
     @staticmethod
     def _add_bool(params, name, var, required=False):
