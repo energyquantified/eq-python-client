@@ -1,9 +1,11 @@
 from dataclasses import dataclass
+from typing import Union
 
-from ..metadata import Area, Curve
+from ..metadata import Area, Curve, ContinuousContract, SpecificContract
 from .ohlc import OHLCList
 from .timeseries import Timeseries
 from .periodseries import Periodseries
+
 
 @dataclass(frozen=True)
 class SRMCOptions:
@@ -53,7 +55,7 @@ class SRMC:
     series.
     """
     curve: Curve = None
-    contract: Contract = None
+    contract: Union[ContinuousContract, SpecificContract] = None
     options: SRMCOptions = None
     ohlc: OHLCList = None
     timeseries: Timeseries = None
@@ -90,12 +92,23 @@ class SRMC:
         return self.periodseries is not None
 
     def __str__(self):
+        parts = []
+        if self.curve:
+            parts.append(f"curve={self.curve}")
+        if self.contract:
+            parts.append(f"contract={self.contract}")
+        if self.options:
+            parts.append(f"options={self.options}")
         if self.has_ohlc():
-            return f"<SRMCResponse: ohlc={self.ohlc}, options={self.options}>"
+            parts.append(f"ohlc={self.ohlc}")
         if self.has_timeseries():
-            return f"<SRMCResponse: timeseries={self.timeseries}, options={self.options}>"
+            parts.append(f"timeseries={self.timeseries}")
         if self.has_periodseries():
-            return f"<SRMCResponse: periodseries={self.periodseries}, options={self.options}>"
+            parts.append(f"periodseries={self.periodseries}")
+        if not parts:
+            return f"<SRMC: (no data)>"
+        joined = ',\n '.join(parts)
+        return f"<SRMC:\n {joined}\n>"
 
     def __repr__(self):
         return self.__str__()
