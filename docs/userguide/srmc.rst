@@ -146,8 +146,8 @@ this:
    3   2020-12-04  month      3  2021-03-01  None  None  None  None       42.34   None          None
    ...
 
-Load SRMC as time series
-------------------------
+Load as a time series
+---------------------
 
 Method references:
 :py:meth:`eq.srmc.load_front_as_timeseries() <energyquantified.api.SrmcAPI.load_front_as_timeseries>`
@@ -209,8 +209,9 @@ December). That is because there are no trades during these days.
 For a specific contract
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-To calculate SRMC for the coal API2 front contract, specify the **curve**,
-**begin**, **end**, **period** and **delivery** date:
+To calculate SRMC for a specific coal API2 contract, such as the May
+2021-contract, specify the **curve**, **begin**, **end**, **period**
+and **delivery** date:
 
    >>> from datetime import date
    >>> from energyquantified.metadata import ContractPeriod
@@ -253,8 +254,8 @@ You can convert the time series to a ``pandas.DataFrame`` easily:
    ...
 
 
-Load SRMC for a trading day
----------------------------
+Load for a trading day
+----------------------
 
 Method reference: :py:meth:`eq.srmc.latest() <energyquantified.api.SrmcAPI.latest>`
 
@@ -293,8 +294,8 @@ and ``load_delivery()``, except that we don't have a ``contract`` set:
     ...
 
 
-Load SRMC as a forward curve
-----------------------------
+Load as a forward curve
+-----------------------
 
 Method reference: :py:meth:`eq.srmc.latest_as_periods() <energyquantified.api.SrmcAPI.latest_as_periods>`
 
@@ -344,7 +345,6 @@ You can convert the period-based series to a time series or to a
    2026-12-31 00:00:00+01:00                             47.16
    <BLANKLINE>
    [2191 rows x 1 columns]
-
 
 
 Override SRMC factors
