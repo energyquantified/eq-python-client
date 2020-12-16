@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-dev
+0.5
 ---
 
 Introducing support for short-run marginal cost (SRMC) calculations from
