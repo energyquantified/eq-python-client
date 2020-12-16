@@ -29,7 +29,7 @@ We calculate short-run marginal costs on-the-fly from closing prices:
    efficiency, carbon emission factor and conversion rates (except for
    currency conversion).
  * Results from SRMC calculations are in **€/MWh**. Currency conversion is
-   done by using **reference rates** from the **European Central Bank (ECB)**.
+   using **reference rates** from the **European Central Bank (ECB)**.
  * We use the **trading date** for the contract when deciding the **currency
    conversion rate** to use.
  * Some countries, such as the UK, has an **additional tax** (18 GBP/t as
@@ -39,7 +39,8 @@ We calculate short-run marginal costs on-the-fly from closing prices:
    **higher-heating value**, but the power market uses **lower-heating value**.
    We support this conversion.
 
-**Note:** When returning OHLC data, only the ``settlement`` field will be set.
+**Note:** We use settlement prices in the OHLC calculations. When returning
+OHLC data for SRMC, only the ``settlement`` field is set.
 
 More details, such as the formulas used, are available in the SRMC article on
 Energy Quantified's `Knowledge base <https://app.energyquantified.com/knowledge-base/>`_
@@ -56,11 +57,14 @@ Method references:
 Calculating historical short-run marginal costs is very similar to
 `loading historical OHLC data <../userguide/ohlc.html#load-ohlc-data>`__.
 
-However, because SRMC calculations requires you to either specify a **front**
+However, because SRMC calculations require you to either specify a **front**
 contract or a **specific** contract, we have split ``load()`` into two methods.
-The only different between ``load_front()`` and ``load_delivery()`` is that
+The difference between ``load_front()`` and ``load_delivery()`` is that
 the first requires a **front** parameter and the second requires a **delivery**
 parameter.
+
+For a continuous front contract
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To calculate SRMC for the coal API2 front contract, specify the **curve**,
 **begin**, **end**, **period** and **front**:
@@ -76,7 +80,7 @@ To calculate SRMC for the coal API2 front contract, specify the **curve**,
    >>> )
 
 The response is an :py:class:`SRMC <energyquantified.data.SRMC>` object. It
-has a curve, the contract (specifying that it is a front month contract), an
+has a curve, a contract (specifying that it is a front-month contract), an
 ``SRMCOptions`` object with all factors used in the calculation, and a list of
 OHLC objects:
 
@@ -88,9 +92,12 @@ OHLC objects:
     ohlc=<OHLCList: items=[<OHLC>, <OHLC>, ...]>
    >
 
+For a specific contract
+^^^^^^^^^^^^^^^^^^^^^^^
+
 Similar to front contracts, you can get the SRMC for a specific contract by
 only changing the function to ``load_delivery()`` and swap out the **front**
-parameter with **delivery**:
+parameter with a **delivery** date:
 
    >>> from datetime import date
    >>> from energyquantified.metadata import ContractPeriod
@@ -131,8 +138,13 @@ You can extract any of these attributes:
 And, of course, you can convert the OHLC data to a ``pandas.DataFrame`` like
 this:
 
-   >>> srmc_coal.ohlc.to_df()
-
+   >>> srmc_coal.ohlc.to_dataframe()
+           traded period  front    delivery  open  high   low close  settlement volume open_interest
+   0   2020-12-01  month      3  2021-03-01  None  None  None  None       40.96   None          None
+   1   2020-12-02  month      3  2021-03-01  None  None  None  None       41.63   None          None
+   2   2020-12-03  month      3  2021-03-01  None  None  None  None       41.06   None          None
+   3   2020-12-04  month      3  2021-03-01  None  None  None  None       42.34   None          None
+   ...
 
 Load SRMC as time series
 ------------------------
@@ -142,15 +154,114 @@ Method references:
 and
 :py:meth:`eq.srmc.load_delivery_as_timeseries() <energyquantified.api.SrmcAPI.load_delivery_as_timeseries>`
 
+This method works like
+:py:meth:`eq.srmc.load_front() <energyquantified.api.SrmcAPI.load_front>`
+and :py:meth:`eq.srmc.load_delivery() <energyquantified.api.SrmcAPI.load_delivery>`
+(see previous section) except that it returns a daily time series instead of OHLC data.
+
+For a continuous front contract
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To calculate SRMC for the coal API2 front contract, specify the **curve**,
+**begin**, **end**, **period** and **front**:
+
+   >>> from datetime import date
+   >>> from energyquantified.metadata import ContractPeriod
+   >>> srmc_coal = eq.srmc.load_front_as_timeseries(
+   >>>    'Futures Coal API-2 USD/t ICE OHLC',
+   >>>    begin=date(2020, 12, 1),   # or begin='2020-01-01'
+   >>>    end=date(2020, 12, 30),    # or end='2020-01-06'
+   >>>    period=ContractPeriod.MONTH,
+   >>>    front=1,
+   >>> )
+
+The response is an :py:class:`SRMC <energyquantified.data.SRMC>` object. It
+has a curve, a contract (specifying that it is a front-month contract), an
+``SRMCOptions`` object with all factors used in the calculation, and a
+``timeseries``:
+
+   >>> srmc_coal
+   <SRMC:
+    curve=Futures Coal API-2 USD/t ICE OHLC,
+    contract=<ContinuousContract: period=MONTH, front=1, field=SETTLEMENT>,
+    options=<SRMCOptions: COAL, api2_tonne_to_mwh=6.978, efficiency=0.42, carbon_emissions=0.34056, carbon_tax_area=None>,
+    timeseries=<Timeseries: resolution=<Resolution: frequency=P1D, timezone=CET>, curve="None", begin="2020-12-01 00:00:00+01:00", end="2020-12-16 00:00:00+01:00">
+   >
+
+You can extract the timeseries easily:
+
+   >>> timeseries = srmc_coal.timeseries
+   >>> for (date, value) in timeseries:
+   >>>    print(date, value)
+   2020-12-01 00:00:00+01:00 41.06
+   2020-12-02 00:00:00+01:00 41.68
+   2020-12-03 00:00:00+01:00 41.09
+   2020-12-04 00:00:00+01:00 42.41
+   2020-12-05 00:00:00+01:00 None
+   2020-12-06 00:00:00+01:00 None
+   2020-12-07 00:00:00+01:00 41.92
+   2020-12-08 00:00:00+01:00 41.95
+   ...
+
+Notice that there are empty values during the weekend (5 December and 6
+December). That is because there are no trades during these days.
+
+For a specific contract
+^^^^^^^^^^^^^^^^^^^^^^^
+
+To calculate SRMC for the coal API2 front contract, specify the **curve**,
+**begin**, **end**, **period** and **delivery** date:
+
+   >>> from datetime import date
+   >>> from energyquantified.metadata import ContractPeriod
+   >>> srmc_coal = eq.srmc.load_delivery_as_timeseries(
+   >>>    'Futures Coal API-2 USD/t ICE OHLC',
+   >>>    begin=date(2020, 12, 1),
+   >>>    end=date(2020, 12, 30),
+   >>>    period=ContractPeriod.MONTH,
+   >>>    delivery=date(2021, 3, 1),  # March 2021
+   >>> )
+
+The response is an :py:class:`SRMC <energyquantified.data.SRMC>` object. It
+has a curve, a contract (specifying that it is the March 2021-contract), an
+``SRMCOptions`` object with all factors used in the calculation, and a
+``timeseries``:
+
+   >>> srmc_coal
+   <SRMC:
+    curve=Futures Coal API-2 USD/t ICE OHLC,
+    contract=<SpecificContract: period=MONTH, delivery=2021-03-01, field=SETTLEMENT>,
+    options=<SRMCOptions: COAL, api2_tonne_to_mwh=6.978, efficiency=0.42, carbon_emissions=0.34056, carbon_tax_area=None>,
+    timeseries=<Timeseries: resolution=<Resolution: frequency=P1D, timezone=CET>, curve="None", begin="2020-12-01 00:00:00+01:00", end="2020-12-16 00:00:00+01:00">
+   >
+
+You can convert the time series to a ``pandas.DataFrame`` easily:
+
+   >>> srmc_coal.timeseries.to_dataframe()
+                             Futures Coal API-2 USD/t ICE OHLC
+                                   month 2021-03-01 settlement
+   <BLANKLINE>
+   date
+   2020-12-01 00:00:00+01:00                             40.96
+   2020-12-02 00:00:00+01:00                             41.63
+   2020-12-03 00:00:00+01:00                             41.06
+   2020-12-04 00:00:00+01:00                             42.34
+   2020-12-05 00:00:00+01:00                               NaN
+   2020-12-06 00:00:00+01:00                               NaN
+   2020-12-07 00:00:00+01:00                             41.83
+   2020-12-08 00:00:00+01:00                             41.90
+   ...
+
 
 Load SRMC for a trading day
 ---------------------------
 
 Method reference: :py:meth:`eq.srmc.latest() <energyquantified.api.SrmcAPI.latest>`
 
-Loads all contracts for a trading day (the latest trading day by default). You
-may also specify an optional **date** parameter to load data for the latest
-trading day up to and including the given date:
+This method loads all contracts for a trading day (the latest trading day by
+default) and calculates the SRMC for each of them. You may also specify an
+optional **date** parameter to load data for the latest trading day up to and
+including the given date:
 
    >>> from datetime import date
    >>> srmc_coal = eq.srmc.latest(
@@ -159,8 +270,8 @@ trading day up to and including the given date:
    >>> )
 
 The response will contain a list of all OHLC objects from the latest available
-trading day. The response will be almost the same as with the ``load_front()``
-and ``load_delivery()`` methods, except that we don't have a ``contract`` set:
+trading day. The response will be almost the same as for ``load_front()``
+and ``load_delivery()``, except that we don't have a ``contract`` set:
 
    >>> srmc_coal
    <SRMC:
@@ -173,15 +284,9 @@ and ``load_delivery()`` methods, except that we don't have a ``contract`` set:
    [<OHLC: <Product: traded=2020-12-14, period=MONTH, front=1, delivery=2021-01-01>, open=, high=, low=, close=, settlement=44.15, volume=, open_interest=>,
     <OHLC: <Product: traded=2020-12-14, period=MONTH, front=2, delivery=2021-02-01>, open=, high=, low=, close=, settlement=44.07, volume=, open_interest=>,
     <OHLC: <Product: traded=2020-12-14, period=MONTH, front=3, delivery=2021-03-01>, open=, high=, low=, close=, settlement=43.94, volume=, open_interest=>,
-    <OHLC: <Product: traded=2020-12-14, period=MONTH, front=4, delivery=2021-04-01>, open=, high=, low=, close=, settlement=43.83, volume=, open_interest=>,
-    <OHLC: <Product: traded=2020-12-14, period=MONTH, front=5, delivery=2021-05-01>, open=, high=, low=, close=, settlement=43.79, volume=, open_interest=>,
-    <OHLC: <Product: traded=2020-12-14, period=MONTH, front=6, delivery=2021-06-01>, open=, high=, low=, close=, settlement=43.76, volume=, open_interest=>,
     <OHLC: <Product: traded=2020-12-14, period=QUARTER, front=1, delivery=2021-01-01>, open=, high=, low=, close=, settlement=44.05, volume=, open_interest=>,
     <OHLC: <Product: traded=2020-12-14, period=QUARTER, front=2, delivery=2021-04-01>, open=, high=, low=, close=, settlement=43.79, volume=, open_interest=>,
     <OHLC: <Product: traded=2020-12-14, period=QUARTER, front=3, delivery=2021-07-01>, open=, high=, low=, close=, settlement=43.68, volume=, open_interest=>,
-    <OHLC: <Product: traded=2020-12-14, period=QUARTER, front=4, delivery=2021-10-01>, open=, high=, low=, close=, settlement=43.62, volume=, open_interest=>,
-    <OHLC: <Product: traded=2020-12-14, period=QUARTER, front=5, delivery=2022-01-01>, open=, high=, low=, close=, settlement=43.98, volume=, open_interest=>,
-    <OHLC: <Product: traded=2020-12-14, period=QUARTER, front=6, delivery=2022-04-01>, open=, high=, low=, close=, settlement=44.0, volume=, open_interest=>,
     <OHLC: <Product: traded=2020-12-14, period=YEAR, front=1, delivery=2021-01-01>, open=, high=, low=, close=, settlement=43.78, volume=, open_interest=>,
     <OHLC: <Product: traded=2020-12-14, period=YEAR, front=2, delivery=2022-01-01>, open=, high=, low=, close=, settlement=44.04, volume=, open_interest=>,
     <OHLC: <Product: traded=2020-12-14, period=YEAR, front=3, delivery=2023-01-01>, open=, high=, low=, close=, settlement=44.43, volume=, open_interest=>,
@@ -252,7 +357,7 @@ following factors used in the SRMC calculation:
  * ``carbon_emissions``: The carbon emission factor
  * ``hhv_to_lhv``: Conversion from higher-heating value to lower-heating value
  * ``gas_therm_to_mwh``: Conversion factor from pence/therm to GBP/MWh
- * ``api2_tonne_to_mwh``: Conversion from coal API2 tonnes to megawatthours
+ * ``api2_tonne_to_mwh``: Conversion from coal API2 tonnes to megawatt-hours
  * ``carbon_tax_area``: Set an :py:class:`Area <energyquantified.metadata.Area>`
    to apply local tax rules. Typically used for Great Britain's carbon tax.
 
