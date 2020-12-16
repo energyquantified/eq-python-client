@@ -4,6 +4,7 @@ from ..exceptions import ValidationError
 from ..metadata import CurveType, OHLCField
 from ..parser.ohlc import parse_ohlc_response
 from ..parser.timeseries import parse_timeseries
+from ..parser.periodseries import parse_periodseries
 
 
 # Tuple of supported values for Curve.curve_type in the time series API
@@ -121,7 +122,8 @@ class OhlcAPI(BaseAPI):
             end=None,
             period=None,
             delivery=None,
-            field=OHLCField.SETTLEMENT):
+            field=OHLCField.SETTLEMENT,
+            fill=None):
         """
         Load historical OHLC data for specific contract, and convert it to a
         :py:class:`energyquantified.data.Timeseries`.
@@ -144,6 +146,12 @@ class OhlcAPI(BaseAPI):
         :param field: The field (close, settlement, etc.) to extract to a\
             time series, defaults to ``OHLCField.SETTLEMENT``
         :type field: OHLCField, str, required
+        :param fill: How to handle days without trades. Allowed values are:\
+            ``no-fill`` do nothing, ``fill-holes`` fill in holes with data\
+            from previous trading day, ``forward-fill`` fill in all blanks\
+            with data from the previous trading day (also into the future).\
+            Defaults to ``no-fill``.
+        :type fill: str, optional
         :return: A time series
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -155,6 +163,7 @@ class OhlcAPI(BaseAPI):
         self._add_date(params, "end", end, required=True)
         self._add_contract_period(params, "period", period, required=True)
         self._add_date(params, "delivery", delivery, required=True)
+        self._add_fill(params, "fill", fill)
         # Build URL
         field = self._urlencode_ohlc_field(field, "field")
         url = f"/ohlc/{safe_curve}/timeseries/{field}/"
@@ -169,7 +178,8 @@ class OhlcAPI(BaseAPI):
             end=None,
             period=None,
             front=None,
-            field=OHLCField.SETTLEMENT):
+            field=OHLCField.SETTLEMENT,
+            fill=None):
         """
         Load historical OHLC data for a continuous front contract, and convert
         it to a :py:class:`energyquantified.data.Timeseries`.
@@ -187,11 +197,17 @@ class OhlcAPI(BaseAPI):
         :type end: date, str, required
         :param period: The contract period (week, month, quarter)
         :type period: ContractPeriod, str, required
-        :param front: [description], defaults to None
-        :type front: [type], optional
+        :param front: The front contract (1=front, 2=second front, etc.)
+        :type front: int, required
         :param field: The field (close, settlement, etc.) to extract to a\
             time series, defaults to ``OHLCField.SETTLEMENT``
         :type field: OHLCField, str, required
+        :param fill: How to handle days without trades. Allowed values are:\
+            ``no-fill`` do nothing, ``fill-holes`` fill in holes with data\
+            from previous trading day, ``forward-fill`` fill in all blanks\
+            with data from the previous trading day (also into the future).\
+            Defaults to ``no-fill``.
+        :type fill: str, optional
         :return: A time series
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -203,9 +219,53 @@ class OhlcAPI(BaseAPI):
         self._add_date(params, "end", end, required=True)
         self._add_contract_period(params, "period", period, required=True)
         self._add_int(params, "front", front, min=1, required=True)
+        self._add_fill(params, "fill", fill)
         # Build URL
         field = self._urlencode_ohlc_field(field, "field")
         url = f"/ohlc/{safe_curve}/timeseries/{field}/"
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
+
+    def latest_as_periods(
+            self,
+            curve,
+            field=OHLCField.SETTLEMENT,
+            date=None):
+        """
+        Load all OHLC rows from a single trading day, sort them, and
+        merge/convert them to a continuous series.
+
+        It defaults to using the latest prices available, therefore
+        "latest_as_period".
+
+        If ``date`` is given, this method will try to fetch OHLC data for
+        that trading day. When there is no data for the given day, OHLC data
+        will be loaded for the closest trading day earlier in time with data.
+
+        By default, this method uses the settlement price. Select another
+        field, such as close price, by setting the `field` parameter.
+
+        This operation works for curves with ``curve_type = OHLC`` only.
+
+        :param curve: The curve or curve name
+        :type curve: :py:class:`energyquantified.metadata.Curve`, str
+        :param field: The field to generate the series from, \
+            defaults to OHLCField.SETTLEMENT
+        :type field: OHLCField, str, optional
+        :param date: The trading date, defaults to today
+        :type date: date, str, required
+        :return: A period-based series
+        :rtype: :py:class:`energyquantified.data.Periodseries`
+        """
+        # Build URL
+        safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
+        # Parameters
+        params = {}
+        self._add_date(params, "date", date)
+        # Build URL
+        field = self._urlencode_ohlc_field(field, "field")
+        url = f"/ohlc/{safe_curve}/latest/periods/{field}/"
+        # HTTP request
+        response = self._get(url, params=params)
+        return parse_periodseries(response.json())

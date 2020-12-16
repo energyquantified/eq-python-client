@@ -1,5 +1,6 @@
 import urllib
 from datetime import date, datetime, time
+import numbers
 
 from requests import exceptions
 
@@ -231,6 +232,25 @@ class BaseAPI:
             raise ValidationError(reason="Provide an integer", parameter=name)
 
     @staticmethod
+    def _add_number(params, name, var, required=False, min=None, max=None):
+        if var is None and not required:
+            return
+        if isinstance(var, numbers.Number):
+            if min is not None and var < min:
+                raise ValidationError(
+                    reason=f"Must be higher than {min}, was {var}",
+                    parameter=name
+                )
+            if max is not None and var > max:
+                raise ValidationError(
+                    reason=f"Must be lower than {max}, was {var}",
+                    parameter=name
+                )
+            params[name] = var
+        else:
+            raise ValidationError(reason="Provide a number", parameter=name)
+
+    @staticmethod
     def _add_bool(params, name, var, required=False):
         if var is None and not required:
             return
@@ -355,3 +375,20 @@ class BaseAPI:
                 reason=f"Not a valid ContractPeriod: '{var}'",
                 parameter=name
             )
+
+    @staticmethod
+    def _add_fill(params, name, var, required=False):
+        if var is None and not required:
+            return
+        if isinstance(var, str):
+            var = var.lower()
+            if var in ('no-fill', 'fill-holes', 'forward-fill'):
+                params[name] = var
+                return
+        raise ValidationError(
+            reason=(
+                f"Not a valid fill '{var}'. Allowed values "
+                f"are: 'no-fill', 'fill-holes', 'forward-fill'"
+            ),
+            parameter=name
+        )

@@ -6,7 +6,8 @@ from .api import (
     TimeseriesAPI,
     PeriodsAPI,
     PeriodInstancesAPI,
-    OhlcAPI
+    OhlcAPI,
+    SrmcAPI,
 )
 from .exceptions import UnauthorizedError, InitializationError
 
@@ -104,6 +105,9 @@ class EnergyQuantified:
         #: See :py:class:`energyquantified.api.OhlcAPI`. For loading
         #: OHLC data in various ways
         self.ohlc = OhlcAPI(self)
+        #: See :py:class:`energyquantified.api.SrmcAPI`. For loading and
+        #: calculating short-run marginal costs (SRMC) from OHLC data.
+        self.srmc = SrmcAPI(self)
 
     def is_api_key_valid(self):
         """

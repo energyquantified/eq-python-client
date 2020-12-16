@@ -132,7 +132,10 @@ class OHLCList(list):
         raise NotImplementedError("OHLCList does not support multiply")
 
     def __str__(self):
-        return f"<OHLCList: curve=\"{self.curve}\", items={super().__str__()}>"
+        if self.curve:
+            return f"<OHLCList: curve=\"{self.curve}\", items={super().__str__()}>"
+        else:
+            return f"<OHLCList: items={super().__str__()}>"
 
     def to_df(self):
         """

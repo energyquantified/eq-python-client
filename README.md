@@ -51,7 +51,7 @@ at Read the Docs.
 - Forecasts- and time series data
 - Period-based data
 - OHLC data
-- *(TODO!)* SRMC, dark- and spark spreads
+- SRMC calculations on OHLC data
 - *(TODO!)* Shows your subscription for each series
 - Support for time-zones, resolutions and aggregations
 - Easy-to-use filters for issue dates and forecast types

@@ -189,6 +189,62 @@ There is no filtering for
 :py:meth:`eq.ohlc.latest() <energyquantified.api.OhlcAPI.latest>`, like there
 is for :py:meth:`eq.ohlc.load() <energyquantified.api.OhlcAPI.load>`.
 
+Load as a forward curve
+-----------------------
+
+Method reference: :py:meth:`eq.ohlc.latest_as_periods() <energyquantified.api.OhlcAPI.latest_as_periods>`
+
+This method loads all contracts for a trading day (the latest trading day by
+default), sorts them and merges them into a single period-based series (like
+a forward curve). It uses the settlement price by default, but you can
+override it by setting the ``field`` parameter.
+
+   >>> from datetime import date
+   >>> from energyquantified.metadata import OHLCField
+   >>> forward_curve = eq.ohlc.latest_as_periods(
+   >>>    'NP Futures Power Base EUR/MWh Nasdaq OHLC',
+   >>>    date=date(2020, 12, 1),  # Optionally set trading date
+   >>>    field=OHLCField.SETTLEMENT  # Optionally select field (defaults to SETTLEMENT)
+   >>> )
+
+The result is a period-based series:
+
+   >>> forward_curve
+   <Periodseries: resolution=<Resolution: frequency=NONE, timezone=CET>, curve="NP Futures Power Base EUR/MWh Nasdaq OHLC", begin="2020-12-07 00:00:00+01:00", end="2027-01-01 00:00:00+01:00">
+
+   >>> for p in forward_curve:
+   >>>     print(p)
+   <Period: begin=2020-12-07 00:00:00+01:00, end=2020-12-14 00:00:00+01:00, value=21.75>
+   <Period: begin=2020-12-14 00:00:00+01:00, end=2020-12-21 00:00:00+01:00, value=22.25>
+   <Period: begin=2020-12-21 00:00:00+01:00, end=2020-12-28 00:00:00+01:00, value=18.75>
+   <Period: begin=2020-12-28 00:00:00+01:00, end=2021-01-04 00:00:00+01:00, value=19>
+   <Period: begin=2021-01-04 00:00:00+01:00, end=2021-01-11 00:00:00+01:00, value=23.5>
+   <Period: begin=2021-01-11 00:00:00+01:00, end=2021-01-18 00:00:00+01:00, value=25.8>
+   <Period: begin=2021-01-18 00:00:00+01:00, end=2021-02-01 00:00:00+01:00, value=26.1>
+   <Period: begin=2021-02-01 00:00:00+01:00, end=2021-03-01 00:00:00+01:00, value=25.8>
+   ...
+
+And, as described in the period-based series chapter, you can convert it to
+a time series in your preferred resolution. Here we convert it to a daily
+time series:
+
+   >>> from energyquantified.time import Frequency
+   >>> timeseries = forward_curve.to_timeseries(frequency=Frequency.P1D)
+
+   >>> for d, v in timeseries:
+   >>>     print(d, v)
+   2020-12-07 00:00:00+01:00 21.75
+   2020-12-08 00:00:00+01:00 21.75
+   2020-12-09 00:00:00+01:00 21.75
+   2020-12-10 00:00:00+01:00 21.75
+   2020-12-11 00:00:00+01:00 21.75
+   2020-12-12 00:00:00+01:00 21.75
+   2020-12-13 00:00:00+01:00 21.75
+   2020-12-14 00:00:00+01:00 22.25
+   2020-12-15 00:00:00+01:00 22.25
+   ...
+
+
 Convert an OHLC list to a data frame
 ------------------------------------
 

@@ -2,6 +2,35 @@ Changelog
 =========
 
 
+dev
+---
+
+Introducing support for short-run marginal cost (SRMC) calculations from
+OHLC data.
+
+**Improvements**
+
+- Add `OhlcAPI#latest_as_periods()` method for generating a "forward curve"
+  from all closing prices in a market.
+- Add `fill` parameter to `OhlcAPI#load_front_as_timeseries()` and
+  `OhlcAPI#load_front_as_timeseries()`
+- Add `SRMC` and `SRMCOptions` data classes
+- Implement the SRMC API: `load_front()`, `load_delivery()`,
+  `load_front_as_timeseries()`,`load_delivery_as_timeseries()`,
+  `latest()`, and `latest_as_periods()`.
+- Add section in the OHLC documentation on how to load "forward curves".
+- Add new chapter on SRMC in the documentation
+
+**Bugfixes**
+
+- Fix a crash in the `Contract` JSON parser that occured only for SRMC
+  operations.
+
+**Dependencies**
+
+*TODO*
+
+
 0.4.2
 -----
 

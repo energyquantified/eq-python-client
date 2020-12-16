@@ -9,7 +9,7 @@ This page lists note-worthy classes and data models.
 The top-level package with one class:
 
  * :py:class:`EnergyQuantified <energyquantified.EnergyQuantified>`: The main
-   client class.
+   client class. Use this class to access API operations.
 
 ``energyquantified.data``
 -------------------------
@@ -42,6 +42,14 @@ implemented:
 
  * :py:class:`OHLCList <energyquantified.data.OHLCList>`: A list of OHLC data
    objects.
+
+ * :py:class:`SRMC <energyquantified.data.SRMC>`: The server response from
+   an short-run marginal cost (SRMC) calculation. It has multiple attributes,
+   most are defined and used elsewhere. But it has one that is specific for
+   SRMC:
+
+    * :py:class:`SRMCOptions <energyquantified.data.SRMCOptions>`: A data
+      class holding all factors used in an SRMC calculation.
 
 ``energyquantified.metadata``
 -----------------------------
