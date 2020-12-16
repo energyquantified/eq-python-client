@@ -28,7 +28,7 @@ OHLC data.
 
 **Dependencies**
 
-*TODO*
+- Upgrade ``requests`` to v2.25.0.
 
 
 0.4.2
