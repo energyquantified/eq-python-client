@@ -375,3 +375,20 @@ class BaseAPI:
                 reason=f"Not a valid ContractPeriod: '{var}'",
                 parameter=name
             )
+
+    @staticmethod
+    def _add_fill(params, name, var, required=False):
+        if var is None and not required:
+            return
+        if isinstance(var, str):
+            var = var.lower()
+            if var in ('no-fill', 'fill-holes', 'forward-fill'):
+                params[name] = var
+                return
+        raise ValidationError(
+            reason=(
+                f"Not a valid fill '{var}'. Allowed values "
+                f"are: 'no-fill', 'fill-holes', 'forward-fill'"
+            ),
+            parameter=name
+        )

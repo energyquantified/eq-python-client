@@ -73,9 +73,7 @@ class SrmcAPI(BaseAPI):
         :param period: Filter on contract period (day, week, month etc.),\
             defaults to None
         :type period: ContractPeriod, str, required
-        :param front: Filter on front contract, requires parameter ``period``\
-            to be set; cannot be used together with ``delivery``,\
-            defaults to None
+        :param front: The front contract (1=front, 2=second front, etc.)
         :type front: int, required
         :param hhv_to_lhv: Conversion factor between higher-heating value and\
             lower-heating value. Gas contracts are traded with the assumption\
@@ -212,6 +210,7 @@ class SrmcAPI(BaseAPI):
             frequency=None,
             period=None,
             front=None,
+            fill=None,
             hhv_to_lhv=None,
             gas_therm_to_mwh=None,
             api2_tonne_to_mwh=None,
@@ -243,10 +242,14 @@ class SrmcAPI(BaseAPI):
         :param period: Filter on contract period (day, week, month etc.),\
             defaults to None
         :type period: ContractPeriod, str, required
-        :param front: Filter on front contract, requires parameter ``period``\
-            to be set; cannot be used together with ``delivery``,\
-            defaults to None
+        :param front: The front contract (1=front, 2=second front, etc.)
         :type front: int, required
+        :param fill: How to handle days without trades. Allowed values are:\
+            ``no-fill`` do nothing, ``fill-holes`` fill in holes with data\
+            from previous trading day, ``forward-fill`` fill in all blanks\
+            with data from the previous trading day (also into the future).\
+            Defaults to ``no-fill``.
+        :type fill: str, optional
         :param hhv_to_lhv: Conversion factor between higher-heating value and\
             lower-heating value. Gas contracts are traded with the assumption\
             of effectiveness in higher-heating value, but the power market\
@@ -280,6 +283,7 @@ class SrmcAPI(BaseAPI):
         self._add_date(params, "end", end, required=True)
         self._add_contract_period(params, "period", period, required=True)
         self._add_int(params, "front", front, min=1, required=True)
+        self._add_fill(params, "fill", fill)
         self._add_number(params, "hhv-to-lhv", hhv_to_lhv)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
@@ -297,6 +301,7 @@ class SrmcAPI(BaseAPI):
             end=None,
             period=None,
             delivery=None,
+            fill=None,
             hhv_to_lhv=None,
             gas_therm_to_mwh=None,
             api2_tonne_to_mwh=None,
@@ -333,6 +338,12 @@ class SrmcAPI(BaseAPI):
         :param delivery: Filter on delivery date, requires parameter ``period``\
             to be set; cannot be used together with ``front``, defaults to None
         :type delivery: date, str, required
+        :param fill: How to handle days without trades. Allowed values are:\
+            ``no-fill`` do nothing, ``fill-holes`` fill in holes with data\
+            from previous trading day, ``forward-fill`` fill in all blanks\
+            with data from the previous trading day (also into the future).\
+            Defaults to ``no-fill``.
+        :type fill: str, optional
         :param hhv_to_lhv: Conversion factor between higher-heating value and\
             lower-heating value. Gas contracts are traded with the assumption\
             of effectiveness in higher-heating value, but the power market\
@@ -366,6 +377,7 @@ class SrmcAPI(BaseAPI):
         self._add_date(params, "end", end, required=True)
         self._add_contract_period(params, "period", period, required=True)
         self._add_date(params, "delivery", delivery, required=True)
+        self._add_fill(params, "fill", fill)
         self._add_number(params, "hhv-to-lhv", hhv_to_lhv)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
