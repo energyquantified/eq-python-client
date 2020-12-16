@@ -13,4 +13,4 @@ rm -rf dist
 python3 setup.py sdist bdist_wheel
 
 # Publish
-python -m twine upload dist/*
+python3 -m twine upload dist/*
