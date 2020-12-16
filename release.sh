@@ -4,10 +4,10 @@
 DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Change to root dir of project
-cd $DIR
+cd "$DIR"
 
 # Remove old build
-rm -rf $DIR/dist
+rm -rf dist
 
 # Package
 python3 setup.py sdist bdist_wheel
