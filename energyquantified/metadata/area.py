@@ -1,3 +1,4 @@
+# pylint: disable=protected-access
 import enum
 
 
@@ -5,6 +6,7 @@ class Allocation(enum.Enum):
     """
     Enumerator of border allocation types between two price areas.
     """
+
     #: Explicit exchange border
     EXPLICIT = ("E", "Explicit")
     #: Implicit exchange border
@@ -19,10 +21,10 @@ class Allocation(enum.Enum):
         self.label = label
 
     def __repr__(self):
-        return self.name
+        return self.tag
 
     def __str__(self):
-        return self.name
+        return self.tag
 
 
 class Area:
@@ -131,7 +133,7 @@ class Area:
         #: smaller areas)
         self.children = set()
         # Convert tag to variable name ("-" becomes "_")
-        self._variable = self.tag.replace('-', '_')
+        self._variable = self.tag.replace("-", "_")
         setattr(Area, self.tag.replace("-", "_"), self)
 
     _ordering_nb = []
@@ -331,7 +333,9 @@ DE = Area(tag="DE", name="Germany", country=True, price_area=True)
 DE_50Hertz = Area(tag="DE-50Hertz", name="Germany – 50Hertz", control_area=True)
 DE_Amprion = Area(tag="DE-Amprion", name="Germany – Amprion", control_area=True)
 DE_TenneT = Area(tag="DE-TenneT", name="Germany – TenneT GER", control_area=True)
-DE_TransnetBW = Area(tag="DE-TransnetBW", name="Germany – TransnetBW", control_area=True)
+DE_TransnetBW = Area(
+    tag="DE-TransnetBW", name="Germany – TransnetBW", control_area=True
+)
 DE._add_children(DE_50Hertz, DE_Amprion, DE_TenneT, DE_TransnetBW)
 
 FR = Area(tag="FR", name="France", country=True, price_area=True)
@@ -377,8 +381,15 @@ CH = Area(tag="CH", name="Switzerland", country=True, price_area=True)
 GB = Area(tag="GB", name="Great Britain", country=True, price_area=True)
 
 # Single Electricity Market (IE + NIE). IE = EirGrid. NIE = SONI.
-SEM = Area(tag="SEM", name="Single Electricity Market – Ireland", country=False, price_area=True)
-NIE = Area(tag="NIE", name="Northern Ireland", country=True, price_area=True, control_area=True)
+SEM = Area(
+    tag="SEM",
+    name="Single Electricity Market – Ireland",
+    country=False,
+    price_area=True,
+)
+NIE = Area(
+    tag="NIE", name="Northern Ireland", country=True, price_area=True, control_area=True
+)
 IE = Area(tag="IE", name="Ireland", country=True, price_area=True, control_area=True)
 SEM._add_children(NIE, IE)
 
@@ -401,13 +412,13 @@ PT = Area(tag="PT", name="Portugal", country=True, price_area=True)
 
 IT = Area(tag="IT", name="Italy", country=True, price_area=True)
 IT_NORD = Area(tag="IT-NORD", name="Italy – Northern", price_area=True)
-IT_SUD = Area(tag="IT-SUD", name="Italy – Southern", price_area=True)
 IT_CNOR = Area(tag="IT-CNOR", name="Italy – Central-Northern", price_area=True)
 IT_CSUD = Area(tag="IT-CSUD", name="Italy – Central-Southern", price_area=True)
+IT_SUD = Area(tag="IT-SUD", name="Italy – Southern", price_area=True)
+IT_CALA = Area(tag="IT-CALA", name="Italy – Calabria", price_area=True)
 IT_SARD = Area(tag="IT-SARD", name="Italy – Sardegna", price_area=True)
 IT_SICI = Area(tag="IT-SICI", name="Italy – Sicily", price_area=True)
-IT_CALA = Area(tag="IT-CALA", name="Italy – Calabria", price_area=True)
-IT._add_children(IT_NORD, IT_SUD, IT_CNOR, IT_CSUD, IT_SARD, IT_SICI)
+IT._add_children(IT_NORD, IT_CNOR, IT_CSUD, IT_SUD, IT_CALA, IT_SARD, IT_SICI)
 
 
 SI = Area(tag="SI", name="Slovenia", country=True, price_area=True)
@@ -514,9 +525,11 @@ PT._add_borders((ES, "I"))
 IT_NORD._add_borders((AT, "EI"), (CH, "E"), (FR, "EI"), (IT_CNOR, "I"), (SI, "EI"))
 IT_CNOR._add_borders((IT_CSUD, "I"), (IT_NORD, "I"), (IT_SARD, "I"))
 IT_CSUD._add_borders((IT_CNOR, "I"), (IT_SARD, "I"), (IT_SUD, "I"), (ME, "E"))
-IT_SUD._add_borders((GR, "E"), (IT_CSUD, "I"), (IT_SICI, "I"))
-IT_SICI._add_borders((IT_SUD, "I"), (MT, "I"))
+IT_SUD._add_borders((GR, "E"), (IT_CSUD, "I"), (IT_CALA, "I"))
+IT_CALA._add_borders((IT_SUD, "I"), (IT_SICI, "I"))
+IT_SICI._add_borders((IT_CALA, "I"), (MT, "I"))
 IT_SARD._add_borders((FR_COR, "I"), (IT_CNOR, "I"), (IT_CSUD, "I"))
+
 
 SI._add_borders((AT, "EI"), (HR, "EI"), (IT_NORD, "EI"))
 RO._add_borders((BG, "E"), (HU, "EI"), (RS, "E"), (UA, "E"))
