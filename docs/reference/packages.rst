@@ -6,10 +6,17 @@ This page lists note-worthy classes and data models.
 ``energyquantified``
 --------------------
 
-The top-level package with one class:
+The top-level package with the main class:
 
- * :py:class:`EnergyQuantified <energyquantified.EnergyQuantified>`: The main
-   client class. Use this class to access API operations.
+ * :py:class:`EnergyQuantified <energyquantified.EnergyQuantified>`: The client
+   class. Use this class to initialize the client with an API key and
+   to access API operations.
+
+There is also additional class available here:
+
+ * :py:class:`RealtoConnection <energyquantified.RealtoConnection>`: An
+   alternative client class for Realto users. Use this class to connect
+   to the API via a Realto subscription.
 
 ``energyquantified.data``
 -------------------------

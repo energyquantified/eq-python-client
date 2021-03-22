@@ -76,6 +76,7 @@ Getting started
 
    intro/install
    intro/quickstart
+   intro/quickstart-realto
 
 
 User guide

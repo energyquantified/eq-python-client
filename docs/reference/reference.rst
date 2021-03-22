@@ -9,10 +9,20 @@ This part of the documentation covers the public classes and methods
 for Energy Quantified's Python library. All interaction with the API
 happens through the :py:class:`energyquantified.EnergyQuantified` class:
 
+
 The main client
 ---------------
 
+The default client
+^^^^^^^^^^^^^^^^^^
+
 .. autoclass:: energyquantified.EnergyQuantified
+   :inherited-members:
+
+The Realto client
+^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: energyquantified.RealtoConnection
    :inherited-members:
 
 
