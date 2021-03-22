@@ -25,6 +25,26 @@ from ..exceptions import (
 )
 
 
+def _urlencode(text, safe=''):
+    """
+    Replace special characters in string using the %xx escape. Letters, digits,
+    and the characters '_.-~' are never quoted. This function is intended for
+    quoting the path section of a URL.
+
+    The optional safe parameter specifies additional ASCII characters that
+    should *not* be quoted — its default value is ''. If you want to leave i.e.
+    '/' unquoted, you must set safe = '/'.
+
+    :param text: A string to be quoted
+    :type text: str, bytes
+    :param safe: A string of safe characters, defaults to ''
+    :type safe: str, optional
+    :return: A quoted string
+    :rtype: str, bytes
+    """
+    return urllib.parse.quote(text, safe=safe)
+
+
 class BaseAPI:
 
     def __init__(self, client):
@@ -93,7 +113,7 @@ class BaseAPI:
                 reason="Provide either a string or a Curve instance",
                 parameter="curve"
             )
-        return urllib.parse.quote(curve_name)
+        return _urlencode(curve_name)
 
     @staticmethod
     def _urlencode_datetime(datetime_obj, name):
@@ -114,7 +134,7 @@ class BaseAPI:
             date_string = datetime_obj.isoformat()
         else:
             raise ValidationError(reason="Provide a datetime", parameter=name)
-        return urllib.parse.quote(date_string)
+        return _urlencode(date_string)
 
     @staticmethod
     def _urlencode_string(text, name, transform_func=None):
@@ -125,7 +145,7 @@ class BaseAPI:
             )
         if transform_func:
             text = transform_func(text)
-        return urllib.parse.quote(text)
+        return _urlencode(text)
 
     @staticmethod
     def _urlencode_ohlc_field(ohlc_field, name):
@@ -140,7 +160,7 @@ class BaseAPI:
             field_string = ohlc_field.tag
         else:
             raise ValidationError(reason="Provide an OHLCField", parameter=name)
-        return urllib.parse.quote(field_string)
+        return _urlencode(field_string)
 
     @staticmethod
     def _add_datetime(params, name, var, required=False):
