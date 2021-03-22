@@ -3,6 +3,7 @@ from .http import Session
 from .api import (
     InstancesAPI,
     MetadataAPI,
+    RealtoMetadataAPI,
     TimeseriesAPI,
     PeriodsAPI,
     PeriodInstancesAPI,
@@ -222,7 +223,7 @@ class RealtoConnection:
         # --- Public members ---
         #: See :py:class:`energyquantified.api.MetadataAPI`. For metadata
         #: queries (such as curve search and place lookups).
-        self.metadata = MetadataAPI(self)
+        self.metadata = RealtoMetadataAPI(self)
         #: See :py:class:`energyquantified.api.TimeseriesAPI`. For loading
         #: time series data.
         self.timeseries = TimeseriesAPI(self)
