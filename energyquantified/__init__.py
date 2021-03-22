@@ -22,9 +22,10 @@ from .__version__ import (
 
 
 # The client implementation
-from .base import EnergyQuantified
+from .base import EnergyQuantified, RealtoConnection
 
 
 __all__ = [
     "EnergyQuantified",
+    "RealtoConnection",
 ]
