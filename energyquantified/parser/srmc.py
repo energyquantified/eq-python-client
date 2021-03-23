@@ -64,7 +64,6 @@ def parse_srmc_options(opts):
     fuel_type = opts.get('fuel_type')
     api2_tonne_to_mwh = opts.get('api2_tonne_to_mwh')
     gas_therm_to_mwh = opts.get('gas_therm_to_mwh')
-    hhv_to_lhv = opts.get('hhv_to_lhv')
     efficiency = opts.get('efficiency')
     carbon_emissions = opts.get('carbon_emissions')
     carbon_tax_area = opts.get('carbon_tax_area')
@@ -77,7 +76,6 @@ def parse_srmc_options(opts):
         fuel_type=fuel_type,
         api2_tonne_to_mwh=api2_tonne_to_mwh,
         gas_therm_to_mwh=gas_therm_to_mwh,
-        hhv_to_lhv=hhv_to_lhv,
         efficiency=efficiency,
         carbon_emissions=carbon_emissions,
         carbon_tax_area=carbon_tax_area
