@@ -4,51 +4,14 @@ from .base import BaseAPI
 from ..parser.metadata import parse_curve, parse_place
 
 
-class MetadataAPI(BaseAPI):
+class _MetadataAPI(BaseAPI):
     """
-    Operations for curve search and place lookups. It also includes
-    operations for listing attributes on
-    :py:class:`energyquantified.metadata.Curve` objects.
+    Common metadata API operations.
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._cache = {}
-
-    def categories(self):
-        """
-        List all available categories.
-
-        Results are cached on repeated calls.
-
-        :return: A set of available categories (strings)
-        :rtype: set
-        """
-        CACHE_KEY = "categories"
-        if self._cache.get(CACHE_KEY):
-            return self._cache[CACHE_KEY]
-        response = self._get("/metadata/categories/")
-        self._cache[CACHE_KEY] = set(response.json())
-        return self._cache[CACHE_KEY]
-
-    def exact_categories(self):
-        """
-        List available exact combinations of categories (meaning
-        combinations that exists in curve names). You can use this response
-        for filtering curves on the ``exact_category`` parameter in
-        :py:meth:`MetadataAPI.curves`.
-
-        Results are cached on repeated calls.
-
-        :return: A set of category combinations (strings)
-        :rtype: set
-        """
-        CACHE_KEY = "exact-categories"
-        if self._cache.get(CACHE_KEY):
-            return self._cache[CACHE_KEY]
-        response = self._get("/metadata/exact-categories/")
-        self._cache[CACHE_KEY] = set(response.json())
-        return self._cache[CACHE_KEY]
 
     def curves(
             self,
@@ -106,7 +69,7 @@ class MetadataAPI(BaseAPI):
                 self._add_int(params, "page", page)
             # Check cache to see if we already have done this
             cache_key = dict_to_str(params, "curves")
-            if self._cache.get(cache_key):
+            if self._cache.get(cache_key) is not None:
                 return self._cache[cache_key]
             # Do the HTTP request, cache the result and return
             response = self._get("/metadata/curves/", params=params)
@@ -117,6 +80,52 @@ class MetadataAPI(BaseAPI):
             return self._cache[cache_key]
         # Invoke load
         return _load()
+
+
+class MetadataAPI(_MetadataAPI):
+    """
+    Operations for curve search and place lookups. It also includes
+    operations for listing attributes on
+    :py:class:`energyquantified.metadata.Curve` objects.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def categories(self):
+        """
+        List all available categories.
+
+        Results are cached on repeated calls.
+
+        :return: A set of available categories (strings)
+        :rtype: set
+        """
+        CACHE_KEY = "categories"
+        if self._cache.get(CACHE_KEY):
+            return self._cache[CACHE_KEY]
+        response = self._get("/metadata/categories/")
+        self._cache[CACHE_KEY] = set(response.json())
+        return self._cache[CACHE_KEY]
+
+    def exact_categories(self):
+        """
+        List available exact combinations of categories (meaning
+        combinations that exists in curve names). You can use this response
+        for filtering curves on the ``exact_category`` parameter in
+        :py:meth:`MetadataAPI.curves`.
+
+        Results are cached on repeated calls.
+
+        :return: A set of category combinations (strings)
+        :rtype: set
+        """
+        CACHE_KEY = "exact-categories"
+        if self._cache.get(CACHE_KEY):
+            return self._cache[CACHE_KEY]
+        response = self._get("/metadata/exact-categories/")
+        self._cache[CACHE_KEY] = set(response.json())
+        return self._cache[CACHE_KEY]
 
     def places(
             self,
@@ -175,3 +184,12 @@ class MetadataAPI(BaseAPI):
             return self._cache[cache_key]
         # Invoke load
         return _load()
+
+
+class RealtoMetadataAPI(_MetadataAPI):
+    """
+    The metadata API for Realto users. Has only the curves() method enabled.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

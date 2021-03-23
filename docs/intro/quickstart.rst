@@ -12,12 +12,17 @@ Quantified's Python library.
 First, make sure that ``energyquantified`` is :doc:`installed and up-to-date <install>`
 on your workstation.
 
-**Getting started**
+**Authenticate**
 
 Import the library, create a client and supply the API key:
 
    >>> from energyquantified import EnergyQuantified
    >>> eq = EnergyQuantified(api_key='aaaa-bbbb-cccc-dddd')
+
+You can check if your API key is valid by invoking ``is_api_key_valid()``:
+
+   >>> eq.is_api_key_valid()
+   True
 
 **Search for curves (data series)**
 
