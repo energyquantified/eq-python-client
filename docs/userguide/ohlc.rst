@@ -270,6 +270,8 @@ and :py:meth:`eq.ohlc.load_front_as_timeseries() <energyquantified.api.OhlcAPI.l
 There are two additional methods in the OHLC API for loading a specific OHLC
 field into a time series object.
 
+.. _continuous-front:
+
 For a continuous front contract
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -308,6 +310,8 @@ object, describing the query used to load this data:
     <Value: date=2020-01-05 00:00:00+01:00, value=None>,
     <Value: date=2020-01-06 00:00:00+01:00, value=32.1>,
     ...
+
+.. _specific-contract:
 
 For a specific contract
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -349,3 +353,81 @@ object, describing the query used to load this data:
 
 (Apparently, there wasn't any trades on the June contract for 6 and 7 January,
 so there is no close price.)
+
+Fill holes for dates without trading activity
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the :ref:`continuous front contract<continuous-front>` example above, there
+was no data on 4 Jan and 5 Jan because these dates falls on a weekend. In some
+cases, you may want to have a time series without holes in the data. We have
+added a parameter to solve this issue.
+
+When you are loading OHLC data using
+:py:meth:`eq.ohlc.load_delivery_as_timeseries() <energyquantified.api.OhlcAPI.load_delivery_as_timeseries>`
+or
+:py:meth:`eq.ohlc.load_front_as_timeseries() <energyquantified.api.OhlcAPI.load_front_as_timeseries>`,
+, you can set a ``fill`` parameter. It allows you to fill these holes in,
+for instance, weekends and other days without trading activity.
+
+**Fill holes:**
+
+Let's load the continuous front data from the example earlier, but where we
+set the ``fill`` parameter to ``fill-holes``:
+
+>>> from energyquantified.metadata import OHLCField
+>>> timeseries = eq.ohlc.load_front_as_timeseries(
+>>>    'NP Futures Power Base EUR/MWh Nasdaq OHLC',
+>>>    begin=date(2020, 1, 1),
+>>>    end=date(2020, 1, 10),
+>>>    period=ContractPeriod.MONTH,
+>>>    front=1,  # Front month
+>>>    field=OHLCField.CLOSE,
+>>>    fill='fill-holes'  # Fills the holes!
+>>> )
+
+The response will have the latest available closing price set for 4 and 5 Jan:
+
+>>> timeseries.data
+[<Value: date=2020-01-02 00:00:00+01:00, value=34>,
+ <Value: date=2020-01-03 00:00:00+01:00, value=34.4>,
+ <Value: date=2020-01-04 00:00:00+01:00, value=34.4>,  # Filled value!
+ <Value: date=2020-01-05 00:00:00+01:00, value=34.4>,  # Filled value!
+ <Value: date=2020-01-06 00:00:00+01:00, value=32.1>,
+ ...
+
+**Forward fill:**
+
+Another, more aggressive ``fill``-option doesn’t only fill the holes but
+always fills the latest closing price forward.
+
+That parameter value is ``forward-fill``.
+
+Using the example from :ref:`specific contract<specific-contract>` above, where
+we don't have any values on 4-7 Jan, we can use ``fill=forward-fill`` to set
+these values to the latest available closing price we know:
+
+>>> from energyquantified.metadata import OHLCField
+>>> timeseries = eq.ohlc.load_delivery_as_timeseries(
+>>>    'NP Futures Power Base EUR/MWh Nasdaq OHLC',
+>>>    begin=date(2020, 1, 1),
+>>>    end=date(2020, 1, 10),
+>>>    period=ContractPeriod.MONTH,
+>>>    delivery=date(2020, 6, 1),
+>>>    field=OHLCField.CLOSE,
+>>>    fill='forward-fill'  # Always fill the closing price forward
+>>> )
+
+Even though there were no trades in the weekend 4-5 Jan, as well as on the
+following workdays, Monday 6 Jan and Tuesday 7 Jan, we will now have the
+closing price from Friday 3 Jan set on all these days:
+
+>>> timeseries.data
+[<Value: date=2020-01-03 00:00:00+01:00, value=24.7>,
+ <Value: date=2020-01-04 00:00:00+01:00, value=24.7>,
+ <Value: date=2020-01-05 00:00:00+01:00, value=24.7>,
+ <Value: date=2020-01-06 00:00:00+01:00, value=24.7>,
+ <Value: date=2020-01-07 00:00:00+01:00, value=24.7>,
+ ...
+
+Keep in mind that this option will forward-fill also dates into the future.
+Use it with care.
