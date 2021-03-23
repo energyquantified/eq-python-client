@@ -62,8 +62,11 @@ If you have a scenario-based time series (such as a time series loaded for
 an ensemble forecast), you will get one column per ensemble.
 
 Notice that there are **three column headers** here. The first is the
-**curve**, the second is the **instance**, and the third is the **scenarios**
-– more on this in a section below.
+**curve**, the second is the **instance**, and the third is the **scenarios**.
+You can read more on this in the :ref:`column headers section<column-headers>`
+below. It is also possible to merge these three header levels onto one, see
+the section on :ref:`single-level column headers<single-column-headers>` for
+details.
 
    >>> forecast.instance
    <Instance: issued="2020-10-26 00:00:00+00:00", tag="ec-ens", scenarios=51>
@@ -264,6 +267,8 @@ at different times:
    ...
 
 
+.. _column-headers:
+
 Column headers for time series data
 -----------------------------------
 
@@ -295,6 +300,8 @@ forecasts, for example, have 51 scenarios, named from ``e00``, ``e01``, ...,
 headers are named after the weather year they are based on: ``y1980``,
 ``y1981``, ..., ``y2018``, ``y2019``.
 
+
+.. _single-column-headers:
 
 Force single-level column headers
 ---------------------------------

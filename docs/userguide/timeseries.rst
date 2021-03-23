@@ -166,8 +166,12 @@ a **value**. The **scenarios** attribute is a tuple of the scenario values:
 Convert to pandas
 -----------------
 
+(This section contains a short description on how to convert a time series to a
+``pandas.DataFrame``. See the chapter on :doc:`Pandas integration <pandas>`
+for a detailed explanation.)
+
 Convert :py:class:`~energyquantified.data.Timeseries` objects to pandas by
-calling on :py:meth:`~energyquantified.data.Timeseries.to_dataframe`.
+calling on :py:meth:`~energyquantified.data.Timeseries.to_dataframe`:
 
    >>> from datetime import date
    >>> timeseries = eq.timeseries.load(
