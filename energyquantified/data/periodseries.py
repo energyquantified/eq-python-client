@@ -298,7 +298,7 @@ class Periodseries(Series):
         timeseries.set_name(self._name)
         return timeseries
 
-    def to_df(self, frequency=None, name=None):
+    def to_df(self, frequency=None, name=None, single_level_header=False):
         """
         Alias for :meth:`Periodseries.to_dataframe`.
 
@@ -316,13 +316,21 @@ class Periodseries(Series):
         :param name: Set a name for the column in the ``pandas.DataFrame``,\
             defaults to ``value``
         :type name: str, optional
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(frequency=frequency, name=name)
+        return self.to_dataframe(
+            frequency=frequency,
+            name=name,
+            single_level_header=single_level_header
+        )
 
-    def to_dataframe(self, frequency=None, name=None):
+    def to_dataframe(self, frequency=None, name=None,
+                     single_level_header=False):
         """
         Convert this period-based to a ``pandas.DataFrame`` as a time series
         in the given frequency.
@@ -338,6 +346,9 @@ class Periodseries(Series):
         :param name: Set a name for the column in the ``pandas.DataFrame``,\
             defaults to ``value``
         :type name: str, optional
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
@@ -346,7 +357,10 @@ class Periodseries(Series):
         assert isinstance(frequency, Frequency), "Must be a frequency"
         # Conversion
         timeseries = self.to_timeseries(frequency=frequency)
-        df = timeseries.to_dataframe(name=name)
+        df = timeseries.to_dataframe(
+            name=name,
+            single_level_header=single_level_header
+        )
         return df
 
     def print(self, file=sys.stdout):
@@ -506,7 +520,7 @@ class PeriodseriesList(list):
             for periodseries in self
         )
 
-    def to_df(self, frequency=None):
+    def to_df(self, frequency=None, single_level_header=False):
         """
         Alias for :meth:`Timeseries.to_dataframe`.
 
@@ -516,13 +530,19 @@ class PeriodseriesList(list):
 
         :param frequency: The frequency of the resulting time series'
         :type frequency: Frequency, required
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(frequency=frequency)
+        return self.to_dataframe(
+            frequency=frequency,
+            single_level_header=single_level_header
+        )
 
-    def to_dataframe(self, frequency=None):
+    def to_dataframe(self, frequency=None, single_level_header=False):
         """
         Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
         series are placed in its own column and are lined up with the date-time
@@ -530,6 +550,9 @@ class PeriodseriesList(list):
 
         :param frequency: The frequency of the resulting time series'
         :type frequency: Frequency, required
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
@@ -538,7 +561,9 @@ class PeriodseriesList(list):
         assert isinstance(frequency, Frequency), "Must be a frequency"
         # Convert to time series then to data frame
         timeseries_list = self.to_timeseries(frequency=frequency)
-        return timeseries_list.to_dataframe()
+        return timeseries_list.to_dataframe(
+            single_level_header=single_level_header
+        )
 
     def append(self, periodseries):
         _validate_periodseries(periodseries)

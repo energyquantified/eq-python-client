@@ -405,30 +405,43 @@ class Timeseries(Series):
         else:
             raise ValueError("Timeseries has no values")
 
-    def to_df(self, name=None):
+    def to_df(self, name=None, single_level_header=False):
         """
         Alias for :meth:`Timeseries.to_dataframe`. Convert this timeseries
         to a ``pandas.DataFrame``.
 
         :param name: Set a name for the value column, defaults to ``value``
         :type name: str, optional
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(name=name)
+        return self.to_dataframe(
+            name=name,
+            single_level_header=single_level_header
+        )
 
-    def to_dataframe(self, name=None):
+    def to_dataframe(self, name=None, single_level_header=False):
         """
         Convert this timeseries to a ``pandas.DataFrame``.
 
         :param name: Set a name for the value column, defaults to ``value``
         :type name: str, optional
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return timeseries_to_dataframe(self, name=name)
+        return timeseries_to_dataframe(
+            self,
+            name=name,
+            single_level_header=single_level_header
+        )
 
     def validate(self):
         """
@@ -501,7 +514,7 @@ class TimeseriesList(list):
     def frequency(self):
         return self._frequency
 
-    def to_df(self):
+    def to_df(self, single_level_header=False):
         """
         Alias for :meth:`Timeseries.to_dataframe`.
 
@@ -509,23 +522,32 @@ class TimeseriesList(list):
         series are placed in its own column and are lined up with the date-time
         as index.
 
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe()
+        return self.to_dataframe(single_level_header=single_level_header)
 
-    def to_dataframe(self):
+    def to_dataframe(self, single_level_header=False):
         """
         Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
         series are placed in its own column and are lined up with the date-time
         as index.
 
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return timeseries_list_to_dataframe(self)
+        return timeseries_list_to_dataframe(
+            self,
+            single_level_header=single_level_header
+        )
 
     def append(self, timeseries):
         # Asserts

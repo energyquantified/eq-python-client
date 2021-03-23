@@ -76,14 +76,18 @@ def assert_pandas_installed():
             )
 
 
-def timeseries_to_dataframe(timeseries, name=None):
+def timeseries_to_dataframe(timeseries, name=None, single_level_header=False):
     """
     Convert a time series to a ``pandas.DataFrame``.
 
     :param timeseries: The time series
     :type timeseries: energyquantified.data.Timeseries, required
-    :param name: Set a name for the value column, defaults to ``value``
+    :param name: Set a custom name in the column header, Timeseries.curve.name \
+        is used when this parameter is not set, defaults to None
     :type name: str, optional
+    :param single_level_header: Set to True to use single-level header \
+        in the DataFrame, defaults to False
+    :type single_level_header: boolean, optional
     :return: A DataFrame
     :rtype: pandas.DataFrame
     :raises ImportError: When pandas is not installed on the system
@@ -99,13 +103,40 @@ def timeseries_to_dataframe(timeseries, name=None):
     ValueType = _get_value_type_class()
     if timeseries.value_type() == ValueType.VALUE:
         # Convert a time series of (date, value)
-        return _timeseries_to_dataframe_value(timeseries, name)
+        if single_level_header:
+            return _timeseries_to_dataframe_value_single_header(
+                timeseries,
+                name
+            )
+        else:
+            return _timeseries_to_dataframe_value(
+                timeseries,
+                name
+            )
     if timeseries.value_type() == ValueType.SCENARIOS:
         # Convert a time series of (date, scenarios[])
-        return _timeseries_to_dataframe_scenarios(timeseries, name)
+        if single_level_header:
+            return _timeseries_to_dataframe_scenarios_single_header(
+                timeseries,
+                name
+            )
+        else:
+            return _timeseries_to_dataframe_scenarios(
+                timeseries,
+                name
+            )
     if timeseries.value_type() == ValueType.MEAN_AND_SCENARIOS:
         # Convert a time series of (date, value, scenarios[])
-        return _timeseries_to_dataframe_mean_and_scenarios(timeseries, name)
+        if single_level_header:
+            return _timeseries_to_dataframe_mean_and_scenarios_single_header(
+                timeseries,
+                name
+            )
+        else:
+            return _timeseries_to_dataframe_mean_and_scenarios(
+                timeseries,
+                name
+            )
     # Unknown value type for time series
     raise ValueError(
         "Unknown ValueType: timeseries.value_type = "
@@ -117,6 +148,8 @@ def _timeseries_to_dataframe_value(timeseries, name):
     """
     Private utility function for converting a time series of single values
     to a pandas dataframe.
+
+    The DataFrame will have a three-level column header.
 
     :param timeseries: A time series object
     :type timeseries: Timeseries
@@ -141,10 +174,41 @@ def _timeseries_to_dataframe_value(timeseries, name):
     return df
 
 
+def _timeseries_to_dataframe_value_single_header(timeseries, name):
+    """
+    Private utility function for converting a time series of single values
+    to a pandas dataframe.
+
+    The DateFrame will have a single-level column header.
+
+    :param timeseries: A time series object
+    :type timeseries: Timeseries
+    :param name: The time series name
+    :type name: str
+    :return: A pandas DataFrame
+    :rtype: pandas.DataFrame
+    """
+    # Column header
+    instance = timeseries.instance_or_contract_dataframe_column_header()
+    columns = [
+        [f"{name} {instance}".strip()]
+    ]
+    # Convert a time series of (date, value)
+    df = pd.DataFrame.from_records(
+        ((v.value,) for v in timeseries),
+        columns=columns,
+        index=[v.date for v in timeseries],
+    )
+    df.index.name = 'date'
+    return df
+
+
 def _timeseries_to_dataframe_scenarios(timeseries, name):
     """
     Private utility function for converting a time series of scenario values
     to a pandas dataframe.
+
+    The DataFrame will have a three-level column header.
 
     :param timeseries: A time series object
     :type timeseries: Timeseries
@@ -170,10 +234,45 @@ def _timeseries_to_dataframe_scenarios(timeseries, name):
     return df
 
 
+def _timeseries_to_dataframe_scenarios_single_header(timeseries, name):
+    """
+    Private utility function for converting a time series of scenario values
+    to a pandas dataframe.
+
+    The DateFrame will have a single-level column header.
+
+    :param timeseries: A time series object
+    :type timeseries: Timeseries
+    :param name: The time series name
+    :type name: str
+    :return: A pandas DataFrame
+    :rtype: pandas.DataFrame
+    """
+    width = timeseries.total_values_per_item()
+    # Column header
+    instance = timeseries.instance_or_contract_dataframe_column_header()
+    columns = [
+        [
+            f"{name} {instance} {scenario}".strip()
+            for scenario in timeseries.scenario_names
+        ],
+    ]
+    # Convert a time series of (date, scenarios[])
+    df = pd.DataFrame.from_records(
+        (v.scenarios for v in timeseries.data),
+        columns=columns,
+        index=[v.date for v in timeseries],
+    )
+    df.index.name = 'date'
+    return df
+
+
 def _timeseries_to_dataframe_mean_and_scenarios(timeseries, name):
     """
     Private utility function for converting a time series of a mean value
     and scenarios to a pandas dataframe.
+
+    The DataFrame will have a three-level column header.
 
     :param timeseries: A time series object
     :type timeseries: Timeseries
@@ -199,12 +298,48 @@ def _timeseries_to_dataframe_mean_and_scenarios(timeseries, name):
     return df
 
 
-def timeseries_list_to_dataframe(timeseries_list):
+def _timeseries_to_dataframe_mean_and_scenarios_single_header(timeseries, name):
+    """
+    Private utility function for converting a time series of a mean value
+    and scenarios to a pandas dataframe.
+
+    The DateFrame will have a single-level column header.
+
+    :param timeseries: A time series object
+    :type timeseries: Timeseries
+    :param name: The time series name
+    :type name: str
+    :return: A pandas DataFrame
+    :rtype: pandas.DataFrame
+    """
+    width = timeseries.total_values_per_item()
+    # Column headers
+    instance = timeseries.instance_or_contract_dataframe_column_header()
+    scenario_names = [''] + timeseries.scenario_names
+    columns = [
+        [f"{name} {instance} {scenario}".strip() for scenario in scenario_names],
+    ]
+    # Convert a time series of (date, scenarios[])
+    df = pd.DataFrame.from_records(
+        ((v.value, *v.scenarios) for v in timeseries.data),
+        columns=columns,
+        index=[v.date for v in timeseries],
+    )
+    df.index.name = 'date'
+    return df
+
+
+def timeseries_list_to_dataframe(timeseries_list, single_level_header=False):
     """
     Convert a list of time series to a ``pandas.DataFrame``.
 
     :param timeseries_list: [description]
     :type timeseries_list: [type]
+    :param single_level_header: Set to True to use single-level header \
+        in the DataFrame, defaults to False
+    :type single_level_header: boolean, optional
+    :return: A pandas DataFrame
+    :rtype: pandas.DataFrame
     """
     # Checks
     assert_pandas_installed()
@@ -215,7 +350,13 @@ def timeseries_list_to_dataframe(timeseries_list):
             f"energyquantified.data.Timeseries, but was: {type(timeseries)}"
         )
     # Merge into one data frame
-    return pd.concat([ts.to_dataframe() for ts in timeseries_list], axis=1)
+    return pd.concat(
+        [
+            ts.to_dataframe(single_level_header=single_level_header)
+            for ts in timeseries_list
+        ],
+        axis=1
+    )
 
 
 def ohlc_list_to_dataframe(ohlc_list):
