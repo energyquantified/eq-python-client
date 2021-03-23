@@ -8,6 +8,9 @@ for a few selected countries.
 This page gives a short introduction on how to get started with Energy
 Quantified's Python library for **Realto users**.
 
+If you have an Energy Quantified user account, you should read the
+:doc:`quickstart guide <quickstart>` instead.
+
 -----
 
 2-minute guide
