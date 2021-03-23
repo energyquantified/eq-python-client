@@ -355,7 +355,6 @@ following factors used in the SRMC calculation:
 
  * ``efficiency``: The efficiency of the fuel
  * ``carbon_emissions``: The carbon emission factor
- * ``hhv_to_lhv``: Conversion from higher-heating value to lower-heating value
  * ``gas_therm_to_mwh``: Conversion factor from pence/therm to GBP/MWh
  * ``api2_tonne_to_mwh``: Conversion from coal API2 tonnes to megawatt-hours
  * ``carbon_tax_area``: Set an :py:class:`Area <energyquantified.metadata.Area>`

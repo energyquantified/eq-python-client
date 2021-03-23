@@ -42,7 +42,6 @@ class SrmcAPI(BaseAPI):
             end=None,
             period=None,
             front=None,
-            hhv_to_lhv=None,
             gas_therm_to_mwh=None,
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
@@ -75,11 +74,6 @@ class SrmcAPI(BaseAPI):
         :type period: ContractPeriod, str, required
         :param front: The front contract (1=front, 2=second front, etc.)
         :type front: int, required
-        :param hhv_to_lhv: Conversion factor between higher-heating value and\
-            lower-heating value. Gas contracts are traded with the assumption\
-            of effectiveness in higher-heating value, but the power market\
-            uses lower-heating value. Defaults to 0.9.
-        :type hhv_to_lhv: float, optional
         :param gas_therm_to_mwh: Conversion from pence/therm to GBP/MWh\
             (still in higher-heating value). Defaults to 0.029307.
         :type gas_therm_to_mwh: float, optional
@@ -108,7 +102,6 @@ class SrmcAPI(BaseAPI):
         self._add_date(params, "end", end, required=True)
         self._add_contract_period(params, "period", period, required=True)
         self._add_int(params, "front", front, min=1, required=True)
-        self._add_number(params, "hhv-to-lhv", hhv_to_lhv)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
         self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
@@ -125,7 +118,6 @@ class SrmcAPI(BaseAPI):
             end=None,
             period=None,
             delivery=None,
-            hhv_to_lhv=None,
             gas_therm_to_mwh=None,
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
@@ -159,11 +151,6 @@ class SrmcAPI(BaseAPI):
         :param delivery: Filter on delivery date, requires parameter ``period``\
             to be set; cannot be used together with ``front``, defaults to None
         :type delivery: date, str, required
-        :param hhv_to_lhv: Conversion factor between higher-heating value and\
-            lower-heating value. Gas contracts are traded with the assumption\
-            of effectiveness in higher-heating value, but the power market\
-            uses lower-heating value. Defaults to 0.9.
-        :type hhv_to_lhv: float, optional
         :param gas_therm_to_mwh: Conversion from pence/therm to GBP/MWh\
             (still in higher-heating value). Defaults to 0.029307.
         :type gas_therm_to_mwh: float, optional
@@ -192,7 +179,6 @@ class SrmcAPI(BaseAPI):
         self._add_date(params, "end", end, required=True)
         self._add_contract_period(params, "period", period, required=True)
         self._add_date(params, "delivery", delivery, required=True)
-        self._add_number(params, "hhv-to-lhv", hhv_to_lhv)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
         self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
@@ -211,7 +197,6 @@ class SrmcAPI(BaseAPI):
             period=None,
             front=None,
             fill=None,
-            hhv_to_lhv=None,
             gas_therm_to_mwh=None,
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
@@ -250,11 +235,6 @@ class SrmcAPI(BaseAPI):
             with data from the previous trading day (also into the future).\
             Defaults to ``no-fill``.
         :type fill: str, optional
-        :param hhv_to_lhv: Conversion factor between higher-heating value and\
-            lower-heating value. Gas contracts are traded with the assumption\
-            of effectiveness in higher-heating value, but the power market\
-            uses lower-heating value. Defaults to 0.9.
-        :type hhv_to_lhv: float, optional
         :param gas_therm_to_mwh: Conversion from pence/therm to GBP/MWh\
             (still in higher-heating value). Defaults to 0.029307.
         :type gas_therm_to_mwh: float, optional
@@ -284,7 +264,6 @@ class SrmcAPI(BaseAPI):
         self._add_contract_period(params, "period", period, required=True)
         self._add_int(params, "front", front, min=1, required=True)
         self._add_fill(params, "fill", fill)
-        self._add_number(params, "hhv-to-lhv", hhv_to_lhv)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
         self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
@@ -302,7 +281,6 @@ class SrmcAPI(BaseAPI):
             period=None,
             delivery=None,
             fill=None,
-            hhv_to_lhv=None,
             gas_therm_to_mwh=None,
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
@@ -344,11 +322,6 @@ class SrmcAPI(BaseAPI):
             with data from the previous trading day (also into the future).\
             Defaults to ``no-fill``.
         :type fill: str, optional
-        :param hhv_to_lhv: Conversion factor between higher-heating value and\
-            lower-heating value. Gas contracts are traded with the assumption\
-            of effectiveness in higher-heating value, but the power market\
-            uses lower-heating value. Defaults to 0.9.
-        :type hhv_to_lhv: float, optional
         :param gas_therm_to_mwh: Conversion from pence/therm to GBP/MWh\
             (still in higher-heating value). Defaults to 0.029307.
         :type gas_therm_to_mwh: float, optional
@@ -378,7 +351,6 @@ class SrmcAPI(BaseAPI):
         self._add_contract_period(params, "period", period, required=True)
         self._add_date(params, "delivery", delivery, required=True)
         self._add_fill(params, "fill", fill)
-        self._add_number(params, "hhv-to-lhv", hhv_to_lhv)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
         self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
@@ -392,7 +364,6 @@ class SrmcAPI(BaseAPI):
             self,
             curve,
             date=None,
-            hhv_to_lhv=None,
             gas_therm_to_mwh=None,
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
@@ -423,11 +394,6 @@ class SrmcAPI(BaseAPI):
         :type curve: :py:class:`energyquantified.metadata.Curve`, str
         :param date: The trading date, defaults to today
         :type date: date, str, required
-        :param hhv_to_lhv: Conversion factor between higher-heating value and\
-            lower-heating value. Gas contracts are traded with the assumption\
-            of effectiveness in higher-heating value, but the power market\
-            uses lower-heating value. Defaults to 0.9.
-        :type hhv_to_lhv: float, optional
         :param gas_therm_to_mwh: Conversion from pence/therm to GBP/MWh\
             (still in higher-heating value). Defaults to 0.029307.
         :type gas_therm_to_mwh: float, optional
@@ -453,7 +419,6 @@ class SrmcAPI(BaseAPI):
         # Parameters
         params = {}
         self._add_date(params, "date", date)
-        self._add_number(params, "hhv-to-lhv", hhv_to_lhv)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
         self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
@@ -467,7 +432,6 @@ class SrmcAPI(BaseAPI):
             self,
             curve,
             date=None,
-            hhv_to_lhv=None,
             gas_therm_to_mwh=None,
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
@@ -501,11 +465,6 @@ class SrmcAPI(BaseAPI):
         :type curve: :py:class:`energyquantified.metadata.Curve`, str
         :param date: The trading date, defaults to today
         :type date: date, str, required
-        :param hhv_to_lhv: Conversion factor between higher-heating value and\
-            lower-heating value. Gas contracts are traded with the assumption\
-            of effectiveness in higher-heating value, but the power market\
-            uses lower-heating value. Defaults to 0.9.
-        :type hhv_to_lhv: float, optional
         :param gas_therm_to_mwh: Conversion from pence/therm to GBP/MWh\
             (still in higher-heating value). Defaults to 0.029307.
         :type gas_therm_to_mwh: float, optional
@@ -531,7 +490,6 @@ class SrmcAPI(BaseAPI):
         # Parameters
         params = {}
         self._add_date(params, "date", date)
-        self._add_number(params, "hhv-to-lhv", hhv_to_lhv)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
         self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)

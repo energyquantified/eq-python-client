@@ -18,10 +18,6 @@ class SRMCOptions:
     api2_tonne_to_mwh: float = None
     #: (For gas) Conversion from pence/therm to GBP/MWh.
     gas_therm_to_mwh: float = None
-    #: (For gas) Gas contracts are traded with the assumption of effectiveness
-    #: in higher-heating value, but the power market uses lower-heating
-    #: value. Defaults to 0.9.
-    hhv_to_lhv: float = None
     #: The energy efficiency factor.
     efficiency: float = None
     #: The carbon emission factor.
@@ -35,7 +31,6 @@ class SRMCOptions:
             return (
                 f"<SRMCOptions: {self.fuel_type}, "
                 f"gas_therm_to_mwh={self.gas_therm_to_mwh}, "
-                f"hhv_to_lhv={self.hhv_to_lhv}, "
                 f"efficiency={self.efficiency}, "
                 f"carbon_emissions={self.carbon_emissions}, "
                 f"carbon_tax_area={self.carbon_tax_area}"
