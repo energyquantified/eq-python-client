@@ -2,6 +2,51 @@ Changelog
 =========
 
 
+dev
+---
+
+A release with lots of small improvements.
+
+**Improvements**
+
+- Add borders and parent-child relationships for the Italian price zone
+  Calabria. The price zone has been in the client for a while, but haven't
+  placed in the exchange neighbour list for the other price zones in Italy
+  until now.
+- Add the new parameter ``single_level_header`` to all ``to_dataframe()``
+  methods. By default, the ``to_dataframe()``-method will create
+  ``pandas.DataFrame`` objects with three column headers. When
+  ``single_level_header=True``, the client will merge all three levels into
+  one header. The parameter defaults to ``False`` (to not break the old
+  behaviour).
+- Remove the parameter ``hhv_to_lhv`` for all SRMC API operations.
+- Add a new class ``RealtoConnection``. This class is a drop-in replacement
+  for the ``EnergyQuantified``-class. It lets Realto users connect to
+  the Energy Quantified's API on Realto's marketplace.
+- Update the documentation on how to authenticate for Realto users.
+- Add a quickstart chapter for Realto users.
+- Add a section in the pandas documentation on the effects of setting the
+  ``single_level_header`` parameter to ``True`` in ``to_dataframe()``.
+- Add documentation on the ``fill`` parameter in
+  ``eq.ohlc.load_delivery_as_timeseries()`` and
+  ``eq.ohlc.load_front_as_timeseries()``.
+- Other minor improvements in the documentation.
+
+**Breaking change**
+
+- Remove the HHV-to-LHV option for gas in the SRMC API.
+
+**Bugfixes**
+
+- Slashes (/) weren't escaped in curve names in the URL. While this didn't
+  cause issues for Energy Quantified's API, it caused an issue while
+  integrating the client with Realto's marketplace.
+
+**Dependencies**
+
+- Upgrade ``requests`` to v2.25.1.
+
+
 0.5
 ---
 
