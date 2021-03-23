@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 # Requirements
 install_requires = [
-    "requests>=2.25",
+    "requests==2.25.1",
     "pytz",
     "tzlocal",
     "python-dateutil==2.8.1",
