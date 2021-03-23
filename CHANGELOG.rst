@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-dev
+0.6
 ---
 
 A release with lots of small improvements.
