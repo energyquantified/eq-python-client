@@ -20,8 +20,11 @@ You can convert any of these types to a ``pandas.DataFrame``:
  * :py:class:`~energyquantified.data.Periodseries`
  * :py:class:`~energyquantified.data.OHLCList`
 
-They all have a method called ``to_dataframe()``. ``Periodseries`` differ from
+They all have a method called ``to_dataframe()``. ``Periodseries`` differs from
 the two others in which you must supply a **frequency** parameter.
+
+There also exists an alias of ``to_dataframe()`` called ``to_df()``. The term
+``df`` is a commonly used shorthand and variable name for ``DataFrame``'s.
 
 Convert time series
 ^^^^^^^^^^^^^^^^^^^
@@ -291,6 +294,54 @@ forecasts, for example, have 51 scenarios, named from ``e00``, ``e01``, ...,
 ``e49``, ``e50``. Climate series uses underlying weather years. These column
 headers are named after the weather year they are based on: ``y1980``,
 ``y1981``, ..., ``y2018``, ``y2019``.
+
+
+Force single-level column headers
+---------------------------------
+
+While the default behaviour is to create three levels of column headers,
+as seen above, you can tell the client to merge all the levels into one.
+
+Do this by setting the parameter ``single_level_header=True`` when
+you invoke ``to_dataframe()``.
+
+Using the wind forecast example from earlier on this page:
+
+>>> forecast.instance
+<Instance: issued="2020-10-26 00:00:00+00:00", tag="ec-ens", scenarios=51>
+>>> df = forecast.to_dataframe(name='wind forecast')
+>>> df
+                                    wind forecast                                ...
+                          2020-10-26 00:00 ec-ens                                ...
+                                                        e00       e01       e02  ...       e47       e48       e49       e50
+date                                                                             ...
+2020-10-27 00:00:00+01:00                26575.48  26733.56  27500.18  26672.14  ...  24269.32  24301.24  30265.62  24280.31
+2020-10-28 00:00:00+01:00                30657.37  30446.78  28420.88  37041.53  ...  28426.01  27353.77  32797.71  28044.18
+2020-10-29 00:00:00+01:00                27776.44  27720.31  30748.11  28341.64  ...  30731.12  25900.96  29088.77  28441.85
+2020-10-30 00:00:00+01:00                26984.86  23955.59  32940.16  27493.37  ...  38920.07  34470.99  26831.95  30003.82
+2020-10-31 00:00:00+01:00                15179.69  14326.49  16155.63  16337.56  ...  16874.91  10602.34   8203.10  27192.68
+...
+
+We can add the ``single_level_header`` parameter. Notice that the headers,
+which previously were three levels (curve name, instance and scenario), are
+now merged into one row:
+
+>>> df = forecast.to_dataframe(
+>>>     name='wind forecast',
+>>>     single_level_header=True  # Merge column headers
+>>> )
+                          wind forecast 2020-10-26 00:00 ec-ens wind forecast 2020-10-26 00:00 ec-ens e00  ... wind forecast 2020-10-26 00:00 ec-ens e49 wind forecast 2020-10-26 00:00 ec-ens e50
+date                                                                                                       ...
+2020-10-27 00:00:00+01:00                              26575.48                                  26733.56  ...                                  30265.62                                  24280.31
+2020-10-28 00:00:00+01:00                              30657.37                                  30446.78  ...                                  32797.71                                  28044.18
+2020-10-29 00:00:00+01:00                              27776.44                                  27720.31  ...                                  29088.77                                  28441.85
+2020-10-30 00:00:00+01:00                              26984.86                                  23955.59  ...                                  26831.95                                  30003.82
+2020-10-31 00:00:00+01:00                              15179.69                                  14326.49  ...                                   8203.10                                  27192.68
+...
+
+Some functions and utilities in pandas work best when the ``DataFrame`` has
+a single level header. Setting ``single_level_header=True`` makes it easier
+than if you would have to merge the headers manually.
 
 
 Set custom time series name
