@@ -168,7 +168,7 @@ handle the transition from/to daylight saving time. Using the ``Resolution``
 will make sure that the date-times get the right offset from UTC.
 
 See the :py:class:`Resolution <energyquantified.time.Resolution>` class for
-more information.
+a full reference.
 
 Aggregation and filters
 -----------------------
