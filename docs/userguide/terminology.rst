@@ -170,6 +170,7 @@ will make sure that the date-times get the right offset from UTC.
 See the :py:class:`Resolution <energyquantified.time.Resolution>` class for
 a full reference.
 
+
 Aggregation and filters
 -----------------------
 
@@ -221,6 +222,7 @@ should keep the following in mind:
 
 Class reference: :py:class:`Filter <energyquantified.metadata.Filter>`
 
+
 .. _time-series:
 
 Time series
@@ -242,7 +244,6 @@ Example of a time series:
    2020-01-03   167.4
    2020-01-04   134.1
    ...
-
 
 Time series data can have a varying number of values per date-time:
 
