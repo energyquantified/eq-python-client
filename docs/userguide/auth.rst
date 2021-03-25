@@ -59,13 +59,14 @@ and that the API key is provided in the HTTP header Realto requires you
 to use.
 
 Import class :py:class:`RealtoConnection <energyquantified.RealtoConnection>`
-from the library, create a client and supply your Realto API key. Notice that
-you must specify an ``api_url`` and the ``api_key``:
+from the library, create a client and supply the details needed to connect
+to the Realto API. Notice that you must specify both an ``api_url`` and an
+``api_key``:
 
    >>> from energyquantified import RealtoConnection
    >>> eq = RealtoConnection(
    >>>     api_url=RealtoConnection.API_URL_GERMANY,
-   >>>     api_key='abcdefghijklmnopqrstuvw'
+   >>>     api_key='abcdefghijklmnopqrstuvw'  # Supply your API key
    >>> )
 
 You can also store your API key in a file like you can with the default
@@ -88,7 +89,8 @@ writing, the available products are:
    RealtoConnection.API_URL_UK
    RealtoConnection.API_URL_BELGIUM
 
-   These variables are strings of the base URL for the specific API on Realto:
+These variables are nothing else than strings of the base URL for the specific
+API on Realto:
 
 >>> RealtoConnection.API_URL_GERMANY
 'https://api.realto.io/energyquantified-germany'

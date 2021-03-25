@@ -61,7 +61,8 @@ There are five countries available as of this writing:
    RealtoConnection.API_URL_UK
    RealtoConnection.API_URL_BELGIUM
 
-These variables are strings of the base URL for the specific API on Realto:
+These variables are nothing else than strings of the base URL for the specific
+API on Realto:
 
 >>> RealtoConnection.API_URL_GERMANY
 'https://api.realto.io/energyquantified-germany'
