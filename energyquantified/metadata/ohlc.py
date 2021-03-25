@@ -18,6 +18,7 @@ class ContractPeriod(enum.Enum):
      * ``QUARTER`` – Quarterly contract period
      * ``MONTH`` – Monthly contract period
      * ``WEEK`` – Weekly contract period
+     * ``WEEKEND`` – Weekend contract period
      * ``DAY`` – Daily contract period
     """
 
@@ -28,6 +29,7 @@ class ContractPeriod(enum.Enum):
     QUARTER = ("quarter", Frequency.P3M)
     MONTH = ("month", Frequency.P1M)
     WEEK = ("week", Frequency.P1W)
+    WEEKEND = ("weekend", Frequency.P1D)
     DAY = ("day", Frequency.P1D)
 
     def __init__(self, tag, frequency):
