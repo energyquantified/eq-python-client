@@ -1,6 +1,19 @@
 Changelog
 =========
 
+0.6.1
+-----
+
+**Improvements**
+
+- Add ``ContractPeriod.WEEKEND`` for OHLC data.
+
+**Bugfixes**
+
+- Fix crashes in ``Border.__str__`` and ``Border.__repr__`` due to missing
+  implementations of ``__lt__`` and ``__gt__`` in class ``Allocation``
+  (thanks to stanton119).
+
 
 0.6
 ---
