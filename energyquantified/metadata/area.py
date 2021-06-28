@@ -26,6 +26,12 @@ class Allocation(enum.Enum):
     def __str__(self):
         return self.tag
 
+    def __lt__(self, other):
+        return self.tag.__lt__(other.tag)
+
+    def __gt__(self, other):
+        return self.tag.__gt__(other.tag)
+
 
 class Area:
     """
@@ -163,6 +169,12 @@ class Area:
     def __str__(self):
         return "<Area: %s>" % self.tag
 
+    def __lt__(self, other):
+        return self.tag.__lt__(other.tag)
+
+    def __gt__(self, other):
+        return self.tag.__gt__(other.tag)
+
     def _add_exchange_neighbours(self, *neighbours):
         """
         Private method. Add a list of exchange neighbours to self and
@@ -270,6 +282,9 @@ class Border:
 
     def __eq__(self, other):
         return self.as_tuple() == other.as_tuple()
+
+    def __ne__(self, other):
+        return self.as_tuple() != other.as_tuple()
 
     def __repr__(self):
         return "<Border: %s – %s, allocations=%s>" % (
