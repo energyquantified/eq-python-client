@@ -1,6 +1,34 @@
 Changelog
 =========
 
+
+dev
+---
+
+**Improvements**
+
+- Add new area Kosovo (``Area.XK``) with these borders:
+   - XK–AL Explicit
+   - XK–ME Explicit
+   - XK–MK Explicit
+- Add new border:
+   - NO2–GB Explicit
+- Changes in capacity allocation for these borders:
+   - IT-Sud–GR Implict and Explicit
+   - BG–GR Implict and Explicit
+   - PL–DE Implict and Explicit
+   - PL–SK Implict and Explicit
+   - PL–CZ Implict and Explicit
+   - DE–CZ Implict and Explicit
+   - AT–CZ Implict
+   - AT–HU Implict
+   - GB–FR Explicit
+   - GB–BE Explicit
+   - GB–NL Explicit
+- Remove border:
+   - RS–AL
+
+
 0.6.1
 -----
 
