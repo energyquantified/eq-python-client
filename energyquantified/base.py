@@ -39,7 +39,7 @@ class EnergyQuantified:
     :param timeout: Maximum timeout per HTTP request, defaults to 15.0
     :type timeout: float, optional
     :param http_delay: The minimum number of seconds between the start of\
-                       each HTTP request, defaults to 0.33 seconds
+                       each HTTP request, defaults to 0.125 seconds (8 req/s)
     :type http_delay: float, optional
 
     **Basic usage:**
@@ -56,7 +56,7 @@ class EnergyQuantified:
             api_key_file=None,
             ssl_verify=True,
             timeout=15.0,
-            http_delay=0.33,
+            http_delay=0.125,
             api_url=BASE_PATH
         ):
         # Simple validations
@@ -72,7 +72,9 @@ class EnergyQuantified:
                 "must be set at the same time, but both were given"
             )
         assert timeout >= 0, "timeout must be larger than 0s"
-        assert http_delay >= 0.125, "http_delay must be 0.125s or slower"
+        assert http_delay >= 0.0667, (
+            "http_delay must be 0.0667s or slower (15 req/s)"
+        )
         assert api_url, "api_url is missing"
         # Attributes
         self._api_key = _find_api_key(api_key, api_key_file)
@@ -154,7 +156,7 @@ class RealtoConnection:
     :param timeout: Maximum timeout per HTTP request, defaults to 15.0
     :type timeout: float, optional
     :param http_delay: The minimum number of seconds between the start of\
-                       each HTTP request, defaults to 0.33 seconds
+                       each HTTP request, defaults to 0.125 seconds (8 req/s)
     :type http_delay: float, optional
 
     **Basic usage:**
@@ -190,7 +192,7 @@ class RealtoConnection:
             api_key_file=None,
             ssl_verify=True,
             timeout=15.0,
-            http_delay=0.33
+            http_delay=0.125
         ):
         # Simple validations
         assert api_url, "api_url is missing"
@@ -206,7 +208,9 @@ class RealtoConnection:
                 "must be set at the same time, but both were given"
             )
         assert timeout >= 0, "timeout must be larger than 0s"
-        assert http_delay >= 0.125, "http_delay must be 0.125s or slower"
+        assert http_delay >= 0.0667, (
+            "http_delay must be 0.0667s or slower (15 req/s)"
+        )
         # Attributes
         self._api_url = api_url
         self._api_key = _find_api_key(api_key, api_key_file)
