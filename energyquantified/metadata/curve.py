@@ -173,7 +173,7 @@ class CurveType(enum.Enum):
     #: Period-based data
     PERIOD = ("PERIOD", False)
     #: Instances of period-based data
-    INSTANCE_PERIOD = ("INSTANCE_PERIOD", False)
+    INSTANCE_PERIOD = ("INSTANCE_PERIOD", True)
     #: Closing prices for market data
     OHLC = ("OHLC", False)
 
