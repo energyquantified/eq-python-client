@@ -2,6 +2,18 @@ Changelog
 =========
 
 
+0.6.3
+-----
+
+**Improvements**
+
+- Increase rate limits.
+
+**Bugfixes**
+
+- Set ``has_instances = True`` in ``CurveType.INSTANCE_PERIOD`` (was ``False``).
+
+
 0.6.2
 -----
 
