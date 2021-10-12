@@ -1,16 +1,17 @@
 Changelog
 =========
 
+
 dev
 ---
 
 **Improvements**
 
-- Define new time-zone in ``pytz`` called ``Europe/Gas_Day``
-   - Follows Acer's Gas Day, which is from 06:00 – 06:00 in CET/CEST
-   - Used for the natural gas market in the European Union
-   - Import it with ``from energyquantified.time import GAS_DAY``, or look it
-     up in ``pytz`` like so: ``pytz.timezone("Europe/Gas_Day")``
+- Define new time-zone in ``pytz`` called ``Europe/Gas_Day``. It follows
+  Acer's Gas Day, which is from 06:00 – 06:00 in CET/CEST. This time-zone is
+  used for the natural gas market in the European Union. Import it with
+  ``from energyquantified.time import GAS_DAY``, or look it up in ``pytz``
+  like so: ``pytz.timezone("Europe/Gas_Day")``.
 
 **Bugfixes**
 
