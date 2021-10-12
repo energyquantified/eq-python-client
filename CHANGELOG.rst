@@ -2,8 +2,10 @@ Changelog
 =========
 
 
-dev
+0.7
 ---
+
+Implementing Acer's non-standard Gas Day time-zone.
 
 **Improvements**
 
