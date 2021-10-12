@@ -15,7 +15,7 @@ dev
 
 **Bugfixes**
 
-- When invoking `timeseries.to_dataframe(name="foo", single_level_header=True)`,
+- When invoking ``timeseries.to_dataframe(name="foo", single_level_header=True)``,
   the resulting column header in pandas' DataFrame no longer includes the
   instance identifier. However, the ensemble/scenario name is still appended
   at the end.
