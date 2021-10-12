@@ -16,24 +16,21 @@ https://documents.acer.europa.eu/en/Gas/Framework%20guidelines_and_network%20cod
 How to generate the zone in this file
 -------------------------------------
 
-- Open the CET zonefile
-  >>> f = open('<path-to-python-site-packages>/pytz/zoneinfo/CET', 'rb')
+ - Open the CET zonefile
+   >>> fp = open('<path-to-python-site-packages>/pytz/zoneinfo/CET', 'rb')
 
-- Copy and modify the latest build_tzinfo file from pytz:
-  https://github.com/stub42/pytz/blob/master/src/pytz/tzfile.py
+ - Copy and modify the latest build_tzinfo file from pytz:
+   https://github.com/stub42/pytz/blob/master/src/pytz/tzfile.py
 
-- Extract variables "zone", "transitions" and "transition_info".
+ - Extract variables "zone", "transitions" and "transition_info".
 
-- Replace offsets and names.
+ - Replace offsets and names.
 """
 
 import datetime
 
 from pytz.tzinfo import DstTzInfo
 from pytz import _tzinfo_cache
-
-
-
 
 
 def _build_europe_gas_day_tzinfo():
