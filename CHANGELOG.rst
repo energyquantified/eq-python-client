@@ -12,6 +12,13 @@ dev
    - Import it with ``from energyquantified.time import GAS_DAY``, or look it
      up in ``pytz`` like so: ``pytz.timezone("Europe/Gas_Day")``
 
+**Bugfixes**
+
+- When invoking `timeseries.to_dataframe(name="foo", single_level_header=True)`,
+  the resulting column header in pandas' DataFrame no longer includes the
+  instance identifier. However, the ensemble/scenario name is still appended
+  at the end.
+
 
 0.6.3
 -----
