@@ -14,7 +14,7 @@ class Curve:
                  area=None, area_sink=None, place=None,
                  resolution=None, frequency=None, timezone=None,
                  categories=None, unit=None, denominator=None, data_type=None,
-                 source=None):
+                 source=None, commodity=None):
         #: The curve name is the identifier.
         self.name = name
         #: Curve type (the type of data this curve refers to).
@@ -55,6 +55,8 @@ class Curve:
         self.data_type = data_type
         #: The source of the data.
         self.source = source
+        #: The curve commodity (Power, Gas, etc.)
+        self.commodity = commodity
 
     @property
     def resolution(self):
