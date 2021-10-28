@@ -34,6 +34,7 @@ def parse_curve(json):
     denominator = json.get("denominator")
     data_type = DataType.by_tag(json.get("data_type"))
     source = json.get("source")
+    commodity = json.get("commodity")
 
     area_sink = json.get("area_sink")
     if area_sink:
@@ -60,7 +61,8 @@ def parse_curve(json):
         unit=unit,
         denominator=denominator,
         data_type=data_type,
-        source=source
+        source=source,
+        commodity=commodity
     )
 
 
@@ -131,6 +133,8 @@ def parse_place(json):
     areas = json.get("areas")
     if areas:
         areas = [Area.by_tag(a) for a in areas]
+    else:
+        areas = []
 
     children = json.get("children")
     if children:
