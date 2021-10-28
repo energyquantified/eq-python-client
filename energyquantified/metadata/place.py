@@ -77,6 +77,12 @@ class PlaceType(enum.Enum):
     RIVER = ("river",)
     #: A weather station
     WEATHERSTATION = ("weatherstation",)
+    #: Gas storage
+    GAS_STORAGE("gas-storage",)
+    #: Gas LNG terminal
+    GAS_LNG_TERMINAL("gas-lng-terminal",)
+    #: Gas interconnector
+    GAS_INTERCONNECTOR("gas-interconnector",)
     #: Unspecified
     OTHER = ("other",)
 
