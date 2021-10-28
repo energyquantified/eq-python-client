@@ -8,7 +8,7 @@ class Place:
     """
 
     def __init__(self, kind, key, name, unit=None, fuels=None, area=None,
-                 location=None, children=None, curves=None):
+                 areas=None, location=None, children=None, curves=None):
         #: The place type. See :py:class:`PlaceType`.
         self.kind = kind
         #: The identifier
@@ -19,8 +19,12 @@ class Place:
         self.unit = unit
         #: The fuel types (if it is a powerplant unit)
         self.fuels = fuels or []
-        #: The area in which this place lies, see :py:class:`Area`.
+        #: The area in which this place lies, see :py:class:`Area`. This
+        #: field is deprecated and will be removed in future releases.
         self.area = area
+        #: The list areas in which this place lies (mulitple when it's on a
+        #: border), see :py:class:`Area`.
+        self.areas = areas or []
         #: The geolocation of this place: ``(latitude, longitude)``
         self.location = location or None
         #: A list of children (typically used for a powerplants with sub-units)
@@ -77,6 +81,12 @@ class PlaceType(enum.Enum):
     RIVER = ("river",)
     #: A weather station
     WEATHERSTATION = ("weatherstation",)
+    #: Gas storage
+    GAS_STORAGE = ("gas-storage",)
+    #: Gas LNG terminal
+    GAS_LNG_TERMINAL = ("gas-lng-terminal",)
+    #: Gas interconnector
+    GAS_INTERCONNECTOR = ("gas-interconnector",)
     #: Unspecified
     OTHER = ("other",)
 
