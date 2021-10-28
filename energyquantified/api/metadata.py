@@ -21,6 +21,7 @@ class _MetadataAPI(BaseAPI):
             category=None,
             exact_category=None,
             frequency=None,
+            commodity=None,
             has_place=None,
             page=1,
             page_size=50):
@@ -41,6 +42,8 @@ class _MetadataAPI(BaseAPI):
         :type exact_category: str, optional
         :param frequency: Filter by frequency, defaults to None
         :type frequency: Frequency, str, optional
+        :param commodity: Filter by commodity, defaults to None
+        :type commodity: str, optional
         :param has_place: True – only curves for places, False – only curves\
             without places, defaults to None
         :type has_place: bool, optional
@@ -58,6 +61,7 @@ class _MetadataAPI(BaseAPI):
         self._add_data_type(params, "data-type", data_type)
         self._add_str_list(params, "category", category)
         self._add_str(params, "exact-category", exact_category)
+        self._add_str(params, "commodity", commodity)
         self._add_frequency(params, "frequency", frequency)
         self._add_bool(params, "has-place", has_place)
         self._add_int(params, "page", page)
