@@ -15,7 +15,7 @@ More gas data preparations.
   ``PlaceType.GAS_LNG_TERMINAL`` and ``PlaceType.GAS_INTERCONNECTOR``.
 - Add ``Curve.commodity`` (str) which is either ``Power``, ``Gas``, ``Coal``,
   ``Oil``, ``Carbon`` or ``None`` at this time.
-– Add a ``commodity`` filter for ``eq.metadata.curves()``.
+- Add a ``commodity`` filter for ``eq.metadata.curves()``.
 
 **Deprecations**
 
