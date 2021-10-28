@@ -12,7 +12,7 @@ More gas data preparations.
 - Add ``Place.areas`` (list of areas), as some places (i.e. gas interconnectors)
   are places on borders and should be listed for both areas.
 - Add three new place types: ``PlaceType.GAS_STORAGE``,
-  ``PlaceType.GAS_LNG_TERMINAL`` and ``PlaceType.GAS_INTERCONNECTOR``.
+  ``PlaceType.GAS_LNG_TERMINAL`` and ``PlaceType.GAS_INTERCONNECTOR``
 - Add ``Curve.commodity`` (str) which is either ``Power``, ``Gas``, ``Coal``,
   ``Oil``, ``Carbon`` or ``None`` at this time.
 - Add a ``commodity`` filter for ``eq.metadata.curves()``.
