@@ -2,6 +2,27 @@ Changelog
 =========
 
 
+dev
+---
+
+More gas data preparations.
+
+**Improvements**
+
+- Add ``Place.areas`` (list of areas), as some places (i.e. gas interconnectors)
+  are places on borders and should be listed for both areas.
+- Add three new place types: ``PlaceType.GAS_STORAGE``,
+  ``PlaceType.GAS_LNG_TERMINAL`` and ``PlaceType.GAS_INTERCONNECTOR``.
+- Add ``Curve.commodity`` (str) which is either ``Power``, ``Gas``, ``Coal``,
+  ``Oil``, ``Carbon`` or ``None`` at this time.
+– Add a ``commodity`` filter for ``eq.metadata.curves()``.
+
+**Deprecations**
+
+- Add ``Place.area`` is deprecated and will eventually be replaced by
+  ``Place.areas``. It will be removed in a future release.
+
+
 0.7
 ---
 
