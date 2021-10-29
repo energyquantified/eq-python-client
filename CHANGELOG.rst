@@ -2,8 +2,8 @@ Changelog
 =========
 
 
-dev
----
+0.7.1
+-----
 
 More gas data preparations.
 
