@@ -109,6 +109,7 @@ continuing.
 Here we convert a REMIT series for German nuclear available capacity to a daily
 average capacity ``pandas.DataFrame``:
 
+   >>> from energyquantified.time import Frequency
    >>> periodseries.instance
    <Instance: issued="2020-10-24 14:10:40+00:00", tag="a-PvMRn_EpOJtngkh4D06Q">
    >>> df = periodseries.to_dataframe(

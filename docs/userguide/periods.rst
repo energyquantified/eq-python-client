@@ -62,6 +62,7 @@ wind power capacity loaded earlier into a time series in monthly resolution.
 If multiple periods are overlapping the same month, the resulting value is
 a weighted average of those.
 
+    >>> from energyquantified.time import Frequency
     >>> timeseries = periodseries.to_timeseries(Frequency.P1M)
     >>> timeseries
     <Timeseries: resolution=<Resolution: frequency=P1M, timezone=CET>, curve="DE Wind Power Installed MW Capacity", begin="2020-01-01 00:00:00+01:00", end="2020-05-01 00:00:00+02:00">
