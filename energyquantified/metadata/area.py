@@ -103,6 +103,7 @@ class Area:
         self,
         tag,
         name,
+        short_tag=None,
         country=False,
         price_area=False,
         control_area=False,
@@ -115,6 +116,8 @@ class Area:
         # --- Attributes ---
         #: The area tag (used in curve names)
         self.tag = tag
+        #: The short tag (used for context-aware tags in Javascript/corejs)
+        self.short_tag = short_tag
         #: The full name of the area
         self.name = name
         #: True when this area is a country, otherwise False
@@ -347,30 +350,111 @@ LT = Area(tag="LT", name="Lithuania", country=True, price_area=True)
 ## Central Western Europe
 
 DE = Area(tag="DE", name="Germany", country=True, price_area=True)
-DE_50Hertz = Area(tag="DE-50Hertz", name="Germany – 50Hertz", control_area=True)
-DE_Amprion = Area(tag="DE-Amprion", name="Germany – Amprion", control_area=True)
-DE_TenneT = Area(tag="DE-TenneT", name="Germany – TenneT GER", control_area=True)
+DE_50Hertz = Area(
+    tag="DE-50Hertz",
+    short_tag="50Hertz",
+    name="Germany – 50Hertz",
+    control_area=True,
+)
+DE_Amprion = Area(
+    tag="DE-Amprion",
+    short_tag="Amprion",
+    name="Germany – Amprion",
+    control_area=True,
+)
+DE_TenneT = Area(
+    tag="DE-TenneT",
+    short_tag="TenneT",
+    name="Germany – TenneT",
+    control_area=True,
+)
 DE_TransnetBW = Area(
-    tag="DE-TransnetBW", name="Germany – TransnetBW", control_area=True
+    tag="DE-TransnetBW",
+    short_tag="TransnetBW",
+    name="Germany – TransnetBW",
+    control_area=True,
 )
 DE._add_children(DE_50Hertz, DE_Amprion, DE_TenneT, DE_TransnetBW)
 
 FR = Area(tag="FR", name="France", country=True, price_area=True)
-FR_ARA = Area(tag="FR-ARA", name="France – Auvergne-Rhône-Alpes", control_area=True)
-FR_BFC = Area(tag="FR-BFC", name="France – Bourgogne-Franche-Comté", control_area=True)
-FR_BRE = Area(tag="FR-BRE", name="France – Bretagne", control_area=True)
-FR_COR = Area(tag="FR-COR", name="France – Corse", control_area=True)
-FR_CVL = Area(tag="FR-CVL", name="France – Centre-Val de Loire", control_area=True)
-FR_GES = Area(tag="FR-GES", name="France – Grand-Est", control_area=True)
-FR_HDF = Area(tag="FR-HDF", name="France – Hauts-de-France", control_area=True)
-FR_IDF = Area(tag="FR-IDF", name="France – Île-de-France", control_area=True)
-FR_NAQ = Area(tag="FR-NAQ", name="France – Nouvelle-Aquitaine", control_area=True)
-FR_NOR = Area(tag="FR-NOR", name="France – Normandie", control_area=True)
-FR_OCC = Area(tag="FR-OCC", name="France – Occitanie", control_area=True)
-FR_PAC = Area(
-    tag="FR-PAC", name="France – Provence-Alpes-Côte d'Azur", control_area=True
+FR_ARA = Area(
+    tag="FR-ARA",
+    short_tag="ARA",
+    name="France – Auvergne-Rhône-Alpes",
+    control_area=True,
 )
-FR_PDL = Area(tag="FR-PDL", name="France – Pays de la Loire", control_area=True)
+FR_BFC = Area(
+    tag="FR-BFC",
+    short_tag="BFC",
+    name="France – Bourgogne-Franche-Comté",
+    control_area=True,
+)
+FR_BRE = Area(
+    tag="FR-BRE",
+    short_tag="BRE",
+    name="France – Bretagne",
+    control_area=True,
+)
+FR_COR = Area(
+    tag="FR-COR",
+    short_tag="COR",
+    name="France – Corse",
+    control_area=True,
+)
+FR_CVL = Area(
+    tag="FR-CVL",
+    short_tag="CVL",
+    name="France – Centre-Val de Loire",
+    control_area=True,
+)
+FR_GES = Area(
+    tag="FR-GES",
+    short_tag="GES",
+    name="France – Grand-Est",
+    control_area=True,
+)
+FR_HDF = Area(
+    tag="FR-HDF",
+    short_tag="HDF",
+    name="France – Hauts-de-France",
+    control_area=True,
+)
+FR_IDF = Area(
+    tag="FR-IDF",
+    short_tag="IDF",
+    name="France – Île-de-France",
+    control_area=True,
+)
+FR_NAQ = Area(
+    tag="FR-NAQ",
+    short_tag="NAQ",
+    name="France – Nouvelle-Aquitaine",
+    control_area=True,
+)
+FR_NOR = Area(
+    tag="FR-NOR",
+    short_tag="NOR",
+    name="France – Normandie",
+    control_area=True,
+)
+FR_OCC = Area(
+    tag="FR-OCC",
+    short_tag="OCC",
+    name="France – Occitanie",
+    control_area=True,
+)
+FR_PAC = Area(
+    tag="FR-PAC",
+    short_tag="PAC",
+    name="France – Provence-Alpes-Côte d'Azur",
+    control_area=True,
+)
+FR_PDL = Area(
+    tag="FR-PDL",
+    short_tag="PDL",
+    name="France – Pays de la Loire",
+    control_area=True,
+)
 FR._add_children(
     FR_ARA,
     FR_BFC,
@@ -400,14 +484,24 @@ GB = Area(tag="GB", name="Great Britain", country=True, price_area=True)
 # Single Electricity Market (IE + NIE). IE = EirGrid. NIE = SONI.
 SEM = Area(
     tag="SEM",
-    name="Single Electricity Market – Ireland",
+    name="SEM – Ireland",
     country=False,
     price_area=True,
 )
 NIE = Area(
-    tag="NIE", name="Northern Ireland", country=True, price_area=True, control_area=True
+    tag="NIE",
+    name="Northern Ireland",
+    country=True,
+    price_area=True,
+    control_area=True,
 )
-IE = Area(tag="IE", name="Ireland", country=True, price_area=True, control_area=True)
+IE = Area(
+    tag="IE",
+    name="Ireland",
+    country=True,
+    price_area=True,
+    control_area=True,
+)
 SEM._add_children(NIE, IE)
 
 
@@ -428,13 +522,48 @@ PT = Area(tag="PT", name="Portugal", country=True, price_area=True)
 ## Southern Europe
 
 IT = Area(tag="IT", name="Italy", country=True, price_area=True)
-IT_NORD = Area(tag="IT-NORD", name="Italy – Northern", price_area=True)
-IT_CNOR = Area(tag="IT-CNOR", name="Italy – Central-Northern", price_area=True)
-IT_CSUD = Area(tag="IT-CSUD", name="Italy – Central-Southern", price_area=True)
-IT_SUD = Area(tag="IT-SUD", name="Italy – Southern", price_area=True)
-IT_CALA = Area(tag="IT-CALA", name="Italy – Calabria", price_area=True)
-IT_SARD = Area(tag="IT-SARD", name="Italy – Sardegna", price_area=True)
-IT_SICI = Area(tag="IT-SICI", name="Italy – Sicily", price_area=True)
+IT_NORD = Area(
+    tag="IT-NORD",
+    short_tag="NORD",
+    name="Italy – Northern",
+    price_area=True,
+)
+IT_CNOR = Area(
+    tag="IT-CNOR",
+    short_tag="CNOR",
+    name="Italy – Central-Northern",
+    price_area=True,
+)
+IT_CSUD = Area(
+    tag="IT-CSUD",
+    short_tag="CSUD",
+    name="Italy – Central-Southern",
+    price_area=True,
+)
+IT_SUD = Area(
+    tag="IT-SUD",
+    short_tag="SUD",
+    name="Italy – Southern",
+    price_area=True,
+)
+IT_CALA = Area(
+    tag="IT-CALA",
+    short_tag="CALA",
+    name="Italy – Calabria",
+    price_area=True,
+)
+IT_SARD = Area(
+    tag="IT-SARD",
+    short_tag="SARD",
+    name="Italy – Sardegna",
+    price_area=True,
+)
+IT_SICI = Area(
+    tag="IT-SICI",
+    short_tag="SICI",
+    name="Italy – Sicily",
+    price_area=True,
+)
 IT._add_children(IT_NORD, IT_CNOR, IT_CSUD, IT_SUD, IT_CALA, IT_SARD, IT_SICI)
 
 
@@ -464,12 +593,13 @@ BY = Area(tag="BY", name="Belarus", country=True, external=True)
 UA = Area(tag="UA", name="Ukraine", country=True, external=True)
 MD = Area(tag="MD", name="Moldova", country=True, external=True)
 MT = Area(tag="MT", name="Malta", country=True, external=True)
+GE = Area(tag="GE", name="Georgia", country=True, external=True)
 
 
 ## Nordic borders
 
 NO1._add_borders((NO2, "I"), (NO3, "I"), (NO5, "I"), (SE3, "I"))
-NO2._add_borders((DE, "I"), (DK1, "I"), (GB, "E"), (NL, "I"), (NO1, "I"), (NO5, "I"))
+NO2._add_borders((DE, "I"), (DK1, "I"), (GB, "I"), (NL, "I"), (NO1, "I"), (NO5, "I"))
 NO3._add_borders((NO1, "I"), (NO4, "I"), (NO5, "I"), (SE2, "I"))
 NO4._add_borders((FI, "N"), (NO3, "I"), (SE1, "I"), (SE2, "I"))
 NO5._add_borders((NO1, "I"), (NO2, "I"), (NO3, "I"))
@@ -507,10 +637,10 @@ DE._add_borders(
     (PL, "EI"),
     (SE4, "I"),
 )
-AT._add_borders((CH, "E"), (CZ, "EI"), (DE, "F"), (HU, "EI"), (IT_NORD, "EI"), (SI, "EI"))
-FR._add_borders(
-    (BE, "F"), (CH, "E"), (DE, "F"), (ES, "EI"), (GB, "E"), (IT_NORD, "EI")
+AT._add_borders(
+    (CH, "E"), (CZ, "I"), (DE, "F"), (HU, "I"), (IT_NORD, "EI"), (SI, "EI")
 )
+FR._add_borders((BE, "F"), (CH, "E"), (DE, "F"), (ES, "EI"), (GB, "E"), (IT_NORD, "EI"))
 FR_COR._add_borders((IT_SARD, "I"))
 NL._add_borders((BE, "F"), (DE, "F"), (DK1, "I"), (GB, "E"), (NO2, "I"))
 BE._add_borders((DE, "F"), (FR, "F"), (GB, "E"), (NL, "F"))
@@ -519,7 +649,7 @@ CH._add_borders((AT, "E"), (DE, "E"), (FR, "E"), (IT_NORD, "E"))
 
 ## United Kingdom/Ireland
 
-GB._add_borders((BE, "E"), (FR, "E"), (NL, "E"), (NIE, "I"), (IE, "I"), (NO2, "E"))
+GB._add_borders((BE, "E"), (FR, "E"), (NL, "E"), (NIE, "I"), (IE, "I"), (NO2, "I"))
 NIE._add_borders((IE, "I"), (GB, "I"))
 IE._add_borders((NIE, "I"), (GB, "I"))
 
@@ -527,8 +657,8 @@ IE._add_borders((NIE, "I"), (GB, "I"))
 ## Central Eastern Europe
 
 PL._add_borders((CZ, "EI"), (DE, "EI"), (LT, "I"), (SE4, "I"), (SK, "EI"), (UA, "E"))
-CZ._add_borders((AT, "EI"), (DE, "EI"), (PL, "EI"), (SK, "EI"))
-HU._add_borders((AT, "EI"), (HR, "E"), (RO, "EI"), (RS, "E"), (SK, "EI"), (UA, "E"))
+CZ._add_borders((AT, "I"), (DE, "EI"), (PL, "EI"), (SK, "EI"))
+HU._add_borders((AT, "I"), (HR, "E"), (RO, "EI"), (RS, "E"), (SK, "EI"), (UA, "E"))
 SK._add_borders((CZ, "EI"), (HU, "EI"), (PL, "EI"), (UA, "E"))
 
 
@@ -561,18 +691,19 @@ RS._add_borders(
     (ME, "E"),
     (MK, "E"),
     (RO, "E"),
+    (XK, "E"),
 )
 ME._add_borders((AL, "E"), (BA, "E"), (IT_CSUD, "E"), (RS, "E"), (XK, "E"))
 BG._add_borders((GR, "EI"), (MK, "E"), (RO, "E"), (RS, "E"), (TR, "E"))
 AL._add_borders((GR, "E"), (ME, "E"), (XK, "E"))
 MK._add_borders((BG, "E"), (GR, "E"), (RS, "E"), (XK, "E"))
 GR._add_borders((AL, "E"), (BG, "EI"), (IT_SUD, "EI"), (MK, "E"), (TR, "E"))
-XK._add_borders((AL, "E"), (ME, "E"), (MK, "E"))
+XK._add_borders((AL, "E"), (ME, "E"), (MK, "E"), (RS, "E"))
 
 
 ## South-Eastern Europe
 
-TR._add_borders((BG, "E"), (GR, "E"))
+TR._add_borders((BG, "E"), (GE, "E"), (GR, "E"))
 
 
 ## Others
@@ -582,3 +713,4 @@ RU_KGD._add_borders((LT, "E"))
 BY._add_borders((LT, "N"))
 UA._add_borders((HU, "E"), (PL, "E"), (RO, "E"), (SK, "E"))
 MT._add_borders((IT_SICI, "I"))
+GE._add_borders((TR, "E"))
