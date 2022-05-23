@@ -6,17 +6,18 @@ expects you to have an initialized instance of the client called ``eq``.
 
 Operations described here are available under ``eq.metadata.*``.
 
+
 Curve search
 ------------
 
-The API allows you to query for curve names in many ways. It is using the same
-operation as the data search on Energy Quantified's web application.
+Method reference: :py:meth:`eq.metadata.curves() <energyquantified.api.MetadataAPI.curves>`
 
+The API allows you to query for :py:class:`Curve <energyquantified.metadata.Curve>`
+objects in many ways. It is using the same operation as the data search on Energy
+Quantified's web application.
 
 Searching for curves in the API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Method reference: :py:meth:`eq.metadata.curves() <energyquantified.api.MetadataAPI.curves>`
 
 When looking for curves, specify ``q`` to do a free-text search:
 
@@ -80,6 +81,30 @@ You can, of course, also return a specific page directly when searching:
 
 Metadata is cached. So, if you try to load the same page twice, it is fetched
 from the cache, and thus not hitting the server.
+
+
+Look up a curve name
+--------------------
+
+Method reference: :py:meth:`eq.metadata.curve() <energyquantified.api.MetadataAPI.curve>`
+
+When you know the name of a curve and want to load the corresponding
+:py:class:`Curve <energyquantified.metadata.Curve>` instance, use the
+:py:meth:`eq.metadata.curve() <energyquantified.api.MetadataAPI.curve>` method:
+
+    >>> curve = eq.metadata.curve("CZ>DE Exchange Net Transfer Capacity MW 15min REMIT")
+    >>> curve
+    <Curve: "CZ>DE Exchange Net Transfer Capacity MW 15min REMIT", curve_type=TIMESERIES>
+
+When you provide a name that does not exist, this method will throw a
+:py:class:`NotFoundError <energyquantified.exceptions.NotFoundError>`. Below we try
+to load an actual nuclear production curve for Norway. However, Norway does not have
+nuclear production, so the curve does not exist:
+
+    >>> curve = eq.metadata.curve("NO Nuclear Production MWh/h Actual")
+    ...
+    NotFoundError: Curve 'NO Nuclear Production MWh/h Actual' not found
+
 
 Places
 ------
