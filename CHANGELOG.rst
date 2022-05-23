@@ -12,6 +12,16 @@ dev
 - Add a section in the metadata documentation on the ``eq.metadata.curve()`` method.
 - Add ``eq.metadata.curves()`` and ``eq.metadata.curve()`` to reference page in
   the documentation.
+- Add ``Area.short_tag`` which is a shorter tag than ``Area.tag``. It is typically
+  used for TSO areas. Example: The area with tag ``DE-Amprion`` has the short
+  tag ``Amprion``.
+- Changes in capacity allocation for these borders:
+   - AT-CZ Implicit only
+   - AT-HU Implicit only
+   - NO2-GB Implicit
+- Add borders:
+   - RS-XK Explicit
+   - TR-GE Explicit
 
 
 0.7.1
