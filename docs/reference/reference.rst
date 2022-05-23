@@ -37,6 +37,7 @@ Here are the different API section classes:
 ------
 
 .. autoclass:: energyquantified.api.MetadataAPI
+   :members: curves, curve
    :inherited-members:
 
 ------

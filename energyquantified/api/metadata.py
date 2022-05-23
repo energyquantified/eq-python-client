@@ -96,6 +96,26 @@ class MetadataAPI(_MetadataAPI):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def curve(self, name):
+        """
+        Fetch a Curve object for a given curve name.
+
+        :param name: Freetext search, defaults to None
+        :type name: str, required
+        :return: A Curve for the provided name
+        :rtype: :py:class:`energyquantified.metadata.Curve`
+        """
+        # Check if we already have a cached version
+        key = f"curve-name:{name}"
+        if self._cache.get(key):
+            return self._cache[key]
+        # Do the HTTP request, cache the result and return
+        safe_curve = self._urlencode_string(name, "name")
+        url = f"/metadata/curves/{safe_curve}/"
+        response = self._get(url)
+        self._cache[key] = parse_curve(response.json())
+        return self._cache[key]
+
     def categories(self):
         """
         List all available categories.

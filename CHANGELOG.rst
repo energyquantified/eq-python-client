@@ -2,6 +2,18 @@ Changelog
 =========
 
 
+dev
+---
+
+**Improvements**
+
+- Add ``eq.metadata.curve()`` which returns a Curve object for the corresponding
+  curve name.
+- Add a section in the metadata documentation on the ``eq.metadata.curve()`` method.
+- Add ``eq.metadata.curves()`` and ``eq.metadata.curve()`` to reference page in
+  the documentation.
+
+
 0.7.1
 -----
 
