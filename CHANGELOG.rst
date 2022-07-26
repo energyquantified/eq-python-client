@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+dev
+---
+
+**Dependencies**
+
+- ``requests``: Use the latest v2.x available, as requests is very stable library.
+- ``python-dateutil``: Use the latest v2.8.x available.
+
+
 0.8
 ---
 

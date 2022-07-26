@@ -7,10 +7,10 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 # Requirements
 install_requires = [
-    "requests==2.25.1",
+    "requests>=2.3,<3",
     "pytz",
     "tzlocal",
-    "python-dateutil==2.8.1",
+    "python-dateutil>=2.8.0,<2.9",
 ]
 # tests_require = [
 #     "pytest",
