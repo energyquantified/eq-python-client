@@ -10,7 +10,7 @@ install_requires = [
     "requests>=2.3,<3",
     "pytz",
     "tzlocal",
-    "python-dateutil>=2.8.1,<2.9",
+    "python-dateutil>=2.8.0,<2.9",
 ]
 # tests_require = [
 #     "pytest",
