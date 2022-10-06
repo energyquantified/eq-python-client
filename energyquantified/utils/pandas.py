@@ -203,13 +203,9 @@ def _timeseries_to_dataframe_value_single_header(timeseries, name,
     # Column header
     if include_instance:
         instance = timeseries.instance_or_contract_dataframe_column_header()
-        columns = [
-            [f"{name} {instance}".strip()]
-        ]
+        columns = [f"{name} {instance}".strip()]
     else:
-        columns = [
-            [name]
-        ]
+        columns = [name]
     # Convert a time series of (date, value)
     df = pd.DataFrame.from_records(
         ((v.value,) for v in timeseries),
@@ -273,17 +269,13 @@ def _timeseries_to_dataframe_scenarios_single_header(timeseries, name,
     if include_instance:
         instance = timeseries.instance_or_contract_dataframe_column_header()
         columns = [
-            [
-                f"{name} {instance} {scenario}".strip()
-                for scenario in timeseries.scenario_names
-            ],
+            f"{name} {instance} {scenario}".strip()
+            for scenario in timeseries.scenario_names
         ]
     else:
         columns = [
-            [
-                f"{name} {scenario}".strip()
-                for scenario in timeseries.scenario_names
-            ],
+            f"{name} {scenario}".strip()
+            for scenario in timeseries.scenario_names
         ]
     # Convert a time series of (date, scenarios[])
     df = pd.DataFrame.from_records(
@@ -349,14 +341,12 @@ def _timeseries_to_dataframe_mean_and_scenarios_single_header(timeseries, name,
     if include_instance:
         instance = timeseries.instance_or_contract_dataframe_column_header()
         columns = [
-            [
-                f"{name} {instance} {scenario}".strip()
-                for scenario in scenario_names
-            ],
+            f"{name} {instance} {scenario}".strip()
+            for scenario in scenario_names
         ]
     else:
         columns = [
-            [f"{name} {scenario}".strip() for scenario in scenario_names],
+            f"{name} {scenario}".strip() for scenario in scenario_names
         ]
     # Convert a time series of (date, scenarios[])
     df = pd.DataFrame.from_records(

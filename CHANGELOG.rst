@@ -2,6 +2,16 @@ Changelog
 =========
 
 
+dev
+---
+
+**Bugfixes**
+
+- When invoking ``timeseries.to_dataframe(single_level_header=True)`` the
+  resulting column index was still a ``MultiIndex`` but with a single level.
+  Now the resulting column index is a normal ``Index`` type.
+
+
 0.8.1
 -----
 
