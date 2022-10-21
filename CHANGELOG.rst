@@ -2,11 +2,12 @@ Changelog
 =========
 
 
-dev
----
+0.9.1
+-----
 
 **Improvements**
 
+- Improve ``Border.__hash__``, ``Border.__eq__`` and ``Border.__ne__`` methods
 - Add new areas:
    - ``MA`` Morocco
    - ``LY`` Libya
@@ -29,7 +30,6 @@ dev
    - ``HU – RO``
 - Border updated to flowed-based and explicit:
    - ``SI – HR``
-- Improve ``Border.__hash__``, ``Border.__eq__`` and ``Border.__ne__`` methods
 
 
 0.9
