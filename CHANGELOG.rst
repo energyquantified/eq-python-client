@@ -7,13 +7,29 @@ dev
 
 **Improvements**
 
-- Add new areas: ``MA`` Morocco, ``LY`` Libya, ``DZ`` Algeria
-- Add new border: ``SI – HU`` – Flow-based
-- Borders that no longer has commercial capacity: ``LV – RU``, ``FI – RU``,
-  ``LT – RU_KGD``
-- Borders that have changed to flow-based: ``AT – SI``, ``HR – HU``, ``CZ – DE``,
-  ``CZ – PL``, ``HU – SK``, ``PL – SK``, ``PL – DE``, ``CZ – SK``, ``HU – RO``
-- Border updated to flowed-based and explicit: ``SI – HR``
+- Add new areas:
+   - ``MA`` Morocco
+   - ``LY`` Libya
+   - ``DZ`` Algeria
+- Add new border:
+   - ``SI – HU`` Flow-based
+- Borders that no longer has commercial capacity:
+   - ``LV – RU``
+   - ``FI – RU``
+   - ``LT – RU_KGD``
+- Borders that have changed to flow-based:
+   - ``AT – SI``
+   - ``HR – HU``
+   - ``CZ – DE``
+   - ``CZ – PL``
+   - ``HU – SK``
+   - ``PL – SK``
+   - ``PL – DE``
+   - ``CZ – SK``
+   - ``HU – RO``
+- Border updated to flowed-based and explicit:
+   - ``SI – HR``
+- Improve ``Border.__hash__``, ``Border.__eq__`` and ``Border.__ne__`` methods
 
 
 0.9
