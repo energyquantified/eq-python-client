@@ -283,13 +283,15 @@ class Border:
         return (self.source, self.sink, self.allocations)
 
     def __hash__(self):
-        return hash(self.as_tuple())
+        return hash((self.__class__,) + self.as_tuple())
 
     def __eq__(self, other):
-        return self.as_tuple() == other.as_tuple()
+        return isinstance(other, self.__class__) and self.as_tuple() == other.as_tuple()
 
     def __ne__(self, other):
-        return self.as_tuple() != other.as_tuple()
+        return (
+            not isinstance(other, self.__class__) or self.as_tuple() != other.as_tuple()
+        )
 
     def __repr__(self):
         return "<Border: %s – %s, allocations=%s>" % (
@@ -595,6 +597,10 @@ MD = Area(tag="MD", name="Moldova", country=True, external=True)
 MT = Area(tag="MT", name="Malta", country=True, external=True)
 GE = Area(tag="GE", name="Georgia", country=True, external=True)
 
+MA = Area(tag="MA", name="Morocco", country=True, external=True)
+LY = Area(tag="LY", name="Libya", country=True, external=True)
+DZ = Area(tag="DZ", name="Algeria", country=True, external=True)
+
 
 ## Nordic borders
 
@@ -612,14 +618,14 @@ SE4._add_borders((DE, "I"), (DK2, "I"), (LT, "I"), (PL, "I"), (SE3, "I"))
 DK1._add_borders((DE, "I"), (DK2, "I"), (NL, "I"), (NO2, "I"), (SE3, "I"))
 DK2._add_borders((DE, "I"), (DK1, "I"), (SE4, "I"))
 
-FI._add_borders((EE, "I"), (NO4, "N"), (RU, "E"), (SE1, "I"), (SE3, "I"))
+FI._add_borders((EE, "I"), (NO4, "N"), (RU, "N"), (SE1, "I"), (SE3, "I"))
 
 
 ## Baltic borders
 
 EE._add_borders((FI, "I"), (LV, "I"), (RU, "N"))
-LV._add_borders((EE, "I"), (LT, "I"), (RU, "E"))
-LT._add_borders((BY, "N"), (LV, "I"), (PL, "I"), (RU_KGD, "E"), (SE4, "I"))
+LV._add_borders((EE, "I"), (LT, "I"), (RU, "N"))
+LT._add_borders((BY, "N"), (LV, "I"), (PL, "I"), (RU_KGD, "N"), (SE4, "I"))
 
 
 ## Central Western Europe
@@ -628,18 +634,16 @@ DE._add_borders(
     (AT, "F"),
     (BE, "F"),
     (CH, "E"),
-    (CZ, "EI"),
+    (CZ, "F"),
     (DK1, "I"),
     (DK2, "I"),
     (FR, "F"),
     (NL, "F"),
     (NO2, "I"),
-    (PL, "EI"),
+    (PL, "F"),
     (SE4, "I"),
 )
-AT._add_borders(
-    (CH, "E"), (CZ, "I"), (DE, "F"), (HU, "I"), (IT_NORD, "EI"), (SI, "EI")
-)
+AT._add_borders((CH, "E"), (CZ, "I"), (DE, "F"), (HU, "I"), (IT_NORD, "EI"), (SI, "F"))
 FR._add_borders((BE, "F"), (CH, "E"), (DE, "F"), (ES, "EI"), (GB, "E"), (IT_NORD, "EI"))
 FR_COR._add_borders((IT_SARD, "I"))
 NL._add_borders((BE, "F"), (DE, "F"), (DK1, "I"), (GB, "E"), (NO2, "I"))
@@ -656,10 +660,10 @@ IE._add_borders((NIE, "I"), (GB, "I"))
 
 ## Central Eastern Europe
 
-PL._add_borders((CZ, "EI"), (DE, "EI"), (LT, "I"), (SE4, "I"), (SK, "EI"), (UA, "E"))
-CZ._add_borders((AT, "I"), (DE, "EI"), (PL, "EI"), (SK, "EI"))
-HU._add_borders((AT, "I"), (HR, "E"), (RO, "EI"), (RS, "E"), (SK, "EI"), (UA, "E"))
-SK._add_borders((CZ, "EI"), (HU, "EI"), (PL, "EI"), (UA, "E"))
+PL._add_borders((CZ, "F"), (DE, "F"), (LT, "I"), (SE4, "I"), (SK, "F"), (UA, "E"))
+CZ._add_borders((AT, "I"), (DE, "F"), (PL, "F"), (SK, "F"))
+HU._add_borders((AT, "I"), (HR, "F"), (RO, "F"), (RS, "E"), (SI, "F"), (SK, "F"), (UA, "E"))
+SK._add_borders((CZ, "F"), (HU, "F"), (PL, "F"), (UA, "E"))
 
 
 ## Iberian Peninsula
@@ -679,9 +683,9 @@ IT_SICI._add_borders((IT_CALA, "I"), (MT, "I"))
 IT_SARD._add_borders((FR_COR, "I"), (IT_CNOR, "I"), (IT_CSUD, "I"))
 
 
-SI._add_borders((AT, "EI"), (HR, "EI"), (IT_NORD, "EI"))
-RO._add_borders((BG, "E"), (HU, "EI"), (RS, "E"), (UA, "E"))
-HR._add_borders((BA, "E"), (HU, "E"), (RS, "E"), (SI, "EI"))
+SI._add_borders((AT, "F"), (HR, "EF"), (HU, "F"), (IT_NORD, "EI"))
+RO._add_borders((BG, "E"), (HU, "F"), (RS, "E"), (UA, "E"))
+HR._add_borders((BA, "E"), (HU, "F"), (RS, "E"), (SI, "EF"))
 BA._add_borders((HR, "E"), (ME, "E"), (RS, "E"))
 RS._add_borders(
     (BA, "E"),
@@ -708,8 +712,8 @@ TR._add_borders((BG, "E"), (GE, "E"), (GR, "E"))
 
 ## Others
 
-RU._add_borders((EE, "N"), (FI, "E"), (LV, "E"))
-RU_KGD._add_borders((LT, "E"))
+RU._add_borders((EE, "N"), (FI, "N"), (LV, "N"))
+RU_KGD._add_borders((LT, "N"))
 BY._add_borders((LT, "N"))
 UA._add_borders((HU, "E"), (PL, "E"), (RO, "E"), (SK, "E"))
 MT._add_borders((IT_SICI, "I"))
