@@ -2,6 +2,14 @@ Changelog
 =========
 
 
+dev
+---
+
+**Improvements**
+
+- Update borders: Set ``SI – HU`` and ``SI – HU`` as Flow-based
+
+
 0.9.1
 -----
 

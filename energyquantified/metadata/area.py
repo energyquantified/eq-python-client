@@ -643,7 +643,7 @@ DE._add_borders(
     (PL, "F"),
     (SE4, "I"),
 )
-AT._add_borders((CH, "E"), (CZ, "I"), (DE, "F"), (HU, "I"), (IT_NORD, "EI"), (SI, "F"))
+AT._add_borders((CH, "E"), (CZ, "F"), (DE, "F"), (HU, "F"), (IT_NORD, "EI"), (SI, "F"))
 FR._add_borders((BE, "F"), (CH, "E"), (DE, "F"), (ES, "EI"), (GB, "E"), (IT_NORD, "EI"))
 FR_COR._add_borders((IT_SARD, "I"))
 NL._add_borders((BE, "F"), (DE, "F"), (DK1, "I"), (GB, "E"), (NO2, "I"))
@@ -661,8 +661,8 @@ IE._add_borders((NIE, "I"), (GB, "I"))
 ## Central Eastern Europe
 
 PL._add_borders((CZ, "F"), (DE, "F"), (LT, "I"), (SE4, "I"), (SK, "F"), (UA, "E"))
-CZ._add_borders((AT, "I"), (DE, "F"), (PL, "F"), (SK, "F"))
-HU._add_borders((AT, "I"), (HR, "F"), (RO, "F"), (RS, "E"), (SI, "F"), (SK, "F"), (UA, "E"))
+CZ._add_borders((AT, "F"), (DE, "F"), (PL, "F"), (SK, "F"))
+HU._add_borders((AT, "F"), (HR, "F"), (RO, "F"), (RS, "E"), (SI, "F"), (SK, "F"), (UA, "E"))
 SK._add_borders((CZ, "F"), (HU, "F"), (PL, "F"), (UA, "E"))
 
 
