@@ -9,6 +9,10 @@ dev
 
 - Update borders: Set ``SI – HU`` and ``SI – HU`` as Flow-based
 
+**Bugfixes**
+
+- Fixed an error where SRMC responses failed to parse empty lists in the response
+
 
 0.9.1
 -----

@@ -22,7 +22,7 @@ def parse_srmc_response(json):
         options = parse_srmc_options(options)
     # Check for OHLC response
     data = json.get('ohlc')
-    if data:
+    if data is not None:
         ohlc = parse_ohlc_list(data)
         return SRMC(
             curve=curve,
@@ -32,7 +32,7 @@ def parse_srmc_response(json):
         )
     # Check for timeseries response
     data = json.get('timeseries')
-    if data:
+    if data is not None:
         timeseries = parse_timeseries(data)
         return SRMC(
             curve=curve,
@@ -42,7 +42,7 @@ def parse_srmc_response(json):
         )
     # Check for period-based series response
     data = json.get('periodseries')
-    if data:
+    if data is not None:
         periodseries = parse_periodseries(data)
         return SRMC(
             curve=curve,
