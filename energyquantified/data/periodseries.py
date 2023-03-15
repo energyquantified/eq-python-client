@@ -256,7 +256,7 @@ class Periodseries(Series):
         else:
             raise ValueError("Periodseries has no values")
 
-    def to_timeseries(self, frequency=None):
+    def to_timeseries(self, frequency=None, use_capacity=False):
         """
         Convert this period-based series to a regular time series.
 
@@ -265,11 +265,16 @@ class Periodseries(Series):
 
         :param frequency: The frequency of the resulting time series
         :type frequency: Frequency, required
+        :param use_capacity: If periods' (installed) 'capacity' should be used instead of
+        'value' when creating the timeseries. Defaults to False.
+        :type use_capacity: Bool, optional
         :return: A time series
         :rtype: Timeseries
         """
         # Verify parameters
         assert isinstance(frequency, Frequency), "Must be a frequency"
+        if use_capacity:
+            assert all(isinstance(p, CapacityPeriod) for p in self.data), "Periods does not have capacity"
         # Prepare conversion
         resolution = Resolution(frequency, self.resolution.timezone)
         if not self.has_data():
@@ -285,7 +290,8 @@ class Periodseries(Series):
             periods=self.data,
             resolution=resolution,
             begin=begin,
-            end=end
+            end=end,
+            use_capacity=use_capacity,
         )
         # Convert
         data = [Value(dt, value) for dt, value in iterator]
@@ -298,7 +304,7 @@ class Periodseries(Series):
         timeseries.set_name(self._name)
         return timeseries
 
-    def to_df(self, frequency=None, name=None, single_level_header=False):
+    def to_df(self, frequency=None, name=None, single_level_header=False, use_capacity=False):
         """
         Alias for :meth:`Periodseries.to_dataframe`.
 
@@ -319,6 +325,9 @@ class Periodseries(Series):
         :param single_level_header: Set to True to use single-level header \
             in the DataFrame, defaults to False
         :type single_level_header: boolean, optional
+        :param use_capacity: If periods' (installed) 'capacity' should be used instead of
+        'value' when creating the timeseries. Defaults to False.
+        :type use_capacity: Bool, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
@@ -326,11 +335,12 @@ class Periodseries(Series):
         return self.to_dataframe(
             frequency=frequency,
             name=name,
-            single_level_header=single_level_header
+            single_level_header=single_level_header,
+            use_capacity=use_capacity,
         )
 
     def to_dataframe(self, frequency=None, name=None,
-                     single_level_header=False):
+                     single_level_header=False, use_capacity=False):
         """
         Convert this period-based to a ``pandas.DataFrame`` as a time series
         in the given frequency.
@@ -349,6 +359,9 @@ class Periodseries(Series):
         :param single_level_header: Set to True to use single-level header \
             in the DataFrame, defaults to False
         :type single_level_header: boolean, optional
+        :param use_capacity: If periods' (installed) 'capacity' should be used instead of
+        'value' when creating the timeseries. Defaults to False.
+        :type use_capacity: Bool, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
@@ -356,7 +369,7 @@ class Periodseries(Series):
         # Verify parameters
         assert isinstance(frequency, Frequency), "Must be a frequency"
         # Conversion
-        timeseries = self.to_timeseries(frequency=frequency)
+        timeseries = self.to_timeseries(frequency=frequency, use_capacity=use_capacity)
         df = timeseries.to_dataframe(
             name=name,
             single_level_header=single_level_header
@@ -384,11 +397,12 @@ class _PeriodsToTimeseriesIterator:
     A period-based series iterator used for conversions to Timeseries objects.
     """
 
-    def __init__(self, periods=None, resolution=None, begin=None, end=None):
+    def __init__(self, periods=None, resolution=None, begin=None, end=None, use_capacity=False):
         self.periods = [p for p in periods if p.end > begin and p.begin < end]
         self.resolution = resolution
         self.begin = begin
         self.end = end
+        self.use_capacity = use_capacity
         # Iterator stuff
         self.d = None
         self.p = None
@@ -412,6 +426,11 @@ class _PeriodsToTimeseriesIterator:
             raise StopIteration
         else:
             return self._find_next_value(p, d0, d1)
+    
+    def _get_value(self, period):
+        if not self.use_capacity:
+            return period.value
+        return period.installed
 
     def _find_next_value(self, p, d0, d1):
         # No more periods
@@ -419,7 +438,7 @@ class _PeriodsToTimeseriesIterator:
             return (d0, None)
         # Period covers the entire time interval
         if p.is_covered(d0, d1):
-            return (d0, p.value)
+            return (d0, self._get_value(p))
         # We do not have any values for given date
         if p.is_interval_before(d0, d1):
             return (d0, None)
@@ -469,7 +488,7 @@ class _PeriodsToTimeseriesIterator:
     def _calc_mean_periods(self, periods, begin, end):
         # Get value and duration in interval for each period
         available_weights = [
-            (p.value, p.get_duration_seconds(begin, end))
+            (self._get_value(p), p.get_duration_seconds(begin, end))
             for p in periods
         ]
         # Get sum of weight
@@ -500,7 +519,7 @@ class PeriodseriesList(list):
         # Asserts
         _validate_periodseries_list(iterable)
 
-    def to_timeseries(self, frequency=None):
+    def to_timeseries(self, frequency=None, use_capacity=False):
         """
         Convert all period-based series in this list to time series.
 
@@ -509,6 +528,12 @@ class PeriodseriesList(list):
 
         :param frequency: The frequency of the resulting time series
         :type frequency: Frequency, required
+        :param use_capacity: If periods' (installed) 'capacity' should be used instead of
+        'value' when creating the timeseries. Defaults to False.
+        :type use_capacity: Bool, optional
+        :param use_capacity: If periods' (installed) 'capacity' should be used instead of
+        'value' when creating the timeseries. Defaults to False.
+        :type use_capacity: Bool, optional
         :return: A list of time series
         :rtype: TimeseriesList
         """
@@ -516,11 +541,11 @@ class PeriodseriesList(list):
         assert isinstance(frequency, Frequency), "Must be a frequency"
         # Convert all period-based series to time series
         return TimeseriesList(
-            periodseries.to_timeseries(frequency=frequency)
+            periodseries.to_timeseries(frequency=frequency, use_capacity=use_capacity)
             for periodseries in self
         )
 
-    def to_df(self, frequency=None, single_level_header=False):
+    def to_df(self, frequency=None, single_level_header=False, use_capacity=False):
         """
         Alias for :meth:`Timeseries.to_dataframe`.
 
@@ -533,16 +558,20 @@ class PeriodseriesList(list):
         :param single_level_header: Set to True to use single-level header \
             in the DataFrame, defaults to False
         :type single_level_header: boolean, optional
+        :param use_capacity: If periods' (installed) 'capacity' should be used instead of
+        'value' when creating the timeseries. Defaults to False.
+        :type use_capacity: Bool, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
         return self.to_dataframe(
             frequency=frequency,
-            single_level_header=single_level_header
+            single_level_header=single_level_header,
+            use_capacity=use_capacity,
         )
 
-    def to_dataframe(self, frequency=None, single_level_header=False):
+    def to_dataframe(self, frequency=None, single_level_header=False, use_capacity=False):
         """
         Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
         series are placed in its own column and are lined up with the date-time
@@ -553,6 +582,9 @@ class PeriodseriesList(list):
         :param single_level_header: Set to True to use single-level header \
             in the DataFrame, defaults to False
         :type single_level_header: boolean, optional
+        :param use_capacity: If periods' (installed) 'capacity' should be used instead of
+        'value' when creating the timeseries. Defaults to False.
+        :type use_capacity: Bool, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
@@ -560,7 +592,7 @@ class PeriodseriesList(list):
         # Verify parameters
         assert isinstance(frequency, Frequency), "Must be a frequency"
         # Convert to time series then to data frame
-        timeseries_list = self.to_timeseries(frequency=frequency)
+        timeseries_list = self.to_timeseries(frequency=frequency, use_capacity=use_capacity)
         return timeseries_list.to_dataframe(
             single_level_header=single_level_header
         )

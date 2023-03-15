@@ -11,6 +11,8 @@ dev
     - Set ``SI – HU`` and ``SI – HU`` as Flow-based
 - Increase rate limits.
 - Increase default requests timeout.
+- Add support for using periods installed capacity instead of values when
+  converting a PeriodSeries to a Timeseries or a DataFrame.
 
 **Bugfixes**
 
