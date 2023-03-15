@@ -99,6 +99,31 @@ So if Energy Quantified adds more products to the Realto marketplace — but
 hasn't updated the client yet — you can set the ``api_url`` parameter to the
 base URL of those API's.
 
+-----
+
+Proxies
+----------------------
+
+If you need to use a proxy, it can be configured for the entire session in both
+:py:class:`EnergyQuantified <energyquantified.EnergyQuantified>`
+and :py:class:`RealtoConnection <energyquantified.RealtoConnection>` by providing
+the ``proxies`` parameter with a dictionary of proxies.
+
+Example:
+
+   >>> from energyquantified import EnergyQuantified
+   >>> proxies = {
+   >>>     'http': 'http://10.10.1.10:3128',
+   >>>     'https': 'http://10.10.1.10:1080',
+   >>> }
+   >>> eq = EnergyQuantified(proxies=proxies)
+
+   >>> from energyquantified import RealtoConnection
+   >>> proxies = {
+   >>>     'http': 'http://10.10.1.10:3128',
+   >>>     'https': 'http://10.10.1.10:1080',
+   >>> }
+   >>> eq = RealtoConnection(proxies=proxies)
 
 -----
 
