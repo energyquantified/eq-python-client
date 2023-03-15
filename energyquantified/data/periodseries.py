@@ -531,9 +531,6 @@ class PeriodseriesList(list):
         :param use_capacity: If periods' (installed) 'capacity' should be used instead of
         'value' when creating the timeseries. Defaults to False.
         :type use_capacity: Bool, optional
-        :param use_capacity: If periods' (installed) 'capacity' should be used instead of
-        'value' when creating the timeseries. Defaults to False.
-        :type use_capacity: Bool, optional
         :return: A list of time series
         :rtype: TimeseriesList
         """
