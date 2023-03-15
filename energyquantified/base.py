@@ -17,7 +17,6 @@ from .exceptions import UnauthorizedError, InitializationError
 # Defaults
 
 BASE_PATH = "https://app.energyquantified.com/api"
-#BASE_PATH = "http://localhost:8080/api"
 
 
 class EnergyQuantified:
