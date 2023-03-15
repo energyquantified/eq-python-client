@@ -9,6 +9,7 @@ from .api import (
     PeriodInstancesAPI,
     OhlcAPI,
     SrmcAPI,
+    CurveUpdateEventAPI,
 )
 from .exceptions import UnauthorizedError, InitializationError
 
@@ -16,6 +17,7 @@ from .exceptions import UnauthorizedError, InitializationError
 # Defaults
 
 BASE_PATH = "https://app.energyquantified.com/api"
+#BASE_PATH = "http://localhost:8080/api"
 
 
 class EnergyQuantified:
@@ -57,7 +59,8 @@ class EnergyQuantified:
             ssl_verify=True,
             timeout=15.0,
             http_delay=0.125,
-            api_url=BASE_PATH
+            api_url=BASE_PATH,
+            last_id_file=None,
         ):
         # Simple validations
         assert api_key or api_key_file, "api_key is missing"
@@ -111,6 +114,9 @@ class EnergyQuantified:
         #: See :py:class:`energyquantified.api.SrmcAPI`. For loading and
         #: calculating short-run marginal costs (SRMC) from OHLC data.
         self.srmc = SrmcAPI(self)
+        # TODO comments that generate docs (see above)
+        # Event
+        self.events = CurveUpdateEventAPI(self._api_key, last_id_file)
 
     def is_api_key_valid(self):
         """
