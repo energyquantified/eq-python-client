@@ -29,7 +29,7 @@ class Session:
     """
 
     def __init__(self, timeout=30, max_redirects=5, verify=True, headers={},
-            auth=None, base_url=None, delay=None, retry=None, proxies={}):
+            auth=None, base_url=None, delay=None, retry=None, proxies=None):
         # Rate limit and retry
         self.rate_limiter = RateLimiter(delay) if delay else RateLimiter()
         self.retry = retry if retry else Retry()
@@ -44,7 +44,8 @@ class Session:
         self._requests = 0
         # Session
         self.session = requests.Session()
-        self.session.proxies = proxies
+        if proxies is not None:
+            self.session.proxies = proxies
         self.session.max_redirects = max_redirects
         self.session.headers.update({"User-agent": USER_AGENT})
         self.session.headers.update(self.headers)

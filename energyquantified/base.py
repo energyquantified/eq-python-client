@@ -41,7 +41,7 @@ class EnergyQuantified:
     :param http_delay: The minimum number of seconds between the start of\
                        each HTTP request, defaults to 0.0667 seconds (15 req/s)
     :type http_delay: float, optional
-    :param proxies: Map of proxies, defaults to an empty dict (no proxy)
+    :param proxies: Map of proxies, defaults to None (no proxy)
     :type proxies: dict, optional
 
     **Basic usage:**
@@ -60,7 +60,7 @@ class EnergyQuantified:
             timeout=20.0,
             http_delay=0.0667,
             api_url=BASE_PATH,
-            proxies={},
+            proxies=None,
         ):
         # Simple validations
         assert api_key or api_key_file, "api_key is missing"
@@ -79,7 +79,7 @@ class EnergyQuantified:
             "http_delay must be 0.05s or slower (20 req/s)"
         )
         assert api_url, "api_url is missing"
-        assert isinstance(proxies, dict), "proxies must be a dict"
+        assert proxies is None or isinstance(proxies, dict), "proxies must be None or a dict"
         # Attributes
         self._api_key = _find_api_key(api_key, api_key_file)
         self._api_url = api_url
@@ -163,7 +163,7 @@ class RealtoConnection:
     :param http_delay: The minimum number of seconds between the start of\
                        each HTTP request, defaults to 0.1 seconds (10 req/s)
     :type http_delay: float, optional
-    :param proxies: Map of proxies, defaults to an empty dict (no proxy)
+    :param proxies: Map of proxies, defaults to None (no proxy)
     :type proxies: dict, optional
 
     **Basic usage:**
@@ -219,7 +219,7 @@ class RealtoConnection:
         assert http_delay >= 0.05, (
             "http_delay must be 0.05s or slower (20 req/s)"
         )
-        assert isinstance(proxies, dict), "proxies must be a dict"
+        assert proxies is None or isinstance(proxies, dict), "proxies must be None or a dict"
         # Attributes
         self._api_url = api_url
         self._api_key = _find_api_key(api_key, api_key_file)
