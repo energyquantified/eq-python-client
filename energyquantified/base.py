@@ -158,10 +158,10 @@ class RealtoConnection:
     :param ssl_verify: Whether or not to verify the server certificate,\
                        defaults to True
     :type ssl_verify: bool, optional
-    :param timeout: Maximum timeout per HTTP request, defaults to 15.0
+    :param timeout: Maximum timeout per HTTP request, defaults to 20.0
     :type timeout: float, optional
     :param http_delay: The minimum number of seconds between the start of\
-                       each HTTP request, defaults to 0.125 seconds (8 req/s)
+                       each HTTP request, defaults to 0.1 seconds (10 req/s)
     :type http_delay: float, optional
     :param proxies: Map of proxies, defaults to an empty dict (no proxy)
     :type proxies: dict, optional
@@ -198,8 +198,8 @@ class RealtoConnection:
             api_key=None,
             api_key_file=None,
             ssl_verify=True,
-            timeout=15.0,
-            http_delay=0.125,
+            timeout=20.0,
+            http_delay=0.1,
             proxies={},
         ):
         # Simple validations
@@ -216,8 +216,8 @@ class RealtoConnection:
                 "must be set at the same time, but both were given"
             )
         assert timeout >= 0, "timeout must be larger than 0s"
-        assert http_delay >= 0.0667, (
-            "http_delay must be 0.0667s or slower (15 req/s)"
+        assert http_delay >= 0.05, (
+            "http_delay must be 0.05s or slower (20 req/s)"
         )
         assert isinstance(proxies, dict), "proxies must be a dict"
         # Attributes
