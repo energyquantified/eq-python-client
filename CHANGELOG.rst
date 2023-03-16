@@ -11,8 +11,8 @@ dev
 - Update borders:
     - Set ``SI – HU`` and ``SI – HU`` as Flow-based
 - Increase rate limits.
-- Increase default requests timeout.
-- Add option to include ``proxies`` in ``EnergyQuantified`` and ``RealtoConnection``
+- Increase default request timeout.
+- Add option to include ``proxies`` in ``EnergyQuantified`` and ``RealtoConnection``.
 - Add support for using periods installed capacity instead of values when
   converting a ``PeriodSeries`` to a ``Timeseries`` or a ``DataFrame``.
 
