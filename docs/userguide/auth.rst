@@ -134,6 +134,12 @@ Example with :py:class:`RealtoConnection <energyquantified.RealtoConnection>`:
    >>>     proxies=proxies,  # Supply proxies here
    >>> )
 
+Since the ``requests`` library is used internally in
+:py:class:`EnergyQuantified <energyquantified.EnergyQuantified>` and
+:py:class:`RealtoConnection <energyquantified.RealtoConnection>`, refer to
+the `proxies section <https://requests.readthedocs.io/en/latest/user/advanced/#proxies>`_
+in their documentation.
+
 -----
 
 Next step
