@@ -274,7 +274,7 @@ class Periodseries(Series):
         # Verify parameters
         assert isinstance(frequency, Frequency), "Must be a frequency"
         assert isinstance(field, str), "Must be a str"
-        assert field in tuple("value", "installed"), "field must be 'value' or 'installed'"
+        assert field in ("value", "installed"), "field must be 'value' or 'installed'"
         if field == "installed":
             assert all(isinstance(p, CapacityPeriod) for p in self.data), "field='installed' requires a series of CapacityPeriods"
         # Prepare conversion
