@@ -265,8 +265,8 @@ class Periodseries(Series):
 
         :param frequency: The frequency of the resulting time series
         :type frequency: Frequency, required
-        :param field: Which period attribute to use when converting to timeseries. Options:
-        'value' or 'installed'. Defaults to 'value'.
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
         :type field: str, optional
         :return: A time series
         :rtype: Timeseries
@@ -324,11 +324,11 @@ class Periodseries(Series):
         :param name: Set a name for the column in the ``pandas.DataFrame``,\
             defaults to ``value``
         :type name: str, optional
-        :param single_level_header: Set to True to use single-level header \
+        :param single_level_header: Set to True to use single-level header\
             in the DataFrame, defaults to False
         :type single_level_header: boolean, optional
-        :param field: Which period attribute to use when converting to timeseries. Options:
-        'value' or 'installed'. Defaults to 'value'.
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
         :type field: str, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
@@ -361,8 +361,8 @@ class Periodseries(Series):
         :param single_level_header: Set to True to use single-level header \
             in the DataFrame, defaults to False
         :type single_level_header: boolean, optional
-        :param field: Which period attribute to use when converting to timeseries. Options:
-        'value' or 'installed'. Defaults to 'value'.
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
         :type field: str, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
@@ -530,8 +530,8 @@ class PeriodseriesList(list):
 
         :param frequency: The frequency of the resulting time series
         :type frequency: Frequency, required
-        :param field: Which period attribute to use when converting to timeseries. Options:
-        'value' or 'installed'. Defaults to 'value'.
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
         :type field: str, optional
         :return: A list of time series
         :rtype: TimeseriesList
@@ -557,8 +557,8 @@ class PeriodseriesList(list):
         :param single_level_header: Set to True to use single-level header \
             in the DataFrame, defaults to False
         :type single_level_header: boolean, optional
-        :param field: Which period attribute to use when converting to timeseries. Options:
-        'value' or 'installed'. Defaults to 'value'.
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
         :type field: str, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
@@ -581,8 +581,8 @@ class PeriodseriesList(list):
         :param single_level_header: Set to True to use single-level header \
             in the DataFrame, defaults to False
         :type single_level_header: boolean, optional
-        :param field: Which period attribute to use when converting to timeseries. Options:
-        'value' or 'installed'. Defaults to 'value'.
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
         :type field: str, optional
         :return: A DataFrame
         :rtype: pandas.DataFrame
