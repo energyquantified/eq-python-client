@@ -41,6 +41,8 @@ class EnergyQuantified:
     :param http_delay: The minimum number of seconds between the start of\
                        each HTTP request, defaults to 0.0667 seconds (15 req/s)
     :type http_delay: float, optional
+    :param proxies: Map of proxies, defaults to None (no proxy)
+    :type proxies: dict, optional
 
     **Basic usage:**
 
@@ -57,7 +59,8 @@ class EnergyQuantified:
             ssl_verify=True,
             timeout=20.0,
             http_delay=0.0667,
-            api_url=BASE_PATH
+            api_url=BASE_PATH,
+            proxies=None,
         ):
         # Simple validations
         assert api_key or api_key_file, "api_key is missing"
@@ -76,6 +79,7 @@ class EnergyQuantified:
             "http_delay must be 0.05s or slower (20 req/s)"
         )
         assert api_url, "api_url is missing"
+        assert proxies is None or isinstance(proxies, dict), "proxies must be None or a dict"
         # Attributes
         self._api_key = _find_api_key(api_key, api_key_file)
         self._api_url = api_url
@@ -87,7 +91,8 @@ class EnergyQuantified:
             headers={
                 "X-API-Key": self._api_key,
             },
-            delay=http_delay
+            delay=http_delay,
+            proxies=proxies,
         )
         # --- Public members ---
         #: See :py:class:`energyquantified.api.MetadataAPI`. For metadata
@@ -153,11 +158,13 @@ class RealtoConnection:
     :param ssl_verify: Whether or not to verify the server certificate,\
                        defaults to True
     :type ssl_verify: bool, optional
-    :param timeout: Maximum timeout per HTTP request, defaults to 15.0
+    :param timeout: Maximum timeout per HTTP request, defaults to 20.0
     :type timeout: float, optional
     :param http_delay: The minimum number of seconds between the start of\
-                       each HTTP request, defaults to 0.125 seconds (8 req/s)
+                       each HTTP request, defaults to 0.1 seconds (10 req/s)
     :type http_delay: float, optional
+    :param proxies: Map of proxies, defaults to None (no proxy)
+    :type proxies: dict, optional
 
     **Basic usage:**
 
@@ -191,8 +198,9 @@ class RealtoConnection:
             api_key=None,
             api_key_file=None,
             ssl_verify=True,
-            timeout=15.0,
-            http_delay=0.125
+            timeout=20.0,
+            http_delay=0.1,
+            proxies=None,
         ):
         # Simple validations
         assert api_url, "api_url is missing"
@@ -208,9 +216,10 @@ class RealtoConnection:
                 "must be set at the same time, but both were given"
             )
         assert timeout >= 0, "timeout must be larger than 0s"
-        assert http_delay >= 0.0667, (
-            "http_delay must be 0.0667s or slower (15 req/s)"
+        assert http_delay >= 0.05, (
+            "http_delay must be 0.05s or slower (20 req/s)"
         )
+        assert proxies is None or isinstance(proxies, dict), "proxies must be None or a dict"
         # Attributes
         self._api_url = api_url
         self._api_key = _find_api_key(api_key, api_key_file)
@@ -222,7 +231,8 @@ class RealtoConnection:
             headers={
                 "Ocp-Apim-Subscription-Key": self._api_key,
             },
-            delay=http_delay
+            delay=http_delay,
+            proxies=proxies,
         )
         # --- Public members ---
         #: See :py:class:`energyquantified.api.MetadataAPI`. For metadata
