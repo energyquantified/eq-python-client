@@ -7,7 +7,8 @@ dev
 
 **Improvements**
 
-- Update borders: 
+- Add areas ``IS`` and ``LU``
+- Update borders:
     - Set ``SI – HU`` and ``SI – HU`` as Flow-based
 - Increase rate limits.
 - Increase default requests timeout.
