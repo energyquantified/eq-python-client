@@ -11,6 +11,7 @@ dev
     - Set ``SI – HU`` and ``SI – HU`` as Flow-based
 - Increase rate limits.
 - Increase default requests timeout.
+- Add option to include ``proxies`` in ``EnergyQuantified`` and ``RealtoConnection``
 
 **Bugfixes**
 
