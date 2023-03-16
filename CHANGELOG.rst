@@ -2,6 +2,14 @@ Changelog
 =========
 
 
+0.10.1
+------
+
+**Bugfixes**
+
+- Fixed a bug introduced in v0.10 in ``PeriodSeries.to_timeseries()``
+
+
 0.10
 ----
 
