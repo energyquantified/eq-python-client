@@ -200,7 +200,7 @@ class RealtoConnection:
             ssl_verify=True,
             timeout=20.0,
             http_delay=0.1,
-            proxies={},
+            proxies=None,
         ):
         # Simple validations
         assert api_url, "api_url is missing"
