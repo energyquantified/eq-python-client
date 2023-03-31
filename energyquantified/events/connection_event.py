@@ -65,6 +65,15 @@ class ConnectionEvent:
         self.ws_status_code = status_code
         self.message = message
 
+    def __str__(self):
+        return (f"<ConnectionEvent: "
+                f"status={self.status}, "
+                f"ws_status_code={self.ws_status_code}, "
+                f"message={self.message}>")
+
+    def __repr__(self):
+        return str(self)
+
 # @dataclass(frozen=True)
 # class ConnectionEvent:
 #     status: str
