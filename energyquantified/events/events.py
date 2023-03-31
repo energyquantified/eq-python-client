@@ -1,75 +1,23 @@
-from enum import Enum
 from energyquantified.metadata import CurveType
-from energyquantified.parser.metadata import parse_curve, parse_instance
 from energyquantified.exceptions import APIError
 from dataclasses import dataclass
 from typing import Optional
 
+from . import EventType
+
+
 @dataclass(frozen=True)
-class DisconnectEvent:
+class DisconnectedEvent:
     status_code: int
     message: Optional[str] = None
 
+@dataclass(frozen=True)
+class UnavailableEvent:
+    status_code: int
+    server_message: Optional[str] = None
+    message: Optional[str] = None
 
-_message_lookup = {}
-class MessageType(Enum):
-    """
-    Type of response from event stream.
-    """
 
-    EVENT = ("EVENT", "Event")
-    INFO = ("INFO", "Info")
-    FILTERS = ("FILTERS", "Filters")
-    TIMEOUT = ("TIMEOUT", "Timeout")
-    MESSAGE = ("MESSAGE", "Message") # TODO fix var naming
-    DISCONNECT = ("DISCONNECT", "Disconnect")
-    UNAVAILABLE = ("UNAVAILABLE", "Unavailable")
-
-    def __init__(self, tag=None, label=None):
-        self.tag = tag
-        self.label = label
-        _message_lookup[tag.lower()] = self
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return self.__str__()
-
-    @staticmethod
-    def is_valid_tag(tag):
-        return tag.lower() in _message_lookup
-
-    @staticmethod
-    def by_tag(tag):
-        return _message_lookup[tag.lower()]
-
-_event_lookup = {}
-class EventType(Enum):
-
-    CREATE = ("CREATE", "Create")
-    UPDATE = ("UPDATE", "Update")
-    DELETE = ("DELETE", "Delete")
-    TRUNCATE = ("TRUNCATE", "Truncate")
-
-    def __init__(self, tag=None, label=None):
-        self.tag = tag
-        self.label = label
-        _event_lookup[tag.lower()] = self
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return self.__str__()
-
-    @staticmethod
-    def is_valid_tag(tag):
-        return tag.lower() in _event_lookup
-
-    @staticmethod
-    def by_tag(tag):
-        return _event_lookup[tag.lower()]
 
 class CurveUpdateEvent:
     def __init__(
@@ -110,8 +58,10 @@ class CurveUpdateEvent:
 
     def load_data(self, eq):
         try:
+            print("loading data ..")
             data = self._load_data(eq)
         except APIError as e:
+            print("failed to laod data")
             # TODO
             data = e
         return data

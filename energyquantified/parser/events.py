@@ -32,19 +32,24 @@ def parse_event(json):
     )
 
 def parse_event_options(json):
+    print(f"JSON: {json}")
     # Event type
     curve_names = json.get("curve_names")
     # Either EventCurveOptions or EventFilterOptions
     if curve_names is not None:
+        print("parse curve")
         return _parse_curve_options(json, curve_names)
+    print("parse filter")
     return _parse_filter_options(json)
 
 def _parse_curve_options(json, curve_names):
+    print("start parse curve")
     # EventCurveOptions
-    options = EventCurveOptions().set_curves(*curve_names)
+    options = EventCurveOptions().set_curve_names(curve_names)
     return _parse_shared_options(json, options)
 
 def _parse_filter_options(json):
+    print("start parse filter")
     # EventFilterOptions
     options = EventFilterOptions()
     _parse_shared_options(json, options)
@@ -55,23 +60,23 @@ def _parse_filter_options(json):
     # Areas
     areas = json.get("areas")
     if areas is not None:
-        options.set_areas(*areas)
+        options.set_areas(areas)
     # Data types
-    data_types = json.get("data_type")
+    data_types = json.get("data_types")
     if data_types is not None:
-        options.set_data_types(*data_types)
+        options.set_data_types(data_types)
     # Commodities
     commodities = json.get("commodity")
     if commodities is not None:
-        options.set_commodities(*commodities)
+        options.set_commodities(commodities)
     # Categories
     categories = json.get("category")
     if categories is not None:
-        options.set_categories(*categories)
+        options.set_categories(categories)
     # Exact categories
     exact_categories = json.get("exact_category")
     if exact_categories is not None:
-        options.set_exact_categories(*exact_categories)
+        options.set_exact_categories(exact_categories)
     # Location
     location = json.get("location")
     if location is not None:

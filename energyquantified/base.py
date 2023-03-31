@@ -42,6 +42,9 @@ class EnergyQuantified:
     :param http_delay: The minimum number of seconds between the start of\
                        each HTTP request, defaults to 0.125 seconds (8 req/s)
     :type http_delay: float, optional
+    :param last_id_file: A file path to a file that keeps track of the last\
+                       event id received from the curve events stream
+    :type last_id_file: str, optional
 
     **Basic usage:**
 
@@ -49,6 +52,25 @@ class EnergyQuantified:
        >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd")
        >>> eq.metadata.curves(q="de wind power actual")
 
+    If you intend to listen to the curve events stream, keep track of the
+    last event received between sesssions by supplying the **last_id_file**
+    parameter with a file path. The file will be created for you if it does
+    not already exist. This is useful in the case of a disconnect or
+    an unexpected termination.
+        
+        >>> from energyquantified import EnergyQuantified
+        >>> eq = EnergyQuantified(
+        >>>     api_key="aaaa-bbbb-cccc-dddd,
+        >>>     last_id_file="last_id_file.json", # file path
+        >>> )
+    
+    The file can also be created inside a folder (which will also be created):
+    
+        >>> from energyquantified import EnergyQuantified
+        >>> eq = EnergyQuantified(
+        >>>     api_key="aaaa-bbbb-cccc-dddd,
+        >>>     last_id_file="folder_name/last_id_file.json",
+        >>> )
     """
 
     def __init__(

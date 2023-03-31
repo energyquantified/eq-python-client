@@ -70,6 +70,10 @@ Here are the different API section classes:
 .. autoclass:: energyquantified.api.SrmcAPI
    :inherited-members:
 
+------
+
+.. autoclass:: energyquantified.api.CurveUpdateEventAPI
+   :inherited-members:
 
 Data types
 ----------

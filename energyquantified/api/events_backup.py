@@ -5,19 +5,11 @@ import json
 import queue
 import time
 import os
-from energyquantified.events import (MessageType,
-                                     UnavailableEvent,
-                                     DisconnectedEvent,
-                                     EventCurveOptions,
-                                     EventFilterOptions,
-                                     ConnectionEvent,
-                                     WebSocketError)
+from energyquantified.events.events import MessageType, DisconnectedEvent
+from energyquantified.events.event_options import EventCurveOptions, EventFilterOptions
 from energyquantified.parser.events import parse_event_options, parse_event
 import atexit
 from socket import timeout
-
-BASE_URL = f"ws://localhost:8080/events/curves"
-#TEST_URL = f"ws://192.168.1.199/events/curves"
 
 class CurveUpdateEventAPI:
     """
@@ -40,12 +32,12 @@ class CurveUpdateEventAPI:
         >>> from energyquantified import EnergyQuantified
         >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd)
 
-    Establishing a connection and connecting to the stream:
+    Establishing a connection and subscribing to the stream:
 
         >>> from energyquantified import EnergyQuantified
         >>> from energyquantified.events.events import MessageType
         >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd)
-        >>> events = eq.events.connect()
+        >>> events = eq.events.subscribe()
         >>> # Loop over events as they come
         >>> for msg_type, event in ws.get_next():
         >>>     if msg_type == MessageType.EVENT:
@@ -59,11 +51,11 @@ class CurveUpdateEventAPI:
 
         >>> from energyquantified import EnergyQuantified
         >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd)
-        >>> ws_client = eq.events.connect()
+        >>> ws_client = eq.events.subscribe()
         >>> from energyquantified.events.event_options import EventFilterOptions
         >>> To receive all UPDATE-events for Germany
         >>> filter = EventFilterOptions().set_areas("DE").set_event_types("UPDATE")
-        >>> ws_client.subscribe(filter)
+        >>> ws_client.set_filters(filter)
         
     To keep track of the last event received between sesssions, supply the
     **last_id_file** parameter with a file path. The file will be created 
@@ -97,14 +89,8 @@ class CurveUpdateEventAPI:
         #self._done_try_connecting.set()
         #self._should_try_connect = threading.Event()
         #self._should_try_connect.set()
-        self._last_connection_event = ConnectionEvent(status_code=1000, message="Not connected to the server")
         self._should_not_connect = threading.Event()
         self._done_trying_to_connect = threading.Event()
-        self._done_trying_to_connect.set()
-        #self._connection_closed_by_user = threading.Event()
-        self._
-        self._reconnect_counter = 0
-        self._reconnect_counter_lock = threading.Lock()
         #self._is_connected.clear()
         self._latest_filters = None
         # Last event id
@@ -208,14 +194,10 @@ class CurveUpdateEventAPI:
         self._last_id_lock.release()
 
     def _on_open(self, _ws):
-        self._last_connection_event = None
-        # Reset reconnect counter on successfull connection
-        with self._reconnect_counter_lock:
-            self._reconnect_counter = -1
-        # Flag events
+        print("connected")
         self._is_connected.set()
         self._done_trying_to_connect.set()
-        # Send the last active filters
+        #self._done_try_connecting.set()
         if self._latest_filters is not None:
             self._messages.put((MessageType.INFO, "Successfully reconnected to the server, setting previous filters.."))
             try:
@@ -224,6 +206,7 @@ class CurveUpdateEventAPI:
                 print(f"Failed to send filters after reconnecting, e: {e}")
 
     def _on_message(self, _ws, message):
+        print("on msg")
         msg = json.loads(message)
         msg_tag = msg.pop("type")
         if not MessageType.is_valid_tag(msg_tag):
@@ -250,48 +233,37 @@ class CurveUpdateEventAPI:
             raise ValueError(f"Failed to parse message: '{message}' with type: '{msg_type}'")
         self._messages.put((msg_type, data))
 
-    def _on_ping(self, _ws, *args):
-        print(f"on_ping: {args}")
-    def _on_pong(self, _ws, *args):
-        print(f"on_pong: {args}")
-
     def _on_close(self, _ws, status_code, msg):
         print(f"on close, status_code: {status_code}, msg: {msg}")
         if self._is_connected.is_set():
             self._is_connected.clear()
-            if self._last_connection_event is not None:
-                self._last_connection_event = ConnectionEvent(status_code=status_code, message=msg)
-            # TODO self._last_connection_event = ConnectionEvent(status_code=status_code, message=msg) 
-            #self._messages.put((MessageType.DISCONNECTED, DisconnectedEvent(status_code=status_code, message=msg)))
-            #self._messages.put((MessageType.UNAVAILABLE, UnavailableEvent(status_code=status_code, server_message=msg)))
+            self._messages.put((MessageType.DISCONNECTED, DisconnectedEvent(status_code=status_code, message=msg)))
             self._last_id_to_file(write_interval_s=0)
-            #if status_code is not None:
-                #self.connect(timeout=3, max_retries=3)
+            if status_code is not None:
+                print("on close, is_connected, calling subscribe")
+                # TODO
+                #self.subscribe(timeout=3, max_retries=3)
 
     def _on_error(self, _ws, error):
-        print(f"on_error: {error}")
-        print(error.__dict__)
-        print(dir(error))
         if isinstance(error, (ConnectionRefusedError, timeout)):
             #self._done_try_connecting.set()
             # TODO
             pass
-        #print(f"on_error, error: {error}, type: {type(error)}")
+        print(f"on_error, error: {error}, type: {type(error)}")
         #import traceback
         #print(traceback.extract_stack(error))
 
-    def _stream_url(self, include_last_id=True):
-        url = BASE_URL
-        # Return base path of not including last_id
-        if not include_last_id:
-            return url
-        # last_id default to '$'
-        last_id = self._last_id if self._last_id is not None else "$"
-        return f"{BASE_URL}/?last-id={last_id}"
+    def _on_ping(self, _ws, msg):
+        print(f"on_ping, msg: {msg}")
+        pass
 
-    def connect(self, last_id=None, timeout=3, max_retries=3):
+    def _on_pong(self, _ws, msg):
+        print(f"on_pong, msg: {msg}")
+        pass
+
+    def subscribe(self, timeout=3, max_retries=3):
         """
-        Connect to the curve update events stream.
+        Subscribe to the curve update events stream.
 
         Args:
             timeout (int, required): The time in seconds to wait inbetween (re)connect attempts. Defaults to 5.
@@ -301,19 +273,16 @@ class CurveUpdateEventAPI:
         Returns:
             CurveUpdateEventAPI: Returns the instance once connected to the stream server.
         """
-        # Reset flags
-        self._should_not_connect.clear()
-        self._done_trying_to_connect.clear()
-        self._last_connection_event = None
-        #self._connection_closed_by_user.clear()
-        # Overwrite potential last_id from file
-        self._last_id = last_id
+        last_id = self._last_id
+        if last_id is None:
+            last_id = ""
         # Close if already set
         if self._ws is not None:
             self._ws.close()
         websocket.setdefaulttimeout(timeout)
         self._ws = websocket.WebSocketApp(
-            self._stream_url(),
+            f"ws://localhost:8080/events/curves/?last-id={last_id}",
+            #f"ws://192.168.1.199/events/curves/?last-id={last_id}",
             header={
                 "X-API-KEY": self._api_key
             },
@@ -322,49 +291,136 @@ class CurveUpdateEventAPI:
             on_close=self._on_close,
             on_error=self._on_error,
             on_ping=self._on_ping,
-            on_pong=self._on_pong,)
-    
+            on_pong=self._on_pong)
+        
         def _ws_thread():
+            t_id = threading.get_ident()
+            print(f"t_id: {t_id} START")
+            # Try to connect/reconnect
+            self._should_not_connect.clear()
+            self._done_trying_to_connect.clear()
+            retry_counter = 0
+            print(f"t_id: {t_id}, b4 run")
+            ###
+            #while not self._is_connected.wait(timeout+0.5):
+            #self._ws.run_forever()
+            self._ws.run_forever(reconnect=2)
+            #####
+            # # Only occurs if run_forever fails
+            # if not self._should_not_connect.is_set():
+            #     # TODO retry attempts here
+            #     pass
+            #####
+            counter = 0
             while not self._should_not_connect.is_set():
-                start_time = time.time()
-                # Blocking until dc
-                self._ws.run_forever()
-                # Safely acquire the reconnect_counter
-                with self._reconnect_counter_lock:
-                    # Update stream url if this is the first dc after connection
-                    if self._reconnect_counter == -1:
-                        self._ws.url = self._stream_url()
-                    # Increment counter
-                    self._reconnect_counter += 1
-                    reconnect_counter = self._reconnect_counter
-                # Stop trying if max attemps exceeded
-                if reconnect_counter >= max_retries:
-                    #if self._last_connection_event is not None:
-                    #    self._last_connection_event = ConnectionEvent()
-                    # TODO dont queue
-                    #self._messages.put((MessageType.UNAVAILABLE, "Exceeded max reconnect attempts"))
+                counter += 1
+                print("r1")
+                if counter == 2:
+                    print("sending fitlers")
+                    #self.send_get_filters()
+                    print("fitlers sent")
+                print(f"counter: {counter}")
+                self._ws.run_forever(reconnect=2)
+                print("r2")
+                self._is_connected.wait(4)
+                while self._is_connected.is_set():
+                    pass
+                print("r3")
+            #####
+            print(f"t_id: {t_id}, b4 loop")
+            while not self._is_connected.wait(timeout + 0.5):
+                print(f"t_id: {t_id} IN LOOP")
+                retry_counter += 1
+                if retry_counter == max_retries:
+                    print(f"t_id: {t_id} MAX_RETRIES")
+                    self._messages.put((MessageType.UNAVAILABLE, "Exceeded max reconnect attempts"))
                     # Exceeded max retries, should not try to reconnect
                     self._should_not_connect.set()
                     self._done_trying_to_connect.set()
                     return
-                # Wait up to delta seconds longer than the default websocket timeout
-                delta = 0.5
-                time.sleep(delta + max(0, timeout - (time.time() - start_time)))
+                #self._ws.run_forever()
+            else:
+                # Connected -> flag _done_trying_to_connect
+                print("should be connected, stopping loop")
+                self._done_trying_to_connect.set()
+            ###
+            # while not self._is_connected.is_set():
+            #     if retry_counter == max_retries:
+            #         self._messages.put((MessageType.UNAVAILABLE, "Exceeded max reconnect attempts"))
+            #         # Exceeded max retries, should not try to reconnect
+            #         self._should_not_connect.set()
+            #         self._done_trying_to_connect.set()
+            #         return
+            #     print("run forever")
+            #     self._ws.run_forever()
+            #     print("b4 wait")
+            #     #self._done_try_connecting.wait(timeout + 5)
+            #     self._is_connected.wait(timeout + 3)
+            #     print("after wait")
+            #     retry_counter += 1
+            # else:
+            #     # Connected -> flag _done_trying_to_connect
+            #     self._done_trying_to_connect.set()
+
+        # def _ws_thread():
+        #     t_id = threading.get_ident()
+        #     print(f"t_id: {t_id} START")
+        #     # Try to connect/reconnect
+        #     self._should_not_connect.clear()
+        #     self._done_trying_to_connect.clear()
+        #     retry_counter = 0
+        #     print(f"t_id: {t_id}, b4 run")
+        #     #while not self._is_connected.wait(timeout+0.5):
+        #     # print("start loop")
+        #     # print("trying to connect")
+        #     self._ws.run_forever()
+        #     print(f"t_id: {t_id}, b4 loop")
+        #     while not self._is_connected.wait(timeout + 0.5):
+        #         print(f"t_id: {t_id} IN LOOP")
+        #         retry_counter += 1
+        #         if retry_counter == max_retries:
+        #             print(f"t_id: {t_id} MAX_RETRIES")
+        #             self._messages.put((MessageType.UNAVAILABLE, "Exceeded max reconnect attempts"))
+        #             # Exceeded max retries, should not try to reconnect
+        #             self._should_not_connect.set()
+        #             self._done_trying_to_connect.set()
+        #             return
+        #         self._ws.run_forever()
+        #     else:
+        #         # Connected -> flag _done_trying_to_connect
+        #         print("should be connected, stopping loop")
+        #         self._done_trying_to_connect.set()
+        #     # while not self._is_connected.is_set():
+        #     #     if retry_counter == max_retries:
+        #     #         self._messages.put((MessageType.UNAVAILABLE, "Exceeded max reconnect attempts"))
+        #     #         # Exceeded max retries, should not try to reconnect
+        #     #         self._should_not_connect.set()
+        #     #         self._done_trying_to_connect.set()
+        #     #         return
+        #     #     print("run forever")
+        #     #     self._ws.run_forever()
+        #     #     print("b4 wait")
+        #     #     #self._done_try_connecting.wait(timeout + 5)
+        #     #     self._is_connected.wait(timeout + 3)
+        #     #     print("after wait")
+        #     #     retry_counter += 1
+        #     # else:
+        #     #     # Connected -> flag _done_trying_to_connect
+        #     #     self._done_trying_to_connect.set()
 
         self._wst = threading.Thread(target=_ws_thread)
         self._wst.daemon = True
         self._wst.start()
 
         self._done_trying_to_connect.wait()
+        print("done waiting, returning")
         return self
-
+    
     def close(self):
         """
-        Close the stream connection (if open) and disable automatic reconnecting.
+        Close the stream connection.
         """
-        self._last_connection_event = ConnectionEvent(status_code=1000, message="Connection closed by user")
-        self._should_not_connect.set()
-        #self._connection_closed_by_user.set()
+        # TODO do nothing if already closed
         self._ws.close()
 
     def get_next(self, timeout=None):
@@ -379,97 +435,30 @@ class CurveUpdateEventAPI:
                 second item
         :rtype: Tuple[MessageType, Union[CurveUpdateEvent, DisconnectedEvent str, None]]
         """
-        remaining_dc_events = 5
         while True:
             # if self.is_connecting: time.sleep(0.1) continue
             if not self._is_connected.is_set():
-                #self._messages.empty
                 try:
-                    self._messages.empty
-                    msg = self._messages.get(block=False)
+                    msg = self._messages.get(timeout=0)
                     yield msg
                     self._messages.task_done()
                 except queue.Empty:
-                    if not self._done_trying_to_connect.is_set():
-                        # Wait while trying to (re)connect
-                        self._done_trying_to_connect.wait()
-                    else:
-                        # Stop get_next() loop if no action from user
-                        if remaining_dc_events == 0:
-                            return
-                        yield (MessageType.DISCONNECTED, self._last_connection_event)
-                        # Decrement dc events counter if user doesn't try to reconnect
-                        if self._should_not_connect.is_set():
-                            remaining_dc_events -= 1
-                            time.sleep(2)
-
-                    #     # Use must reconnect 
-                    #     for _ in range(5):
-                    #         yield self._last_connection_event
-                    #         time.sleep(2)
-                    #         if not self._should_not_connect.is_set():
-                    #             # NOTE: replace _should_not_connect with _done_trying_to_connect
-                    #             # if we also want to only yield 5 times to users that never tried
-                    #             # to connect
-                    #             break
-                    #     else:
-                    #         return
-                    # #     while self._should_not_connect.is_set():
-                    # #         # TODO replace _should_not_connect with _done_trying_to_connect
-                    # #         # if we also want to only yield 5 times to users that never tried
-                    # #         # to connect
-                    # #         remaining_dc_events -= 1
-                    # #         yield
-                    # #         time.sleep(2)
-                    # #     if self._should_not_connect.is_set():
-                    # #         remaining_dc_events -= 1
-                    # #         time.sleep(2)
-
-
-
-
-
-                    # if remaining_dc_events == 0:
-                    #         return
-                    
-                    # if self._done_trying_to_connect.is_set():
-                    #     # TODO wrong, can be connected here so should NOT yield status
-                    #     yield self._last_connection_event
-                    # else:
-                    #     # Wait while reconnecting
-                    #     self._done_trying_to_connect.wait()
-                    # # if self._should_not_connect.is_set():
-                    # #     # TODO
-                    # #     # #if self._connection_closed_by_user.is_set():
-                    # #     #     # TODO if not initially connected: dc event (check status_code in docs)
-                    # #     #     # TODO use last dc event
-                    # #     #     yield (MessageType.DISCONNECTED, "Disconnected by user")
-                    # #     # else:
-                    # #     #     # TODO 
-                    # #     #     yield (MessageType.UNAVAILABLE, UnavailableEvent(status_code=None,
-                    # #     #                                                      server_message=None,
-                    # #     #                                                      message=None,))
-                    # if self._should_not_connect.is_set():
-                    #     remaining_dc_events -= 1
-                        
-                    #     time.sleep(2)
-                    # else:
-                    #     self._done_trying_to_connect.wait(0.1)
+                    yield (MessageType.UNAVAILABLE, "Not connected")
+                    time.sleep(2)
             else:
-                remaining_dc_events = 5
                 try:
                     msg = self._messages.get(timeout=timeout)
                     yield msg
                     self._messages.task_done()
                 except queue.Empty:
-                    # If connection dropped while waiting for a message 
                     if not self._is_connected.is_set():
-                        continue
-                    yield (MessageType.TIMEOUT, None)
+                        yield (MessageType.UNAVAILABLE, "Not connected")
+                    else:
+                        yield (MessageType.TIMEOUT, None)
 
-    def subscribe(self, filters):
+    def set_filters(self, filters):
         """
-        Subscribe to curve events matching any of the filters.
+        Updates filters for curve events.
 
         :param filters: The filters to use. Can be a single filter or a list of filters.
         :type filters: Union[EventFilterOptions, EventCurveOptions, List[Union[EventFilterOptions, EventCurveOptions]]]
@@ -480,21 +469,16 @@ class CurveUpdateEventAPI:
         filter_list = list(eventFilter.to_dict() for eventFilter in filters)
         filters_msg = json.dumps(
             {"action": "filter.set",
-            "filters": filter_list},)
-        print(f"filters_Msg: {filters_msg}")
+            "filters": filter_list})
         # TODO set latest here or confirm after get_filters()?
         self._latest_filters = filters_msg
-        # TODO try/catch or not?
-        print("sending new")
-        self._ws.send(filters_msg)
-        # try:
-        #     self._ws.send(filters_msg)
-        # except Exception as e:
-        #     pass
+        try:
+            self._ws.send(filters_msg)
+        except Exception as e:
+            pass
 
     def send_get_filters(self):
         """
         Request the curently active filters from the stream.
         """
-        # TODO try/catch or not?
         self._ws.send(json.dumps({"action": "filter.get"}))
