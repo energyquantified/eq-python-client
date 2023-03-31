@@ -102,7 +102,6 @@ class CurveUpdateEventAPI:
         self._done_trying_to_connect = threading.Event()
         self._done_trying_to_connect.set()
         #self._connection_closed_by_user = threading.Event()
-        self._
         self._reconnect_counter = 0
         self._reconnect_counter_lock = threading.Lock()
         #self._is_connected.clear()
@@ -401,60 +400,8 @@ class CurveUpdateEventAPI:
                         # Decrement dc events counter if user doesn't try to reconnect
                         if self._should_not_connect.is_set():
                             remaining_dc_events -= 1
-                            time.sleep(2)
-
-                    #     # Use must reconnect 
-                    #     for _ in range(5):
-                    #         yield self._last_connection_event
-                    #         time.sleep(2)
-                    #         if not self._should_not_connect.is_set():
-                    #             # NOTE: replace _should_not_connect with _done_trying_to_connect
-                    #             # if we also want to only yield 5 times to users that never tried
-                    #             # to connect
-                    #             break
-                    #     else:
-                    #         return
-                    # #     while self._should_not_connect.is_set():
-                    # #         # TODO replace _should_not_connect with _done_trying_to_connect
-                    # #         # if we also want to only yield 5 times to users that never tried
-                    # #         # to connect
-                    # #         remaining_dc_events -= 1
-                    # #         yield
-                    # #         time.sleep(2)
-                    # #     if self._should_not_connect.is_set():
-                    # #         remaining_dc_events -= 1
-                    # #         time.sleep(2)
-
-
-
-
-
-                    # if remaining_dc_events == 0:
-                    #         return
-                    
-                    # if self._done_trying_to_connect.is_set():
-                    #     # TODO wrong, can be connected here so should NOT yield status
-                    #     yield self._last_connection_event
-                    # else:
-                    #     # Wait while reconnecting
-                    #     self._done_trying_to_connect.wait()
-                    # # if self._should_not_connect.is_set():
-                    # #     # TODO
-                    # #     # #if self._connection_closed_by_user.is_set():
-                    # #     #     # TODO if not initially connected: dc event (check status_code in docs)
-                    # #     #     # TODO use last dc event
-                    # #     #     yield (MessageType.DISCONNECTED, "Disconnected by user")
-                    # #     # else:
-                    # #     #     # TODO 
-                    # #     #     yield (MessageType.UNAVAILABLE, UnavailableEvent(status_code=None,
-                    # #     #                                                      server_message=None,
-                    # #     #                                                      message=None,))
-                    # if self._should_not_connect.is_set():
-                    #     remaining_dc_events -= 1
-                        
-                    #     time.sleep(2)
-                    # else:
-                    #     self._done_trying_to_connect.wait(0.1)
+                        # TODO replace sleep with event.wait(2) - so it can break earlier
+                        time.sleep(2)
             else:
                 remaining_dc_events = 5
                 try:
