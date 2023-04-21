@@ -3,9 +3,9 @@ from .base import BaseAPI
 from ..metadata import CurveType
 from ..parser.timeseries import parse_timeseries
 
-
 # Tuple of supported values for Curve.curve_type in the time series API
 CURVE_TYPES = (CurveType.TIMESERIES, CurveType.SCENARIO_TIMESERIES)
+
 
 class TimeseriesAPI(BaseAPI):
     """
@@ -24,6 +24,7 @@ class TimeseriesAPI(BaseAPI):
             curve,
             begin=None,
             end=None,
+            time_zone=None,
             frequency=None,
             aggregation=None,
             hour_filter=None):
@@ -39,6 +40,8 @@ class TimeseriesAPI(BaseAPI):
         :type begin: date, datetime, str, required
         :param end: The end date-time
         :type end: date, datetime, str, required
+        :param time_zone: Set the time zone for the date-times
+        :type time_zone: TzInfo, optional
         :param frequency: Set the preferred frequency for aggregations, defaults to None
         :type frequency: Frequency, optional
         :param aggregation: The aggregation method (i.e. AVERAGE, MIN, MAX),\
@@ -57,6 +60,7 @@ class TimeseriesAPI(BaseAPI):
         params = {}
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
+        self._add_time_zone(params, "time-zone", time_zone, required=False)
         self._add_frequency(params, "frequency", frequency)
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
