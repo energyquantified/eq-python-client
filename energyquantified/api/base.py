@@ -1,9 +1,17 @@
+import numbers
 import urllib
 from datetime import date, datetime, time
-import numbers
 
 from requests import exceptions
 
+from ..exceptions import (
+    ForbiddenError,
+    HTTPError,
+    InternalServerError,
+    NotFoundError,
+    UnauthorizedError,
+    ValidationError,
+)
 from ..metadata import (
     Area,
     Curve,
@@ -13,15 +21,9 @@ from ..metadata import (
     ContractPeriod,
     OHLCField,
 )
-from ..time import Frequency
-
-from ..exceptions import (
-    ForbiddenError,
-    HTTPError,
-    InternalServerError,
-    NotFoundError,
-    UnauthorizedError,
-    ValidationError,
+from ..time import (
+    Frequency,
+    timezone
 )
 
 
@@ -319,6 +321,22 @@ class BaseAPI:
                 reason=f"Not a valid DataType: '{var}'",
                 parameter=name
             )
+
+    @staticmethod
+    def _add_time_zone(params, name, var, required=False):
+        if var is None and not required:
+            return
+        if timezone._is_valid_timezone(var):
+            import pytz
+            if isinstance(var, str):
+                params[name] = var
+            elif isinstance(var, pytz.tzinfo.BaseTzInfo):
+                params[name] = var.zone
+            return
+        raise ValidationError(
+            reason=f"Not a valid time zone: '{var}'",
+            parameter=name
+        )
 
     @staticmethod
     def _add_frequency(params, name, var, required=False):
