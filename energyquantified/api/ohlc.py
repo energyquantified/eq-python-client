@@ -1,14 +1,13 @@
 from .base import BaseAPI
-
 from ..exceptions import ValidationError
 from ..metadata import CurveType, OHLCField
 from ..parser.ohlc import parse_ohlc_response
-from ..parser.timeseries import parse_timeseries
 from ..parser.periodseries import parse_periodseries
-
+from ..parser.timeseries import parse_timeseries
 
 # Tuple of supported values for Curve.curve_type in the time series API
 CURVE_TYPES = (CurveType.OHLC,)
+
 
 class OhlcAPI(BaseAPI):
     """
@@ -231,7 +230,8 @@ class OhlcAPI(BaseAPI):
             self,
             curve,
             field=OHLCField.SETTLEMENT,
-            date=None):
+            date=None,
+            time_zone=None):
         """
         Load all OHLC rows from a single trading day, sort them, and
         merge/convert them to a continuous series.
@@ -255,6 +255,8 @@ class OhlcAPI(BaseAPI):
         :type field: OHLCField, str, optional
         :param date: The trading date, defaults to today
         :type date: date, str, required
+        :param time_zone: Set the time zone for the date-times
+        :type time_zone: TzInfo, optional
         :return: A period-based series
         :rtype: :py:class:`energyquantified.data.Periodseries`
         """
@@ -263,6 +265,7 @@ class OhlcAPI(BaseAPI):
         # Parameters
         params = {}
         self._add_date(params, "date", date)
+        self._add_time_zone(params, "time-zone", time_zone)
         # Build URL
         field = self._urlencode_ohlc_field(field, "field")
         url = f"/ohlc/{safe_curve}/latest/periods/{field}/"
