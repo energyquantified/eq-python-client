@@ -43,6 +43,15 @@ representing data that mostly remain the same, but changes sporadically
     <Period: begin=2020-01-06 00:00:00+01:00, end=2020-01-13 00:00:00+01:00, value=60686.44>,
     <Period: begin=2020-01-13 00:00:00+01:00, end=2020-01-20 00:00:00+01:00, value=60832.02>]
 
+Use the ``time_zone`` parameter to convert the data to the given time zone:
+
+   >>> from energyquantified.time import UTC
+   >>>
+   >>> periodseries = eq.periods.load(
+   >>>    'DE Wind Power Installed MW Capacity',
+   >>>    time_zone=UTC
+   >>> )
+
 Don't worry if you do not know how to work with this data structure – it is
 easy to convert period-based series to time series.
 

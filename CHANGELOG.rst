@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.11.0
+------
+
+**Improvements**
+
+- Add time zone conversion.
 
 0.10.1
 ------

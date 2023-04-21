@@ -59,6 +59,18 @@ The response is an :class:`energyquantified.data.Timeseries` instance:
     <Value: date=2020-01-01 00:30:00+01:00, value=6640>
     ...
 
+Time Zone Conversion
+^^^^^^^^^^^^^^^^^^^^
+
+Use the ``time_zone`` parameter to convert the data to the given time zone:
+
+   >>> from energyquantified.time import UTC
+   >>>
+   >>> timeseries = eq.timeseries.load(
+   >>>    'DE Wind Power Production MWh/h 15min Actual',
+   >>>    time_zone=UTC
+   >>> )
+
 
 Aggregation
 ^^^^^^^^^^^
