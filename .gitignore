@@ -13,3 +13,6 @@ __pycache__
 # Sphinx
 _build
 
+# PyCharm
+.idea/
+
