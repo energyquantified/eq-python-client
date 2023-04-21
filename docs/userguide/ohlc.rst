@@ -207,6 +207,15 @@ override it by setting the ``field`` parameter.
    >>>    field=OHLCField.SETTLEMENT  # Optionally select field (defaults to SETTLEMENT)
    >>> )
 
+Use the ``time_zone`` parameter to convert the data to the given time zone:
+
+   >>> from energyquantified.time import UTC
+   >>>
+   >>> forward_curve = eq.ohlc.latest_as_periods(
+   >>>    'NP Futures Power Base EUR/MWh Nasdaq OHLC',
+   >>>    time_zone=UTC
+   >>> )
+
 The result is a period-based series:
 
    >>> forward_curve
