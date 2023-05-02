@@ -2,6 +2,7 @@ import numbers
 import urllib
 from datetime import date, datetime, time
 
+import pytz
 from requests import exceptions
 
 from ..exceptions import (
@@ -327,14 +328,13 @@ class BaseAPI:
         if var is None and not required:
             return
         if timezone._is_valid_timezone(var):
-            import pytz
             if isinstance(var, str):
                 params[name] = var
             elif isinstance(var, pytz.tzinfo.BaseTzInfo):
                 params[name] = var.zone
             return
         raise ValidationError(
-            reason=f"Not a valid time zone: '{var}'",
+            reason=f"Not a supported time zone: '{var}'",
             parameter=name
         )
 

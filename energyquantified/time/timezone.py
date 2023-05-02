@@ -41,12 +41,7 @@ def _is_valid_timezone(tz):
         except pytz.exceptions.UnknownTimeZoneError:
             return False
     if isinstance(tz, pytz.tzinfo.BaseTzInfo):
-        return tz == UTC \
-            or tz == CET \
-            or tz == WET \
-            or tz == EET \
-            or tz == TRT \
-            or tz == GAS_DAY
+        return tz in (UTC, CET, WET, EET, TRT, GAS_DAY)
     return False
 
 
