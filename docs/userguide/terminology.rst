@@ -190,9 +190,6 @@ aggregated value. The supported aggregations are:
 
 Energy Quantified defaults to use ``AVERAGE`` (mean).
 
-The aggregation will return empty values whenever there are one or more missing
-input values.
-
 Class reference: :py:class:`Aggregation <energyquantified.metadata.Aggregation>`
 
 Filters (or hour-filters)
@@ -221,6 +218,24 @@ should keep the following in mind:
   between workdays and weekends.
 
 Class reference: :py:class:`Filter <energyquantified.metadata.Filter>`
+
+Threshold
+~~~~~~~~~
+
+By default, the aggregation returns empty values whenever one or more input
+values are missing. You can set a *threshold* that defines how many values are
+allowed to be missing within a frame of the converted frequency. If the number
+of missing values is less than or equal to the *threshold*, aggregation is
+performed on the remaining non-empty values. Otherwise, an empty value is
+returned.
+
+**Note**: By default, the threshold is set to zero. This means that an empty
+input value will result in an empty output value.
+
+For example, you want to convert hourly values to daily values using the mean
+value. Let's assume that some input values are missing. Instead of getting
+empty values, you want to get the average if a maximum of four values are
+missing within a day. In this case, set the *threshold* to four.
 
 
 .. _time-series:

@@ -1,6 +1,12 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Add threshold parameter
 
 0.10.1
 ------

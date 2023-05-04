@@ -5,7 +5,6 @@ from ..metadata import CurveType
 from ..parser.metadata import parse_instance_list
 from ..parser.timeseries import parse_timeseries, parse_timeseries_list
 
-
 # Tuple of supported values for Curve.curve_type in the instances API
 CURVE_TYPES = (CurveType.INSTANCE,)
 
@@ -104,6 +103,7 @@ class InstancesAPI(BaseAPI):
             frequency=None,
             aggregation=None,
             hour_filter=None,
+            threshold=None,
             ensembles=False):
         """
         Load time series instances.
@@ -144,7 +144,11 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param ensembles: Whether or not to include ensembles where available,\
+        :param threshold: Allow that many values to be missing within one frame of \
+            *frequency*. Has no effect unless *frequency* is provided, \
+            defaults to 0.
+        :type threshold: int, optional
+        :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
         :return: A list :py:class:`energyquantified.data.Timeseries` instances
@@ -170,6 +174,7 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries_list(response.json())
@@ -182,6 +187,7 @@ class InstancesAPI(BaseAPI):
             frequency=None,
             aggregation=None,
             hour_filter=None,
+            threshold=None,
             ensembles=False):
         """
         Get the latest time series instance with filtering on `tags` and
@@ -208,7 +214,11 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param ensembles: Whether or not to include ensembles where available,\
+        :param threshold: Allow that many values to be missing within one frame of \
+            *frequency*. Has no effect unless *frequency* is provided, \
+            defaults to 0.
+        :type threshold: int, optional
+        :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
         :return: A time series instance
@@ -229,6 +239,7 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
@@ -241,6 +252,7 @@ class InstancesAPI(BaseAPI):
             frequency=None,
             aggregation=None,
             hour_filter=None,
+            threshold=None,
             ensembles=False):
         """
         Get an instance specified by a `issued` (issue date) and `tag`. The
@@ -267,7 +279,11 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param ensembles: Whether or not to include ensembles where available,\
+        :param threshold: Allow that many values to be missing within one frame of \
+            *frequency*. Has no effect unless *frequency* is provided, \
+            defaults to 0.
+        :type threshold: int, optional
+        :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
         :return: A time series instance
@@ -288,6 +304,7 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
@@ -305,7 +322,8 @@ class InstancesAPI(BaseAPI):
             before_time_of_day=None,
             frequency=None,
             aggregation=None,
-            hour_filter=None):
+            hour_filter=None,
+            threshold=None):
         """
         Load one instance for each day based on some common criteria, stitch
         them together and return a continuous time series.
@@ -353,6 +371,10 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
+        :param threshold: Allow that many values to be missing within one frame of \
+            *frequency*. Has no effect unless *frequency* is provided, \
+            defaults to 0.
+        :type threshold: int, optional
         :return: A time series
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -373,6 +395,7 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
         # Additional validation checks
         if sum(1 if t is not None else 0 for t in (time_of_day, after_time_of_day, before_time_of_day)) > 1:
             raise ValidationError(reason=(
