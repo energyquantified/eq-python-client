@@ -1,11 +1,11 @@
-from collections import namedtuple
-from datetime import datetime
 import numbers
 import sys
+from collections import namedtuple
+from datetime import datetime
 
-from ..time import Resolution, Frequency
 from .base import Series
 from .timeseries import TimeseriesList, Timeseries, Value
+from ..time import Resolution, Frequency
 
 
 class Period(namedtuple("Period", ("begin", "end", "value"))):
@@ -217,6 +217,8 @@ class Periodseries(Series):
     :type resolution: Resolution, optional
     :param instance: The instance, defaults to None
     :type instance: Instance, optional
+    :param time_zone: The time zone of the time series
+    :type time_zone: TzInfo, optional
     :param data: A list of periods (Period or CapacityPeriod)
     :type data: list[]
     """
@@ -276,7 +278,8 @@ class Periodseries(Series):
         assert isinstance(field, str), "Must be a str"
         assert field in ("value", "installed"), "field must be 'value' or 'installed'"
         if field == "installed":
-            assert all(isinstance(p, CapacityPeriod) for p in self.data), "field='installed' requires a series of CapacityPeriods"
+            assert all(isinstance(p, CapacityPeriod) for p in
+                       self.data), "field='installed' requires a series of CapacityPeriods"
         # Prepare conversion
         resolution = Resolution(frequency, self.resolution.timezone)
         if not self.has_data():
@@ -497,13 +500,12 @@ class _PeriodsToTimeseriesIterator:
         sum_weights = 1.0 * sum(weight for avail, weight in available_weights)
         # Get the mean value
         return (
-            sum(avail * weight for avail, weight in available_weights)
-            / sum_weights
+                sum(avail * weight for avail, weight in available_weights)
+                / sum_weights
         )
 
 
 # Period-based series list with helpers
-
 
 
 class PeriodseriesList(list):
@@ -603,13 +605,13 @@ class PeriodseriesList(list):
     def extend(self, iterable):
         # Asserts
         _validate_periodseries_list(iterable)
-         # Perform operation
+        # Perform operation
         return super().extend(iterable)
 
     def insert(self, index, periodseries):
         # Asserts
         _validate_periodseries(periodseries)
-         # Perform operation
+        # Perform operation
         return super().insert(index, periodseries)
 
     def __add__(self, rhs):

@@ -6,7 +6,7 @@ from ..metadata import (
     Curve, Instance, Area, DataType, CurveType, Place, PlaceType,
     ContractPeriod, ContinuousContract, SpecificContract, OHLCField
 )
-from ..time import Frequency, Resolution, UTC, to_timezone
+from ..time import Frequency, Resolution, UTC, to_timezone, timezone
 from ..time.timezone import LOCAL_TZ
 
 
@@ -185,3 +185,16 @@ def parse_contract(json):
     raise ParseException(
         f"Unknown contract.type in JSON: {contract_type}"
     )
+
+
+def parse_time_zone(json):
+    time_zone_tag = json.get("zone")
+    if time_zone_tag:
+        time_zone = pytz.timezone(time_zone_tag)
+        if timezone._is_valid_timezone(time_zone):
+            return time_zone
+        else:
+            raise ParseException(
+                f"Unknown time zone in JSON: {time_zone_tag}"
+            )
+    return None

@@ -1,5 +1,12 @@
 from dateutil import parser
 
+from .metadata import (
+    parse_curve,
+    parse_instance,
+    parse_resolution,
+    parse_contract,
+    parse_time_zone
+)
 from ..data import (
     Timeseries,
     TimeseriesList,
@@ -9,12 +16,6 @@ from ..data import (
 )
 from ..exceptions import ParseException
 from ..time import to_timezone
-from .metadata import (
-    parse_curve,
-    parse_instance,
-    parse_resolution,
-    parse_contract
-)
 
 
 def parse_timeseries_list(json):
@@ -52,6 +53,8 @@ def parse_timeseries(json):
         contract = parse_contract(contract)
     # Parse scenario names
     scenario_names = json.get("scenario_names") or None
+    # Parse time zone
+    time_zone = parse_time_zone(json)
     # Parse data
     data = _parse_data(json.get("data"), resolution=resolution)
 
@@ -61,6 +64,7 @@ def parse_timeseries(json):
         instance=instance,
         contract=contract,
         scenario_names=scenario_names,
+        time_zone=time_zone,
         data=data
     )
 

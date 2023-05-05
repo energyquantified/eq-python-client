@@ -1,10 +1,10 @@
+from .metadata import parse_curve, parse_contract, parse_time_zone
+from .ohlc import parse_ohlc_list
+from .periodseries import parse_periodseries
+from .timeseries import parse_timeseries
 from ..data import SRMC, SRMCOptions, OHLCList
 from ..exceptions import ParseException
 from ..metadata import Area
-from .ohlc import parse_ohlc_list
-from .timeseries import parse_timeseries
-from .periodseries import parse_periodseries
-from .metadata import parse_curve, parse_contract
 
 
 def parse_srmc_response(json):
@@ -16,6 +16,8 @@ def parse_srmc_response(json):
     contract = json.get('contract')
     if contract is not None:
         contract = parse_contract(contract)
+    # Get time zone
+    time_zone = parse_time_zone(json)
     # Get SRMC options
     options = json.get('srmc_options')
     if options is not None:
@@ -26,6 +28,7 @@ def parse_srmc_response(json):
         ohlc = parse_ohlc_list(data)
         return SRMC(
             curve=curve,
+            time_zone=time_zone,
             contract=contract,
             options=options,
             ohlc=OHLCList(ohlc)
@@ -36,6 +39,7 @@ def parse_srmc_response(json):
         timeseries = parse_timeseries(data)
         return SRMC(
             curve=curve,
+            time_zone=time_zone,
             contract=contract,
             options=options,
             timeseries=timeseries
@@ -46,6 +50,7 @@ def parse_srmc_response(json):
         periodseries = parse_periodseries(data)
         return SRMC(
             curve=curve,
+            time_zone=time_zone,
             contract=contract,
             options=options,
             periodseries=periodseries
@@ -55,6 +60,7 @@ def parse_srmc_response(json):
         "Failed to parse SRMC response, expected either ohlc data, "
         "timeseries or periodseries, but got neither"
     )
+
 
 def parse_srmc_options(opts):
     # Check if there are any srmc options

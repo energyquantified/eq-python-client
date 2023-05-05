@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from typing import Union
 
-from ..metadata import Area, Curve, ContinuousContract, SpecificContract
 from .ohlc import OHLCList
-from .timeseries import Timeseries
 from .periodseries import Periodseries
+from .timeseries import Timeseries
+from ..metadata import Area, Curve, ContinuousContract, SpecificContract
 
 
 @dataclass(frozen=True)
@@ -61,6 +61,8 @@ class SRMC:
     """
     #: The curve used as input to this SRMC calculation
     curve: Curve = None
+    #: The time zone
+    time_zone = None
     #: (optional) The contract when the calculation was done for historical
     #: closing prices – either a front contract (continuous front contract),
     #: or a specific contract such as Year-2020, Year-2021, Q3-2020 etc.

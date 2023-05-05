@@ -1,5 +1,3 @@
-
-
 class Series:
     """
     Base class for Timeseries and Periodseries.
@@ -11,7 +9,8 @@ class Series:
             name=None,
             resolution=None,
             instance=None,
-            contract=None):
+            contract=None,
+            time_zone=None):
         # --- Members ---
         #: The curve
         self.curve = curve
@@ -22,6 +21,8 @@ class Series:
         self.instance = instance
         #: The contract for OHLC operations resulting in a time series
         self.contract = contract
+        #: The time zone
+        self.time_zone = time_zone
         #: The data
         self.data = []
 
@@ -47,7 +48,7 @@ class Series:
         :param name: An user-defined name
         :type name: str
         """
-        assert name is None or isinstance(name, str),\
+        assert name is None or isinstance(name, str), \
             "name must be None or a string"
         self._name = name
 
@@ -93,6 +94,15 @@ class Series:
         """
         # This method must be implemented in subclasses
         raise NotImplementedError("Method end() is not implemented")
+
+    def time_zone(self):
+        """
+        Get the time zone of the timeseries.
+
+        :return: The time zone
+        :rtype: TzInfo
+        """
+        return self.time_zone
 
     def __iter__(self):
         """

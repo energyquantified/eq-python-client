@@ -1,13 +1,8 @@
-from collections import namedtuple
 from dataclasses import dataclass
 from datetime import date
-import enum
 
-from .base import Series
 from ..metadata import ContractPeriod, OHLCField
-from ..time import Frequency
 from ..utils.pandas import ohlc_list_to_dataframe
-
 
 
 @dataclass(frozen=True)
@@ -86,11 +81,13 @@ class OHLCList(list):
     (yearly, monthly, weekly etc.) for a specific market.
     """
 
-    def __init__(self, elements, curve=None, contract=None):
+    def __init__(self, elements, curve=None, time_zone=None, contract=None):
         super().__init__(elements)
         # --- Public members ---
         #: The curve holding these OHLC objects
         self.curve = curve
+        #: The time zone
+        self.time_zone = time_zone
 
     def append(self, value):
         raise NotImplementedError("OHLCList does not support append")
