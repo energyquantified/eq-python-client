@@ -5,6 +5,7 @@ dist/
 .vscode
 api_key*
 .api_key*
+.idea
 
 # Python
 __pycache__
