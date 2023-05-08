@@ -483,6 +483,8 @@ class Timeseries(Series):
         if self.scenario_names:
             print(f"  Scenarios: {self.scenario_names}", file=file)
         print(f"  Resolution: {self.resolution}", file=file)
+        print(f"  Unit: {self.unit}, Denominator: {self.denominator}",
+              file=file)
         print(f"", file=file)
         for d in self.data:
             d.print(file=file)

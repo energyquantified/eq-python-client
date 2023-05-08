@@ -394,6 +394,8 @@ class Periodseries(Series):
         if self.instance:
             print(f"  Instance: {self.instance}", file=file)
         print(f"  Resolution: {self.resolution}", file=file)
+        print(f"  Unit: {self.unit}, Denominator: {self.denominator}",
+              file=file)
         print(f"", file=file)
         for d in self.data:
             d.print(file=file)
@@ -404,7 +406,11 @@ class _PeriodsToTimeseriesIterator:
     A period-based series iterator used for conversions to Timeseries objects.
     """
 
-    def __init__(self, periods=None, resolution=None, begin=None, end=None,
+    def __init__(self,
+                 periods=None,
+                 resolution=None,
+                 begin=None,
+                 end=None,
                  field="value"):
         self.periods = [p for p in periods if p.end > begin and p.begin < end]
         self.resolution = resolution

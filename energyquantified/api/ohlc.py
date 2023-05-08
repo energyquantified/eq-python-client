@@ -25,7 +25,8 @@ class OhlcAPI(BaseAPI):
             end=None,
             period=None,
             delivery=None,
-            front=None):
+            front=None,
+            unit=None):
         """
         Load OHLC data for a :py:class:`energyquantified.metadata.Curve`.
 
@@ -47,6 +48,8 @@ class OhlcAPI(BaseAPI):
             to be set; cannot be used together with ``delivery``,\
             defaults to None
         :type front: int, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A list of OHLC objects
         :rtype: :py:class:`energyquantified.data.OHLCList`
         """
@@ -79,6 +82,7 @@ class OhlcAPI(BaseAPI):
                     "Parameter 'delivery' can only be used in together with "
                     "'period'"
                 ))
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_ohlc_response(response.json())
@@ -86,7 +90,8 @@ class OhlcAPI(BaseAPI):
     def latest(
             self,
             curve,
-            date=None):
+            date=None,
+            unit=None):
         """
         Select all OHLC for specific trading day, while defaulting to the
         latest available OHLC data.
@@ -101,6 +106,8 @@ class OhlcAPI(BaseAPI):
         :type curve: :py:class:`energyquantified.metadata.Curve`, str
         :param date: The trading date, defaults to today
         :type date: date, str, required
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A list of OHLC objects
         :rtype: :py:class:`energyquantified.data.OHLCList`
         """
@@ -110,6 +117,7 @@ class OhlcAPI(BaseAPI):
         # Parameters
         params = {}
         self._add_date(params, "date", date)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_ohlc_response(response.json())
@@ -122,7 +130,8 @@ class OhlcAPI(BaseAPI):
             period=None,
             delivery=None,
             field=OHLCField.SETTLEMENT,
-            fill=None):
+            fill=None,
+            unit=None):
         """
         Load historical OHLC data for specific contract, and convert it to a
         :py:class:`energyquantified.data.Timeseries`.
@@ -151,6 +160,8 @@ class OhlcAPI(BaseAPI):
             with data from the previous trading day (also into the future).\
             Defaults to ``no-fill``.
         :type fill: str, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A time series
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -163,6 +174,7 @@ class OhlcAPI(BaseAPI):
         self._add_contract_period(params, "period", period, required=True)
         self._add_date(params, "delivery", delivery, required=True)
         self._add_fill(params, "fill", fill)
+        self._add_str(params, "unit", unit)
         # Build URL
         field = self._urlencode_ohlc_field(field, "field")
         url = f"/ohlc/{safe_curve}/timeseries/{field}/"
@@ -178,7 +190,8 @@ class OhlcAPI(BaseAPI):
             period=None,
             front=None,
             field=OHLCField.SETTLEMENT,
-            fill=None):
+            fill=None,
+            unit=None):
         """
         Load historical OHLC data for a continuous front contract, and convert
         it to a :py:class:`energyquantified.data.Timeseries`.
@@ -207,6 +220,8 @@ class OhlcAPI(BaseAPI):
             with data from the previous trading day (also into the future).\
             Defaults to ``no-fill``.
         :type fill: str, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A time series
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -219,6 +234,7 @@ class OhlcAPI(BaseAPI):
         self._add_contract_period(params, "period", period, required=True)
         self._add_int(params, "front", front, min=1, required=True)
         self._add_fill(params, "fill", fill)
+        self._add_str(params, "unit", unit)
         # Build URL
         field = self._urlencode_ohlc_field(field, "field")
         url = f"/ohlc/{safe_curve}/timeseries/{field}/"
@@ -231,7 +247,8 @@ class OhlcAPI(BaseAPI):
             curve,
             field=OHLCField.SETTLEMENT,
             date=None,
-            time_zone=None):
+            time_zone=None,
+            unit=None):
         """
         Load all OHLC rows from a single trading day, sort them, and
         merge/convert them to a continuous series.
@@ -257,6 +274,8 @@ class OhlcAPI(BaseAPI):
         :type date: date, str, required
         :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A period-based series
         :rtype: :py:class:`energyquantified.data.Periodseries`
         """
@@ -266,6 +285,7 @@ class OhlcAPI(BaseAPI):
         params = {}
         self._add_date(params, "date", date)
         self._add_time_zone(params, "timezone", time_zone)
+        self._add_str(params, "unit", unit)
         # Build URL
         field = self._urlencode_ohlc_field(field, "field")
         url = f"/ohlc/{safe_curve}/latest/periods/{field}/"

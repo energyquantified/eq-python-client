@@ -105,7 +105,8 @@ class InstancesAPI(BaseAPI):
             aggregation=None,
             hour_filter=None,
             threshold=None,
-            ensembles=False):
+            ensembles=False,
+            unit=None):
         """
         Load time series instances.
 
@@ -154,6 +155,8 @@ class InstancesAPI(BaseAPI):
         :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A list :py:class:`energyquantified.data.Timeseries` instances
         :rtype: list
         """
@@ -179,6 +182,7 @@ class InstancesAPI(BaseAPI):
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
             self._add_int(params, "threshold", threshold, min=0)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries_list(response.json())
@@ -193,7 +197,8 @@ class InstancesAPI(BaseAPI):
             aggregation=None,
             hour_filter=None,
             threshold=None,
-            ensembles=False):
+            ensembles=False,
+            unit=None):
         """
         Get the latest time series instance with filtering on `tags` and
         `issued_at_latest`.
@@ -228,6 +233,8 @@ class InstancesAPI(BaseAPI):
         :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A time series instance
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -248,6 +255,7 @@ class InstancesAPI(BaseAPI):
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
             self._add_int(params, "threshold", threshold, min=0)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
@@ -262,7 +270,8 @@ class InstancesAPI(BaseAPI):
             aggregation=None,
             hour_filter=None,
             threshold=None,
-            ensembles=False):
+            ensembles=False,
+            unit=None):
         """
         Get an instance specified by a `issued` (issue date) and `tag`. The
         default tag is blank and tags are case-insensitive.
@@ -297,6 +306,8 @@ class InstancesAPI(BaseAPI):
         :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A time series instance
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -317,6 +328,7 @@ class InstancesAPI(BaseAPI):
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
             self._add_int(params, "threshold", threshold, min=0)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
@@ -336,7 +348,8 @@ class InstancesAPI(BaseAPI):
             frequency=None,
             aggregation=None,
             hour_filter=None,
-            threshold=None):
+            threshold=None,
+            unit=None):
         """
         Load one instance for each day based on some common criteria, stitch
         them together and return a continuous time series.
@@ -390,6 +403,8 @@ class InstancesAPI(BaseAPI):
             *frequency*. Has no effect unless *frequency* is provided, \
             defaults to 0.
         :type threshold: int, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A time series
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -413,7 +428,6 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            self._add_int(params, "threshold", threshold, min=0)
         # Additional validation checks
         if sum(1 if t is not None else 0 for t in
                (time_of_day, after_time_of_day, before_time_of_day)) > 1:

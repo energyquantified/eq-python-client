@@ -9,7 +9,10 @@ class Series:
             name=None,
             resolution=None,
             instance=None,
-            contract=None):
+            contract=None,
+            unit=None,
+            denominator=None,
+    ):
         # --- Members ---
         #: The curve
         self.curve = curve
@@ -20,6 +23,10 @@ class Series:
         self.instance = instance
         #: The contract for OHLC operations resulting in a time series
         self.contract = contract
+        #: The unit of the data
+        self.unit = unit
+        #: The denominator of the data
+        self.denominator = denominator
         #: The data
         self.data = []
 

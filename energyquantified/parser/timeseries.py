@@ -52,6 +52,9 @@ def parse_timeseries(json):
         contract = parse_contract(contract)
     # Parse scenario names
     scenario_names = json.get("scenario_names") or None
+    # Parse unit and denominator
+    unit = json.get("unit")
+    denominator = json.get("denominator")
     # Parse data
     data = _parse_data(json.get("data"), resolution=resolution)
 
@@ -61,6 +64,8 @@ def parse_timeseries(json):
         instance=instance,
         contract=contract,
         scenario_names=scenario_names,
+        unit=unit,
+        denominator=denominator,
         data=data
     )
 
