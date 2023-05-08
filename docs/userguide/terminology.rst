@@ -219,6 +219,32 @@ should keep the following in mind:
 
 Class reference: :py:class:`Filter <energyquantified.metadata.Filter>`
 
+Conversions
+-----------
+
+Unit
+~~~~
+
+Convert data to another unit. Supported units at this moment:
+
+- ``°C`` for temperatures in celsius degrees
+- ``Degrees`` for angles in degrees
+- ``hPa`` for pressure in hectopascal
+- ``m`` for length in meters
+- ``m^2`` for area in square meters
+- ``m^3`` for volume in cubic meters
+- ``s`` for time in seconds
+- ``t`` for weight in tons
+- ``TW``, ``GW``, ``MW``, ``kW``, ``W`` for power in watt
+- ``TWh``, ``GWh``, ``MWh``, ``kWh``, ``Wh`` for energy in watt-hours
+- ``TWh/h``, ``GWh/h``, ``MWh/h``, ``kWh/h``, ``Wh/h`` for average energy in watt-hours per hour
+- ``therm`` for heat energy in therms
+- ``bbl`` for volume in barrels
+- ``%`` as percent
+- ``EUR``, ``USD``, ``GBP``, ``NOK``, ``SEK``, ``DKK``, ``CHF``, ``CZK``, ``HUF``, ``PLN``, ``BGN``, ``HRK``, ``RUB``, ``RON``, ``TRY``, ``pence`` for currencies
+
+**Note:** Currency conversions are not supported for timeseries with a frequency higher than P1D and not for periods.
+
 Aggregation threshold
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -236,7 +262,6 @@ For example, you want to convert hourly values to daily values using the mean
 value. Let's assume that some input values are missing. Instead of getting
 empty values, you want to get the average if a maximum of four values are
 missing within a day. In this case, set the *threshold* to four.
-
 
 .. _time-series:
 
