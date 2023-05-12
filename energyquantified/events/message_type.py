@@ -9,6 +9,7 @@ class MessageType(Enum):
     EVENT = ("EVENT", "Event")
     INFO = ("INFO", "Info")
     FILTERS = ("FILTERS", "Filters")
+    ERROR = ("ERROR", "Error")
     TIMEOUT = ("TIMEOUT", "Timeout")
     DISCONNECTED = ("DISCONNECTED", "Disconnected")
     UNAVAILABLE = ("UNAVAILABLE", "Unavailable")

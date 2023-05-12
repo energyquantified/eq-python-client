@@ -1,6 +1,6 @@
 from .event_type import EventType
 from .message_type import MessageType
-from .connection_event import ConnectionEvent, WebSocketError
+from .connection_event import ConnectionEvent#, ConnectionError
 from .event_options import EventFilterOptions, EventCurveOptions
 from .events import CurveUpdateEvent, DisconnectedEvent, UnavailableEvent
 from .message_type import MessageType
@@ -9,7 +9,7 @@ __all__ = [
     "EventType",
     "MessageType",
     "ConnectionEvent",
-    "WebSocketError",
+    #"ConnectionError",
     # event_options
     "EventFilterOptions",
     "EventCurveOptions",
