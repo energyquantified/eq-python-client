@@ -4,8 +4,7 @@ from .metadata import (
     parse_curve,
     parse_instance,
     parse_resolution,
-    parse_contract,
-    parse_time_zone
+    parse_contract
 )
 from ..data import (
     Timeseries,
@@ -53,8 +52,6 @@ def parse_timeseries(json):
         contract = parse_contract(contract)
     # Parse scenario names
     scenario_names = json.get("scenario_names") or None
-    # Parse time zone
-    time_zone = parse_time_zone(json)
     # Parse data
     data = _parse_data(json.get("data"), resolution=resolution)
 
@@ -64,7 +61,6 @@ def parse_timeseries(json):
         instance=instance,
         contract=contract,
         scenario_names=scenario_names,
-        time_zone=time_zone,
         data=data
     )
 

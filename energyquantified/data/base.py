@@ -9,8 +9,7 @@ class Series:
             name=None,
             resolution=None,
             instance=None,
-            contract=None,
-            time_zone=None):
+            contract=None):
         # --- Members ---
         #: The curve
         self.curve = curve
@@ -21,8 +20,6 @@ class Series:
         self.instance = instance
         #: The contract for OHLC operations resulting in a time series
         self.contract = contract
-        #: The time zone
-        self.time_zone = time_zone
         #: The data
         self.data = []
 
@@ -94,15 +91,6 @@ class Series:
         """
         # This method must be implemented in subclasses
         raise NotImplementedError("Method end() is not implemented")
-
-    def time_zone(self):
-        """
-        Get the time zone of the timeseries.
-
-        :return: The time zone
-        :rtype: TzInfo
-        """
-        return self.time_zone
 
     def __iter__(self):
         """

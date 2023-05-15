@@ -307,8 +307,6 @@ class Timeseries(Series):
     :type resolution: Resolution, optional
     :param instance: The instance, defaults to None
     :type instance: Instance, optional
-    :param time_zone: The time zone of the time series
-    :type time_zone: TzInfo, optional
     :param data: A list of values (Value, ScenariosValue, or MeanScenariosValue)
     :type data: list[]
     :param scenario_names: A list of scenario names, if any
@@ -560,7 +558,8 @@ class TimeseriesList(list):
     def extend(self, iterable):
         # Asserts
         _validate_timeseries_list(iterable)
-        self._frequency = _check_and_get_frequency_list(iterable, self._frequency)
+        self._frequency = _check_and_get_frequency_list(iterable,
+                                                        self._frequency)
         # Perform operation
         return super().extend(iterable)
 
@@ -576,14 +575,16 @@ class TimeseriesList(list):
         _validate_timeseries_list(rhs)
         self._frequency = _check_and_get_frequency_list(rhs, self._frequency)
         # Perform operation
-        return TimeseriesList(list.__add__(self, rhs), frequency=self._frequency)
+        return TimeseriesList(list.__add__(self, rhs),
+                              frequency=self._frequency)
 
     def __iadd__(self, rhs):
         # Asserts
         _validate_timeseries_list(rhs)
         self._frequency = _check_and_get_frequency_list(rhs, self._frequency)
         # Perform operation
-        return TimeseriesList(list.__iadd__(self, rhs), frequency=self._frequency)
+        return TimeseriesList(list.__iadd__(self, rhs),
+                              frequency=self._frequency)
 
     def __setitem__(self, key, timeseries):
         # Asserts

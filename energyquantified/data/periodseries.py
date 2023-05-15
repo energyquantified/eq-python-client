@@ -102,7 +102,8 @@ class Period(namedtuple("Period", ("begin", "end", "value"))):
         return (d1 - d0).total_seconds()
 
 
-class CapacityPeriod(namedtuple("Period", ("begin", "end", "value", "installed"))):
+class CapacityPeriod(
+    namedtuple("Period", ("begin", "end", "value", "installed"))):
     """
     A period for a period-based series. Includes the installed capacity for
     the period (which may differ from the currently available capacity given in
@@ -139,7 +140,8 @@ class CapacityPeriod(namedtuple("Period", ("begin", "end", "value", "installed")
             raise ValueError("Period.end is not a datetime")
         if not (self.value is None or isinstance(self.value, (numbers.Number))):
             raise ValueError("Period.value must either be a number or None")
-        if not (self.installed is None or isinstance(self.installed, (numbers.Number))):
+        if not (self.installed is None or isinstance(self.installed,
+                                                     (numbers.Number))):
             raise ValueError("Period.installed must either be a number or None")
 
     def print(self, file=sys.stdout):
@@ -217,8 +219,6 @@ class Periodseries(Series):
     :type resolution: Resolution, optional
     :param instance: The instance, defaults to None
     :type instance: Instance, optional
-    :param time_zone: The time zone of the time series
-    :type time_zone: TzInfo, optional
     :param data: A list of periods (Period or CapacityPeriod)
     :type data: list[]
     """
@@ -276,7 +276,8 @@ class Periodseries(Series):
         # Verify parameters
         assert isinstance(frequency, Frequency), "Must be a frequency"
         assert isinstance(field, str), "Must be a str"
-        assert field in ("value", "installed"), "field must be 'value' or 'installed'"
+        assert field in (
+            "value", "installed"), "field must be 'value' or 'installed'"
         if field == "installed":
             assert all(isinstance(p, CapacityPeriod) for p in
                        self.data), "field='installed' requires a series of CapacityPeriods"
@@ -309,7 +310,8 @@ class Periodseries(Series):
         timeseries.set_name(self._name)
         return timeseries
 
-    def to_df(self, frequency=None, name=None, single_level_header=False, field="value"):
+    def to_df(self, frequency=None, name=None, single_level_header=False,
+              field="value"):
         """
         Alias for :meth:`Periodseries.to_dataframe`.
 
@@ -402,7 +404,8 @@ class _PeriodsToTimeseriesIterator:
     A period-based series iterator used for conversions to Timeseries objects.
     """
 
-    def __init__(self, periods=None, resolution=None, begin=None, end=None, field="value"):
+    def __init__(self, periods=None, resolution=None, begin=None, end=None,
+                 field="value"):
         self.periods = [p for p in periods if p.end > begin and p.begin < end]
         self.resolution = resolution
         self.begin = begin
@@ -572,7 +575,8 @@ class PeriodseriesList(list):
             field=field,
         )
 
-    def to_dataframe(self, frequency=None, single_level_header=False, field="value"):
+    def to_dataframe(self, frequency=None, single_level_header=False,
+                     field="value"):
         """
         Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
         series are placed in its own column and are lined up with the date-time

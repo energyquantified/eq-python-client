@@ -1,4 +1,4 @@
-from .metadata import parse_curve, parse_contract, parse_time_zone
+from .metadata import parse_curve, parse_contract
 from .ohlc import parse_ohlc_list
 from .periodseries import parse_periodseries
 from .timeseries import parse_timeseries
@@ -16,8 +16,6 @@ def parse_srmc_response(json):
     contract = json.get('contract')
     if contract is not None:
         contract = parse_contract(contract)
-    # Get time zone
-    time_zone = parse_time_zone(json)
     # Get SRMC options
     options = json.get('srmc_options')
     if options is not None:
@@ -28,7 +26,6 @@ def parse_srmc_response(json):
         ohlc = parse_ohlc_list(data)
         return SRMC(
             curve=curve,
-            time_zone=time_zone,
             contract=contract,
             options=options,
             ohlc=OHLCList(ohlc)

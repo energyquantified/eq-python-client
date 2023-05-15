@@ -81,13 +81,11 @@ class OHLCList(list):
     (yearly, monthly, weekly etc.) for a specific market.
     """
 
-    def __init__(self, elements, curve=None, time_zone=None, contract=None):
+    def __init__(self, elements, curve=None, contract=None):
         super().__init__(elements)
         # --- Public members ---
         #: The curve holding these OHLC objects
         self.curve = curve
-        #: The time zone
-        self.time_zone = time_zone
 
     def append(self, value):
         raise NotImplementedError("OHLCList does not support append")

@@ -1,6 +1,6 @@
 from dateutil import parser
 
-from .metadata import parse_curve, parse_instance, parse_resolution, parse_time_zone
+from .metadata import parse_curve, parse_instance, parse_resolution
 from ..data import Period, CapacityPeriod, Periodseries, PeriodseriesList
 from ..exceptions import ParseException
 from ..time import to_timezone
@@ -35,8 +35,6 @@ def parse_periodseries(json):
     instance = json.get("instance")
     if instance:
         instance = parse_instance(instance, curve=curve)
-    # Parse time zone
-    time_zone = parse_time_zone(json)
     # Parse data
     data = _parse_data(json.get("data"), resolution=resolution)
 
@@ -44,7 +42,6 @@ def parse_periodseries(json):
         curve=curve,
         resolution=resolution,
         instance=instance,
-        time_zone=time_zone,
         data=data
     )
 
