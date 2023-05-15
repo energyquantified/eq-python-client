@@ -3,16 +3,29 @@ from enum import Enum
 _message_lookup = {}
 class MessageType(Enum):
     """
-    Type of response from event stream.
-    """
+    Describes the type of response received when listening to
+    the curve events stream. It is the first element in the
+    tuple of two elements returned from ``get_next()``, and
+    describes the second element.
+    
+    See also :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
 
+     * ``EVENT`` – A curve event (type: :py:class:`energyquantified.events.CurveUpdateEvent`)
+     * ``INFO`` – An informative message (type: str)
+     * ``FILTERS`` – List of filters (type:\
+            [:py:class:`energyquantified.events.EventCurveOptions` | \
+            :py:class:`energyquantified.events.EventFilterOptions`])
+     * ``ERROR`` – Informative error message from the stream (type: str)
+     * ``TIMEOUT`` – No new messages or events received (type: None)
+     * ``DISCONNECTED`` – A connection event\
+            (type: :py:class:`energyquantified.events.ConnectionEvent`)
+    """
     EVENT = ("EVENT", "Event")
     INFO = ("INFO", "Info")
     FILTERS = ("FILTERS", "Filters")
     ERROR = ("ERROR", "Error")
     TIMEOUT = ("TIMEOUT", "Timeout")
     DISCONNECTED = ("DISCONNECTED", "Disconnected")
-    UNAVAILABLE = ("UNAVAILABLE", "Unavailable")
 
     def __init__(self, tag=None, label=None):
         self.tag = tag

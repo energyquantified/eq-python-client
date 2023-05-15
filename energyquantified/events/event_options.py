@@ -17,14 +17,15 @@ class _BaseEventOptions:
 
     def set_begin(self, begin):
         """
-        Set the filters 'begin'. The begin/end range is for the changes an event
-        describes, regardless of when the event was created.
+        Set the filters 'begin'. The begin/end range regards the data an event
+        describes, not to be confused with created time of the event.
 
         :param begin: Start of range
-        :type begin: datetime # TODO date? require tz-aware?
+        :type begin: datetime
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: EventCurveOptions | EventFilterOptions
+        :rtype: :py:class:`energyquantified.events.EventCurveOptions` | \
+                :py:class:`energyquantified.events.EventFilterOptions`
         """
         if isinstance(begin, str):
             begin = datetime.fromisoformat(begin)
@@ -33,20 +34,21 @@ class _BaseEventOptions:
             if not isinstance(begin, datetime):
                 begin = datetime.combine(begin, datetime.min.time())
         else:
-            raise ValueError(f"'{begin}' is not type datetime or str")
+            raise ValueError(f"'{begin}' is not type datetime or string")
         self._begin = begin
         return self
 
     def set_end(self, end):
         """
-        Set the filters 'end'. The begin/end range is for the changes an event
-        describes, regardless of when the event was created.
+        Set the filters 'end'. The begin/end range regards the data an event
+        describes, not to be confused with the created time of the event.
 
         :param end: End of range
-        :type end: datetime # TODO date? require tz-aware?
+        :type end: datetime
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: EventCurveOptions | EventFilterOptions
+        :rtype: :py:class:`energyquantified.events.EventCurveOptions` | \
+                :py:class:`energyquantified.events.EventFilterOptions`
         """
         if isinstance(end, str):
             end = datetime.fromisoformat(end)
@@ -55,21 +57,22 @@ class _BaseEventOptions:
             if not isinstance(end, datetime):
                 end = datetime.combine(end, datetime.min.time())
         else:
-            raise ValueError(f"'{end}' is not type datetime or str")
+            raise ValueError(f"'{end}' is not type datetime or string")
         self._end = end
         return self
 
     def set_event_types(self, event_types):
         """
-        Set one or more EventTypes in this filter, excluding any events not matching at least one.
-        # TODO describe by_tag
+        Set one or more EventTypes in this filter, excluding events not matching
+        at least one.
 
-        :param event_types: EventTypes to include
-        :type event_types: EventType | str | Union[list, tuple, set](EventType | str)
+        :param event_types: EventTypes (optionally by tag) to include
+        :type event_types: list[EventType, str]
         :raises ValueError: Invalid arg type
         :raises ValueError: Invalid event tag
-        :return: the instance this method was invoked upon
-        :rtype: EventCurveOptions | EventFilterOptions
+        :return: The instance this method was invoked upon
+        :rtype: :py:class:`energyquantified.events.EventCurveOptions` | \
+                :py:class:`energyquantified.events.EventFilterOptions`
         """
         new_event_types = set()
         if not isinstance(event_types, (list, tuple, set)):
@@ -80,7 +83,7 @@ class _BaseEventOptions:
                     raise ValueError(f"EventType not found for tag: {event_type}")
                 event_type = EventType.by_tag(event_type)
             if not isinstance(event_type, EventType):
-                raise ValueError(f"'{event_type}' is not type 'EventType' or 'str'")
+                raise ValueError(f"'{event_type}' is not type 'EventType' or 'string'")
             new_event_types.add(event_type)
         self._event_types = new_event_types
         return self
@@ -125,12 +128,12 @@ class EventCurveOptions(_BaseEventOptions):
         Set one ore more curve names for this filter. Limit the events to events 
         with a curve matching one of the curve_names.
 
-        :param curves: One or more str or curves
-        :type curves: Curve | str | Union[list, tuple, set](Curve | str)
-        :raises ValueError: Curve without a name
+        :param curves: Filter events by exact curve names
+        :type curves: list[Curve, str]
+        :raises ValueError: Curve missing name attr
         :raises ValueError: Invalid arg type
-        :return: the instance this method was invoked upon
-        :rtype: EventCurveOptions
+        :return: The instance this method was invoked upon
+        :rtype: :py:class:`energyquantified.events.EventCurveOptions`
         """
         new_curves = set()
         if not isinstance(curves, (list, tuple, set)):
@@ -138,27 +141,29 @@ class EventCurveOptions(_BaseEventOptions):
         for curve in curves:
             if isinstance(curve, Curve):
                 if not isinstance(curve.name, str):
-                    raise ValueError("curve.name must be a str")
+                    raise ValueError("curve.name must be a string")
                 curve = curve.name
             if not isinstance(curve, str):
-                raise ValueError(f"curve: '{curve}' is not type 'str' or 'Curve'")
+                raise ValueError(f"curve: '{curve}' is not type 'string' or 'Curve'")
             new_curves.add(curve)
         self._curve_names = list(new_curves)
         return self
 
     def to_json(self):
+        """
+        Represent this object as json.
+        """
         return json.dumps(self.to_dict())
 
     def to_dict(self, include_not_set=False):
         """
-        Return the object as a dictionary.
+        Represent this object as a dictionary, optionally excluding None-values.
 
-        Args:
-            include_not_set (bool, optional): If values that are not set should be included
-            or not. Defaults to False (excludes).
-
-        Returns:
-            dict: This obj as a dictionary, optionally including not-set values
+        :param include_not_set: If variables that are not set should be included\
+            in the dictionary. Defaults to False.
+        :type include_not_set: bool, optional
+        :return: A dict representation of this object
+        :rtype: dict
         """
         filters = super()._to_dict(include_not_set=include_not_set)
         if self._curve_names is not None:
@@ -207,94 +212,85 @@ class EventFilterOptions(_BaseEventOptions):
         Filter events by a query/freetext search
 
         :param q: Query/freetext
-        :type q: str, required
-        :raises ValueError: If q is not a str
+        :type q: string, required
+        :raises ValueError: If q is not a string
         :return: The instance this method was invoked upon
-        :rtype: EventFilterOptions
+        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
         """
         if not isinstance(q, str):
-            raise ValueError(f"q: '{q}' is not a str")
+            raise ValueError(f"q: '{q}' is not a string")
         self._q = q
         return self
 
     def set_areas(self, areas):
         """
-        Set one or more areas in this filter. Limit events to events having a curve with a matching Area.
-        # TODO describe by_tag
+        Set one or more areas in this filter. Limit events to events having
+        a curve with a matching Area.
 
-        :param areas: The areas to receive events for
-        :type areas: Area | str | Union[list, tuple, set](Area | str)
+        :param areas: The areas or area tags to receive events
+        :type areas: list[Area, str]
         :raises ValueError: Invalid arg type
-        :raises ValueError: One or more arg is a str but not a valid Area tag
+        :raises ValueError: Tag is not a valid Area tag
         :return: The instance this method was invoked upon
-        :rtype: EventFilterOptions
+        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
         """
         new_areas = set()
         if not isinstance(areas, (list, tuple, set)):
             areas = [areas]
         for area in areas:
-            # Get Area by tag if str
+            # Get Area by tag if string
             if isinstance(area, str):
                 if not Area.is_valid_tag(area):
                     raise ValueError(f"Area not found for tag: {area}")
                 area = Area.by_tag(area)
             if not isinstance(area, Area):
-                raise ValueError(f"'{area}' must be type Area or str")
+                raise ValueError(f"'{area}' must be type Area or string")
             new_areas.add(area)
         self._areas = list(new_areas)
         return self
 
     def set_data_types(self, data_types):
         """
-        Set one or more DataTypes. Limit events to events having a curve with a matching DataType.
-        # TODO describe by_tag
+        Set one or more DataTypes. Limit events to events having a
+        curve with a matching DataType.
 
-        :param data_types: The DataTypes to receive events for
-        :type data_types: DataType | str | Union[list, tuple, set](DataType | str)
+        :param data_types: The DataTypes (optionally by tag) to receive events for
+        :type data_types: list[DataType, str]
         :raises ValueError: Invalid arg type
-        :raises ValueError: One or more arg is a str but not a valid DataType tag
+        :raises ValueError: Tag is not a valid DataType tag
         :return: The instance this method was invoked upon
-        :rtype: EventFilterOptions
+        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
         """
         new_data_types = set()
         if not isinstance(data_types, (list, tuple, set)):
             data_types = [data_types]
         for data_type in data_types:
-            # Get DataType by tag if str
+            # Get DataType by tag if string
             if isinstance(data_type, str):
                 if not DataType.is_valid_tag(data_type):
                     raise ValueError(f"DataType not found for tag: {data_type}")
                 data_type = DataType.by_tag(data_type)
             if not isinstance(data_type, DataType):
-                raise ValueError(f"'{data_type}' must be type DataType or str")
+                raise ValueError(f"'{data_type}' must be type DataType or string")
             new_data_types.add(data_type)
         self._data_types = list(new_data_types)
         return self
 
-
-        # """
-        # Set one or more commodities - limit events to events having a curve with a matching commodity.
-
-        # Raises:
-        #     ValueError: If invalid input
-
-        # Returns:
-        #     EventFilterOptions: The instance this method was invoked upon
-        # """
     def set_commodities(self, commodities):
         """
-        Set one or more commodities in this filter. Limit events to those having a curve with a matching commodity.
+        Set one or more commodities in this filter. Limit events to those having a
+        curve with a matching commodity.
 
-        :param commodities: _description_
-        :type commodities: str | Union[list, tuple, set](str)
+        :param commodities: _description_ # TODO
+        :type commodities: list, str
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: EventFilterOptions
+        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
         """
         if not isinstance(commodities, (list, tuple, set)):
             commodities = set([commodities])
         if not all(isinstance(commodity, str) for commodity in commodities):
-            raise ValueError("commodities must be a str or a list/tuple/set of str")
+            raise ValueError("commodities must be a string or a list/tuple/set of strings")
         self._commodities = commodities
         return self
 
@@ -304,15 +300,15 @@ class EventFilterOptions(_BaseEventOptions):
         with at least one matching category.
 
         :param categories: The categories to include
-        :type categories: str | Union[list, tuple, set](str)
+        :type categories: list, str
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: EventFilterOptions
+        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
         """
         if not isinstance(categories, (list, tuple, set)):
             categories = set([categories])
         if not all(isinstance(category, str) for category in categories):
-            raise ValueError("categories must be a str or a list/tuple/set of str")
+            raise ValueError("categories must be a string or a list/tuple/set of string")
         self._categories = categories
         return self
 
@@ -323,7 +319,7 @@ class EventFilterOptions(_BaseEventOptions):
         separated by space.
 
         :param exact_categories: The exact categories to include
-        :type exact_categories: str | Union[list, tuple, set](str)
+        :type exact_categories: list, str
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
         :rtype: EventFilterOptions
@@ -331,7 +327,7 @@ class EventFilterOptions(_BaseEventOptions):
         if not isinstance(exact_categories, (list, tuple, set)):
             exact_categories = set([exact_categories])
         if not all(isinstance(category, str) for category in exact_categories):
-            raise ValueError("exact_categories must be a str or a list/tuple/set of str")
+            raise ValueError("exact_categories must be a string or a list/tuple/set of strings")
         self._exact_categories = exact_categories
         return self
 
@@ -340,29 +336,31 @@ class EventFilterOptions(_BaseEventOptions):
         Filter by location.
 
         :param location: Location
-        :type location: str
+        :type location: string
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: EventFilterOptions
+        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
         """
         if not isinstance(location, str):
-            raise ValueError(f"location: '{location}' is not a str")
+            raise ValueError(f"location: '{location}' is not a string")
         self._location = location
         return self
     
     def to_json(self):
+        """
+        Represent this object as json.
+        """
         return json.dumps(self.to_dict())
 
     def to_dict(self, include_not_set=False):
         """
-        Represent this object as a dictionary.
+        Represent this object as a dictionary, optionally excluding None-values.
 
-        Args:
-            include_not_set (bool, optional): If filters not-set should be included.
-            Defaults to False (excludes).
-
-        Returns:
-            dict: dictionary of self
+        :param include_not_set: If variables that are not set should be included\
+            in the dictionary. Defaults to False.
+        :type include_not_set: bool, optional
+        :return: A dict representation of this object
+        :rtype: dict
         """
         filters = super()._to_dict(include_not_set=include_not_set)
         # q (freetext)

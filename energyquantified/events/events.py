@@ -18,7 +18,6 @@ class UnavailableEvent:
     message: Optional[str] = None
 
 
-
 class CurveUpdateEvent:
     def __init__(
         self,
@@ -58,16 +57,15 @@ class CurveUpdateEvent:
 
     def load_data(self, eq):
         try:
-            print("loading data ..")
             data = self._load_data(eq)
         except APIError as e:
-            print("failed to laod data")
             # TODO
             data = e
         return data
         
     def _load_data(self, eq):
         if self.event_type in [EventType.TRUNCATE, EventType.DELETE]:
+            # TODO
             print(f"Can't load data for {self.event_type} event")
             return None
         # Timeseries and scenarios
