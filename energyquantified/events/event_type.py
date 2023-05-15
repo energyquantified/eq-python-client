@@ -41,9 +41,9 @@ class EventType(Enum):
     @staticmethod
     def by_tag(tag):
         """
-        Look up an EventType by tag (case-insensitive)
+        Look up an EventType by tag.
 
-        :param tag: The tag to look up
+        :param tag: The tag to look up (case-insensitive)
         :type tag: str
         :return: The EventType for this tag
         :rtype: EventType

@@ -404,7 +404,7 @@ class CurveUpdateEventAPI:
         :py:class:`energyquantified.events.ConnectionEvent`, str, None). The
         ``MessageType`` is used for describing the second element. Example:
 
-        >>> for msg_type, msg in enumerate(get_next()):
+        >>> for msg_type, msg in enumerate(get_next(3)):
         >>>     if msg_type == MessageType.EVENT:
         >>>         # Got a new event
         >>>         # msg. ...
@@ -415,6 +415,9 @@ class CurveUpdateEventAPI:
         >>>         # Got the currently active filters on the stream, let's
         >>>         # check it out
         >>>         print(msg)
+        >>>     elif msg_type == MessageType.TIMEOUT:
+        >>>         # No new message or event in the last 'timeout' seconds
+        >>>         # Maybe I want to change filters soon ..
 
         See :py:class:`energyquantified.events.MessageType` for the combinations.
 
@@ -459,7 +462,8 @@ class CurveUpdateEventAPI:
         curve events matching any of the filters.
 
         :param filters: The filters. Can be a single filter or a list of filters.
-        :type filters: list[EventFilterOptions | EventCurveOptions]
+        :type filters: list[:py:class:`energyquantified.events.EventFilterOptions` | \
+            :py:class:`energyquantified.events.EventCurveOptions`]
         """
         if not isinstance(filters, (list, tuple, set)):
             filters = [filters]

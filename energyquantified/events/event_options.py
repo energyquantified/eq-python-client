@@ -83,7 +83,7 @@ class _BaseEventOptions:
                     raise ValueError(f"EventType not found for tag: {event_type}")
                 event_type = EventType.by_tag(event_type)
             if not isinstance(event_type, EventType):
-                raise ValueError(f"'{event_type}' is not type 'EventType' or 'string'")
+                raise ValueError(f"'{event_type}' is not type 'EventType' or 'str'")
             new_event_types.add(event_type)
         self._event_types = new_event_types
         return self
@@ -144,7 +144,7 @@ class EventCurveOptions(_BaseEventOptions):
                     raise ValueError("curve.name must be a string")
                 curve = curve.name
             if not isinstance(curve, str):
-                raise ValueError(f"curve: '{curve}' is not type 'string' or 'Curve'")
+                raise ValueError(f"curve: '{curve}' is not type 'str' or 'Curve'")
             new_curves.add(curve)
         self._curve_names = list(new_curves)
         return self
@@ -212,7 +212,7 @@ class EventFilterOptions(_BaseEventOptions):
         Filter events by a query/freetext search
 
         :param q: Query/freetext
-        :type q: string, required
+        :type q: str, required
         :raises ValueError: If q is not a string
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.EventFilterOptions`
@@ -281,7 +281,7 @@ class EventFilterOptions(_BaseEventOptions):
         Set one or more commodities in this filter. Limit events to those having a
         curve with a matching commodity.
 
-        :param commodities: _description_ # TODO
+        :param commodities: The commidities to filter for
         :type commodities: list, str
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
@@ -290,7 +290,7 @@ class EventFilterOptions(_BaseEventOptions):
         if not isinstance(commodities, (list, tuple, set)):
             commodities = set([commodities])
         if not all(isinstance(commodity, str) for commodity in commodities):
-            raise ValueError("commodities must be a string or a list/tuple/set of strings")
+            raise ValueError("commodities must be a str or a list/tuple/set of strings")
         self._commodities = commodities
         return self
 
@@ -308,14 +308,14 @@ class EventFilterOptions(_BaseEventOptions):
         if not isinstance(categories, (list, tuple, set)):
             categories = set([categories])
         if not all(isinstance(category, str) for category in categories):
-            raise ValueError("categories must be a string or a list/tuple/set of string")
+            raise ValueError("categories must be a str or a list/tuple/set of string")
         self._categories = categories
         return self
 
     def set_exact_categories(self, exact_categories):
         """
         Set one or more exact categories. Limits events to those with a curve matching at least one
-        of the exact_categories. An exact category should be one or more categories in a single string,
+        of the exact_categories. An exact category should be one or more categories in a single str,
         separated by space.
 
         :param exact_categories: The exact categories to include
@@ -327,7 +327,7 @@ class EventFilterOptions(_BaseEventOptions):
         if not isinstance(exact_categories, (list, tuple, set)):
             exact_categories = set([exact_categories])
         if not all(isinstance(category, str) for category in exact_categories):
-            raise ValueError("exact_categories must be a string or a list/tuple/set of strings")
+            raise ValueError("exact_categories must be a str or a list/tuple/set of strings")
         self._exact_categories = exact_categories
         return self
 
@@ -336,7 +336,7 @@ class EventFilterOptions(_BaseEventOptions):
         Filter by location.
 
         :param location: Location
-        :type location: string
+        :type location: str
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.EventFilterOptions`

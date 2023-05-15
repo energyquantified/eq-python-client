@@ -40,8 +40,24 @@ class MessageType(Enum):
 
     @staticmethod
     def is_valid_tag(tag):
+        """
+        Check whether a MessageType tag exists or not.
+
+        :param tag: The tag to look up (case-insensitive)
+        :type tag: str
+        :return: True if the MessageType tag exists, otherwise False
+        :rtype: bool
+        """
         return tag.lower() in _message_lookup
 
     @staticmethod
     def by_tag(tag):
+        """
+        Look up a MessageType by tag.
+
+        :param tag: The tag to look up (case-insensitive)
+        :type tag: str
+        :return: The MessageType for this tag
+        :rtype: MessageType
+        """
         return _message_lookup[tag.lower()]

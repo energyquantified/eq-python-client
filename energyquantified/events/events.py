@@ -1,21 +1,7 @@
 from energyquantified.metadata import CurveType
 from energyquantified.exceptions import APIError
-from dataclasses import dataclass
-from typing import Optional
 
 from . import EventType
-
-
-@dataclass(frozen=True)
-class DisconnectedEvent:
-    status_code: int
-    message: Optional[str] = None
-
-@dataclass(frozen=True)
-class UnavailableEvent:
-    status_code: int
-    server_message: Optional[str] = None
-    message: Optional[str] = None
 
 
 class CurveUpdateEvent:

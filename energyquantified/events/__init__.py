@@ -2,7 +2,7 @@ from .event_type import EventType
 from .message_type import MessageType
 from .connection_event import ConnectionEvent#, ConnectionError
 from .event_options import EventFilterOptions, EventCurveOptions
-from .events import CurveUpdateEvent, DisconnectedEvent, UnavailableEvent
+from .events import CurveUpdateEvent
 from .message_type import MessageType
 
 __all__ = [
@@ -15,6 +15,4 @@ __all__ = [
     "EventCurveOptions",
     # events
     "CurveUpdateEvent",
-    "DisconnectedEvent",
-    "UnavailableEvent",
 ]
