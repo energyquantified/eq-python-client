@@ -75,6 +75,7 @@ Here are the different API section classes:
 .. autoclass:: energyquantified.api.CurveUpdateEventAPI
    :inherited-members:
 
+
 Data types
 ----------
 
@@ -250,6 +251,34 @@ Metadata
 
 .. autoclass:: energyquantified.metadata.SpecificContract
    :inherited-members:
+
+
+Curve events
+-------------
+
+.. autoclass:: energyquantified.events.ConnectionEvent
+   :inherited-members:
+   :special-members: __str__, __repr__
+
+.. autoclass:: energyquantified.events.EventCurveOptions
+   :inherited-members:
+   :special-members: __str__, __repr__
+
+.. autoclass:: energyquantified.events.EventFilterOptions
+   :inherited-members:
+   :special-members: __str__, __repr__
+
+.. autoclass:: energyquantified.events.EventType
+   :inherited-members:
+   :special-members: __str__, __repr__
+
+.. autoclass:: energyquantified.events.CurveUpdateEvent
+   :inherited-members:
+   :special-members: __str__, __repr__
+
+.. autoclass:: energyquantified.events.MessageType
+   :inherited-members:
+   :special-members: __str__, __repr__
 
 
 Date and time
