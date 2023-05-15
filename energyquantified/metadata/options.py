@@ -3,6 +3,7 @@ from datetime import datetime, date
 
 from ..time import Frequency
 
+
 _aggregation_lookup = {}
 
 class Aggregation(enum.Enum):

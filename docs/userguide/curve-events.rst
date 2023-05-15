@@ -433,7 +433,7 @@ different filters:
 Query for current filters
 ~~~~~~~~~~~~~~
 
-Although you automatically get a message every time the filters are updated, it is also possible to
+Although you automatically get a message every time the filters are updatedF, it is also possible to
 manually request the currently active filters with
 :py:meth:`send_get_filters() <energyquantified.api.events.CurveUpdateEventAPI.send_get_filters>`.
 The response with the filters will be put in a message queue that is accessible from
