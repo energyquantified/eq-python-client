@@ -90,6 +90,7 @@ And finally, you can aggregate instances:
    >>>    frequency=Frequency.P1D,
    >>>    aggregation=Aggregation.AVERAGE,
    >>>    hour_filter=Filter.BASE,
+   >>>    threshold=7 # Aggregate days only if 7 or fewer quarters are missing
    >>>    limit=10
    >>> )
 
