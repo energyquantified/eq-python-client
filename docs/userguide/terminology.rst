@@ -219,8 +219,8 @@ should keep the following in mind:
 
 Class reference: :py:class:`Filter <energyquantified.metadata.Filter>`
 
-Threshold
-~~~~~~~~~
+Aggregation threshold
+~~~~~~~~~~~~~~~~~~~~~
 
 By default, the aggregation returns empty values whenever one or more input
 values are missing. You can set a *threshold* that defines how many values are

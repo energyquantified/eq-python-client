@@ -6,7 +6,7 @@ dev
 
 **Improvements**
 
-- Add threshold parameter
+- Add ``threshold`` parameter to define how many values are allowed to be missing while performing an aggregation
 
 0.10.1
 ------

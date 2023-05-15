@@ -133,6 +133,9 @@ so:
 When you specify a weekly, monthly, quarterly or yearly frequency, the API
 will automatically use futures peak (8-20 on workdays only) in the aggregation.
 
+Aggregation threshold
+~~~~~~~~~~~~~~~~~~~~~
+
 In case, one or more input values are empty, the aggregation will return an
 empty value. To avoid this, you can set the ``threshold`` parameter which
 defines how many values are allowed to be missing within a frame of the
