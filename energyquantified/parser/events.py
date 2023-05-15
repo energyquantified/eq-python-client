@@ -61,21 +61,17 @@ def _parse_filter_options(json):
     if data_types is not None:
         options.set_data_types(data_types)
     # Commodities
-    commodities = json.get("commodity")
+    commodities = json.get("commodities")
     if commodities is not None:
         options.set_commodities(commodities)
     # Categories
-    categories = json.get("category")
+    categories = json.get("categories")
     if categories is not None:
         options.set_categories(categories)
     # Exact categories
-    exact_categories = json.get("exact_category")
+    exact_categories = json.get("exact_categories")
     if exact_categories is not None:
         options.set_exact_categories(exact_categories)
-    # Location
-    location = json.get("location")
-    if location is not None:
-        options.set_location(location)
     return options
     
 

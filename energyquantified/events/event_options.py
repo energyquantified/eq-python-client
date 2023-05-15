@@ -3,6 +3,8 @@ from datetime import datetime, date
 from ..metadata.curve import Curve, DataType
 from ..metadata.area import Area
 from . import EventType
+from energyquantified.time.utils import is_tz_aware
+
 
 class _BaseEventOptions:
     """
@@ -21,7 +23,7 @@ class _BaseEventOptions:
         describes, not to be confused with created time of the event.
 
         :param begin: Start of range
-        :type begin: datetime
+        :type begin: str, date, datetime
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.EventCurveOptions` | \
@@ -30,11 +32,10 @@ class _BaseEventOptions:
         if isinstance(begin, str):
             begin = datetime.fromisoformat(begin)
         if isinstance(begin, date):
-            # TODO require tz-aware?
             if not isinstance(begin, datetime):
                 begin = datetime.combine(begin, datetime.min.time())
         else:
-            raise ValueError(f"'{begin}' is not type datetime or string")
+            raise ValueError("begin must be a date, datetime, or an isoformatted string")
         self._begin = begin
         return self
 
@@ -44,7 +45,7 @@ class _BaseEventOptions:
         describes, not to be confused with the created time of the event.
 
         :param end: End of range
-        :type end: datetime
+        :type end: str, date, datetime
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.EventCurveOptions` | \
@@ -53,11 +54,10 @@ class _BaseEventOptions:
         if isinstance(end, str):
             end = datetime.fromisoformat(end)
         if isinstance(end, date):
-            # TODO require tz-aware?
             if not isinstance(end, datetime):
                 end = datetime.combine(end, datetime.min.time())
         else:
-            raise ValueError(f"'{end}' is not type datetime or string")
+            raise ValueError("end must be a date, datetime, or an isoformatted string")
         self._end = end
         return self
 
@@ -205,7 +205,6 @@ class EventFilterOptions(_BaseEventOptions):
         self._commodities = None
         self._categories = None
         self._exact_categories = None
-        self._location = None
 
     def set_q(self, q):
         """
@@ -288,10 +287,12 @@ class EventFilterOptions(_BaseEventOptions):
         :rtype: :py:class:`energyquantified.events.EventFilterOptions`
         """
         if not isinstance(commodities, (list, tuple, set)):
+            # Set to remove duplicates
             commodities = set([commodities])
         if not all(isinstance(commodity, str) for commodity in commodities):
             raise ValueError("commodities must be a str or a list/tuple/set of strings")
-        self._commodities = commodities
+        # Store as list
+        self._commodities = list(commodities)
         return self
 
     def set_categories(self, categories):
@@ -306,10 +307,12 @@ class EventFilterOptions(_BaseEventOptions):
         :rtype: :py:class:`energyquantified.events.EventFilterOptions`
         """
         if not isinstance(categories, (list, tuple, set)):
+            # Set to remove duplicates
             categories = set([categories])
         if not all(isinstance(category, str) for category in categories):
             raise ValueError("categories must be a str or a list/tuple/set of string")
-        self._categories = categories
+        # Store as list
+        self._categories = list(categories)
         return self
 
     def set_exact_categories(self, exact_categories):
@@ -325,27 +328,14 @@ class EventFilterOptions(_BaseEventOptions):
         :rtype: EventFilterOptions
         """
         if not isinstance(exact_categories, (list, tuple, set)):
+            # Set to remove duplicates
             exact_categories = set([exact_categories])
         if not all(isinstance(category, str) for category in exact_categories):
             raise ValueError("exact_categories must be a str or a list/tuple/set of strings")
-        self._exact_categories = exact_categories
+        # Store as list
+        self._exact_categories = list(exact_categories)
         return self
 
-    def set_location(self, location):
-        """
-        Filter by location.
-
-        :param location: Location
-        :type location: str
-        :raises ValueError: Invalid arg type
-        :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
-        """
-        if not isinstance(location, str):
-            raise ValueError(f"location: '{location}' is not a string")
-        self._location = location
-        return self
-    
     def to_json(self):
         """
         Represent this object as json.
@@ -377,26 +367,21 @@ class EventFilterOptions(_BaseEventOptions):
         if self._data_types is not None:
             filters["data_types"] = list(data_type.tag for data_type in self._data_types)
         elif include_not_set:
-            filters["data_type"] = None
+            filters["data_types"] = None
         # Commodities
         if self._commodities is not None:
-            filters["commodity"] = self._commodities
+            filters["commodities"] = self._commodities
         elif include_not_set:
-            filters["commodity"] = None
+            filters["commodities"] = None
         # Categories
         if self._categories is not None:
-            filters["category"] = self._categories
+            filters["categories"] = self._categories
         elif include_not_set:
-            filters["category"] = None
+            filters["categories"] = None
         if self._exact_categories is not None:
-            filters["exact_category"] = self._exact_categories
+            filters["exact_categories"] = self._exact_categories
         elif include_not_set:
-            filters["exact_category"] = None
-        # Location
-        if self._location is not None:
-            filters["location"] = self._location
-        elif include_not_set:
-            filters["location"] = None
+            filters["exact_categories"] = None
         return filters
     
     def __str__(self):
@@ -419,8 +404,6 @@ class EventFilterOptions(_BaseEventOptions):
             str_list.append(f"categories={self._categories}")
         if self._exact_categories:
             str_list.append(f"exact_categories={self._exact_categories}")
-        if self._location:
-            str_list.append(f"location={self._location}")
         return (
             f"<EventFilterOptions: "
             f"{', '.join(str_list)}"

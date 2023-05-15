@@ -6,6 +6,7 @@ from .period_instances import PeriodInstancesAPI
 from .ohlc import OhlcAPI
 from .srmc import SrmcAPI
 from .events import CurveUpdateEventAPI
+
 __all__ = [
     "InstancesAPI",
     "MetadataAPI",
