@@ -27,7 +27,8 @@ class TimeseriesAPI(BaseAPI):
             time_zone=None,
             frequency=None,
             aggregation=None,
-            hour_filter=None):
+            hour_filter=None,
+            threshold=None):
         """
         Load time series data for a :py:class:`energyquantified.metadata.Curve`.
 
@@ -50,6 +51,10 @@ class TimeseriesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
+        :param threshold: Allow that many values to be missing within one frame of \
+            *frequency*. Has no effect unless *frequency* is provided, \
+            defaults to 0.
+        :type threshold: int, optional
         :return: A time series
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -65,6 +70,7 @@ class TimeseriesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
