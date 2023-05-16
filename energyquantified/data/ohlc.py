@@ -1,13 +1,8 @@
-from collections import namedtuple
 from dataclasses import dataclass
 from datetime import date
-import enum
 
-from .base import Series
 from ..metadata import ContractPeriod, OHLCField
-from ..time import Frequency
 from ..utils.pandas import ohlc_list_to_dataframe
-
 
 
 @dataclass(frozen=True)

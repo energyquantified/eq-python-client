@@ -1,9 +1,9 @@
 from dateutil import parser
 
+from .metadata import parse_curve, parse_instance, parse_resolution
 from ..data import Period, CapacityPeriod, Periodseries, PeriodseriesList
 from ..exceptions import ParseException
 from ..time import to_timezone
-from .metadata import parse_curve, parse_instance, parse_resolution
 
 
 def parse_periodseries_list(json):

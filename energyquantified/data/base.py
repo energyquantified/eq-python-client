@@ -1,5 +1,3 @@
-
-
 class Series:
     """
     Base class for Timeseries and Periodseries.
@@ -47,7 +45,7 @@ class Series:
         :param name: An user-defined name
         :type name: str
         """
-        assert name is None or isinstance(name, str),\
+        assert name is None or isinstance(name, str), \
             "name must be None or a string"
         self._name = name
 

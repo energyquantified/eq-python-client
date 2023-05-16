@@ -309,6 +309,15 @@ curve):
    >>>    date=date(2020, 12, 14)  # Optionally set a date
    >>> )
 
+Use the ``time_zone`` parameter to convert the data to the given timezone:
+
+   >>> from energyquantified.time import UTC
+   >>>
+   >>> srmc_coal = eq.srmc.latest_as_periods(
+   >>>    'Futures Coal API-2 USD/t ICE OHLC',
+   >>>    time_zone=UTC
+   >>> )
+
 The response is an SRMC object with a period-based series set:
 
    >>> srmc_coal

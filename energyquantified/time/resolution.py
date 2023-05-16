@@ -6,13 +6,13 @@ from .utils import to_timezone
 
 class Resolution:
     """
-    A combination of a frequency and a time zone with utility methods
+    A combination of a frequency and a timezone with utility methods
     for iteration and snapping datetimes to given frequency.
 
     :param frequency: The frequency for this resolution
     :type frequency: Frequency
-    :param timezone: The time-zone for this resolution
-    :type timezone: TzInfo (or similar pytz time-zone)
+    :param timezone: The timezone for this resolution
+    :type timezone: TzInfo (or similar pytz timezone)
     """
 
     def __init__(self, frequency, timezone):
@@ -96,7 +96,7 @@ class Resolution:
 
     def matches(self, datetime_obj):
         """
-        Check if a datetime obj has the same time zone as this resolution
+        Check if a datetime obj has the same timezone as this resolution
         and that the datetime aligns with the frequency of this resolution.
 
         :param datetime_obj: A date-time
@@ -108,8 +108,8 @@ class Resolution:
             return self.frequency.matches(datetime_obj)
         else:
             return (
-                datetime_obj.tzinfo.zone == self.timezone.zone
-                and self.frequency.matches(datetime_obj)
+                    datetime_obj.tzinfo.zone == self.timezone.zone
+                    and self.frequency.matches(datetime_obj)
             )
 
     def __rshift__(self, datetime_obj):
@@ -176,7 +176,7 @@ class Resolution:
                  resolution's frequency.
         :rtype: datetime
         """
-        # Make sure it is in the correct time zone and truncate
+        # Make sure it is in the correct timezone and truncate
         dt = to_timezone(datetime_obj, tz=self.timezone)
         return self.frequency.truncate(dt)
 
@@ -228,5 +228,5 @@ class Resolution:
 
     def _assert_valid(self, datetime_obj):
         assert self.matches(datetime_obj), (
-            "datetime_obj %s does not match %s" % (datetime_obj, self)
+                "datetime_obj %s does not match %s" % (datetime_obj, self)
         )

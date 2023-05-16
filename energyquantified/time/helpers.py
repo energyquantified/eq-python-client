@@ -1,4 +1,4 @@
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 
@@ -6,15 +6,15 @@ from .utils import is_tz_aware
 
 
 def shift(
-    datetime_obj,
-    years=0,
-    months=0,
-    weeks=0,
-    days=0,
-    hours=0,
-    minutes=0,
-    seconds=0,
-    millis=0,
+        datetime_obj,
+        years=0,
+        months=0,
+        weeks=0,
+        days=0,
+        hours=0,
+        minutes=0,
+        seconds=0,
+        millis=0,
 ):
     """
     Shift a date by a certain amount of time, using a timedelta
@@ -32,7 +32,7 @@ def shift(
         microseconds=millis * 1000,
     )
     if years != 0 or months != 0 or weeks != 0 or days != 0:
-        # Do arithmetic in without time-zone info, then localize when done
+        # Do arithmetic in without timezone info, then localize when done
         tz, dt_naive = datetime_obj.tzinfo, datetime_obj.replace(tzinfo=None)
         dt_naive = dt_naive + delta
         return tz.localize(dt_naive)
@@ -189,7 +189,8 @@ def truncate_month(datetime_obj):
     """
     if isinstance(datetime_obj, datetime):
         # Datetime
-        d = datetime_obj.replace(microsecond=0, second=0, minute=0, hour=0, day=1)
+        d = datetime_obj.replace(microsecond=0, second=0, minute=0, hour=0,
+                                 day=1)
         if is_tz_aware(datetime_obj):
             return datetime_obj.tzinfo.normalize(d)
         return d
@@ -242,7 +243,8 @@ def truncate_season(datetime_obj):
     if isinstance(datetime_obj, datetime):
         # Datetime
         d = datetime_obj.replace(
-            microsecond=0, second=0, minute=0, hour=0, day=1, month=new_month, year=year
+            microsecond=0, second=0, minute=0, hour=0, day=1, month=new_month,
+            year=year
         )
         if is_tz_aware(datetime_obj):
             return datetime_obj.tzinfo.normalize(d)

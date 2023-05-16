@@ -1,5 +1,11 @@
 from dateutil import parser
 
+from .metadata import (
+    parse_curve,
+    parse_instance,
+    parse_resolution,
+    parse_contract
+)
 from ..data import (
     Timeseries,
     TimeseriesList,
@@ -9,12 +15,6 @@ from ..data import (
 )
 from ..exceptions import ParseException
 from ..time import to_timezone
-from .metadata import (
-    parse_curve,
-    parse_instance,
-    parse_resolution,
-    parse_contract
-)
 
 
 def parse_timeseries_list(json):
