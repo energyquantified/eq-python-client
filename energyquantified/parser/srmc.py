@@ -36,7 +36,6 @@ def parse_srmc_response(json):
         timeseries = parse_timeseries(data)
         return SRMC(
             curve=curve,
-            time_zone=time_zone,
             contract=contract,
             options=options,
             timeseries=timeseries
@@ -47,7 +46,6 @@ def parse_srmc_response(json):
         periodseries = parse_periodseries(data)
         return SRMC(
             curve=curve,
-            time_zone=time_zone,
             contract=contract,
             options=options,
             periodseries=periodseries
