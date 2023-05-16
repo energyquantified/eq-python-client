@@ -78,7 +78,7 @@ Combine the parameters ``issued_at_latest`` and ``tags`` to load the instances
 of your liking. There is also an ``exclude_tags`` to let you remove certain
 tags from the response.
 
-Use the ``time_zone`` parameter to convert the data to the given time zone:
+Use the ``time_zone`` parameter to convert the data to the given timezone:
 
    >>> from energyquantified.time import UTC
    >>>

@@ -40,7 +40,7 @@ class TimeseriesAPI(BaseAPI):
         :type begin: date, datetime, str, required
         :param end: The end date-time
         :type end: date, datetime, str, required
-        :param time_zone: Set the time zone for the date-times
+        :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional
         :param frequency: Set the preferred frequency for aggregations, defaults to None
         :type frequency: Frequency, optional
@@ -60,7 +60,7 @@ class TimeseriesAPI(BaseAPI):
         params = {}
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
-        self._add_time_zone(params, "time-zone", time_zone, required=False)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         self._add_frequency(params, "frequency", frequency)
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)

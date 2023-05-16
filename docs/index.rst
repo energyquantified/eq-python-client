@@ -53,7 +53,7 @@ Features
 - OHLC data
 - SRMC calculations on OHLC data
 - *(TODO)* Shows your subscription for each series
-- Support for time-zones, resolutions and aggregations
+- Support for timezones, resolutions and aggregations
 - Easy-to-use filters for issue dates and forecast types
 - Integrates with pandas
 

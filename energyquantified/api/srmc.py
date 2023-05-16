@@ -104,7 +104,8 @@ class SrmcAPI(BaseAPI):
         self._add_int(params, "front", front, min=1, required=True)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
-        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
+        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01,
+                         max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
         # HTTP request
@@ -181,7 +182,8 @@ class SrmcAPI(BaseAPI):
         self._add_date(params, "delivery", delivery, required=True)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
-        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
+        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01,
+                         max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
         # HTTP request
@@ -266,7 +268,8 @@ class SrmcAPI(BaseAPI):
         self._add_fill(params, "fill", fill)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
-        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
+        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01,
+                         max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
         # HTTP request
@@ -353,7 +356,8 @@ class SrmcAPI(BaseAPI):
         self._add_fill(params, "fill", fill)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
-        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
+        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01,
+                         max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
         # HTTP request
@@ -421,7 +425,8 @@ class SrmcAPI(BaseAPI):
         self._add_date(params, "date", date)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
-        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
+        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01,
+                         max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
         # HTTP request
@@ -481,7 +486,7 @@ class SrmcAPI(BaseAPI):
         :type efficiency: float, optional
         :param carbon_tax_area: Set an area to apply tax rules for.
         :type carbon_tax_area: Area, str, optional
-        :param time_zone: Set the time zone for the date-times
+        :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional
         :return: An SRMC object with a period-based series
         :rtype: :py:class:`energyquantified.data.SRMC`
@@ -495,10 +500,11 @@ class SrmcAPI(BaseAPI):
         self._add_date(params, "date", date)
         self._add_number(params, "gas-therm-to-mwh", gas_therm_to_mwh)
         self._add_number(params, "api2-tonne-to-mwh", api2_tonne_to_mwh)
-        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01, max=1.0)
+        self._add_number(params, "carbon-emissions", carbon_emissions, min=0.01,
+                         max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
-        self._add_time_zone(params, "time-zone", time_zone)
+        self._add_time_zone(params, "timezone", time_zone)
         # HTTP request
         response = self._get(url, params=params)
         return parse_srmc_response(response.json())

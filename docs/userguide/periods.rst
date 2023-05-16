@@ -43,7 +43,7 @@ representing data that mostly remain the same, but changes sporadically
     <Period: begin=2020-01-06 00:00:00+01:00, end=2020-01-13 00:00:00+01:00, value=60686.44>,
     <Period: begin=2020-01-13 00:00:00+01:00, end=2020-01-20 00:00:00+01:00, value=60832.02>]
 
-Use the ``time_zone`` parameter to convert the data to the given time zone:
+Use the ``time_zone`` parameter to convert the data to the given timezone:
 
    >>> from energyquantified.time import UTC
    >>>
@@ -57,8 +57,8 @@ Use the ``time_zone`` parameter to convert the data to the given time zone:
 Don't worry if you do not know how to work with this data structure – it is
 easy to convert period-based series to time series.
 
-**Note:** Only the following time zones are supported because these are the most
-commonly used time-zones. Most power markets in Europe operate in CET due to
+**Note:** Only the following timezones are supported because these are the most
+commonly used timezones. Most power markets in Europe operate in CET due to
 standardization and market coupling.
 
 - ``UTC`` – Coordinated Universal Time
@@ -67,12 +67,12 @@ standardization and market coupling.
 - ``EET`` – Eastern European Time
 - ``Europe/Istanbul`` – Turkey Time
 - ``Europe/Moscow`` – Russian/Moscow Time
-- ``Europe/Gas_Day`` – (Non-standard time-zone; not in the IANA time-zone database)
+- ``Europe/Gas_Day`` – (Non-standard timezone; not in the IANA timezone database)
   European Gas Day at UTC-0500 (UTC-0400 during Daylight Saving Time). Starts
   at 06:00 in CE(S)T time. Used for the natural gas market in the European
   Union.
 
-We use the `pytz <https://pypi.org/project/pytz/>`_ library for time-zones.
+We use the `pytz <https://pypi.org/project/pytz/>`_ library for timezones.
 
 Convert periods to a time series
 --------------------------------
@@ -105,7 +105,7 @@ a weighted average of those.
     2020-03-01 00:00:00+01:00            61220.22
     2020-04-01 00:00:00+02:00            61345.18
 
-When converting from a period series to a time series, the time-zone will
+When converting from a period series to a time series, the timezone will
 always remain the same.
 
 

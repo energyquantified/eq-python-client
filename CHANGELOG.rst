@@ -6,7 +6,7 @@ dev
 
 **Improvements**
 
-- Add time zone conversion.
+- Add timezone conversion.
 
 0.10.1
 ------
@@ -131,12 +131,12 @@ More gas data preparations.
 0.7
 ---
 
-Implementing Acer's non-standard Gas Day time-zone.
+Implementing Acer's non-standard Gas Day timezone.
 
 **Improvements**
 
-- Define new time-zone in ``pytz`` called ``Europe/Gas_Day``. It follows
-  Acer's Gas Day, which is from 06:00 – 06:00 in CET/CEST. This time-zone is
+- Define new timezone in ``pytz`` called ``Europe/Gas_Day``. It follows
+  Acer's Gas Day, which is from 06:00 – 06:00 in CET/CEST. This timezone is
   used for the natural gas market in the European Union. Import it with
   ``from energyquantified.time import GAS_DAY``, or look it up in ``pytz``
   like so: ``pytz.timezone("Europe/Gas_Day")``.
@@ -381,7 +381,7 @@ The first public release of Energy Quantified's Python client. *Woho!*
 
 **Improvements**
 
-- Add utilities for working with date-times, frequencies, time-zones and
+- Add utilities for working with date-times, frequencies, timezones and
   resolutions.
 - Add metadata classes for areas, curves, instances, places and more.
 - Add classes for time series and period-based series.

@@ -36,7 +36,7 @@ class PeriodsAPI(BaseAPI):
         :type begin: date, datetime, str, required
         :param end: The end date-time
         :type end: date, datetime, str, required
-        :param time_zone: Set the time zone for the date-times
+        :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional
         :return: A period-based series
         :rtype: :py:class:`energyquantified.data.Periodseries`
@@ -48,7 +48,7 @@ class PeriodsAPI(BaseAPI):
         params = {}
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
-        self._add_time_zone(params, "time-zone", time_zone, required=False)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         # HTTP request
         response = self._get(url, params=params)
         return parse_periodseries(response.json())

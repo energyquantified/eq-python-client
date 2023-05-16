@@ -334,7 +334,7 @@ class BaseAPI:
                 params[name] = var.zone
             return
         raise ValidationError(
-            reason=f"Not a supported time zone: '{var}'",
+            reason=f"Not a supported timezone: '{var}'",
             parameter=name
         )
 

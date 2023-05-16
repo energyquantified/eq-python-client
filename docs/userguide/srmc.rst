@@ -309,7 +309,7 @@ curve):
    >>>    date=date(2020, 12, 14)  # Optionally set a date
    >>> )
 
-Use the ``time_zone`` parameter to convert the data to the given time zone:
+Use the ``time_zone`` parameter to convert the data to the given timezone:
 
    >>> from energyquantified.time import UTC
    >>>

@@ -265,7 +265,7 @@ Date and time
 
 **Methods** in ``energyquantified.time``. These methods are wrappers around the
 default methods in Python's standard library and other libraries where the
-time-zone is set to CET (which is used in the European power markets)
+timezone is set to CET (which is used in the European power markets)
 by default.
 
 .. autofunction:: energyquantified.time.now
@@ -278,7 +278,7 @@ by default.
 -----
 
 **Constants** in ``energyquantified.time``. These are the most commonly used
-time-zones in the European power markets.
+timezones in the European power markets.
 
 .. autodata:: energyquantified.time.UTC
 .. autodata:: energyquantified.time.CET

@@ -104,14 +104,14 @@ are quite many classes in ``energyquantified.metadata``:
 Date and time utilities.
 
  * :py:class:`Resolution <energyquantified.time.Resolution>`: A combination of
-   a frequency and a time zone. It has utility methods for stepping forward and
+   a frequency and a timezone. It has utility methods for stepping forward and
    backward in a given interval.
 
  * :py:class:`Frequency <energyquantified.time.Frequency>`: Enumerator of
    supported frequencies on Energy Quantified. Mostly used for aggregations
    and in combination with resolutions.
 
- * Commonly used time zones in the European power markets:
+ * Commonly used timezones in the European power markets:
 
     * :py:class:`UTC <energyquantified.time.UTC>` – Universal Time
     * :py:class:`CET <energyquantified.time.CET>` – Central European Time
@@ -120,16 +120,16 @@ Date and time utilities.
     * :py:class:`TRT <energyquantified.time.TRT>` – Turkish Time
 
  * :py:meth:`local_tz() <energyquantified.time.local_tz>`: Get your the local
-   time zone on your workstation.
+   timezone on your workstation.
 
  * Useful functions to get dates and date-times:
 
-    * :py:meth:`now() <energyquantified.time.now>`: Get a time zone aware
+    * :py:meth:`now() <energyquantified.time.now>`: Get a timezone aware
       date-time of the current time.
-    * :py:meth:`today() <energyquantified.time.today>`: Get a time zone aware
+    * :py:meth:`today() <energyquantified.time.today>`: Get a timezone aware
       date-time of the today at midnight.
     * :py:meth:`to_timezone() <energyquantified.time.to_timezone>`: Convert a
-      date-time to given time zone.
+      date-time to given timezone.
     * :py:meth:`get_date() <energyquantified.time.get_date>`: Create a date
       with sensible defaults.
     * :py:meth:`get_datetime() <energyquantified.time.get_datetime>`: Create a

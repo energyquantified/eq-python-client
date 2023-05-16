@@ -207,7 +207,7 @@ override it by setting the ``field`` parameter.
    >>>    field=OHLCField.SETTLEMENT  # Optionally select field (defaults to SETTLEMENT)
    >>> )
 
-Use the ``time_zone`` parameter to convert the data to the given time zone:
+Use the ``time_zone`` parameter to convert the data to the given timezone:
 
    >>> from energyquantified.time import UTC
    >>>

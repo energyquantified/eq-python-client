@@ -255,7 +255,7 @@ class OhlcAPI(BaseAPI):
         :type field: OHLCField, str, optional
         :param date: The trading date, defaults to today
         :type date: date, str, required
-        :param time_zone: Set the time zone for the date-times
+        :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional
         :return: A period-based series
         :rtype: :py:class:`energyquantified.data.Periodseries`
@@ -265,7 +265,7 @@ class OhlcAPI(BaseAPI):
         # Parameters
         params = {}
         self._add_date(params, "date", date)
-        self._add_time_zone(params, "time-zone", time_zone)
+        self._add_time_zone(params, "timezone", time_zone)
         # Build URL
         field = self._urlencode_ohlc_field(field, "field")
         url = f"/ohlc/{safe_curve}/latest/periods/{field}/"

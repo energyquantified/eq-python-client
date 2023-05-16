@@ -20,7 +20,7 @@ class Curve:
         #: Curve type (the type of data this curve refers to).
         self.curve_type = curve_type
         if self.curve_type.has_instances:
-            #: For instance-based curves: The time-zone of the issue date
+            #: For instance-based curves: The timezone of the issue date
             #: in the instance, see :py:attr:`Instance.issued`.
             self.instance_issued_timezone = instance_issued_timezone or UTC
         else:
@@ -38,7 +38,7 @@ class Curve:
         if resolution:
             #: The frequency of data in this curve
             self.frequency = resolution.frequency
-            #: The time-zone of date-times in this curve
+            #: The timezone of date-times in this curve
             self.timezone = resolution.timezone
         else:
             self.frequency = frequency
@@ -73,6 +73,7 @@ class Curve:
 
 
 _datatype_lookup = {}
+
 
 class DataType(enum.Enum):
     """
@@ -146,6 +147,7 @@ class DataType(enum.Enum):
 
 
 _curvetype_lookup = {}
+
 
 class CurveType(enum.Enum):
     """

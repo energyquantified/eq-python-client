@@ -8,26 +8,28 @@ def now(tz=DEFAULT_TZ):
     """
     Get the current datetime.
 
-    :param tz: The preferred time-zone, defaults to DEFAULT_TZ
-    :type tz: TzInfo (or similar pytz time-zone)
-    :return: A time-zone aware datetime set to now
+    :param tz: The preferred timezone, defaults to DEFAULT_TZ
+    :type tz: TzInfo (or similar pytz timezone)
+    :return: A timezone aware datetime set to now
     :rtype: datetime
     """
     return datetime.now(tz=tz)
+
 
 def today(tz=DEFAULT_TZ):
     """
     Get a datetime set to midnight today.
 
-    :param tz: The preferred time-zone, defaults to DEFAULT_TZ
-    :type tz: TzInfo (or similar pytz time-zone)
-    :return: A time-zone aware datetime set to midnight this morning
+    :param tz: The preferred timezone, defaults to DEFAULT_TZ
+    :type tz: TzInfo (or similar pytz timezone)
+    :return: A timezone aware datetime set to midnight this morning
     :rtype: datetime
     """
 
     dt = now(tz=tz)
     dt = dt.replace(microsecond=0, second=0, minute=0, hour=0)
     return dt.tzinfo.normalize(dt)
+
 
 def get_date(year=None, month=1, day=1):
     """
@@ -46,8 +48,9 @@ def get_date(year=None, month=1, day=1):
     assert year and 1900 <= year <= 2100, "Must specify year (1900-2100)"
     return date(year, month, day)
 
+
 def get_datetime(year=None, month=1, day=1, hour=0, minute=0, second=0,
-        millis=0, tz=DEFAULT_TZ):
+                 millis=0, tz=DEFAULT_TZ):
     """
     Get a datetime. Only year needs to be specified. The remaining fields
     defaults to the lowest value. Timezone defaults to `DEFAULT_TZ`.
@@ -66,9 +69,9 @@ def get_datetime(year=None, month=1, day=1, hour=0, minute=0, second=0,
     :type second: int, optional
     :param millis: The milliseconds (0-999), defaults to 0
     :type millis: int, optional
-    :param tz: The time-zone, defaults to DEFAULT_TZ
-    :type tz: TzInfo (or similar pytz time-zone)
-    :return: A time-zone aware datetime
+    :param tz: The timezone, defaults to DEFAULT_TZ
+    :type tz: TzInfo (or similar pytz timezone)
+    :return: A timezone aware datetime
     :rtype: datetime
     """
 
