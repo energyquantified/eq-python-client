@@ -180,7 +180,6 @@ class CurveUpdateEventAPI:
         # Ignore if user didn't provide a file path
         if self._last_id_file is None:
             return
-        # TODO docs write_interval_s: minimum time since last write
         if last_id is None:
             if self._last_id is None:
                 return
@@ -356,8 +355,8 @@ class CurveUpdateEventAPI:
                 # Decrement reconnect counter
                 with self._remaining_reconnect_attempts_lock:
                     self._remaining_reconnect_attempts -= 1
-                # Blocking until dc
-                self._ws.run_forever()
+                # Blocking until dc (ping timeout to detect local network error)
+                self._ws.run_forever(ping_interval=15, ping_timeout=10)
                 # Reset flag and last connection event
                 self._done_trying_to_connect.clear()
                 # Safely acquire the reconnect_counter
