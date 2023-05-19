@@ -136,6 +136,12 @@ class ConnectionEvent:
         self.message = message
 
     def __str__(self):
+        """
+        Represent this object as a string.
+
+        :return: String representation of this object
+        :rtype: str
+        """
         return (f"<ConnectionEvent: "
                 f"status={self.status}, "
                 f"status_code={self.status_code}, "

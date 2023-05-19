@@ -60,6 +60,6 @@ class MessageType(Enum):
         :type tag: str
         :return: The MessageType for this tag
         :rtype: MessageType
-        :raises KeyError: if a MessageType does not exist for the tag
+        :raises KeyError: if no MessageType exists for the tag
         """
         return _message_lookup[tag.lower()]

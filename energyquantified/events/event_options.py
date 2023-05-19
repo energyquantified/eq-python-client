@@ -1,9 +1,10 @@
 import json
 from datetime import datetime, date
+from dateutil.parser import isoparse
+
 from energyquantified.metadata.curve import Curve, DataType
 from energyquantified.metadata.area import Area
 from . import EventType
-from dateutil.parser import isoparse
 
 class _BaseEventOptions:
     """
@@ -150,7 +151,7 @@ class EventCurveOptions(_BaseEventOptions):
 
     def to_json(self):
         """
-        Represent this object as json.
+        Represent the output of `to_dict` as json.
         """
         return json.dumps(self.to_dict())
 
@@ -161,7 +162,7 @@ class EventCurveOptions(_BaseEventOptions):
         :param include_not_set: If variables that are not set should be included\
             in the dictionary. Defaults to False.
         :type include_not_set: bool, optional
-        :return: A dict representation of this object
+        :return: A dictionary representation of this object
         :rtype: dict
         """
         filters = super()._to_dict(include_not_set=include_not_set)
@@ -172,6 +173,12 @@ class EventCurveOptions(_BaseEventOptions):
         return filters
     
     def __str__(self):
+        """
+        Represent this object as a string, excluding not-set values.
+
+        :return: A string representation of this object
+        :rtype: str
+        """
         str_list = []
         if self._event_types:
             str_list.append(f"event_types={self._event_types}")
@@ -337,7 +344,7 @@ class EventFilterOptions(_BaseEventOptions):
 
     def to_json(self):
         """
-        Represent this object as json.
+        Represent the output of `to_dict` as json.
         """
         return json.dumps(self.to_dict())
 
@@ -348,7 +355,7 @@ class EventFilterOptions(_BaseEventOptions):
         :param include_not_set: If variables that are not set should be included\
             in the dictionary. Defaults to False.
         :type include_not_set: bool, optional
-        :return: A dict representation of this object
+        :return: A dictionary representation of this object
         :rtype: dict
         """
         filters = super()._to_dict(include_not_set=include_not_set)
@@ -384,6 +391,12 @@ class EventFilterOptions(_BaseEventOptions):
         return filters
     
     def __str__(self):
+        """
+        Represent this object as a string, excluding not-set values.
+
+        :return: A string representation of this object
+        :rtype: str
+        """
         str_list = []
         if self._event_types:
             str_list.append(f"event_types={self._event_types}")

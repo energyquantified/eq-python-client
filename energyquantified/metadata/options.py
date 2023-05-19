@@ -74,6 +74,7 @@ class Aggregation(enum.Enum):
         :type tag: str
         :return: The aggregation for the given tag
         :rtype: Aggregation
+        :raises KeyError: if no Aggregation exists for this tag
         """
         return _aggregation_lookup[tag.lower()]
 

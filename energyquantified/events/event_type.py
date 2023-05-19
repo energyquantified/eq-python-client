@@ -47,5 +47,6 @@ class EventType(Enum):
         :type tag: str
         :return: The EventType for this tag
         :rtype: EventType
+        :raises KeyError: if no EventType exists for this tag
         """
         return _event_lookup[tag.lower()]

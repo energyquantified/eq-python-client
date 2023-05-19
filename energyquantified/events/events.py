@@ -1,6 +1,4 @@
 from energyquantified.metadata import CurveType
-from energyquantified.exceptions import APIError
-
 from . import EventType
 
 
@@ -42,17 +40,21 @@ class CurveUpdateEvent:
         return self.__str__()
 
     def load_data(self, eq):
-        try:
-            data = self._load_data(eq)
-        except APIError as e:
-            # TODO
-            data = e
-        return data
-        
-    def _load_data(self, eq):
+        """
+        Load data in the range described by the event. Returns 'None' if the
+        event type is either ``EventType.TRUNCATE`` or ``EventType.DELETE``.
+
+        :param eq: Instance of the api client
+        :type eq: :py:class:`energyquantified.EnergyQuantified`
+        :return: The range of data the event describes
+        :rtype: :py:class:`energyquantified.data.TimeSeries`\
+            | :py:class:`energyquantified.data.Periodseries`\
+            | :py:class:`energyquantified.data.OHLCList`\
+            | None
+        :raises APIError: If there were any network- or server-related \
+            issues while loading the data
+        """
         if self.event_type in [EventType.TRUNCATE, EventType.DELETE]:
-            # TODO
-            print(f"Can't load data for {self.event_type} event")
             return None
         # Timeseries and scenarios
         if self.curve.curve_type in [CurveType.TIMESERIES, CurveType.SCENARIO_TIMESERIES]:
