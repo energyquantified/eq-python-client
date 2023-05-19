@@ -1,6 +1,7 @@
 from enum import Enum
 
 _message_lookup = {}
+
 class MessageType(Enum):
     """
     Describes the type of response received when listening to

@@ -98,6 +98,40 @@ are quite many classes in ``energyquantified.metadata``:
    Enumerator of contract periods for OHLC data objects. Typically week, month,
    quarter, year.
 
+``energyquantified.events``
+-----------------------------
+
+Implementation of curve event models and related metadata classes:
+
+ * :py:class:`CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`: The
+   curve event data model. A curve event describes some change in data for a
+   :py:class:`Curve <energyquantified.metadata.Curve>`, sometimes also related
+   to an :py:class:`Instance <energyquantified.metadata.Instance>`. The type of
+   data operation (e.g., create or delete) is described by the
+   :py:class:`EventType <energyquantified.events.EventType>`.
+
+ * :py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`:
+   An event that describes the cause of a disconnect.
+
+ * :py:class:`EventType <energyquantified.events.EventType>`:
+   Enumerator of event types for
+   :py:class:`CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`
+   objects.
+
+ * :py:class:`MessageType <energyquantified.events.MessageType>`:
+   Enumerator of message types that describes the data type of messages
+   received from listening to the curve stream.
+
+ * :py:class:`EventFilterOptions <energyquantified.events.EventFilterOptions>`:
+   One of two classes used for filtering events when subscribing to the curve
+   stream. This options class is for filtering on different
+   :py:class:`Curve <energyquantified.metadata.Curve>` attributes.
+
+ * :py:class:`EventCurveOptions <energyquantified.events.EventCurveOptions>`:
+   One of two classes used for filtering events when subscribing to the curve
+   stream. This options class is for filtering on specific 
+   :py:class:`Curve <energyquantified.metadata.Curve>`'s.
+
 ``energyquantified.time``
 -------------------------
 

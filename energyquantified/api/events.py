@@ -60,8 +60,8 @@ class CurveUpdateEventAPI:
         >>>         data = event.load_data()
 
     At least one filter (of type
-    :py:class:`energyquantified.events.event_options.EventFilterOptions`
-    or :py:class:`energyquantified.events.event_options.EventFilterOptions`)
+    :py:class:`energyquantified.events.EventFilterOptions`
+    or :py:class:`energyquantified.events.EventFilterOptions`)
     must be set in order to receive curve events:
 
         >>> from energyquantified import EnergyQuantified
@@ -326,7 +326,7 @@ class CurveUpdateEventAPI:
                 is reset whenever a connection is established. Defaults to 5.
         :type max_retries: int, optional
         :return: The obj instance this method was invoked upon, so the APi can be used fluently
-        :rtype: CurveUpdateEventAPI
+        :rtype: :py:class:`energyquantified.events.CurveUpdateEventAPI`
         """
         self._max_reconnect_attempts = max_retries
         # Reset flags
@@ -383,7 +383,7 @@ class CurveUpdateEventAPI:
 
     def close(self):
         """
-        Close the stream connection (if open) and disable automatic reconnecting.
+        Close the stream connection (if open) and disables automatic reconnect.
         """
         self._last_connection_event = ConnectionEvent(status_code=1000, message="Connection closed by user")
         self._should_not_connect.set()
@@ -416,8 +416,61 @@ class CurveUpdateEventAPI:
         >>>         # No new message or event in the last 'timeout' seconds
         >>>         # Maybe I want to change filters soon ..
 
-        See :py:class:`energyquantified.events.MessageType` for the combinations.
+        See also :py:class:`energyquantified.events.MessageType`.
 
+        The different message types and what they mean:
+
+        What the second element is based on the first element:
+        ``MessageType.EVENT``:
+            A new event.
+
+            type: :py:class:`energyquantified.events.CurveUpdateEvent`
+
+        ``MessageType.INFO``:
+            An informative message from the stream server.
+
+            type: str
+
+        ``MessageType.FILTERS``:
+            A list of filters currently subscribed to.
+
+            type: list[:py:class:`energyquantified.events.EventFilterOptions`
+            | :py:class:`energyquantified.events.EventCurveOptions`]
+
+        ``MessageType.ERRORS``:
+            An error message that could either be from the stream (e.g., after
+            subscribing with invalid filters), or if something went wrong while
+            parsing a message.
+
+            type: str
+
+        ``MessageType.TIMEOUT``:
+            This means that the client is connected to the stream and no messages has
+            been received in the last ``timeout`` (i.e., the number supplied to the
+            ``timeout`` parameter) seconds, and the second element is simply ``None``
+            and can be ignored. The intention of this message type is to provider users
+            with a way to act inbetween events (e.g., to change filters).
+
+            type: None
+
+        ``MessageType.DISCONNECTED``:
+            This means that the client is neither connected to the stream, nor is it
+            trying to (re)connect. This happens if
+            :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>` is
+            called before :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`,
+            if the initial connection failed, or if the connection dropped and the maximum number
+            of reconnect attempts was exceeded. The
+            :py:class:`energyquantified.events.ConnectionEvent` describes the cause of the error.
+            Since this means that the the client will **not** automatically reconnect,
+            :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>` must be manually
+            invoked in order to reconnect.
+
+            type: :py:class:`energyquantified.events.ConnectionEvent`
+
+        ``get_next()`` blocks program execution until a new message is available. If the
+        ``timeout`` parameter is set, a tuple with ``MessageType.TIMEOUT`` is yielded
+        whenever the timeout is reached. 
+            
         :param timeout: The number of seconds to wait (blocking) for a new message,\
                 yielding a MessageType.TIMEOUT if the timeout occurs. Waits indefinetly\
                 if timeout is None. Defaults to None.
@@ -457,6 +510,11 @@ class CurveUpdateEventAPI:
         """
         Send a filter or a list of filters to the stream, subscribing to
         curve events matching any of the filters.
+        
+        The server responds with the new filters if the subscribe was successful,
+        and the response is added to the message queue that can be accessed through
+        :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
+        The message will have the ``MessageType.FILTERS`` type.
 
         :param filters: The filters. Can be a single filter or a list of filters.
         :type filters: list[:py:class:`energyquantified.events.EventFilterOptions` | \
@@ -478,5 +536,9 @@ class CurveUpdateEventAPI:
     def send_get_filters(self):
         """
         Send a message to the stream requesting the currently active filters.
+        When the server responds with the filters it will be added to the
+        message queue that is accessible through
+        :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`,
+        and the first element of the message will have ``MessageType.FILTERS``.
         """
         self._ws.send(json.dumps({"action": "filter.get"}))

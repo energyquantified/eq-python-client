@@ -12,7 +12,7 @@ __all__ = [
     # Options
     "EventFilterOptions",
     "EventCurveOptions",
-    # Event
+    # Events
     "CurveUpdateEvent",
     "ConnectionEvent",
 ]
