@@ -1,21 +1,20 @@
-from datetime import datetime
-
 from energyquantified.events.events import EventType, CurveUpdateEvent
 from energyquantified.events.event_options import EventCurveOptions, EventFilterOptions
 from energyquantified.time import to_timezone
 from .metadata import parse_curve, parse_instance
+from dateutil.parser import isoparse
+
 
 def parse_event(json):
     # Curve
     curve = parse_curve(json["curve"])
     begin = json.get("begin")
     if begin is not None:
-        begin = datetime.fromisoformat(begin)
+        begin = isoparse(begin)
         begin = to_timezone(begin, curve.timezone)
-    # End # TODO localize?
     end = json.get("end")
     if end is not None:
-        end = datetime.fromisoformat(end)
+        end = isoparse(end)
         end = to_timezone(end, curve.timezone)
     # Instance
     instance = json.get("instance")
@@ -80,7 +79,7 @@ def _parse_shared_options(json, options):
     # Event type
     event_types = json.get("event_types")
     if event_types is not None:
-        options.set_event_types(*event_types)
+        options.set_event_types(event_types)
     # Begin
     begin = json.get("begin")
     if begin is not None:
