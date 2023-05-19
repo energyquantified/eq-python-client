@@ -222,35 +222,37 @@ class CurveUpdateEventAPI:
             try:
                 self._ws.send(self._latest_filters)
             except Exception as e:
-                print(f"Failed to send filters after reconnecting, e: {e}")
+                self._messages.put((MessageType.ERROR, f"Failed to set previous filters after reconnecting, cause: {e}"))
 
     def _on_message(self, _ws, message):
-        msg = json.loads(message)
-        msg_tag = msg.pop("type")
-        if not MessageType.is_valid_tag(msg_tag):
-            # Convert message to info
-            if msg_tag.lower() == "message":
-                msg_type = MessageType.INFO
+        try:
+            msg = json.loads(message)
+            msg_tag = msg.pop("type")
+            if not MessageType.is_valid_tag(msg_tag):
+                # Convert message to info
+                if msg_tag.lower() == "message":
+                    msg_type = MessageType.INFO
+                else:
+                    raise ValueError(f"Unknown message type: '{message}'")
             else:
-                raise ValueError(f"Failed to parse message '{message}': unkown message type")
-        else:
-            msg_type = MessageType.by_tag(msg_tag)
-        if msg_type == MessageType.EVENT:
-            data = parse_event(msg)
-            self._set_last_id(data.event_id)
-            self._last_id_to_file(last_id=data.event_id)
-        elif msg_type == MessageType.FILTERS:
-            data = list(parse_event_options(options) for options in msg["filters"])
-        elif msg_type == MessageType.INFO:
-            try:
+                msg_type = MessageType.by_tag(msg_tag)
+            if msg_type == MessageType.EVENT:
+                data = parse_event(msg)
+                self._set_last_id(data.event_id)
+                self._last_id_to_file(last_id=data.event_id)
+            elif msg_type == MessageType.FILTERS:
+                data = list(parse_event_options(options) for options in msg["filters"])
+            elif msg_type == MessageType.INFO:
                 data = msg["message"]
-            except Exception as e:
-                raise e
-        elif msg_type == MessageType.ERROR:
-            data = msg
-        else:
-            raise ValueError(f"Failed to parse message: '{message}' with type: '{msg_type}'")
-        self._messages.put((msg_type, data))
+            elif msg_type == MessageType.ERROR:
+                data = msg
+            else:
+                raise ValueError(f"Unknown MessageType: {msg_type} for message: {message}")
+        except Exception as e:
+            msg_type = MessageType.ERROR
+            data = f"Failed to parse message: '{message}' from stream, cause: {e}"
+        finally:
+            self._messages.put((msg_type, data))
 
     def _on_close(self, _ws, status_code, msg):
         # last_connection_event should only be set once for each time connecting
@@ -267,23 +269,24 @@ class CurveUpdateEventAPI:
 
 
     def _on_error(self, _ws, error):
-        # Return if we already have a close event
+        if not isinstance(error, (timeout, ConnectionError, WebSocketException)):
+            self._messages.put((MessageType.ERROR, getattr(error, "strerror", str(error))))
+            return
+        # Set _last_connection_event (only if not already)
         if self._last_connection_event is not None:
            return
         if isinstance(error, timeout):
-            # TODO label for timeout?
-            # TODO what if new error when retrying?
             self._last_connection_event = ConnectionEvent(status=TIMEOUT, message=str(error))
         elif isinstance(error, ConnectionError):
-            # TODO if Errno111 -> only use message (not code)
+            # TODO if Errno111 -> only use message (not status code)
             status_code = error.errno
             error_message = error.strerror
             self._last_connection_event = ConnectionEvent(status_code=status_code, message=error_message)
         elif isinstance(error, WebSocketException):
             # Type of exception
             if hasattr(error, "status_code"):
-                # TODO keep this hasattr or not? WebSocketBadStatusException is the
-                #   only one with .status_code atm
+                # At the time of writing, WebSocketBadStatusException is the only
+                #   WebsocketException with this attribute
                 status_code = error.status_code
             elif isinstance(error, WebSocketBadStatusException):
                 status_code = error.status_code
@@ -295,19 +298,14 @@ class CurveUpdateEventAPI:
                 # Abnormal (https://www.rfc-editor.org/rfc/rfc6455.html#section-7.2)
                 status_code = 1006
             else:
-                # Abnormal (no close frame received)
+                # Default to abnormal (no close frame received)
+                # (https://www.rfc-editor.org/rfc/rfc6455.html#section-7.2)
                 status_code = 1006
             # Create the connection event
             self._last_connection_event = ConnectionEvent(
                     status_code=status_code,
                     message=str(error),
                 )
-        else:
-            self._last_connection_event = ConnectionEvent(
-                status=UNKNOWN_ERROR,
-                status_code=getattr(error, "errno", None),
-                message=getattr(error, "strerror", str(error)),
-            )
 
     def _stream_url(self, include_last_id=True):
         if not include_last_id or self._last_id is None:
@@ -391,7 +389,6 @@ class CurveUpdateEventAPI:
         self._should_not_connect.set()
         if self._ws is not None:
             self._ws.close()
-
 
     def get_next(self, timeout=None):
         """
