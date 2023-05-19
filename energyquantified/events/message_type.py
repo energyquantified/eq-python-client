@@ -11,14 +11,15 @@ class MessageType(Enum):
     See also :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
 
      * ``EVENT`` – A curve event (type: :py:class:`energyquantified.events.CurveUpdateEvent`)
-     * ``INFO`` – An informative message (type: str)
-     * ``FILTERS`` – List of filters (type:\
-            [:py:class:`energyquantified.events.EventCurveOptions` | \
+     * ``INFO`` – An informative message from the stream (type: str)
+     * ``FILTERS`` – List of filters (type: list[\
+            :py:class:`energyquantified.events.EventCurveOptions` | \
             :py:class:`energyquantified.events.EventFilterOptions`])
-     * ``ERROR`` – Informative error message from the stream (type: str)
+     * ``ERROR`` – Error message (type: str)
      * ``TIMEOUT`` – No new messages or events received (type: None)
      * ``DISCONNECTED`` – A connection event\
-            (type: :py:class:`energyquantified.events.ConnectionEvent`)
+            (type: :py:class:`energyquantified.events.ConnectionEvent`)\
+            describing what caused the connection to drop
     """
     EVENT = ("EVENT", "Event")
     INFO = ("INFO", "Info")
@@ -59,5 +60,6 @@ class MessageType(Enum):
         :type tag: str
         :return: The MessageType for this tag
         :rtype: MessageType
+        :raises KeyError: if a MessageType does not exist for the tag
         """
         return _message_lookup[tag.lower()]

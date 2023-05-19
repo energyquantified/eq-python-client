@@ -1,10 +1,9 @@
 import json
 from datetime import datetime, date
-from ..metadata.curve import Curve, DataType
-from ..metadata.area import Area
+from energyquantified.metadata.curve import Curve, DataType
+from energyquantified.metadata.area import Area
 from . import EventType
-from energyquantified.time.utils import is_tz_aware
-
+from dateutil.parser import isoparse
 
 class _BaseEventOptions:
     """
@@ -30,7 +29,7 @@ class _BaseEventOptions:
                 :py:class:`energyquantified.events.EventFilterOptions`
         """
         if isinstance(begin, str):
-            begin = datetime.fromisoformat(begin)
+            begin = isoparse(begin)
         if isinstance(begin, date):
             if not isinstance(begin, datetime):
                 begin = datetime.combine(begin, datetime.min.time())
@@ -52,7 +51,7 @@ class _BaseEventOptions:
                 :py:class:`energyquantified.events.EventFilterOptions`
         """
         if isinstance(end, str):
-            end = datetime.fromisoformat(end)
+            end = isoparse(end)
         if isinstance(end, date):
             if not isinstance(end, datetime):
                 end = datetime.combine(end, datetime.min.time())
