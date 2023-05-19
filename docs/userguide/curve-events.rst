@@ -577,3 +577,57 @@ Automic subscribe after reconnect
 When reconnecting with the same instance of
 :py:class:`EnergyQuantified <energyquantified.EnergyQuantified>` (or if automatic reconnect)
 the client will try to subscribe with the last used filters.
+
+
+Program termination and event id
+---------------------
+It can be useful to keep track of the ID from the last event handled when exiting the program, in order
+to not receive duplicate events next time connecting. If the ``last_id_file`` is set upon initialization
+of :py:class:`EnergyQuantified <energyquantified.EnergyQuantified>`, the file will be updated
+at program termination with the use of the `atexit <https://docs.python.org/3/library/atexit.html>` module.
+However, the ID saved when using a file is the last ID that is added to the message queue, and not
+necessarily the last event handled by the user. If you want to keep track of the ID from the last event you
+were done handling, the following code may be helpful:
+    
+    >>> import json
+    >>>
+    >>> last_id = None
+    >>> try:
+    >>>     for msg_type, data in get_next():
+    >>>         if msg_type == MessageType.EVENT:
+    >>>             # your preferred actions, maybe loading a series
+    >>>             series = data.load_data()
+    >>>             # ...
+    >>>             # Done handling the event, let's save the id
+    >>>             last_id = data.event_id
+    >>> # (optional) catch KeyboardInterrupt to manually stop the script
+    >>> catch KeyboardInterrupt as _:
+    >>>     save_file()
+    >>> catch Exception as e:
+    >>>     # Or just save for any unexpected error
+    >>>     save_file()
+    >>>
+    >>> def save_file():
+    >>>     with open("backup_last_id_file.json", "w") as f:
+    >>>         json.dump({"last_id": last_id}, f)
+
+Or by using `atexit <https://docs.python.org/3/library/atexit.html>`:
+
+    >>> import atexit
+    >>> import json
+    >>> 
+    >>> last_id = None
+    >>>
+    >>> def save_file():
+    >>>     with open("backup_last_id_file.json", "w") as f:
+    >>>         json.dump({"last_id": last_id}, f)
+    >>>
+    >>> atexit.register(save_file)
+    >>>
+    >>> for msg_type, data in get_next():
+    >>>     if msg_type == MessageType.EVENT:
+    >>>         # your preferred actions, maybe loading a series
+    >>>         series = data.load_data()
+    >>>         # ...
+    >>>         # Done handling the event, let's save the id
+    >>>         last_id = data.event_id
