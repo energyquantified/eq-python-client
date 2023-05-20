@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from typing import Union
 
-from ..metadata import Area, Curve, ContinuousContract, SpecificContract
 from .ohlc import OHLCList
-from .timeseries import Timeseries
 from .periodseries import Periodseries
+from .timeseries import Timeseries
+from ..metadata import Area, Curve, ContinuousContract, SpecificContract
 
 
 @dataclass(frozen=True)

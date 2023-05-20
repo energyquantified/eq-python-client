@@ -1,13 +1,12 @@
-from collections import namedtuple
-from datetime import datetime
 import enum
 import numbers
 import sys
+from collections import namedtuple
+from datetime import datetime
 
-
+from .base import Series
 from ..time import Resolution
 from ..utils.pandas import timeseries_to_dataframe, timeseries_list_to_dataframe
-from .base import Series
 
 
 class ValueType(enum.Enum):
@@ -143,7 +142,7 @@ class ScenariosValue(namedtuple("Value", ("date", "scenarios"))):
         if not all(
                 (s is None or isinstance(s, (numbers.Number)))
                 for s in self.scenarios
-            ):
+        ):
             raise ValueError(
                 "ScenariosValue.scenarios has members that aren't numbers"
             )
@@ -239,7 +238,7 @@ class MeanScenariosValue(namedtuple("Value", ("date", "value", "scenarios"))):
         if not all(
                 (s is None or isinstance(s, (numbers.Number)))
                 for s in self.scenarios
-            ):
+        ):
             raise ValueError(
                 "MeanScenariosValue.scenarios has members that aren't numbers"
             )
@@ -355,8 +354,8 @@ class Timeseries(Series):
         :rtype: bool
         """
         return (
-            len(self.scenario_names) > 0 or
-            (self.data and self.data[0].has_scenarios())
+                len(self.scenario_names) > 0 or
+                (self.data and self.data[0].has_scenarios())
         )
 
     def total_values_per_item(self):
@@ -559,15 +558,16 @@ class TimeseriesList(list):
     def extend(self, iterable):
         # Asserts
         _validate_timeseries_list(iterable)
-        self._frequency = _check_and_get_frequency_list(iterable, self._frequency)
-         # Perform operation
+        self._frequency = _check_and_get_frequency_list(iterable,
+                                                        self._frequency)
+        # Perform operation
         return super().extend(iterable)
 
     def insert(self, index, timeseries):
         # Asserts
         _validate_timeseries(timeseries)
         self._frequency = _check_and_get_frequency(timeseries, self._frequency)
-         # Perform operation
+        # Perform operation
         return super().insert(index, timeseries)
 
     def __add__(self, rhs):
@@ -575,14 +575,16 @@ class TimeseriesList(list):
         _validate_timeseries_list(rhs)
         self._frequency = _check_and_get_frequency_list(rhs, self._frequency)
         # Perform operation
-        return TimeseriesList(list.__add__(self, rhs), frequency=self._frequency)
+        return TimeseriesList(list.__add__(self, rhs),
+                              frequency=self._frequency)
 
     def __iadd__(self, rhs):
         # Asserts
         _validate_timeseries_list(rhs)
         self._frequency = _check_and_get_frequency_list(rhs, self._frequency)
         # Perform operation
-        return TimeseriesList(list.__iadd__(self, rhs), frequency=self._frequency)
+        return TimeseriesList(list.__iadd__(self, rhs),
+                              frequency=self._frequency)
 
     def __setitem__(self, key, timeseries):
         # Asserts

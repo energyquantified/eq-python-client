@@ -315,6 +315,8 @@ NOAREA = Area(tag="", name="")
 
 ## Nordics
 
+IS = Area(tag="IS", name="Iceland", country=True, price_area=False, external=True)
+
 NP = Area(tag="NP", name="Nord Pool", price_area=True)
 
 NO = Area(tag="NO", name="Norway", country=True)
@@ -476,6 +478,8 @@ NL = Area(tag="NL", name="Netherlands", country=True, price_area=True)
 BE = Area(tag="BE", name="Belgium", country=True, price_area=True)
 AT = Area(tag="AT", name="Austria", country=True, price_area=True)
 CH = Area(tag="CH", name="Switzerland", country=True, price_area=True)
+
+LU = Area(tag="LU", name="Luxembourg", country=True, price_area=False, external=True)
 
 
 ## United Kingdom/Ireland

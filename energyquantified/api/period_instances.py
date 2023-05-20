@@ -4,7 +4,6 @@ from ..metadata import CurveType
 from ..parser.metadata import parse_instance_list
 from ..parser.periodseries import parse_periodseries, parse_periodseries_list
 
-
 # Tuple of supported values for Curve.curve_type in the period instances API
 CURVE_TYPES = (CurveType.INSTANCE_PERIOD,)
 
@@ -80,7 +79,8 @@ class PeriodInstancesAPI(BaseAPI):
             exlude_tags=None,
             limit=3,
             issued_at_latest=None,
-            issued_at_earliest=None):
+            issued_at_earliest=None,
+            time_zone=None):
         """
         Load period-based series instances.
 
@@ -107,6 +107,8 @@ class PeriodInstancesAPI(BaseAPI):
         :type issued_at_latest: datetime, date, str, optional
         :param issued_at_earliest: Filter by issue date, defaults to None
         :type issued_at_earliest: datetime, date, str, optional
+        :param time_zone: Set the timezone for the date-times
+        :type time_zone: TzInfo, optional
         :return: List of :py:class:`energyquantified.data.Periodseries` objects
         :rtype: list
         """
@@ -122,6 +124,7 @@ class PeriodInstancesAPI(BaseAPI):
         self._add_int(params, "limit", limit, min=1, max=20, required=True)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
         self._add_datetime(params, "issued-at-earliest", issued_at_earliest)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         # HTTP request
         response = self._get(url, params=params)
         return parse_periodseries_list(response.json())
@@ -131,7 +134,8 @@ class PeriodInstancesAPI(BaseAPI):
             curve,
             begin=None,
             end=None,
-            issued_at_latest=None):
+            issued_at_latest=None,
+            time_zone=None):
         """
         Get the latest period-based series instance.
 
@@ -147,6 +151,8 @@ class PeriodInstancesAPI(BaseAPI):
         :param issued_at_latest: The latest issue date for the loaded instance,\
              defaults to None
         :type issued_at_latest: date, datetime, str, optional
+        :param time_zone: Set the timezone for the date-times
+        :type time_zone: TzInfo, optional
         :return: A period-based series
         :rtype: :py:class:`energyquantified.data.Periodseries`
         """
@@ -158,6 +164,7 @@ class PeriodInstancesAPI(BaseAPI):
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         # HTTP request
         response = self._get(url, params=params)
         return parse_periodseries(response.json())
@@ -168,7 +175,8 @@ class PeriodInstancesAPI(BaseAPI):
             begin=None,
             end=None,
             issued=None,
-            tag=""):
+            tag="",
+            time_zone=None):
         """
         Get a specific period-based series instance.
 
@@ -182,6 +190,8 @@ class PeriodInstancesAPI(BaseAPI):
         :type issued: datetime, date, str, required
         :param tag: The instance tag
         :type tag: str, required
+        :param time_zone: Set the timezone for the date-times
+        :type time_zone: TzInfo, optional
         :return: A period-based series
         :rtype: :py:class:`energyquantified.data.Periodseries`
         """
@@ -198,6 +208,7 @@ class PeriodInstancesAPI(BaseAPI):
         params = {}
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         # HTTP request
         response = self._get(url, params=params)
         return parse_periodseries(response.json())

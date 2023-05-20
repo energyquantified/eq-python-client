@@ -3,7 +3,6 @@ from .base import BaseAPI
 from ..metadata import CurveType
 from ..parser.periodseries import parse_periodseries
 
-
 # Tuple of supported values for Curve.curve_type in the periods API
 CURVE_TYPES = (CurveType.PERIOD,)
 
@@ -24,7 +23,8 @@ class PeriodsAPI(BaseAPI):
             self,
             curve,
             begin=None,
-            end=None):
+            end=None,
+            time_zone=None):
         """
         Load period-based series data for a curve.
 
@@ -36,6 +36,8 @@ class PeriodsAPI(BaseAPI):
         :type begin: date, datetime, str, required
         :param end: The end date-time
         :type end: date, datetime, str, required
+        :param time_zone: Set the timezone for the date-times
+        :type time_zone: TzInfo, optional
         :return: A period-based series
         :rtype: :py:class:`energyquantified.data.Periodseries`
         """
@@ -46,6 +48,7 @@ class PeriodsAPI(BaseAPI):
         params = {}
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         # HTTP request
         response = self._get(url, params=params)
         return parse_periodseries(response.json())

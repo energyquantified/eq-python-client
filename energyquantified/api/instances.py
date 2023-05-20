@@ -5,7 +5,6 @@ from ..metadata import CurveType
 from ..parser.metadata import parse_instance_list
 from ..parser.timeseries import parse_timeseries, parse_timeseries_list
 
-
 # Tuple of supported values for Curve.curve_type in the instances API
 CURVE_TYPES = (CurveType.INSTANCE,)
 
@@ -101,9 +100,11 @@ class InstancesAPI(BaseAPI):
             limit=5,
             issued_at_latest=None,
             issued_at_earliest=None,
+            time_zone=None,
             frequency=None,
             aggregation=None,
             hour_filter=None,
+            threshold=None,
             ensembles=False):
         """
         Load time series instances.
@@ -135,6 +136,8 @@ class InstancesAPI(BaseAPI):
         :type issued_at_latest: [type], optional
         :param issued_at_earliest: [description], defaults to None
         :type issued_at_earliest: [type], optional
+        :param time_zone: Set the timezone for the date-times
+        :type time_zone: TzInfo, optional
         :param frequency: Set the preferred frequency for aggregations,\
             defaults to None
         :type frequency: Frequency, optional
@@ -144,7 +147,11 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param ensembles: Whether or not to include ensembles where available,\
+        :param threshold: Allow that many values to be missing within one frame of \
+            *frequency*. Has no effect unless *frequency* is provided, \
+            defaults to 0.
+        :type threshold: int, optional
+        :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
         :return: A list :py:class:`energyquantified.data.Timeseries` instances
@@ -166,10 +173,12 @@ class InstancesAPI(BaseAPI):
             self._add_int(params, "limit", limit, min=1, max=10, required=True)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
         self._add_datetime(params, "issued-at-earliest", issued_at_earliest)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         self._add_frequency(params, "frequency", frequency)
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries_list(response.json())
@@ -179,9 +188,11 @@ class InstancesAPI(BaseAPI):
             curve,
             tags=None,
             issued_at_latest=None,
+            time_zone=None,
             frequency=None,
             aggregation=None,
             hour_filter=None,
+            threshold=None,
             ensembles=False):
         """
         Get the latest time series instance with filtering on `tags` and
@@ -199,6 +210,8 @@ class InstancesAPI(BaseAPI):
         :type tags: list, str, optional
         :param issued_at_latest: [description], defaults to None
         :type issued_at_latest: [type], optional
+        :param time_zone: Set the timezone for the date-times
+        :type time_zone: TzInfo, optional
         :param frequency: Set the preferred frequency for aggregations,\
             defaults to None
         :type frequency: Frequency, optional
@@ -208,7 +221,11 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param ensembles: Whether or not to include ensembles where available,\
+        :param threshold: Allow that many values to be missing within one frame of \
+            *frequency*. Has no effect unless *frequency* is provided, \
+            defaults to 0.
+        :type threshold: int, optional
+        :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
         :return: A time series instance
@@ -225,10 +242,12 @@ class InstancesAPI(BaseAPI):
         params = {}
         self._add_str_list(params, "tags", tags)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         self._add_frequency(params, "frequency", frequency)
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
@@ -238,9 +257,11 @@ class InstancesAPI(BaseAPI):
             curve,
             issued=None,
             tag="",
+            time_zone=None,
             frequency=None,
             aggregation=None,
             hour_filter=None,
+            threshold=None,
             ensembles=False):
         """
         Get an instance specified by a `issued` (issue date) and `tag`. The
@@ -260,6 +281,8 @@ class InstancesAPI(BaseAPI):
         :type tag: str, optional
         :param frequency: Set the preferred frequency for aggregations,\
             defaults to None
+        :param time_zone: Set the timezone for the date-times
+        :type time_zone: TzInfo, optional
         :type frequency: Frequency, optional
         :param aggregation: The aggregation method (i.e. AVERAGE, MIN, MAX),\
             has no effect unless *frequency* is provided, defaults to AVERAGE
@@ -267,7 +290,11 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param ensembles: Whether or not to include ensembles where available,\
+        :param threshold: Allow that many values to be missing within one frame of \
+            *frequency*. Has no effect unless *frequency* is provided, \
+            defaults to 0.
+        :type threshold: int, optional
+        :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
         :return: A time series instance
@@ -284,10 +311,12 @@ class InstancesAPI(BaseAPI):
             url = f"/{category}/{safe_curve}/get/{safe_issued}/"
         # Parameters
         params = {}
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         self._add_frequency(params, "frequency", frequency)
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
@@ -303,9 +332,11 @@ class InstancesAPI(BaseAPI):
             time_of_day=None,
             after_time_of_day=None,
             before_time_of_day=None,
+            time_zone=None,
             frequency=None,
             aggregation=None,
-            hour_filter=None):
+            hour_filter=None,
+            threshold=None):
         """
         Load one instance for each day based on some common criteria, stitch
         them together and return a continuous time series.
@@ -344,6 +375,8 @@ class InstancesAPI(BaseAPI):
         :param before_time_of_day:  The instance must be issued before this\
             time of day, defaults to None
         :type before_time_of_day: time, str, optional
+        :param time_zone: Set the timezone for the date-times
+        :type time_zone: TzInfo, optional
         :param frequency: Set the preferred frequency for aggregations,\
             defaults to None
         :type frequency: Frequency, optional
@@ -353,6 +386,10 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
+        :param threshold: Allow that many values to be missing within one frame of \
+            *frequency*. Has no effect unless *frequency* is provided, \
+            defaults to 0.
+        :type threshold: int, optional
         :return: A time series
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -364,17 +401,22 @@ class InstancesAPI(BaseAPI):
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
         self._add_str(params, "tag", tag, required=True)
-        self._add_int(params, "days-ahead", days_ahead, min=0, max=10000, required=True)
-        self._add_str(params, "issued", issued, allowed_values=['earliest', 'latest'], required=True)
+        self._add_int(params, "days-ahead", days_ahead, min=0, max=10000,
+                      required=True)
+        self._add_str(params, "issued", issued,
+                      allowed_values=['earliest', 'latest'], required=True)
         self._add_time(params, "time-of-day", time_of_day)
         self._add_time(params, "after-time-of-day", after_time_of_day)
         self._add_time(params, "before-time-of-day", before_time_of_day)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         self._add_frequency(params, "frequency", frequency)
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
         # Additional validation checks
-        if sum(1 if t is not None else 0 for t in (time_of_day, after_time_of_day, before_time_of_day)) > 1:
+        if sum(1 if t is not None else 0 for t in
+               (time_of_day, after_time_of_day, before_time_of_day)) > 1:
             raise ValidationError(reason=(
                 "At most one of the following fields must be set: "
                 "time_of_day, after_time_of_day, before_time_of_day"

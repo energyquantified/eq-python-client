@@ -5,6 +5,7 @@ dist/
 .vscode
 api_key*
 .api_key*
+.idea
 
 # Python
 __pycache__
@@ -13,6 +14,9 @@ __pycache__
 # Sphinx
 _build
 
-#
+# Last id for streams
 *last_id.json
+
+# PyCharm
+.idea/
 

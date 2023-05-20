@@ -3,9 +3,9 @@ from .base import BaseAPI
 from ..metadata import CurveType
 from ..parser.timeseries import parse_timeseries
 
-
 # Tuple of supported values for Curve.curve_type in the time series API
 CURVE_TYPES = (CurveType.TIMESERIES, CurveType.SCENARIO_TIMESERIES)
+
 
 class TimeseriesAPI(BaseAPI):
     """
@@ -24,9 +24,11 @@ class TimeseriesAPI(BaseAPI):
             curve,
             begin=None,
             end=None,
+            time_zone=None,
             frequency=None,
             aggregation=None,
-            hour_filter=None):
+            hour_filter=None,
+            threshold=None):
         """
         Load time series data for a :py:class:`energyquantified.metadata.Curve`.
 
@@ -39,6 +41,8 @@ class TimeseriesAPI(BaseAPI):
         :type begin: date, datetime, str, required
         :param end: The end date-time
         :type end: date, datetime, str, required
+        :param time_zone: Set the timezone for the date-times
+        :type time_zone: TzInfo, optional
         :param frequency: Set the preferred frequency for aggregations, defaults to None
         :type frequency: Frequency, optional
         :param aggregation: The aggregation method (i.e. AVERAGE, MIN, MAX),\
@@ -47,6 +51,10 @@ class TimeseriesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
+        :param threshold: Allow that many values to be missing within one frame of \
+            *frequency*. Has no effect unless *frequency* is provided, \
+            defaults to 0.
+        :type threshold: int, optional
         :return: A time series
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -57,10 +65,12 @@ class TimeseriesAPI(BaseAPI):
         params = {}
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
         self._add_frequency(params, "frequency", frequency)
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())

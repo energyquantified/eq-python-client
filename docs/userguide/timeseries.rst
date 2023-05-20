@@ -59,13 +59,43 @@ The response is an :class:`energyquantified.data.Timeseries` instance:
     <Value: date=2020-01-01 00:30:00+01:00, value=6640>
     ...
 
+Timezone conversion
+^^^^^^^^^^^^^^^^^^^^
+
+Use the ``time_zone`` parameter to convert the data to the given timezone:
+
+   >>> from energyquantified.time import UTC
+   >>>
+   >>> timeseries = eq.timeseries.load(
+   >>>    'DE Wind Power Production MWh/h 15min Actual',
+   >>>    begin='2020-01-01',
+   >>>    end='2020-01-06',
+   >>>    time_zone=UTC
+   >>> )
+
+**Note:** Only the following timezones are supported because these are the most
+commonly used timezones. Most power markets in Europe operate in CET due to
+standardization and market coupling.
+
+- ``UTC`` – Coordinated Universal Time
+- ``WET`` – Western European Time
+- ``CET`` – Central European Time
+- ``EET`` – Eastern European Time
+- ``Europe/Istanbul`` – Turkey Time
+- ``Europe/Moscow`` – Russian/Moscow Time
+- ``Europe/Gas_Day`` – (Non-standard timezone; not in the IANA timezone database)
+  European Gas Day at UTC-0500 (UTC-0400 during Daylight Saving Time). Starts
+  at 06:00 in CE(S)T time. Used for the natural gas market in the European
+  Union.
+
+We use the `pytz <https://pypi.org/project/pytz/>`_ library for timezones.
 
 Aggregation
 ^^^^^^^^^^^
 
 Notice that the actual wind curve in the above examples is in a 15-minute
-resolution. Energy Quantified do not a copy of that curve in hourly, daily
-or any other resolution.
+resolution. Energy Quantified does not provide a copy of this curve in hourly,
+daily or any other resolution.
 
 If you would like to get the data in, say, daily resolution, supply an
 extra argument, ``frequency``, when loading the time series data:
@@ -132,6 +162,47 @@ so:
 
 When you specify a weekly, monthly, quarterly or yearly frequency, the API
 will automatically use futures peak (8-20 on workdays only) in the aggregation.
+
+Aggregation threshold
+~~~~~~~~~~~~~~~~~~~~~
+
+In case, one or more input values are empty, the aggregation will return an
+empty value. To avoid this, you can set the ``threshold`` parameter which
+defines how many values are allowed to be missing within a frame of the
+converted frequency. If the number of missing values is less than or equal to
+the ``threshold``, aggregation is performed on the remaining non-empty values.
+Otherwise, an empty value is returned.
+
+**Note**: By default, the threshold is set to zero. This means that an empty
+input value will result in an empty output value.
+
+For example, you want to convert hourly values to daily values using the mean
+value. Let's assume that six values on 2020-01-02 are empty and three on
+2020-01-04. Instead of getting empty values, you want to get the average if a
+maximum of four values are missing within a day. In this case, set the
+``threshold`` to four.
+
+   >>> from energyquantified.time import Frequency
+   >>> from energyquantified.metadata import Aggregation, Filter
+   >>> timeseries = eq.timeseries.load(
+   >>>    'DE Wind Power Production MWh/h 15min Actual',
+   >>>    begin=date(2020, 1, 1),
+   >>>    end=date(2020, 1, 6),
+   >>>    frequency=Frequency.P1D,
+   >>>    aggregation=Aggregation.AVERAGE,
+   >>>    threshold=4
+   >>> )
+
+   >>> timeseries.data
+   [<Value: date=2020-01-01 00:00:00+01:00, value=8578.48>,
+    <Value: date=2020-01-02 00:00:00+01:00, value=None>,
+    <Value: date=2020-01-03 00:00:00+01:00, value=33363.6>,
+    <Value: date=2020-01-04 00:00:00+01:00, value=37637.12>,
+    <Value: date=2020-01-05 00:00:00+01:00, value=11912.42>]
+
+The value for 2020-01-02 is ``None`` because more than four input values were
+empty. The value for 2020-01-04 is not empty because less than or equal four
+values were empty.
 
 Load time series scenarios
 --------------------------

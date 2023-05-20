@@ -15,7 +15,7 @@ as categories, areas, unit and others.
 
 An important attribute on the curve model is :ref:`resolution <resolution>`
 (more on resolutions below). It tells you the time step (hourly, 15-minute,
-daily, etc.) and time zone for data in the curve.
+daily, etc.) and timezone for data in the curve.
 
 **Curve types**
 
@@ -80,7 +80,7 @@ nuclear power plant). And a place has a list of all curves connected to
 it.
 
 
-Resolution, time-zone and frequency
+Resolution, timezone and frequency
 -----------------------------------
 
 Power markets operate on contracts such as 15-minute, hourly, daily,
@@ -119,10 +119,10 @@ that involve the Timeseries model.
 See the :py:class:`Frequency <energyquantified.time.Frequency>` enum class
 for more details.
 
-Time-zone
+Timezone
 ~~~~~~~~~
 
-These are the most commonly used time-zones. Most power markets in Europe
+These are the most commonly used timezones. Most power markets in Europe
 operate in CET due to standardization and market coupling.
 
 - ``UTC`` – Coordinated Universal Time
@@ -131,19 +131,19 @@ operate in CET due to standardization and market coupling.
 - ``EET`` – Eastern European Time
 - ``Europe/Istanbul`` – Turkey Time
 - ``Europe/Moscow`` – Russian/Moscow Time
-- ``Europe/Gas_Day`` – (Non-standard time-zone; not in the IANA time-zone database)
+- ``Europe/Gas_Day`` – (Non-standard timezone; not in the IANA timezone database)
   European Gas Day at UTC-0500 (UTC-0400 during Daylight Saving Time). Starts
   at 06:00 in CE(S)T time. Used for the natural gas market in the European
   Union.
 
-We use the `pytz <https://pypi.org/project/pytz/>`_ library for time-zones.
+We use the `pytz <https://pypi.org/project/pytz/>`_ library for timezones.
 
 .. _resolution:
 
 Resolution
 ~~~~~~~~~~
 
-It is a combination of a frequency and a time-zone. All time series have a
+It is a combination of a frequency and a timezone. All time series have a
 resolution. Only resolutions with iterable frequencies are iterable (meaning
 all frequencies other than ``NONE``).
 
@@ -190,9 +190,6 @@ aggregated value. The supported aggregations are:
 
 Energy Quantified defaults to use ``AVERAGE`` (mean).
 
-The aggregation will return empty values whenever there are one or more missing
-input values.
-
 Class reference: :py:class:`Aggregation <energyquantified.metadata.Aggregation>`
 
 Filters (or hour-filters)
@@ -221,6 +218,24 @@ should keep the following in mind:
   between workdays and weekends.
 
 Class reference: :py:class:`Filter <energyquantified.metadata.Filter>`
+
+Aggregation threshold
+~~~~~~~~~~~~~~~~~~~~~
+
+By default, the aggregation returns empty values whenever one or more input
+values are missing. You can set a *threshold* that defines how many values are
+allowed to be missing within a frame of the converted frequency. If the number
+of missing values is less than or equal to the *threshold*, aggregation is
+performed on the remaining non-empty values. Otherwise, an empty value is
+returned.
+
+**Note**: By default, the threshold is set to zero. This means that an empty
+input value will result in an empty output value.
+
+For example, you want to convert hourly values to daily values using the mean
+value. Let's assume that some input values are missing. Instead of getting
+empty values, you want to get the average if a maximum of four values are
+missing within a day. In this case, set the *threshold* to four.
 
 
 .. _time-series:
