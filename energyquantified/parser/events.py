@@ -1,5 +1,4 @@
-from energyquantified.events.events import EventType, CurveUpdateEvent
-from energyquantified.events.event_options import EventCurveOptions, EventFilterOptions
+from energyquantified.events import EventType, CurveUpdateEvent, EventCurveOptions, EventFilterOptions, EventFilters
 from energyquantified.time import to_timezone
 from .metadata import parse_curve, parse_instance
 from dateutil.parser import isoparse
@@ -29,6 +28,18 @@ def parse_event(json):
         instance=instance,
         num_values=json.get("values_changed"),
     )
+
+def parse_filters(json):
+    event_filters = EventFilters()
+    request_id = json.get("request_id")
+    if request_id is not None:
+        event_filters.set_request_id(request_id)
+    last_id = json.get("last_id")
+    if last_id is not None:
+        event_filters.set_last_id(last_id)
+    options = [parse_event_options(option) for option in json["filters"]]
+    event_filters.set_options(options)
+    return event_filters
 
 def parse_event_options(json):
     # Event type

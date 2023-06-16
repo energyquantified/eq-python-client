@@ -1,4 +1,4 @@
-
+import uuid
 import websocket
 import threading
 import json
@@ -10,10 +10,11 @@ from energyquantified.events import (
     EventCurveOptions,
     EventFilterOptions,
     ConnectionEvent,
+    EventFilters,
 )
 from energyquantified.events.connection_event import TIMEOUT, UNKNOWN_ERROR
 import random
-from energyquantified.parser.events import parse_event_options, parse_event
+from energyquantified.parser.events import parse_event_options, parse_event, parse_filters
 import atexit
 from socket import timeout
 from websocket import (
@@ -54,7 +55,7 @@ class CurveUpdateEventAPI:
         >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd)
         >>> events = eq.events.connect()
         >>> # Loop over events as they come
-        >>> for msg_type, event in ws.get_next():
+        >>> for msg_type, event in events.get_next():
         >>>     if msg_type == MessageType.EVENT:
         >>>         # Optionally load event data from API
         >>>         data = event.load_data()
@@ -73,7 +74,7 @@ class CurveUpdateEventAPI:
         >>> ws_client.subscribe(filter)
         
     To keep track of the last event received between sesssions, supply the
-    **last_id_file** parameter with a file path. The file will be created 
+    ``last_id_file`` parameter with a file path. The file will be created
     for you if it does not already exist. This is useful in the case of
     a disconnect or an unexpected termination.
         
@@ -161,8 +162,25 @@ class CurveUpdateEventAPI:
                 json.dump({"last_id": ""}, f)
 
     def _set_last_id(self, last_id):
-        if self._last_id is None or last_id > self._last_id:
+        # Set and return if the current id is None
+        if self._last_id is None:
             self._last_id = last_id
+            return
+        # Check if the new last_id is greater than the current
+        # last_id format: str of timestamp and a seq. number separated by dash
+        current_id = self._last_id.split("-")
+        new_id = last_id.split("-")
+        # First compare timestamps
+        current_timestamp = int(current_id[0])
+        new_timestamp = int(new_id[0])
+        if new_timestamp > current_timestamp:
+            self._last_id = last_id
+        elif new_timestamp == current_timestamp:
+            # Compare sequence number if equal timestamps
+            current_n = int(current_id[1])
+            new_n = int(new_id[1])
+            if new_n > current_n:
+                self._last_id = last_id
 
     def _last_id_from_file(self):
         if self._last_id_file is None:
@@ -219,11 +237,12 @@ class CurveUpdateEventAPI:
         if self._latest_filters is not None:
             self._messages.put((MessageType.INFO, "Successfully reconnected to the server, setting previous filters.."))
             try:
-                self._ws.send(self._latest_filters)
+                self._ws.send(json.dumps(self._latest_filters))
             except Exception as e:
                 self._messages.put((MessageType.ERROR, f"Failed to set previous filters after reconnecting, cause: {e}"))
 
     def _on_message(self, _ws, message):
+        print(f"msg: {message}")
         try:
             msg = json.loads(message)
             msg_tag = msg.pop("type")
@@ -240,7 +259,7 @@ class CurveUpdateEventAPI:
                 self._set_last_id(data.event_id)
                 self._last_id_to_file(last_id=data.event_id)
             elif msg_type == MessageType.FILTERS:
-                data = list(parse_event_options(options) for options in msg["filters"])
+                data = parse_filters(msg)
             elif msg_type == MessageType.INFO:
                 data = msg["message"]
             elif msg_type == MessageType.ERROR:
@@ -348,7 +367,8 @@ class CurveUpdateEventAPI:
             on_open=self._on_open,
             on_message=self._on_message,
             on_close=self._on_close,
-            on_error=self._on_error,)
+            on_error=self._on_error,
+        )
 
         def _ws_thread():
             while not self._should_not_connect.is_set():
@@ -505,7 +525,7 @@ class CurveUpdateEventAPI:
                         continue
                     yield (MessageType.TIMEOUT, None)
 
-    def subscribe(self, filters):
+    def subscribe(self, filters, request_id=None, fill_last_id=False):
         """
         Send a filter or a list of filters to the stream, subscribing to
         curve events matching any of the filters.
@@ -513,31 +533,144 @@ class CurveUpdateEventAPI:
         The server responds with the new filters if the subscribe was successful,
         and the response is added to the message queue that can be accessed through
         :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
-        The message will have the ``MessageType.FILTERS`` type.
+        The message will have the ``MessageType.FILTERS`` type. The response also
+        includes a unique id that can be preset by supplying the ``request_id``
+        parameter with an id in the call to subscribe. The id must be a ``uuid``
+        object in version 4 format, created as shown in the code snippet below:
+
+            >>> import uuid
+            >>> subscribe_id = uuid.uuid4()
+
+        Subscribe with the preset request id:
+
+            >>> import uuid
+            >>> subscribe_id = uuid.uuid4()
+            >>> filters = ...
+            >>> subscribe(filters, request_id=subscribe_id)
+
+        Find out when you are successfully subscribed with the provided filters
+        by comparing your id with with the id's of new messages:
+
+            >>> import uuid
+            >>> from energyquantfied.events import MessageType
+            >>> subscribe_id = uuid.uuid4()
+            >>> filters = ...
+            >>> subscribe(filters, request_id=subscribe_id)
+            >>> # Compare ID while reading from the stream
+            >>> for msg_type, msg in eq.events.get_next():
+            >>>     if msg_type == MessageType.FILTERS:
+            >>>         if msg.request_id == subscribe_id:
+            >>>             # ID match so we know the filters are set
 
         :param filters: The filters. Can be a single filter or a list of filters.
         :type filters: list[:py:class:`energyquantified.events.EventFilterOptions` | \
             :py:class:`energyquantified.events.EventCurveOptions`]
+        :param request_id: Preset id for the response
+        :type request_id: ``uuid.UUID`` (v4), optional
+        :param fill_last_id: If last_id is not set in the filters, this can be set to\
+            True in order to use subscribe to events after the last_id saved in memory.\
+            Does nothing if last_id is set in the filters. Defaults to False.
+        :type fill_last_id: bool
         """
-        if not isinstance(filters, (list, tuple, set)):
-            filters = [filters]
-        assert all(
-            isinstance(eventOptions, (EventFilterOptions, EventCurveOptions))
-            for eventOptions in filters
-        ), "Filter must be either EventFilterOptions or EventCurveOptions"
-        filter_list = list(eventFilter.to_dict() for eventFilter in filters)
-        filters_msg = json.dumps(
-            {"action": "filter.set",
-            "filters": filter_list},)
-        self._latest_filters = filters_msg
-        self._ws.send(filters_msg)
+        # Validate filters
+        assert isinstance(filters, EventFilters)
+        is_valid, errors = filters.validate()
+        assert is_valid, f"Invalid filters: {filters} for reasons: {errors}"
+        # Create message
+        subscribe_message = {"action": "filter.set"}
+        # TODO request_id from filters OR from params?
+        # # Add request id if set
+        # if filters.has_request_id():
+        #     subscribe_message["id"] = str(request_id)
+        # TODO ^request_id from filters OR from params?
+        # Add or fill last_id
+        if filters.has_last_id():
+            subscribe_message["last_id"] = filters.last_id
+        elif fill_last_id:
+            if self._last_id is not None:
+                subscribe_message["last_id"] = self._last_id 
+        # Add options for filtering events
+        if filters.has_options():
+            # TODO must this default to something? or allowed to not send filters?
+            event_options = list(options.to_dict() for options in filters.options)
+            subscribe_message["filters"] = event_options
+        # Update latest filters before setting id # TODO do this in response instead?
+        self._latest_filters = subscribe_message
+        # Validate and set request id
+        if request_id is not None:
+            # Assert that request id is an uuid and correct version
+            _assert_uuid4(request_id)
+            subscribe_message["id"] = str(request_id)
+        subscribe_message = json.dumps(subscribe_message)
+        self._ws.send(subscribe_message)
 
-    def send_get_filters(self):
+    def send_get_filters(self, request_id=None):
         """
         Send a message to the stream requesting the currently active filters.
         When the server responds with the filters it will be added to the
         message queue that is accessible through
         :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`,
         and the first element of the message will have ``MessageType.FILTERS``.
+
+        The server responds with a message that includes the filters and a unique
+        id. The id in the response can be manually chosen by supplying the
+        ``request_id`` parameter with an id, which can be useful if you want to
+        be certain that the filters you get in return are for a specific request.
+        ``request_id`` must be a uuid.UUID object in version 4.
+
+        Create a uuid as shown below:
+
+            >>> import uuid
+            >>> get_filters_id = uuid.uuid4()
+
+        Preset the request_id when requesting the active filters:
+            >>> import uuid
+            >>> get_filters_id = uuid.uuid4()
+            >>> send_get_filters(request_id=get_filters_id)
+
+        Find the response related to your message by comparing the id:
+
+            >>> import uuid
+            >>> from energyquantified.events import MessageType
+            >>> get_filters_id = uuid.uuid4()
+            >>> send_get_filters(request_id=get_filters_id)
+            >>> # Compare ID while reading from the stream
+            >>> for msg_type, msg in eq.events.get_next():
+            >>>     if msg_type == MessageType.FILTERS:
+            >>>         if msg.request_id == get_filters_id:
+            >>>             # ID match so we know which message the response regards
+
+        :param request_id: Preset id for the response
+        :type request_id: ``uuid.UUID`` (v4), optional
         """
-        self._ws.send(json.dumps({"action": "filter.get"}))
+        msg = {"action": "filter.get"}
+        if request_id is not None:
+            # Assert uuid and version
+            _assert_uuid4(request_id)
+            msg["id"] = str(request_id)
+        self._ws.send(json.dumps(msg))
+
+    def sub2(self, last_id, request_id=None):
+        msg = {
+            "action": "events.get",
+            "last_id": last_id,
+        }
+        if request_id is not None:
+            msg["id"] = str(request_id)
+
+        print(f"sending msg: {msg}")
+        self._ws.send(json.dumps(msg))
+
+def _assert_uuid4(id):
+    """
+    Asserts that an id is a valid uuid v4.
+
+    :param id: The id
+    :type id: ``uuid.UUID``
+    """
+    assert isinstance(id, uuid.UUID), (
+        "Optionally parameter request_id must be type uuid if set"
+    )
+    assert id.version == 4, (
+        f"Expected uuid version 4 but found: {id.version}"
+    )

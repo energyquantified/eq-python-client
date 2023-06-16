@@ -1,10 +1,157 @@
 import json
+import uuid
 from datetime import datetime, date
 from dateutil.parser import isoparse
 
 from energyquantified.metadata.curve import Curve, DataType
 from energyquantified.metadata.area import Area
 from . import EventType
+
+class EventFilters:
+    """
+    Class for holding multiple filters and an event id.
+    """
+    def __init__(self):
+        self.request_id = None # TODO do we want this here?
+        # TODO ^imo yes for when parsing filters from server, but not when
+        #   subscribing
+        self.last_id = None
+        self.options = []
+
+    def __str__(self):
+        """
+        Represent this object as a string, excluding not-set values.
+
+        :return: A string representation of this object
+        :rtype: str
+        """
+        str_list = []
+        if self.has_request_id():
+            str_list.append(f"request_id={self.request_id}")
+        if self.has_last_id():
+            str_list.append(f"last_id={self.last_id}")
+        if self.has_options():
+            str_list.append(f"options={self.options}")
+        return (
+            f"<EventFilters: "
+            f"{', '.join(str_list)}"
+            f">"
+        )
+
+    def __repr__(self):
+        return self.__str__()
+    
+
+    def has_request_id(self): # TODO
+        return self.request_id is not None
+
+    def set_request_id(self, request_id): # TODO
+        """
+        Set the request id in this filter.
+
+        :param request_id: The request id
+        :type request_id: uuid v4 | str (in valid uuid v4 format)
+        :raises AssertionError: Invalid request_id type
+        :raises AssertionError: Invalid request_id format
+        :return: EventFilters
+        :rtype: The instance this method was invoked upon
+        """
+        if request_id is None:
+            self.request_id = None
+            return self
+        if isinstance(request_id, str):
+            try:
+                request_id = uuid.UUID(request_id, version=4)
+            except ValueError:
+                raise AssertionError(
+                    "str request_id cannot be parsed to uuid v4 due to invalid format"
+                    )
+            except Exception as _:
+                raise AssertionError("Failed to parse uuid from str request_id")
+        assert isinstance(request_id, uuid.UUID), "request_id must be type uuid"
+        assert request_id.version == 4, "request_id must be uuid v4"
+        self.request_id = request_id
+        return self
+
+    def has_last_id(self):
+        return self.last_id is not None
+
+    def set_last_id(self, last_id):
+        """
+        Set the last_id in this filter.
+
+        :param last_id: The id
+        :type last_id: str
+        :return: EventFilters
+        :rtype: The instance this method was invoked upon
+        """
+        assert last_id is None or isinstance(last_id, str), "last_id must be type str (or None)"
+        self.last_id = last_id
+        return self
+
+    def has_options(self):
+        if not isinstance(self.options, list):
+            return False
+        return len(self.options) > 0
+
+    def set_options(self, options):
+        """
+        Set the options in this filter. Can be a single option
+        or a list of options.
+
+        :param options: The option(s)
+        :type options: list[EventCurveOptions | EventFilterOptions]
+        :return: EventFilters
+        :rtype: The instance this method was invoked upon
+        """
+        if not isinstance(options, list):
+            options = [options]
+        assert all(
+            isinstance(option, (EventCurveOptions, EventFilterOptions))
+            for option in options), (
+            "All objects in 'options' must be type EventCurveOptions or EventFilterOptions"
+            )
+        self.options = options
+        return self
+
+    def validate(self):
+        """
+        Check the validity of this filter and discover reasons if invalid.
+
+        :return: A tuple of two objects; (1) a bool representing the validity of\
+            the object and (2) a list of potential errors.
+        :rtype: tuple[bool, list[str]]
+        """
+        errors = []
+        # Request id
+        if self.has_request_id():
+            if not isinstance(self.request_id, uuid):
+                errors.append("'request_id' must be type uuid (or None)")
+            elif not self.request_id.version == 4:
+                errors.append(
+                    f"'request_id' is required to be in format uuid v4 "
+                    f"but is in uuid v{self.request_id.version}"
+                )
+        # Last (event) id
+        if self.has_last_id():
+            if not isinstance(self.last_id, str):
+                errors.append("'last_id' must be type str (or None)")
+        # Check all options
+        for option in self.options:
+            # Check type
+            if not isinstance(option, (EventCurveOptions, EventFilterOptions)):
+                errors.append(
+                    f"objects in 'options' must be type EventCurveOptions "
+                    f"or EventFitlerOptions, found: {option} with type {type(option)}"
+                )
+            else: # Validate each option
+                option_is_valid, option_errors = option.validate()
+                if not option_is_valid:
+                    errors.append(
+                        f"Options contains an invalid option: {option}. "
+                        f"Invalid for the following reasons: {option_errors}"
+                    )
+        return len(errors) == 0, errors
 
 class _BaseEventOptions:
     """
@@ -16,6 +163,9 @@ class _BaseEventOptions:
         self._begin = None
         self._end = None
         self._event_types = None
+
+    def has_begin(self):
+        return self._begin is not None
 
     def set_begin(self, begin):
         """
@@ -39,6 +189,9 @@ class _BaseEventOptions:
         self._begin = begin
         return self
 
+    def has_end(self):
+        return self._end is not None
+
     def set_end(self, end):
         """
         Set the filters 'end'. The begin/end range regards the data an event
@@ -60,6 +213,11 @@ class _BaseEventOptions:
             raise ValueError("end must be a date, datetime, or an isoformatted string")
         self._end = end
         return self
+
+    def has_event_types(self):
+        if not isinstance(self._event_types, list):
+            return False
+        return len(self._event_types) > 0
 
     def set_event_types(self, event_types):
         """
@@ -85,7 +243,7 @@ class _BaseEventOptions:
             if not isinstance(event_type, EventType):
                 raise ValueError(f"'{event_type}' is not type 'EventType' or 'str'")
             new_event_types.add(event_type)
-        self._event_types = new_event_types
+        self._event_types = list(new_event_types)
         return self
 
     def to_json(self):
@@ -97,21 +255,38 @@ class _BaseEventOptions:
     def _to_dict(self, include_not_set=False):
         filters = {}
         # Event types
-        if self._event_types is not None:
+        if self.has_event_types():
             filters["event_types"] = list(event_type.tag for event_type in self._event_types)
         elif include_not_set:
             filters["event_types"] = None
         # Begin
-        if self._begin is not None:
+        if self.has_begin():
             filters["begin"] = self._begin.isoformat(sep=" ")
         elif include_not_set:
             filters["begin"] = None
         # End
-        if self._end is not None:
+        if self.has_end():
             filters["end"] = self._end.isoformat(sep=" ")
         elif include_not_set:
             filters["end"] = None
         return filters
+
+    def validate(self):
+        raise NotImplementedError
+    
+    def _validate(self):
+        errors = []
+        if self.has_begin():
+            if not isinstance(self._begin, datetime):
+                errors.append("'begin' is not a datetime")
+        if self.has_end():
+            if not isinstance(self._end, datetime):
+                errors.append("'end' is not a datetime")
+        if self.has_event_types():
+            if not all(isinstance(event_type, EventType) for event_type in self._event_types):
+                errors.append("All objects in 'event_types' must be type EventType")
+        return len(errors) == 0, errors
+
 
 class EventCurveOptions(_BaseEventOptions):
     """
@@ -122,6 +297,36 @@ class EventCurveOptions(_BaseEventOptions):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._curve_names = None
+
+    def __str__(self):
+        """
+        Represent this object as a string, excluding not-set values.
+
+        :return: A string representation of this object
+        :rtype: str
+        """
+        str_list = []
+        if self.has_event_types():
+            str_list.append(f"event_types={self._event_types}")
+        if self.has_curve_names():
+            str_list.append(f"curve_names={self._curve_names}")
+        if self.has_begin():
+            str_list.append(f"begin={self._begin.isoformat(sep=' ')}")
+        if self.has_end():
+            str_list.append(f"end={self._end.isoformat(sep=' ')}")
+        return (
+            f"<EventCurveOptions: "
+            f"{', '.join(str_list)}"
+            f">"
+        )
+
+    def __repr__(self):
+        return self.__str__()
+    
+    def has_curve_names(self):
+        if not isinstance(self._curve_names, list):
+            return False
+        return len(self._curve_names) > 0
 
     def set_curve_names(self, curves):
         """
@@ -165,37 +370,27 @@ class EventCurveOptions(_BaseEventOptions):
         :return: A dictionary representation of this object
         :rtype: dict
         """
-        filters = super()._to_dict(include_not_set=include_not_set)
-        if self._curve_names is not None:
+        filters = self._to_dict(include_not_set=include_not_set)
+        if self.has_curve_names():
             filters["curve_names"] = self._curve_names
         elif include_not_set:
             filters["curve_names"] = None
         return filters
-    
-    def __str__(self):
-        """
-        Represent this object as a string, excluding not-set values.
 
-        :return: A string representation of this object
-        :rtype: str
+    def validate(self):
         """
-        str_list = []
-        if self._event_types:
-            str_list.append(f"event_types={self._event_types}")
-        if self._curve_names:
-            str_list.append(f"curve_names={self._curve_names}")
-        if self._begin:
-            str_list.append(f"begin={self._begin.isoformat(sep=' ')}")
-        if self._end:
-            str_list.append(f"end={self._end.isoformat(sep=' ')}")
-        return (
-            f"<EventCurveOptions: "
-            f"{', '.join(str_list)}"
-            f">"
-        )
+        Check the validity of this filter and discover reasons if invalid.
 
-    def __repr__(self):
-        return self.__str__()
+        :return: A tuple of two objects; (1) a bool representing the validity of\
+            the object and (2) a list of potential errors.
+        :rtype: tuple[bool, list[str]]
+        """
+        _, errors = self._validate()
+        if self.has_curve_names():
+            if not all(isinstance(curve_name, str) for curve_name in self._curve_names):
+                errors.append("All objects in 'curve_names' must be type str")
+        return len(errors) == 0, errors
+
 
 class EventFilterOptions(_BaseEventOptions):
     """
@@ -212,6 +407,44 @@ class EventFilterOptions(_BaseEventOptions):
         self._categories = None
         self._exact_categories = None
 
+    def __str__(self):
+        """
+        Represent this object as a string, excluding not-set values.
+
+        :return: A string representation of this object
+        :rtype: str
+        """
+        str_list = []
+        if self.has_event_types():
+            str_list.append(f"event_types={self._event_types}")
+        if self.has_begin():
+            str_list.append(f"begin={self._begin.isoformat(sep=' ')}")
+        if self.has_end():
+            str_list.append(f"end={self._end.isoformat(sep=' ')}")
+        if self.has_q():
+            str_list.append(f"q={self._q}")
+        if self.has_areas():
+            str_list.append(f"areas={self._areas}")
+        if self.has_data_types():
+            str_list.append(f"data_types={self._data_types}")
+        if self.has_commodities():
+            str_list.append(f"commodities={self._commodities}")
+        if self.has_categories():
+            str_list.append(f"categories={self._categories}")
+        if self.has_exact_categories():
+            str_list.append(f"exact_categories={self._exact_categories}")
+        return (
+            f"<EventFilterOptions: "
+            f"{', '.join(str_list)}"
+            f">"
+        )
+
+    def __repr__(self):
+        return self.__str__()
+
+    def has_q(self):
+        return self._q is not None
+
     def set_q(self, q):
         """
         Filter events by a query/freetext search
@@ -226,6 +459,11 @@ class EventFilterOptions(_BaseEventOptions):
             raise ValueError(f"q: '{q}' is not a string")
         self._q = q
         return self
+
+    def has_areas(self):
+        if not isinstance(self._areas, list):
+            return False
+        return len(self._areas) > 0
 
     def set_areas(self, areas):
         """
@@ -254,6 +492,11 @@ class EventFilterOptions(_BaseEventOptions):
         self._areas = list(new_areas)
         return self
 
+    def has_data_types(self):
+        if not isinstance(self._data_types, list):
+            return False
+        return len(self._data_types) > 0
+
     def set_data_types(self, data_types):
         """
         Set one or more DataTypes. Limit events to events having a
@@ -281,6 +524,11 @@ class EventFilterOptions(_BaseEventOptions):
         self._data_types = list(new_data_types)
         return self
 
+    def has_commodities(self):
+        if not isinstance(self._commodities, list):
+            return False
+        return len(self._commodities) > 0
+
     def set_commodities(self, commodities):
         """
         Set one or more commodities in this filter. Limit events to those having a
@@ -301,6 +549,11 @@ class EventFilterOptions(_BaseEventOptions):
         self._commodities = list(commodities)
         return self
 
+    def has_categories(self):
+        if not isinstance(self._categories, list):
+            return False
+        return len(self._categories) > 0
+
     def set_categories(self, categories):
         """
         Set one or more categories. Limits events to those having a curve 
@@ -320,6 +573,11 @@ class EventFilterOptions(_BaseEventOptions):
         # Store as list
         self._categories = list(categories)
         return self
+
+    def has_exact_categories(self):
+        if not isinstance(self._exact_categories, list):
+            return False
+        return len(self._exact_categories) > 0
 
     def set_exact_categories(self, exact_categories):
         """
@@ -358,69 +616,73 @@ class EventFilterOptions(_BaseEventOptions):
         :return: A dictionary representation of this object
         :rtype: dict
         """
-        filters = super()._to_dict(include_not_set=include_not_set)
+        filters = self._to_dict(include_not_set=include_not_set)
         # q (freetext)
-        if self._q is not None:
+        if self.has_q():
             filters["q"] = self._q
         elif include_not_set:
             filters["q"] = None
         # Areas
-        if self._areas is not None:
+        if self.has_areas():
             filters["areas"] = list(area.tag for area in self._areas)
         elif include_not_set:
             filters["areas"] = None
         # Data type
-        if self._data_types is not None:
+        if self.has_data_types():
             filters["data_types"] = list(data_type.tag for data_type in self._data_types)
         elif include_not_set:
             filters["data_types"] = None
         # Commodities
-        if self._commodities is not None:
+        if self.has_commodities():
             filters["commodities"] = self._commodities
         elif include_not_set:
             filters["commodities"] = None
         # Categories
-        if self._categories is not None:
+        if self.has_categories():
             filters["categories"] = self._categories
         elif include_not_set:
             filters["categories"] = None
-        if self._exact_categories is not None:
+        if self.has_exact_categories():
             filters["exact_categories"] = self._exact_categories
         elif include_not_set:
             filters["exact_categories"] = None
         return filters
-    
-    def __str__(self):
-        """
-        Represent this object as a string, excluding not-set values.
 
-        :return: A string representation of this object
-        :rtype: str
+    def validate(self):
         """
-        str_list = []
-        if self._event_types:
-            str_list.append(f"event_types={self._event_types}")
-        if self._begin:
-            str_list.append(f"begin={self._begin.isoformat(sep=' ')}")
-        if self._end:
-            str_list.append(f"end={self._end.isoformat(sep=' ')}")
-        if self._q:
-            str_list.append(f"q={self._q}")
-        if self._areas:
-            str_list.append(f"areas={self._areas}")
-        if self._data_types:
-            str_list.append(f"data_types={self._data_types}")
-        if self._commodities:
-            str_list.append(f"commodities={self._commodities}")
-        if self._categories:
-            str_list.append(f"categories={self._categories}")
-        if self._exact_categories:
-            str_list.append(f"exact_categories={self._exact_categories}")
-        return (
-            f"<EventFilterOptions: "
-            f"{', '.join(str_list)}"
-            f">"
-        )
+        Check the validity of this filter and discover reasons if invalid.
 
-    def __repr__(self):
-        return self.__str__()
+        :return: A tuple of two objects; (1) a bool representing the validity of\
+            the object and (2) a list of potential errors.
+        :rtype: tuple[bool, list[str]]
+        """
+        _, errors = self._validate()
+        if self.has_q():
+            if not isinstance(self._q, str):
+                errors.append("q must be type str")
+        if self.has_areas():
+            if not all(isinstance(area, Area) for area in self._areas):
+                errors.append(
+                    "All objects in 'areas' must be type Area"
+                )
+        if self.has_data_types():
+            if not all(isinstance(data_type, DataType) for data_type in self._data_types):
+                errors.append(
+                    "All objects in 'data_types' must be type DataType"
+                )
+        if self.has_commodities():
+            if not all(isinstance(commodity, str) for commodity in self._commodities):
+                errors.append(
+                    "All objects in 'commodities' must be type str"
+                )
+        if self.has_categories():
+            if not all(isinstance(category, str) for category in self._categories):
+                errors.append(
+                    "All objects in 'categories' must be type str"
+                )
+        if self.has_exact_categories():
+            if not all(isinstance(category, str) for category in self._exact_categories):
+                errors.append(
+                    "All objects in 'exact_categories' must be type str"
+                )
+        return len(errors) == 0, errors
