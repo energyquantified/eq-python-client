@@ -1,7 +1,41 @@
-from energyquantified.events import EventType, CurveUpdateEvent, EventCurveOptions, EventFilterOptions, EventFilters
+from energyquantified.events import EventType, CurveUpdateEvent, EventCurveOptions, EventFilterOptions, EventFilters, SubscribeResponse
 from energyquantified.time import to_timezone
 from .metadata import parse_curve, parse_instance
 from dateutil.parser import isoparse
+import json
+
+def parse_server_message(msg):
+    # Load json
+    
+
+
+#  with self._messages_lock:
+#             try:
+#                 msg = json.loads(message)
+#             except Exception as e:
+#                 self._messages.put((MessageType.ERROR, f"Failed to parse message: {message}, exception: {e}"))
+#                 return
+#             if msg["type"].lower() == "curves.subscribe":
+#                 self._handle_message_subscribe_curves(msg)
+#                 return
+#             if not MessageType.is_valid_tag(msg["type"]):
+#                 self._messages.put((MessageType.ERROR, f"Unknown message type: {msg.get('type')}"))
+#                 return
+#             msg_type = MessageType.by_tag(msg["type"])
+#             if msg_type == MessageType.CURVE_EVENT:
+#                 if self._is_subscribed_curves.is_set():
+#                     obj = parse_event(msg)
+#                     self._update_last_id(obj.event_id)
+#                     self._last_id_to_file(obj.event_id)
+#             elif msg_type == MessageType.MESSAGE:
+#                 obj = msg["message"]
+#             elif msg_type == MessageType.ERROR:
+#                 # TODO Can this ever happen?
+#                 obj = msg
+#             else:
+#                 self._messages.put((MessageType.ERROR, f"Missing handler for MessageType {msg_type}"))
+#                 return
+#             self._messages.put((msg_type, obj))
 
 
 def parse_event(json):
@@ -29,11 +63,22 @@ def parse_event(json):
         num_values=json.get("values_changed"),
     )
 
+def parse_subscribe_response(json):
+    if json["status"].upper() == "OK":
+        response = SubscribeResponse(
+            True,
+            filters=parse_filters(json["obj"]["filters"]),
+            last_id=json["obj"]["last_id"],
+        )
+    else:
+        response = SubscribeResponse(
+            False,
+            errors=json["errors"],
+        )
+    return response
+
 def parse_filters(json):
     event_filters = EventFilters()
-    request_id = json.get("request_id")
-    if request_id is not None:
-        event_filters.set_request_id(request_id)
     last_id = json.get("last_id")
     if last_id is not None:
         event_filters.set_last_id(last_id)

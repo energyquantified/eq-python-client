@@ -61,7 +61,7 @@ class EnergyQuantified:
     parameter with a file path. The file will be created for you if it does
     not already exist. This is useful in the case of a disconnect or
     an unexpected termination.
-        
+    # TODO upadte docs (last_id file)
         >>> from energyquantified import EnergyQuantified
         >>> eq = EnergyQuantified(
         >>>     api_key="aaaa-bbbb-cccc-dddd,
@@ -86,7 +86,6 @@ class EnergyQuantified:
             http_delay=0.0667,
             api_url=BASE_PATH,
             proxies=None,
-            last_id_file=None,
         ):
         # Simple validations
         assert api_key or api_key_file, "api_key is missing"
@@ -146,8 +145,12 @@ class EnergyQuantified:
         #: See :py:class:`energyquantified.api.CurveUpdateEventAPI`. For
         #: using the curve events stream.
         # Create ws url (http -> ws, https -> wss)
-        events_ws_url = f"{self._api_url.replace('http', 'ws')}/events/curves"
-        self.events = CurveUpdateEventAPI(events_ws_url, self._api_key, last_id_file)
+        # TODO improve conversion to ws url?
+        events_ws_url = "".join([
+            self._api_url.replace('http', 'ws').replace('api', 'events').rstrip('/'),
+            "/",
+        ])
+        self.events = CurveUpdateEventAPI(events_ws_url, self._api_key)
 
     def is_api_key_valid(self):
         """

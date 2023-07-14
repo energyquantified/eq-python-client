@@ -11,9 +11,9 @@ class EventType(Enum):
      * ``TRUNCATE`` – All data for a curve is deleted
     """
 
-    UPDATE = ("UPDATE", "Update")
-    DELETE = ("DELETE", "Delete")
-    TRUNCATE = ("TRUNCATE", "Truncate")
+    CURVE_UPDATE = ("UPDATE", "Update")
+    CURVE_DELETE = ("DELETE", "Delete")
+    CURVE_TRUNCATE = ("TRUNCATE", "Truncate")
 
     def __init__(self, tag=None, label=None):
         self.tag = tag

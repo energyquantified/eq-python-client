@@ -22,8 +22,8 @@ class MessageType(Enum):
             (type: :py:class:`energyquantified.events.ConnectionEvent`)\
             describing what caused the connection to drop
     """
-    EVENT = ("EVENT", "Event")
-    INFO = ("INFO", "Info")
+    CURVE_EVENT = ("CURVES.EVENT", "Curve event")
+    MESSAGE = ("MESSAGE", "Message")
     FILTERS = ("FILTERS", "Filters")
     ERROR = ("ERROR", "Error")
     TIMEOUT = ("TIMEOUT", "Timeout")

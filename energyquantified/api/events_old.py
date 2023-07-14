@@ -4,9 +4,7 @@ import threading
 import json
 import queue
 import time
-import logging
 import os
-import re
 from energyquantified.events import (
     MessageType,
     EventCurveOptions,
@@ -14,10 +12,9 @@ from energyquantified.events import (
     ConnectionEvent,
     EventFilters,
 )
-from energyquantified.events.callback import Callback, SUBSCRIBE_CURVES
 from energyquantified.events.connection_event import TIMEOUT, UNKNOWN_ERROR
 import random
-from energyquantified.parser.events import parse_event_options, parse_event, parse_filters, parse_subscribe_response
+from energyquantified.parser.events import parse_event_options, parse_event, parse_filters
 import atexit
 from socket import timeout
 from websocket import (
@@ -27,13 +24,6 @@ from websocket import (
     WebSocketBadStatusException,
     WebSocketPayloadException,
 )
-from energyquantified.events import SubscribeResponse
-from energyquantified.events.callback import Callback, SUBSCRIBE_CURVES
-import sys
-
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-log = logging.getLogger(__name__)
-
 
 class CurveUpdateEventAPI:
     """
@@ -102,7 +92,7 @@ class CurveUpdateEventAPI:
         >>>     last_id_file="folder_name/last_id_file.json"
         >>> )
     """
-    def __init__(self, ws_url, api_key):
+    def __init__(self, ws_url, api_key, last_id_file=None):
         self._ws_url = ws_url
         self._api_key = api_key
         self._ws = None
@@ -118,47 +108,48 @@ class CurveUpdateEventAPI:
         self._max_reconnect_attempts = 3
         self._remaining_reconnect_attempts = 1
         self._remaining_reconnect_attempts_lock = threading.Lock()
-        # Subscribe
-        self._callbacks = {}
-        self._is_subscribed_curves = threading.Event()
-        self._messages_lock = threading.Lock()
-        self._latest_curves_subscribe_message = None
+        # Filters
+        self._filters_is_active = threading.Event()
+        self._latest_filters_uuid = None
+        self._latest_filters = None
         # Last event id
         self._last_id = None
-        self._last_id_timestamp = None
-        # Last event id file
-        self._last_id_file_path = None
-        self._last_id_file_lock = threading.Lock()
-        self._last_id_file_updated = None
-        self._last_id_file_atexit = None
+        self._last_id_file = last_id_file
+        if last_id_file is not None:
+            self._last_id_lock = threading.Lock()
+            self._last_id_timestamp = None
+            # Check fille access and try to create if not exists
+            self._setup_last_id_file()
 
+            def save_id():
+                self._last_id_to_file(write_interval_s=0)
+
+            atexit.register(save_id)
 
     def _setup_last_id_file(self):
         """
-        Finds last_id if the file exists with correct access.
-        Creates the file if not.
+        Check read/write access to file and create if not exists.
         """
-        if os.path.exists(self._last_id_file_path):
+        if self._last_id_file is None:
+            return
+        # Lock
+        if os.path.exists(self._last_id_file):
             # Raise error if path exists but it's not a file
-            if not os.path.isfile(self._last_id_file_path):
+            if not os.path.isfile(self._last_id_file):
                 raise FileNotFoundError(
-                    f"Path last_id_file: '{self._last_id_file_path}' exists but it is not a file"
+                    f"Path last_id_file: '{self._last_id_file}' exists but it is not a file"
                     )
             # Read-access
-            if not os.access(self._last_id_file_path, os.R_OK):
-                raise PermissionError(f"Missing read-access to last_id_file: '{self._last_id_file_path}'")
+            if not os.access(self._last_id_file, os.R_OK):
+                raise PermissionError(f"Missing read-access to last_id_file: '{self._last_id_file}'")
             # Write-access
-            if not os.access(self._last_id_file_path, os.W_OK):
-                raise PermissionError(f"Missing write-access to last_id_file: {self._last_id_file_path}")
-            # Find from file and set
-            with open(self._last_id_file_path, "r") as f:
-                data = json.load(f)
-                # Default to None
-                self._last_id = data.get("last_id")
-
+            if not os.access(self._last_id_file, os.W_OK):
+                raise PermissionError(f"Missing write-access to last_id_file: {self._last_id_file}")
+            # Set last id
+            self._last_id = self._last_id_from_file()
         else:
             # Try to create parent dirs if not exists
-            parent_dir = os.path.dirname(self._last_id_file_path)
+            parent_dir = os.path.dirname(self._last_id_file)
             if not parent_dir:
                 parent_dir = "."
             else:
@@ -166,37 +157,20 @@ class CurveUpdateEventAPI:
                 os.makedirs(parent_dir, exist_ok=True)
             if not os.access(parent_dir, os.W_OK):
                     raise PermissionError(
-                        f"last_id_file: '{self._last_id_file_path}' does not exist "
+                        f"last_id_file: '{self._last_id_file}' does not exist "
                         f"and missing write-access to parent directory: '{parent_dir}'"
                         )
             # Create file
-            with open(self._last_id_file_path, "w") as f:
+            with open(self._last_id_file, "w") as f:
                 json.dump({"last_id": ""}, f)
 
-    def _update_last_id(self, last_id, force_update=False):
-        """
-        Updates the last event id in memory.
-
-        :param last_id: The new id
-        :type last_id: str
-        :param force_update: Overwrites the current last_id without comparing if True.\
-                            Saves the greates of the two id's if False. Defaults to False.
-        :type force_update: bool, optional
-        """
-        if force_update:
-            self._last_id = last_id
-            return
-        # Nothing to update if the new id is None
-        if last_id is None:
-            return
-        # No need to compare if the current last_id is None
+    def _set_last_id(self, last_id):
+        # Set and return if the current id is None
         if self._last_id is None:
             self._last_id = last_id
             return
-        # At this point we know neither are None. Time to keep compare and keep
-        # the greatest of the two id's.
-        # last_id format: str of timestamp (millis) and a seq. number separated by dash
-        # format: \d{13}-{1}\d+
+        # Check if the new last_id is greater than the current
+        # last_id format: str of timestamp and a seq. number separated by dash
         current_id = self._last_id.split("-")
         new_id = last_id.split("-")
         # First compare timestamps
@@ -211,29 +185,32 @@ class CurveUpdateEventAPI:
             if new_n > current_n:
                 self._last_id = last_id
 
-    def _last_id_to_file(self, last_id=None, write_interval_s=120):
-        """
-        Saves the last_id to disk if the file path exists, last_id is not None,
-        and it's at least 'write_interval_s' seconds since last save.
+    def _last_id_from_file(self):
+        if self._last_id_file is None:
+            return None
+        last_id = None
+        # Block other access to file
+        self._last_id_lock.acquire()
+        with open(f"{self._last_id_file}", "r") as f:
+            data = json.load(f)
+            last_id = data.get("last_id")
+        self._last_id_lock.release()
+        return last_id
 
-        :param last_id: The id
-        :type last_id: str, optional
-        :param write_interval_s: The minimum number of seconds since last write, defaults to 120
-        :type write_interval_s: int, optional
-        """
+    def _last_id_to_file(self, last_id=None, write_interval_s=120):
         # Ignore if user didn't provide a file path
-        if self._last_id_file_path is None:
+        if self._last_id_file is None:
             return
         if last_id is None:
             if self._last_id is None:
                 return
-            # Fallback to 
             last_id = self._last_id
         # Don't write if less than 'write_interval_s' since last
         if self._last_id_timestamp is not None and time.time() < self._last_id_timestamp + write_interval_s:
             return
         # Block other access to file
-        with open(self._last_id_file_path, "r+") as f:
+        self._last_id_lock.acquire()
+        with open(self._last_id_file, "r+") as f:
             try:
                 data = json.load(f)
             except Exception as e:
@@ -249,6 +226,7 @@ class CurveUpdateEventAPI:
                 # Truncate in case the new data is shorter
                 f.truncate()
         self._last_id_timestamp = time.time()
+        self._last_id_lock.release()
 
     def _on_open(self, _ws):
         self._last_connection_event = None
@@ -259,12 +237,12 @@ class CurveUpdateEventAPI:
         self._is_connected.set()
         self._done_trying_to_connect.set()
         # Send the last active filters
-        if self._latest_curves_subscribe_message is not None:
-            if self._last_id is not None:
-                self._latest_curves_subscribe_message["last_id"] = self._last_id
-                log.info("Reconnected to the stream, sending %s to subscribe with previous filters" % self._latest_curves_subscribe_message)
-                #self._messages.put((MessageType.INFO, "Successfully reconnected to the server, setting previous filters.."))
-                self._ws.send(json.dumps(self._latest_curves_subscribe_message))
+        if self._latest_filters is not None:
+            self._messages.put((MessageType.INFO, "Successfully reconnected to the server, setting previous filters.."))
+            try:
+                self._ws.send(json.dumps(self._latest_filters))
+            except Exception as e:
+                self._messages.put((MessageType.ERROR, f"Failed to set previous filters after reconnecting, cause: {e}"))
 
     # def _on_message(self, _ws, message):
     #     print(f"msg: {message}")
@@ -308,133 +286,32 @@ class CurveUpdateEventAPI:
     #     finally:
     #         self._messages.put((msg_type, data))
 
-    # def _on_message(self, _ws, message):
-    #     print(f"msg: {message}")
-    #     try:
-    #         msg = json.loads(message)
-    #         msg_type = msg["type"]
-    #         if not MessageType.is_valid_tag(msg_type):
-    #             if msg_type.lower() == "message":
-    #                 msg_type = MessageType.INFO
-    #             else:
-    #                 raise ValueError(f"Failed to parse MessageType from {msg_type}")
-    #         else:
-    #             msg_type = MessageType.by_tag(msg_type)
-    #         # TODO wip start
-    #         # if response is type subscribe
-    #         # parse subscribe response
-    #         # 
-    #         # TODO wip end
-    #         if MessageType == MessageType.ERROR:
-    #             if msg["code"] == "json failed ..":
-    #                 pass # SubscribeResponse
-    #             elif msg["code"] == "too many filters ..":
-    #                 pass # SubscribeResponse
-    #             elif msg["code"] == "bad last_id ..":
-    #                 pass # SubscribeResponse
-    #             else:
-    #                 pass # Unknown?
-    #         elif msg_type == MessageType.FILTERS:
-    #             request_id = msg.get("request_id")
-
-    #             last_id = msg.get("last_id")
-    #             filters = parse_filters(msg)
-    #             response = SubscribeResponse(True, filters, last_id=last_id)
-
-    #     except Exception as e:
-    #         f"Failed to parse message: {message} from stream, cause: {e}"
-    #     # TODO
-    #     if subscribe or sub errror:
-    #         callback = self._callbacks[msg["request_id"]]
-    #         if callback:
-    #             if callback.latest and not msg_error:
-    #                 # set events active
-    #                 pass
-    #             callback.callback(to_response(msg))
-    #     # TODO
-
-    # def _on_message(self, _ws, message):
-    #     log.debug("")
-    #     log.debug(message)
-    #     log.debug("")
-    #     with self._messages_lock:
-    #         try:
-    #             msg = json.loads(message)
-    #         except Exception as e:
-    #             self._messages.put((MessageType.ERROR, f"Failed to parse message: {message}, exception: {e}"))
-    #             return
-    #         if msg["type"].lower() == "curves.subscribe":
-    #             self._handle_message_subscribe_curves(msg)
-    #             return
-    #         if not MessageType.is_valid_tag(msg["type"]):
-    #             self._messages.put((MessageType.ERROR, f"Unknown message type: {msg.get('type')}"))
-    #             return
-    #         msg_type = MessageType.by_tag(msg["type"])
-    #         if msg_type == MessageType.CURVE_EVENT:
-    #             if self._is_subscribed_curves.is_set():
-    #                 obj = parse_event(msg)
-    #                 self._update_last_id(obj.event_id)
-    #                 self._last_id_to_file(obj.event_id)
-    #         elif msg_type == MessageType.MESSAGE:
-    #             obj = msg["message"]
-    #         elif msg_type == MessageType.ERROR:
-    #             # TODO Can this ever happen?
-    #             obj = msg
-    #         else:
-    #             self._messages.put((MessageType.ERROR, f"Missing handler for MessageType {msg_type}"))
-    #             return
-    #         self._messages.put((msg_type, obj))
-
     def _on_message(self, _ws, message):
-        log.debug("")
-        log.debug(message)
-        log.debug("")
-        with self._messages_lock:
-            try:
-                json = json.loads(message)
-            except Exception as e:
-                self._messages.put((MessageType.ERROR, f"Failed to parse message: {message}, exception: {e}"))
-                return
-            server_msg = 
-            if json["type"].lower() == "curves.subscribe":
-                self._handle_message_subscribe_curves(json)
-                return
-            if not MessageType.is_valid_tag(json["type"]):
-                self._messages.put((MessageType.ERROR, f"Unknown message type: {json.get('type')}"))
-                return
-            msg_type = MessageType.by_tag(json["type"])
-            if msg_type == MessageType.CURVE_EVENT:
-                if self._is_subscribed_curves.is_set():
-                    obj = parse_event(json)
-                    self._update_last_id(obj.event_id)
-                    self._last_id_to_file(obj.event_id)
-            elif msg_type == MessageType.MESSAGE:
-                obj = json["message"]
-            elif msg_type == MessageType.ERROR:
-                # TODO Can this ever happen?
-                obj = json
-            else:
-                self._messages.put((MessageType.ERROR, f"Missing handler for MessageType {msg_type}"))
-                return
-            self._messages.put((msg_type, obj))
-
-    def _handle_message_subscribe_curves(self, msg):
-        # Parse uuid from request_id
-        request_id = msg["request_id"]
+        print(f"msg: {message}")
         try:
-            request_id = uuid.UUID(request_id, version=4)
-        except ValueError as e:
-            self._messages.put((MessageType.ERROR, f"Failed to parse uuid from message: {msg}, error: {e}"))
-            return
-        # TODO do we want to pop? Would be nice to keep latest in case of a disconnect (to 
-        # automatically reconnect with previous filters)
-        callback = self._callbacks.pop(request_id, None)
-        #callback = self._callbacks.get(request_id) TODO
-        if callback is not None:
-            subscribe_response = parse_subscribe_response(msg)
-            callback.callback(subscribe_response)
-            if callback.latest and subscribe_response.subscribe_ok:
-                self._is_subscribed_curves.set()
+            msg = json.loads(message)
+            msg_type = msg["type"]
+            if not MessageType.is_valid_tag(msg_type):
+                if msg_type.lower() == "message":
+                    msg_type = MessageType.INFO
+                else:
+                    raise ValueError(f"Failed to parse MessageType from {msg_type}")
+            else:
+                msg_type
+        except Exception as e:
+            f"Failed to parse message: {message} from stream, cause: {e}"
+
+    def _parse_info_message(self, json):
+        pass
+
+    def _parse_event_message(self, json):
+        pass
+
+    def _parse_filters_message(self, json):
+        pass
+
+    def _parse_error_message(self, error):
+        pass
 
     def _on_close(self, _ws, status_code, msg):
         # last_connection_event should only be set once for each time connecting
@@ -447,8 +324,7 @@ class CurveUpdateEventAPI:
             self._last_connection_event = ConnectionEvent(status_code=status_code, message=msg)
         if self._is_connected.is_set():
             self._is_connected.clear()
-            with self._last_id_file_lock:
-                self._last_id_to_file(write_interval_s=0)
+            self._last_id_to_file(write_interval_s=0)
 
 
     def _on_error(self, _ws, error):
@@ -490,88 +366,42 @@ class CurveUpdateEventAPI:
                     message=str(error),
                 )
 
-    @property
-    def last_id(self):
-        return self._last_id
+    def _stream_url(self, include_last_id=True):
+        if not include_last_id or self._last_id is None:
+            return self._ws_url
+        return f"{self._ws_url}/?last-id={self._last_id}"
 
-    def connect(self, last_id_file=None, timeout=10, reconnect_attempts=5):
+    def connect(self, last_id=None, timeout=10, max_retries=5):
         """
         Connect to the curve update events stream.
 
-        To keep track of the last event received between sesssions, supply the
-        ``last_id_file`` parameter with a file path. The file will be created
-        for you if it does not already exist. This is useful in the case of
-        a disconnect or an unexpected termination.
-
-        Optionally supply the ``timeout`` parameter with an integer to change the
-        default number of seconds to wait for a connection to be established before
-        failing.
-
-        The client tries to automatically reconnect if the connections drops. The
-        number of reconnect attempts can be changed with the ``reconnect_attempts``
-        parameter.
-
-        >>> from energyquantified import EnergyQuantified
-        >>> eq = EnergyQuantified(
-        >>>     api_key="aaaa-bbbb-cccc-dddd
-        >>> )
-        >>> eq.events.connect(last_id_file="last_id_file.json")
-    
-        The file can also be created inside a folder (which will be created for you if
-        it does not already exist):
-    
-        >>> from energyquantified import EnergyQuantified
-        >>> eq = EnergyQuantified(
-        >>>     api_key="aaaa-bbbb-cccc-dddd
-        >>> )
-        >>> eq.events.connect(last_id_file="folder_name/last_id_file.json")
-
-        :param last_id_file: A file path to a file that keeps track of the last\
-                       event id received from the curve events stream
-        :type last_id_file: str, optional
-        # TODO last_id moved to subscribe_curves_..(..)
         :param last_id: ID of the latest event received. Used for excluding older events.\
                 Takes priority over the id from a potential last_id file.
         :type last_id: str, optional
         :param timeout: The time in seconds to wait for a connection to be established.\
                 Also used as the minimum wait-time inbetween reconnect attempts. Defaults to 5.
         :type timeout: int, optional
-        :param reconnect_attempts: The number of reconnect attempts after each disconnect.\
-                The counter is reset whenever a connection is established. Defaults to 5.
-        :type reconnect_attempts: int, optional
+        :param max_retries: The number of reconnect attempts after each disconnect. The counter\
+                is reset whenever a connection is established. Defaults to 5.
+        :type max_retries: int, optional
         :return: The obj instance this method was invoked upon, so the APi can be used fluently
         :rtype: :py:class:`energyquantified.events.CurveUpdateEventAPI`
         """
-        assert self._should_not_connect.is_set(), (
-            "'connect()' invoked while already connected. "
-            "Please close the existing connection first by calling 'close()'"
-        )
-        # Last id file
-        with self._last_id_file_lock:
-            # Unregister if previously registered for atexit
-            atexit.unregister(self._last_id_file_atexit)
-            self._last_id_file_path = last_id_file
-            if last_id_file is not None:
-                # Find last_id from file or create file if not exists
-                self._setup_last_id_file()
-
-                def save_id():
-                    self._last_id_to_file(write_interval_s=0)
-
-                # Store the method in a variable so it can be unregistered later
-                self._last_id_file_atexit = save_id
-                atexit.register(self._last_id_file_atexit)
-        self._max_reconnect_attempts = reconnect_attempts
+        self._max_reconnect_attempts = max_retries
         # Reset flags
         self._should_not_connect.clear()
         self._done_trying_to_connect.clear()
         self._last_connection_event = None
+        #self._connection_closed_by_user.clear()
+        # Overwrite potential last_id from file
+        if last_id is not None:
+            self._last_id = last_id
         # Close if already set
         if self._ws is not None:
             self._ws.close()
         websocket.setdefaulttimeout(timeout)
         self._ws = websocket.WebSocketApp(
-            self._ws_url,
+            self._stream_url(),
             header={
                 "X-API-KEY": self._api_key
             },  
@@ -598,8 +428,8 @@ class CurveUpdateEventAPI:
                         self._done_trying_to_connect.set()
                         return
                     elif self._remaining_reconnect_attempts == self._max_reconnect_attempts:
-                        # TODO what? x1 (first dc after connect)
-                        pass
+                        # Update stream url if this is the first dc after connection
+                        self._ws.url = self._stream_url()
                 # Wait delta longer than the default ws timeout,
                 # plus a random amount of time to spread traffic
                 time.sleep(timeout + 0.5 + random.uniform(1,5))
@@ -621,137 +451,8 @@ class CurveUpdateEventAPI:
             self._ws.close()
 
     def disconnect(self):
-        """
-        Close the stream connection (if open) and disables automatic reconnect.
-        """
+        # TODO opposite of connect (check vars etc)
         self.close()
-
-    def on_curves_subscribed(response):
-        """
-        Default callback for how to handle a subscribe response.
-
-        :param response: The response for the subscribe message
-        :type response: SubscribeResponse
-        """
-        if response.ok:
-            filters = response.obj.filters
-            last_id = response.obj.last_id
-            log.info("Subscribe OK - from id %s with filters %s" % (last_id, filters))
-        else:
-            errors = response.errors
-            log.error("Failed to subscribe - %s" % errors)
-
-    def subscribe_curve_events(self, filters, last_id=None, callback=on_curves_subscribed):
-        """
-        Send a filter or a list of filters to the stream, subscribing to
-        curve events matching any of the filters.
-        
-        The server responds with the new filters if the subscribe was successful,
-        and the response is added to the message queue that can be accessed through
-        :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
-        The message will have the ``MessageType.FILTERS`` type. The response also
-        includes a unique id that can be preset by supplying the ``request_id``
-        parameter with an id in the call to subscribe. The id must be a ``uuid``
-        object in version 4 format, created as shown in the code snippet below:
-
-        # TODO update doc (remove uuid)
-            >>> import uuid
-            >>> subscribe_id = uuid.uuid4()
-
-        Subscribe with the preset request id:
-
-            >>> import uuid
-            >>> subscribe_id = uuid.uuid4()
-            >>> filters = ...
-            >>> subscribe(filters, request_id=subscribe_id)
-
-        Find out when you are successfully subscribed with the provided filters
-        by comparing your id with with the id's of new messages:
-
-            >>> import uuid
-            >>> from energyquantfied.events import MessageType
-            >>> subscribe_id = uuid.uuid4()
-            >>> filters = ...
-            >>> subscribe(filters, request_id=subscribe_id)
-            >>> # Compare ID while reading from the stream
-            >>> for msg_type, msg in eq.events.get_next():
-            >>>     if msg_type == MessageType.FILTERS:
-            >>>         if msg.request_id == subscribe_id:
-            >>>             # ID match so we know the filters are set
-
-        # TODO last_id=None, options: "keep"
-
-        :param filters: The filters. Can be a single filter or a list of filters.
-        :type filters: list[:py:class:`energyquantified.events.EventFilterOptions` | \
-            :py:class:`energyquantified.events.EventCurveOptions`]
-        :param request_id: Preset id for the response
-        :type request_id: ``uuid.UUID`` (v4), optional
-        # TODO params
-        :param fill_last_id: If last_id is not set in the filters, this can be set to\
-            True in order to use subscribe to events after the last_id saved in memory.\
-            Does nothing if last_id is set in the filters. Defaults to False.
-        :type fill_last_id: bool
-        """
-        # Validate filters
-        if not isinstance(filters, list):
-            filters = [filters]
-        assert len(filters) > 0, "Must have minimum 1 filter when subscribing to curves"
-        # for curve_filter in filters:
-        #     assert isinstance(curve_filter, (EventCurveOptions, EventFilterOptions)), (
-        #         f"Invalid filter type, expected EventCurveOptions or EventFilterOptions "
-        #         f"but found {type(curve_filter)}"
-        #     )
-        #     is_valid, errors = curve_filter.validate()
-        #     assert is_valid, (
-        #         f"Failed validation for filter {curve_filter}, "
-        #         f"errors: {errors}"
-        #     )
-        # Validate last_id
-        if last_id is not None:
-            assert isinstance(last_id, str), "param 'last_id' must be None or a str"
-            # Use id from memeory if 'keep'
-            if last_id.lower() == "keep":
-                last_id = self._last_id
-            else:
-                assert re.fullmatch("\d{13}-{1}\d+", last_id), f"Invalid last_id format, last_id: {last_id}"
-        # Create message
-        subscribe_message = {
-            "action": "curves.subscribe",
-            "filters": list(curve_filter.to_dict() for curve_filter in filters),
-        }
-        # Include last_id only if not None
-        if last_id is not None:
-            subscribe_message["last_id"] = last_id
-        # Stop receiving events until subscribed with new filters
-        self._is_subscribed_curves.clear()
-        with self._messages_lock:
-            # Clear existing curve events from message queue
-            messages = []
-            try:
-                for msg in self._messages.get(block=False):
-                    if not msg[0] == MessageType.CURVE_EVENT:
-                        messages.append(msg)
-                    self._messages.task_done()
-            except queue.Empty:
-                for msg in messages:
-                    self._messages.put(msg)
-            # Make sure none of the existing callbacks are marked as latest
-            for _, obj in self._callbacks.items():
-                if obj.callback_type == SUBSCRIBE_CURVES:
-                    obj.latest = False
-            # Request id
-            request_uuid = uuid.uuid4()
-            subscribe_message["id"] = str(request_uuid)
-            # Callback
-            callback = Callback(callback, callback_type=SUBSCRIBE_CURVES, latest=True)
-            self._callbacks[request_uuid] = callback
-        # Send msg
-        self._latest_curves_subscribe_message = subscribe_message
-        self._update_last_id(last_id, force_update=True)
-        self._last_id_to_file(write_interval_s=0)
-        msg = json.dumps(subscribe_message)
-        log.debug(f"Sending messsage to subscribe curves:\n{msg}")
-        self._ws.send(msg)
 
     def get_next(self, timeout=None):
         """
@@ -842,7 +543,6 @@ class CurveUpdateEventAPI:
         :rtype: tuple
         """
         while True:
-            # Make sure 
             if not self._is_connected.is_set():
                 try:
                     # Block=False since not connected
@@ -869,6 +569,87 @@ class CurveUpdateEventAPI:
                     if not self._is_connected.is_set():
                         continue
                     yield (MessageType.TIMEOUT, None)
+
+    def subscribe(self, filters, fill_last_id=False):
+        """
+        Send a filter or a list of filters to the stream, subscribing to
+        curve events matching any of the filters.
+        
+        The server responds with the new filters if the subscribe was successful,
+        and the response is added to the message queue that can be accessed through
+        :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
+        The message will have the ``MessageType.FILTERS`` type. The response also
+        includes a unique id that can be preset by supplying the ``request_id``
+        parameter with an id in the call to subscribe. The id must be a ``uuid``
+        object in version 4 format, created as shown in the code snippet below:
+
+        # TODO update doc (remove uuid)
+            >>> import uuid
+            >>> subscribe_id = uuid.uuid4()
+
+        Subscribe with the preset request id:
+
+            >>> import uuid
+            >>> subscribe_id = uuid.uuid4()
+            >>> filters = ...
+            >>> subscribe(filters, request_id=subscribe_id)
+
+        Find out when you are successfully subscribed with the provided filters
+        by comparing your id with with the id's of new messages:
+
+            >>> import uuid
+            >>> from energyquantfied.events import MessageType
+            >>> subscribe_id = uuid.uuid4()
+            >>> filters = ...
+            >>> subscribe(filters, request_id=subscribe_id)
+            >>> # Compare ID while reading from the stream
+            >>> for msg_type, msg in eq.events.get_next():
+            >>>     if msg_type == MessageType.FILTERS:
+            >>>         if msg.request_id == subscribe_id:
+            >>>             # ID match so we know the filters are set
+
+        :param filters: The filters. Can be a single filter or a list of filters.
+        :type filters: list[:py:class:`energyquantified.events.EventFilterOptions` | \
+            :py:class:`energyquantified.events.EventCurveOptions`]
+        :param request_id: Preset id for the response
+        :type request_id: ``uuid.UUID`` (v4), optional
+        :param fill_last_id: If last_id is not set in the filters, this can be set to\
+            True in order to use subscribe to events after the last_id saved in memory.\
+            Does nothing if last_id is set in the filters. Defaults to False.
+        :type fill_last_id: bool
+        """
+        # Validate filters
+        assert isinstance(filters, EventFilters)
+        is_valid, errors = filters.validate()
+        assert is_valid, f"Invalid filters: {filters} for reasons: {errors}"
+        # Create message
+        subscribe_message = {"action": "filter.set"}
+        # TODO request_id from filters OR from params?
+        # # Add request id if set
+        # if filters.has_request_id():
+        #     subscribe_message["id"] = str(request_id)
+        # TODO ^request_id from filters OR from params?
+        # Add or fill last_id
+        if filters.has_last_id():
+            subscribe_message["last_id"] = filters.last_id
+        elif fill_last_id:
+            if self._last_id is not None:
+                subscribe_message["last_id"] = self._last_id 
+        # Add options for filtering events
+        if filters.has_options():
+            # TODO must this default to something? or allowed to not send filters?
+            event_options = list(options.to_dict() for options in filters.options)
+            subscribe_message["filters"] = event_options
+        # Update latest filters before setting id # TODO do this in response instead?
+        self._filters_is_active.clear()
+        # TODO remove user uuid
+        # # Validate and set request id
+        # if request_id is not None:
+        #     # Assert that request id is an uuid and correct version
+        #     _assert_uuid4(request_id)
+        #     subscribe_message["id"] = str(request_id)
+        subscribe_message = json.dumps(subscribe_message)
+        self._ws.send(subscribe_message)
 
     def send_get_filters(self, request_id=None):
         """

@@ -159,10 +159,16 @@ class _BaseEventOptions:
     begin, end, and event_types.
     """
 
-    def __init__(self):
+    def __init__(self, begin=None, end=None, event_types=None):
         self._begin = None
         self._end = None
         self._event_types = None
+        if begin:
+            self.set_begin(begin)
+        if end:
+            self.set_end(end)
+        if event_types:
+            self.set_event_types(event_types)
 
     def has_begin(self):
         return self._begin is not None
@@ -294,9 +300,18 @@ class EventCurveOptions(_BaseEventOptions):
     this option provides filtering on exact curve_names(s).
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+            self,
+            begin=None,
+            end=None,
+            event_types=None,
+            curve_names=None,
+        ):
+
+        super().__init__(begin=begin, end=end, event_types=event_types)
         self._curve_names = None
+        if curve_names:
+            self.set_curve_names(curve_names)
 
     def __str__(self):
         """
@@ -398,14 +413,37 @@ class EventFilterOptions(_BaseEventOptions):
     this option provides filtering on curves attributes.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+            self,
+            begin=None,
+            end=None,
+            event_types=None,
+            q=None,
+            areas=None,
+            data_types=None,
+            commodities=None,
+            categories=None,
+            exact_categories=None,
+        ):
+        super().__init__(begin=begin, end=end, event_types=event_types)
         self._q = None
         self._areas = None
         self._data_types = None
         self._commodities = None
         self._categories = None
         self._exact_categories = None
+        if q:
+            self.set_q(q)
+        if areas:
+            self.set_areas(areas)
+        if data_types:
+            self.set_data_types(data_types)
+        if commodities:
+            self.set_commodities(commodities)
+        if categories:
+            self.set_categories(categories)
+        if exact_categories:
+            self.set_exact_categories(exact_categories)
 
     def __str__(self):
         """
