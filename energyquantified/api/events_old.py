@@ -10,7 +10,7 @@ from energyquantified.events import (
     EventCurveOptions,
     EventFilterOptions,
     ConnectionEvent,
-    EventFilters,
+    CurveEventFilters,
 )
 from energyquantified.events.connection_event import TIMEOUT, UNKNOWN_ERROR
 import random
@@ -619,7 +619,7 @@ class CurveUpdateEventAPI:
         :type fill_last_id: bool
         """
         # Validate filters
-        assert isinstance(filters, EventFilters)
+        assert isinstance(filters, CurveEventFilters)
         is_valid, errors = filters.validate()
         assert is_valid, f"Invalid filters: {filters} for reasons: {errors}"
         # Create message
@@ -636,9 +636,9 @@ class CurveUpdateEventAPI:
             if self._last_id is not None:
                 subscribe_message["last_id"] = self._last_id 
         # Add options for filtering events
-        if filters.has_options():
+        if filters.has_filters():
             # TODO must this default to something? or allowed to not send filters?
-            event_options = list(options.to_dict() for options in filters.options)
+            event_options = list(options.to_dict() for options in filters.filters)
             subscribe_message["filters"] = event_options
         # Update latest filters before setting id # TODO do this in response instead?
         self._filters_is_active.clear()

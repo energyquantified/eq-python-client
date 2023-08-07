@@ -7,16 +7,13 @@ from energyquantified.metadata.curve import Curve, DataType
 from energyquantified.metadata.area import Area
 from . import EventType
 
-class EventFilters:
+class CurveEventFilters:
     """
     Class for holding multiple filters and an event id.
     """
     def __init__(self):
-        self.request_id = None # TODO do we want this here?
-        # TODO ^imo yes for when parsing filters from server, but not when
-        #   subscribing
         self.last_id = None
-        self.options = []
+        self.filters = []
 
     def __str__(self):
         """
@@ -26,24 +23,18 @@ class EventFilters:
         :rtype: str
         """
         str_list = []
-        if self.has_request_id():
-            str_list.append(f"request_id={self.request_id}")
         if self.has_last_id():
             str_list.append(f"last_id={self.last_id}")
-        if self.has_options():
-            str_list.append(f"options={self.options}")
+        if self.has_filters():
+            str_list.append(f"filters={self.filters}")
         return (
-            f"<EventFilters: "
+            f"<CurveEventFilters: "
             f"{', '.join(str_list)}"
             f">"
         )
 
     def __repr__(self):
         return self.__str__()
-    
-
-    def has_request_id(self): # TODO
-        return self.request_id is not None
 
     def set_request_id(self, request_id): # TODO
         """
@@ -53,7 +44,7 @@ class EventFilters:
         :type request_id: uuid v4 | str (in valid uuid v4 format)
         :raises AssertionError: Invalid request_id type
         :raises AssertionError: Invalid request_id format
-        :return: EventFilters
+        :return: CurveEventFilters
         :rtype: The instance this method was invoked upon
         """
         if request_id is None:
@@ -82,36 +73,36 @@ class EventFilters:
 
         :param last_id: The id
         :type last_id: str
-        :return: EventFilters
+        :return: CurveEventFilters
         :rtype: The instance this method was invoked upon
         """
         assert last_id is None or isinstance(last_id, str), "last_id must be type str (or None)"
         self.last_id = last_id
         return self
 
-    def has_options(self):
-        if not isinstance(self.options, list):
+    def has_filters(self):
+        if not isinstance(self.filters, list):
             return False
-        return len(self.options) > 0
+        return len(self.filters) > 0
 
-    def set_options(self, options):
+    def set_filters(self, filters):
         """
-        Set the options in this filter. Can be a single option
-        or a list of options.
+        Set the filters in this filter. Can be a single filter
+        or a list of filters.
 
-        :param options: The option(s)
-        :type options: list[EventCurveOptions | EventFilterOptions]
-        :return: EventFilters
+        :param filters: The filter(s)
+        :type filters: list[EventCurveOptions | EventFilterOptions]
+        :return: CurveEventFilters
         :rtype: The instance this method was invoked upon
         """
-        if not isinstance(options, list):
-            options = [options]
+        if not isinstance(filters, list):
+            filters = [filters]
         assert all(
-            isinstance(option, (EventCurveOptions, EventFilterOptions))
-            for option in options), (
-            "All objects in 'options' must be type EventCurveOptions or EventFilterOptions"
+            isinstance(filter, (EventCurveOptions, EventFilterOptions))
+            for filter in filters), (
+            "All objects in 'filters' must be type EventCurveOptions or EventFilterOptions"
             )
-        self.options = options
+        self.filters = filters
         return self
 
     def validate(self):
@@ -123,33 +114,24 @@ class EventFilters:
         :rtype: tuple[bool, list[str]]
         """
         errors = []
-        # Request id
-        if self.has_request_id():
-            if not isinstance(self.request_id, uuid):
-                errors.append("'request_id' must be type uuid (or None)")
-            elif not self.request_id.version == 4:
-                errors.append(
-                    f"'request_id' is required to be in format uuid v4 "
-                    f"but is in uuid v{self.request_id.version}"
-                )
         # Last (event) id
         if self.has_last_id():
             if not isinstance(self.last_id, str):
                 errors.append("'last_id' must be type str (or None)")
-        # Check all options
-        for option in self.options:
+        # Check all filters
+        for filter in self.filters:
             # Check type
-            if not isinstance(option, (EventCurveOptions, EventFilterOptions)):
+            if not isinstance(filter, (EventCurveOptions, EventFilterOptions)):
                 errors.append(
-                    f"objects in 'options' must be type EventCurveOptions "
-                    f"or EventFitlerOptions, found: {option} with type {type(option)}"
+                    f"objects in 'filters' must be type EventCurveOptions "
+                    f"or EventFitlerOptions, found: {filter} with type {type(filter)}"
                 )
-            else: # Validate each option
-                option_is_valid, option_errors = option.validate()
-                if not option_is_valid:
+            else: # Validate each filter
+                filter_is_valid, filter_errors = filter.validate()
+                if not filter_is_valid:
                     errors.append(
-                        f"Options contains an invalid option: {option}. "
-                        f"Invalid for the following reasons: {option_errors}"
+                        f"Filters contains an invalid filter: {filter}. "
+                        f"Invalid for the following reasons: {filter_errors}"
                     )
         return len(errors) == 0, errors
 

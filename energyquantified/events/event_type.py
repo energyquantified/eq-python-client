@@ -1,6 +1,7 @@
 from enum import Enum
 
 _event_lookup = {}
+
 class EventType(Enum):
     """
     A field in a CurveUpdateEvent object, also used for filtering
@@ -11,9 +12,9 @@ class EventType(Enum):
      * ``TRUNCATE`` – All data for a curve is deleted
     """
 
-    CURVE_UPDATE = ("UPDATE", "Update")
-    CURVE_DELETE = ("DELETE", "Delete")
-    CURVE_TRUNCATE = ("TRUNCATE", "Truncate")
+    CURVE_UPDATE = ("CURVE_UPDATE", "Curve Update")
+    CURVE_DELETE = ("CURVE_DELETE", "Curve Delete")
+    CURVE_TRUNCATE = ("CURVE_TRUNCATE", "Curve Truncate")
 
     def __init__(self, tag=None, label=None):
         self.tag = tag
@@ -36,7 +37,7 @@ class EventType(Enum):
         :return: True if the EventType tag exists, otherwise False
         :rtype: bool
         """
-        return tag.lower() in _event_lookup
+        return isinstance(tag, str) and tag.lower() in _event_lookup
 
     @staticmethod
     def by_tag(tag):

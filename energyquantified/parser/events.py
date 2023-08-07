@@ -1,11 +1,15 @@
-from energyquantified.events import EventType, CurveUpdateEvent, EventCurveOptions, EventFilterOptions, EventFilters, SubscribeResponse
+from energyquantified.events import EventType, CurveUpdateEvent, EventCurveOptions, EventFilterOptions, CurveEventFilters, SubscribeResponse
 from energyquantified.time import to_timezone
 from .metadata import parse_curve, parse_instance
 from dateutil.parser import isoparse
 import json
 
+def parse_filters(json):
+    pass
+
 def parse_server_message(msg):
     # Load json
+    pass
     
 
 
@@ -78,12 +82,12 @@ def parse_subscribe_response(json):
     return response
 
 def parse_filters(json):
-    event_filters = EventFilters()
+    event_filters = CurveEventFilters()
     last_id = json.get("last_id")
     if last_id is not None:
         event_filters.set_last_id(last_id)
     options = [parse_event_options(option) for option in json["filters"]]
-    event_filters.set_options(options)
+    event_filters.set_filters(options)
     return event_filters
 
 def parse_event_options(json):

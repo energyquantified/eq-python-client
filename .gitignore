@@ -14,9 +14,12 @@ __pycache__
 # Sphinx
 _build
 
-# Last id for streams
+# Config file for push feed
 *last_id.json
 
 # PyCharm
 .idea/
+
+# Debug files
+debug.py
 

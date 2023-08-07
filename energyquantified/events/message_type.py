@@ -50,7 +50,7 @@ class MessageType(Enum):
         :return: True if the MessageType tag exists, otherwise False
         :rtype: bool
         """
-        return tag.lower() in _message_lookup
+        return isinstance(tag, str) and tag.lower() in _message_lookup
 
     @staticmethod
     def by_tag(tag):
