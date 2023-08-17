@@ -269,7 +269,7 @@ class CurveUpdateEventAPI:
                 data = json.load(f)
             except Exception as e:
                 data = {}
-            data["last_curve_event_id"] = last_id
+            data["last_id"] = last_id
             # Write from start of file
             f.seek(0,0)
             #f.truncate()
@@ -1154,7 +1154,7 @@ class CurveUpdateEventAPI:
                         current_timestamp = int(time.time())
                         if current_timestamp - last_timeout_timestamp > timeout:
                             yield TimeoutEvent()
-                    time.sleep(1)
+                    time.sleep(0.1)
 
     def on_curves_filters(response):
         if response.ok:

@@ -109,6 +109,11 @@ class EnergyQuantified:
         # Attributes
         self._api_key = _find_api_key(api_key, api_key_file)
         self._api_url = api_url
+        # Create websocket url (http -> ws, https -> wss)
+        events_ws_url = "".join([
+          self._api_url.replace('http', 'ws', 1),
+          "/events/"
+        ])
         # HTTP client
         self._session = Session(
             timeout=timeout,
@@ -144,14 +149,6 @@ class EnergyQuantified:
         self.srmc = SrmcAPI(self)
         #: See :py:class:`energyquantified.api.CurveUpdateEventAPI`. For
         #: using the curve events stream.
-        # Create ws url (http -> ws, https -> wss)
-        # TODO improve conversion to ws url?
-        #events_ws_url = "".join([
-        #   self._api_url.replace('http', 'ws').replace('api', 'events').rstrip('/'),
-        #   "/",
-        #])
-        events_ws_url = "wss://backend.energyquantified.com/api/events/"
-        #events_ws_url = "ws://backend.energyquantified.com/api/events/"
         self.events = CurveUpdateEventAPI(events_ws_url, self._api_key)
 
     def is_api_key_valid(self):
