@@ -269,20 +269,16 @@ class CurveUpdateEventAPI:
                 data = json.load(f)
             except Exception as e:
                 data = {}
-            current_last_id = data.get("last_id")
-            # Only overwrite if new last_id is greater
-            if not current_last_id or current_last_id <= last_id:
-                data["last_id"] = last_id
-                # Write from start of file
-                f.seek(0,0)
-                #f.truncate()
-                json.dump(data, f)
-                # Truncate in case the new data is shorter
-                f.truncate()
+            data["last_curve_event_id"] = last_id
+            # Write from start of file
+            f.seek(0,0)
+            #f.truncate()
+            json.dump(data, f)
+            # Truncate in case the new data is shorter
+            f.truncate()
         self._last_id_timestamp = time.time()
 
     def _on_open(self, _ws):
-        print("ON OPEN")
         self._last_connection_event = None
         # Reset reconnect counter on successfull connection
         with self._remaining_reconnect_attempts_lock:
