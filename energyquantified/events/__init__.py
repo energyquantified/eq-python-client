@@ -4,7 +4,7 @@ from .connection_event import ConnectionEvent
 from .event_options import EventFilterOptions, EventCurveOptions, CurveEventFilters
 from .events import CurveUpdateEvent
 from .message_type import MessageType
-from .subscribe_response import SubscribeResponse
+from .responses import CurvesSubscribeResponse, CurvesFiltersResponse
 
 __all__ = [
     # Types
@@ -17,4 +17,7 @@ __all__ = [
     # Events
     "CurveUpdateEvent",
     "ConnectionEvent",
+    # Responses
+    "CurvesSubscribeResponse",
+    "CurveFiltersRespponse",
 ]

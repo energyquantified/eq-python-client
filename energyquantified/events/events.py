@@ -1,8 +1,30 @@
 from energyquantified.metadata import CurveType
 from . import EventType
 
+class _Event:
+    def __init__(self, event_type):
+        self._set_event_type(event_type)
 
-class CurveUpdateEvent:
+    @property
+    def is_curve_event(self):
+        return self.event_type.is_curve_type
+
+    @property
+    def is_connection_event(self):
+        return self.event_type.is_connection_type
+
+    def _set_event_type(self, event_type):
+        raise NotImplementedError    
+    
+class TimeoutEvent(_Event):
+    def __init__(self):
+        super().__init__(event_type=EventType.TIMEOUT)
+
+    def _set_event_type(self, event_type):
+        assert event_type.is_timeout_type, f"Cannot create TimeoutEvent with EventType={event_type}"
+        self.event_type = event_type
+
+class CurveUpdateEvent(_Event):
     def __init__(
         self,
         event_id,
@@ -13,13 +35,19 @@ class CurveUpdateEvent:
         instance = None,
         num_values = None,
     ):
+        super().__init__(event_type=event_type)
         self.event_id = event_id
         self.curve = curve
-        self.event_type = event_type
         self.begin = begin
         self.end = end
         self.instance = instance
         self.num_values = num_values
+
+    def _set_event_type(self, event_type):
+        assert event_type.is_curve_type, (
+            f"Cannot create CurveUpdateEvent with EventType={event_type}"
+        )
+        self.event_type = event_type
     
     def __str__(self):
         begin_str = self.begin.isoformat(sep=" ") if self.begin is not None else None
@@ -54,7 +82,7 @@ class CurveUpdateEvent:
         :raises APIError: If there were any network- or server-related \
             issues while loading the data
         """
-        if self.event_type in [EventType.TRUNCATE, EventType.DELETE]:
+        if self.event_type in [EventType.CURVE_TRUNCATE, EventType.CURVE_DELETE]:
             return None
         # Timeseries and scenarios
         if self.curve.curve_type in [CurveType.TIMESERIES, CurveType.SCENARIO_TIMESERIES]:

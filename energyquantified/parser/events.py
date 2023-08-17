@@ -1,4 +1,4 @@
-from energyquantified.events import EventType, CurveUpdateEvent, EventCurveOptions, EventFilterOptions, CurveEventFilters, SubscribeResponse
+from energyquantified.events import EventType, CurveUpdateEvent, EventCurveOptions, EventFilterOptions, CurveEventFilters
 from energyquantified.time import to_timezone
 from .metadata import parse_curve, parse_instance
 from dateutil.parser import isoparse
@@ -42,9 +42,10 @@ def parse_server_message(msg):
 #             self._messages.put((msg_type, obj))
 
 
-def parse_event(json):
+def parse_curve_event(json):
     # Curve
     curve = parse_curve(json["curve"])
+    # Begin and end
     begin = json.get("begin")
     if begin is not None:
         begin = isoparse(begin)
@@ -60,26 +61,26 @@ def parse_event(json):
     return CurveUpdateEvent(
         json["id"],
         curve,
-        EventType.by_tag(json["event_type"]),
+        event_type=EventType.by_tag(json["event_type"]),
         begin=begin,
         end=end,
         instance=instance,
         num_values=json.get("values_changed"),
     )
 
-def parse_subscribe_response(json):
-    if json["status"].upper() == "OK":
-        response = SubscribeResponse(
-            True,
-            filters=parse_filters(json["obj"]["filters"]),
-            last_id=json["obj"]["last_id"],
-        )
-    else:
-        response = SubscribeResponse(
-            False,
-            errors=json["errors"],
-        )
-    return response
+# def parse_subscribe_response(json):
+#     if json["status"].upper() == "OK":
+#         response = SubscribeResponse(
+#             True,
+#             filters=parse_filters(json["obj"]["filters"]),
+#             last_id=json["obj"]["last_id"],
+#         )
+#     else:
+#         response = SubscribeResponse(
+#             False,
+#             errors=json["errors"],
+#         )
+#     return response
 
 def parse_filters(json):
     event_filters = CurveEventFilters()

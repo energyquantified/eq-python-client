@@ -12,13 +12,18 @@ class EventType(Enum):
      * ``TRUNCATE`` – All data for a curve is deleted
     """
 
-    CURVE_UPDATE = ("CURVE_UPDATE", "Curve Update")
-    CURVE_DELETE = ("CURVE_DELETE", "Curve Delete")
-    CURVE_TRUNCATE = ("CURVE_TRUNCATE", "Curve Truncate")
+    CURVE_UPDATE = ("CURVE_UPDATE", "Curve Update", True, False, False)
+    CURVE_DELETE = ("CURVE_DELETE", "Curve Delete", True, False, False)
+    CURVE_TRUNCATE = ("CURVE_TRUNCATE", "Curve Truncate", True, False, False)
+    DISCONNECTED = ("DISCONNECTED", "Disconnected", False, True, False)
+    TIMEOUT = ("TIMEOUT", "Timeout", False, False, True)
 
-    def __init__(self, tag=None, label=None):
+    def __init__(self, tag, label, is_curve_type, is_connection_type, is_timeout_type):
         self.tag = tag
         self.label = label
+        self._is_curve_type = is_curve_type
+        self._is_connection_type = is_connection_type
+        self._is_timeout_type = is_timeout_type
         _event_lookup[tag.lower()] = self
 
     def __str__(self):
@@ -26,7 +31,7 @@ class EventType(Enum):
 
     def __repr__(self):
         return self.__str__()
-
+    
     @staticmethod
     def is_valid_tag(tag):
         """
@@ -51,3 +56,15 @@ class EventType(Enum):
         :raises KeyError: if no EventType exists for this tag
         """
         return _event_lookup[tag.lower()]
+
+    @property
+    def is_curve_type(self):
+        return self._is_curve_type
+
+    @property
+    def is_connection_type(self):
+        return self._is_connection_type
+
+    @property
+    def is_timeout_type(self):
+        return self._is_timeout_type

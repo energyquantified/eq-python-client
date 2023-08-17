@@ -1,6 +1,7 @@
 SUBSCRIBE_CURVES = "subscribe_curves"
+GET_CURVE_FILTERS = "curve_filters"
 
-CALLBACK_TYPES = (SUBSCRIBE_CURVES)
+CALLBACK_TYPES = (SUBSCRIBE_CURVES, GET_CURVE_FILTERS)
 
 class Callback:
     def __init__(self, callback, callback_type, latest=True):

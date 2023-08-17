@@ -36,33 +36,33 @@ class CurveEventFilters:
     def __repr__(self):
         return self.__str__()
 
-    def set_request_id(self, request_id): # TODO
-        """
-        Set the request id in this filter.
+    # def set_request_id(self, request_id): # TODO
+    #     """
+    #     Set the request id in this filter.
 
-        :param request_id: The request id
-        :type request_id: uuid v4 | str (in valid uuid v4 format)
-        :raises AssertionError: Invalid request_id type
-        :raises AssertionError: Invalid request_id format
-        :return: CurveEventFilters
-        :rtype: The instance this method was invoked upon
-        """
-        if request_id is None:
-            self.request_id = None
-            return self
-        if isinstance(request_id, str):
-            try:
-                request_id = uuid.UUID(request_id, version=4)
-            except ValueError:
-                raise AssertionError(
-                    "str request_id cannot be parsed to uuid v4 due to invalid format"
-                    )
-            except Exception as _:
-                raise AssertionError("Failed to parse uuid from str request_id")
-        assert isinstance(request_id, uuid.UUID), "request_id must be type uuid"
-        assert request_id.version == 4, "request_id must be uuid v4"
-        self.request_id = request_id
-        return self
+    #     :param request_id: The request id
+    #     :type request_id: uuid v4 | str (in valid uuid v4 format)
+    #     :raises AssertionError: Invalid request_id type
+    #     :raises AssertionError: Invalid request_id format
+    #     :return: CurveEventFilters
+    #     :rtype: The instance this method was invoked upon
+    #     """
+    #     if request_id is None:
+    #         self.request_id = None
+    #         return self
+    #     if isinstance(request_id, str):
+    #         try:
+    #             request_id = uuid.UUID(request_id, version=4)
+    #         except ValueError:
+    #             raise AssertionError(
+    #                 "str request_id cannot be parsed to uuid v4 due to invalid format"
+    #                 )
+    #         except Exception as _:
+    #             raise AssertionError("Failed to parse uuid from str request_id")
+    #     assert isinstance(request_id, uuid.UUID), "request_id must be type uuid"
+    #     assert request_id.version == 4, "request_id must be uuid v4"
+    #     self.request_id = request_id
+    #     return self
 
     def has_last_id(self):
         return self.last_id is not None
@@ -230,6 +230,8 @@ class _BaseEventOptions:
                 event_type = EventType.by_tag(event_type)
             if not isinstance(event_type, EventType):
                 raise ValueError(f"'{event_type}' is not type 'EventType' or 'str'")
+            if not event_type.is_curve_type:
+                raise ValueError(f"EventType: {event_type} not valid for curve filters")
             new_event_types.add(event_type)
         self._event_types = list(new_event_types)
         return self

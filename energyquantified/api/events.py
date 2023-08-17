@@ -13,19 +13,34 @@ from energyquantified.events import (
     EventFilterOptions,
     ConnectionEvent,
     CurveEventFilters,
+    CurveUpdateEvent,
 )
-from energyquantified.events.server_message import (
-    StreamMessageType,
-    StreamMessageResponseCurvesSubscribe,
-    StreamMessageResponseCurvesFilters,
-    StreamMessageResponseError,
-    StreamMessageMessage,
-    StreamMessageCurveEvent,
+from energyquantified.events.events import TimeoutEvent
+from energyquantified.events.responses import CurvesSubscribeResponse, CurvesFiltersResponse
+#from energyquantified.events.messages.requests import RequestCurvesSubscribe, RequestCurvesFilters
+# from energyquantified.events.server_message import (
+    # StreamMessageType,
+    # StreamMessageResponseCurvesSubscribe,
+    # StreamMessageResponseCurvesFilters,
+    # StreamMessageResponseError,
+    # StreamMessageMessage,
+    # StreamMessageCurveEvent,
+# )
+from energyquantified.events.messages import (
+    RequestCurvesSubscribe,
+    RequestCurvesFilters,
+    ServerMessageMessage,
+    ServerMessageCurveEvent,
+    _ServerResponse,
+    ServerResponseCurvesSubscribe,
+    ServerResponseCurvesFilters,
+    ServerResponseError,
+    ServerMessageType,
 )
-from energyquantified.events.callback import Callback, SUBSCRIBE_CURVES
+from energyquantified.events.callback import Callback, SUBSCRIBE_CURVES, GET_CURVE_FILTERS
 from energyquantified.events.connection_event import TIMEOUT, UNKNOWN_ERROR
 import random
-from energyquantified.parser.events import parse_event_options, parse_event, parse_filters, parse_subscribe_response
+from energyquantified.parser.events import parse_event_options, parse_curve_event, parse_filters#, parse_subscribe_response
 import atexit
 from socket import timeout
 from websocket import (
@@ -35,7 +50,6 @@ from websocket import (
     WebSocketBadStatusException,
     WebSocketPayloadException,
 )
-from energyquantified.events import SubscribeResponse
 from energyquantified.events.callback import Callback, SUBSCRIBE_CURVES
 import sys
 
@@ -139,7 +153,16 @@ class CurveUpdateEventAPI:
         self._last_id_file_lock = threading.Lock()
         self._last_id_file_updated = None
         self._last_id_file_atexit = None
+        # Message handlers
+        self._message_handler = lambda msg: log.info("Message from server: %s" % msg)
+        # TODO what if response.request_id is in callbacks? 
+        self._error_handler = lambda err: log.error(err)
 
+    def set_message_handler(self, func):
+        self._message_handler = func
+
+    def set_error_handler(self, func):
+        self._error_handler = func
 
     def _setup_last_id_file(self):
         """
@@ -204,7 +227,7 @@ class CurveUpdateEventAPI:
         # At this point we know neither are None. Time to keep compare and keep
         # the greatest of the two id's.
         # last_id format: str of timestamp (millis) and a seq. number separated by dash
-        # format: \d{13}-{1}\d+
+        # format: ^\\d{13}-{1}\\d+$
         current_id = self._last_id.split("-")
         new_id = last_id.split("-")
         # First compare timestamps
@@ -259,6 +282,7 @@ class CurveUpdateEventAPI:
         self._last_id_timestamp = time.time()
 
     def _on_open(self, _ws):
+        print("ON OPEN")
         self._last_connection_event = None
         # Reset reconnect counter on successfull connection
         with self._remaining_reconnect_attempts_lock:
@@ -428,9 +452,7 @@ class CurveUpdateEventAPI:
     #         self._messages.put((msg_type, obj))
 
     def _on_message(self, _ws, message):
-        log.debug("")
-        log.debug(message)
-        log.debug("")
+        #log.debug(message)
         with self._messages_lock:
             # TODO probably want to stop execution if this fails
             try:
@@ -438,51 +460,94 @@ class CurveUpdateEventAPI:
             except Exception as e:
                 self._messages.put((MessageType.ERROR, f"Failed to parse message: {message}, exception: {e}"))
                 return
-            msg_type_tag = StreamMessageType.tag_from_json(message_json)
-            if not StreamMessageType.is_valid_tag(msg_type_tag):
-                raise ValueError("Failed to parse stream msg")
-            msg_obj = StreamMessageType.by_tag(msg_type_tag).model.parse_message(message_json)
+            msg_type_tag = ServerMessageType.tag_from_json(message_json)
+            if not ServerMessageType.is_valid_tag(msg_type_tag):
+                # Unkown type, skip. Might be a new type that is not supported in this version.
+                pass
+            msg_obj = ServerMessageType.by_tag(msg_type_tag).model.from_message(message_json)
             # Check type
-            if isinstance(msg_obj, StreamMessageResponseCurvesSubscribe):
+            if isinstance(msg_obj, ServerMessageMessage):
+                self._message_handler(msg_obj.message)
+            elif isinstance(msg_obj, ServerMessageCurveEvent):
+                if self._is_subscribed_curves.is_set():
+                    event = msg_obj.event
+                    self._update_last_id(event.event_id)
+                    self._last_id_to_file(event.event_id)
+                    self._messages.put(event)
+            elif isinstance(msg_obj, _ServerResponse):
                 callback = self._callbacks.pop(msg_obj.request_id, None)
-                if callback is not None:
-                    subscribe_response = SubscribeResponse(
-                        subscribe_ok=msg_obj.status,
-                        last_id=msg_obj.data.last_id,
-                        filters=msg_obj.data.filters,
+                if callback is None:
+                    return
+                if isinstance(msg_obj, ServerResponseCurvesSubscribe):
+                    subscribe_response = CurvesSubscribeResponse(
+                        status=msg_obj.status,
+                        data=msg_obj.data,
                         errors=msg_obj.errors,
                     )
                     callback.callback(subscribe_response)
                     if callback.latest and subscribe_response.subscribe_ok:
                         self._is_subscribed_curves.set()
-                return
-            elif isinstance(msg_obj, StreamMessageResponseError):
+                elif isinstance(msg_obj, ServerResponseCurvesFilters):
+                    filters_response = CurvesFiltersResponse(
+                        status=msg_obj.status,
+                        data=msg_obj.data,
+                        errors=msg_obj.errors,
+                    )
+                    callback.callback(filters_response)
+                elif isinstance(msg_obj, ServerResponseError):
+                    # TODO what to do here?
+                    # Should only really happen if server fails to parse 'type' (so shouldnt happen)
+                    # TODO what if callback exists for request_id?
+                    self._error_handler(". ".join[[err.capitalize() for err in msg_obj.errors]])
+                else:
+                    # Might be a new type that is not supported in this version. Skip.
+                    pass
+            else:
+                # Might be a new type that is not supported in this version. Skip.
                 pass
-                return
-            else:
-                raise NotImplementedError
+            # if isinstance(msg_obj, ServerResponseCurvesSubscribe):
+            #     callback = self._callbacks.pop(msg_obj.request_id, None)
+            #     if callback is not None:
+            #         subscribe_response = SubscribeResponse(
+            #             subscribe_ok=msg_obj.status,
+            #             last_id=msg_obj.data.last_id,
+            #             filters=msg_obj.data.filters,
+            #             errors=msg_obj.errors,
+            #         )
+            #         callback.callback(subscribe_response)
+            #         if callback.latest and subscribe_response.subscribe_ok:
+            #             self._is_subscribed_curves.set()
+            # elif isinstance(msg_obj, ServerResponseCurvesFilters):
+            #     callback = self._callbacks.pop(msg_obj.request_id, None)
+            #     if callback is not None:
+            #         pass
+            # elif isinstance(msg_obj, ServerResponseError):
+            #     pass
+            # else:
+            #     # Unkown type, skip. Might be a new type that is not supported in this version.
+            #     pass
             # TODO
-            if message_json["type"].lower() == "curves.subscribe":
-                self._handle_message_subscribe_curves(message_json)
-                return
-            if not MessageType.is_valid_tag(message_json["type"]):
-                self._messages.put((MessageType.ERROR, f"Unknown message type: {message_json.get('type')}"))
-                return
-            msg_type = MessageType.by_tag(message_json["type"])
-            if msg_type == MessageType.CURVE_EVENT:
-                if self._is_subscribed_curves.is_set():
-                    obj = parse_event(message_json)
-                    self._update_last_id(obj.event_id)
-                    self._last_id_to_file(obj.event_id)
-            elif msg_type == MessageType.MESSAGE:
-                obj = message_json["message"]
-            elif msg_type == MessageType.ERROR:
-                # TODO Can this ever happen?
-                obj = message_json
-            else:
-                self._messages.put((MessageType.ERROR, f"Missing handler for MessageType {msg_type}"))
-                return
-            self._messages.put((msg_type, obj))
+            # if message_json["type"].lower() == "curves.subscribe":
+            #     self._handle_message_subscribe_curves(message_json)
+            #     return
+            # if not MessageType.is_valid_tag(message_json["type"]):
+            #     self._messages.put((MessageType.ERROR, f"Unknown message type: {message_json.get('type')}"))
+            #     return
+            # msg_type = MessageType.by_tag(message_json["type"])
+            # if msg_type == MessageType.CURVE_EVENT:
+            #     if self._is_subscribed_curves.is_set():
+            #         obj = parse_event(message_json)
+            #         self._update_last_id(obj.event_id)
+            #         self._last_id_to_file(obj.event_id)
+            # elif msg_type == MessageType.MESSAGE:
+            #     obj = message_json["message"]
+            # elif msg_type == MessageType.ERROR:
+            #     # TODO Can this ever happen?
+            #     obj = message_json
+            # else:
+            #     self._messages.put((MessageType.ERROR, f"Missing handler for MessageType {msg_type}"))
+            #     return
+            # self._messages.put((msg_type, obj))
 
     # def _handle_message_subscribe_curves(self, msg):
     #     # Parse uuid from request_id
@@ -536,13 +601,16 @@ class CurveUpdateEventAPI:
             with self._last_id_file_lock:
                 self._last_id_to_file(write_interval_s=0)
 
-
     def _on_error(self, _ws, error):
         if not isinstance(error, (timeout, ConnectionError, WebSocketException)):
-            self._messages.put((MessageType.ERROR, getattr(error, "strerror", str(error))))
+            # TODO raise error instead of returning? or create connection event?
+            # self._messages.put((MessageType.ERROR, getattr(error, "strerror", str(error))))
+            print(f"on er: {error}")
+            self._error_handler(getattr(error, "strerror", str(error)))
             return
         # Set _last_connection_event (only if not already)
         if self._last_connection_event is not None:
+           print(f"hm: {error}")
            return
         if isinstance(error, timeout):
             self._last_connection_event = ConnectionEvent(status=TIMEOUT, message=str(error))
@@ -656,6 +724,7 @@ class CurveUpdateEventAPI:
         if self._ws is not None:
             self._ws.close()
         websocket.setdefaulttimeout(timeout)
+        print(f"ws url: {self._ws_url}")
         self._ws = websocket.WebSocketApp(
             self._ws_url,
             header={
@@ -720,14 +789,14 @@ class CurveUpdateEventAPI:
         :type response: SubscribeResponse
         """
         if response.ok:
-            filters = response.obj.filters
-            last_id = response.obj.last_id
+            filters = response.data.filters
+            last_id = response.data.last_id
             log.info("Subscribe OK - from id %s with filters %s" % (last_id, filters))
         else:
             errors = response.errors
             log.error("Failed to subscribe - %s" % errors)
 
-    def subscribe_curve_events(self, filters, last_id=None, callback=on_curves_subscribed):
+    def subscribe_curve_events(self, filters=None, last_id=None, callback=on_curves_subscribed):
         """
         Send a filter or a list of filters to the stream, subscribing to
         curve events matching any of the filters.
@@ -781,17 +850,16 @@ class CurveUpdateEventAPI:
         # Validate filters
         if not isinstance(filters, list):
             filters = [filters]
-        assert len(filters) > 0, "Must have minimum 1 filter when subscribing to curves"
-        # for curve_filter in filters:
-        #     assert isinstance(curve_filter, (EventCurveOptions, EventFilterOptions)), (
-        #         f"Invalid filter type, expected EventCurveOptions or EventFilterOptions "
-        #         f"but found {type(curve_filter)}"
-        #     )
-        #     is_valid, errors = curve_filter.validate()
-        #     assert is_valid, (
-        #         f"Failed validation for filter {curve_filter}, "
-        #         f"errors: {errors}"
-        #     )
+        for curve_filter in filters:
+            assert isinstance(curve_filter, (EventCurveOptions, EventFilterOptions)), (
+                f"Invalid filter type, expected EventCurveOptions or EventFilterOptions "
+                f"but found {type(curve_filter)}"
+            )
+            is_valid, errors = curve_filter.validate()
+            assert is_valid, (
+                f"Invalid filter {curve_filter}, "
+                f"errors: {errors}"
+            )
         # Validate last_id
         if last_id is not None:
             assert isinstance(last_id, str), "param 'last_id' must be None or a str"
@@ -799,23 +867,30 @@ class CurveUpdateEventAPI:
             if last_id.lower() == "keep":
                 last_id = self._last_id
             else:
-                assert re.fullmatch("\d{13}-{1}\d+", last_id), f"Invalid last_id format, last_id: {last_id}"
-        # Create message
-        subscribe_message = {
-            "action": "curves.subscribe",
-            "filters": list(curve_filter.to_dict() for curve_filter in filters),
-        }
-        # Include last_id only if not None
-        if last_id is not None:
-            subscribe_message["last_id"] = last_id
+                assert re.fullmatch("^\\d{13}-{1}\\d+$", last_id), (
+                    f"Invalid last_id format: {last_id}, "
+                    f"expected two numbers separated by a dash ('-'), "
+                    f"where the first number is exactly 13 digits long"
+                )
+        # At least one of 'last_id' and 'filters' must be set
+        assert last_id is not None or filters is not None, (
+            f"Minimum one of 'last_id' and 'filters' must be set in order to subscribe to curve events"
+        )
+        # Validation done. Create request id
+        request_id = uuid.uuid4()
+        subscribe_message = RequestCurvesSubscribe(
+            request_id,
+            last_id=last_id,
+            filters=filters
+        ).to_message()
         # Stop receiving events until subscribed with new filters
-        self._is_subscribed_curves.clear()
         with self._messages_lock:
+            self._is_subscribed_curves.clear()
             # Clear existing curve events from message queue
             messages = []
             try:
                 for msg in self._messages.get(block=False):
-                    if not msg[0] == MessageType.CURVE_EVENT:
+                    if not isinstance(msg, CurveUpdateEvent):
                         messages.append(msg)
                     self._messages.task_done()
             except queue.Empty:
@@ -825,19 +900,137 @@ class CurveUpdateEventAPI:
             for _, obj in self._callbacks.items():
                 if obj.callback_type == SUBSCRIBE_CURVES:
                     obj.latest = False
-            # Request id
-            request_uuid = uuid.uuid4()
-            subscribe_message["id"] = str(request_uuid)
+                    # TODO or just del other curves.subscribe callbacks instead?
+                    #del self._callbacks[k] #_ / k
             # Callback
             callback = Callback(callback, callback_type=SUBSCRIBE_CURVES, latest=True)
-            self._callbacks[request_uuid] = callback
+            self._callbacks[request_id] = callback
         # Send msg
         self._latest_curves_subscribe_message = subscribe_message
         self._update_last_id(last_id, force_update=True)
         self._last_id_to_file(write_interval_s=0)
+        #log.debug(f"sub msg: {subscribe_message}")
         msg = json.dumps(subscribe_message)
-        log.debug(f"Sending messsage to subscribe curves:\n{msg}")
+        #log.debug(f"Sending messsage to subscribe curves:\n{msg}")
         self._ws.send(msg)
+
+    # def get_next(self, timeout=None):
+    #     """
+    #     Returns a generator over messages from the stream, and blocks
+    #     while waiting for new messages.
+        
+    #     Each messages is a tuple of two objects; (1) a
+    #     :py:class:`energyquantified.events.MessageType` and (2) one of
+    #     (:py:class:`energyquantified.events.CurveUpdateEvent`,
+    #     :py:class:`energyquantified.events.ConnectionEvent`, str, None). The
+    #     ``MessageType`` is used for describing the second element. Example:
+
+    #     >>> for msg_type, msg in enumerate(get_next(3)):
+    #     >>>     if msg_type == MessageType.EVENT:
+    #     >>>         # Got a new event
+    #     >>>         # msg. ...
+    #     >>>     elif msg_type == MessageType.INFO:
+    #     >>>         # Got an informative message from the server
+    #     >>>         # Maybe I want to skip this
+    #     >>>     elif msg_type == MessageType.FILTERS:
+    #     >>>         # Got the currently active filters on the stream, let's
+    #     >>>         # check it out
+    #     >>>         print(msg)
+    #     >>>     elif msg_type == MessageType.TIMEOUT:
+    #     >>>         # No new message or event in the last 'timeout' seconds
+    #     >>>         # Maybe I want to change filters soon ..
+
+    #     See also :py:class:`energyquantified.events.MessageType`.
+
+    #     The different message types and what they mean:
+
+    #     What the second element is based on the first element:
+    #     ``MessageType.EVENT``:
+    #         A new event.
+
+    #         type: :py:class:`energyquantified.events.CurveUpdateEvent`
+
+    #     ``MessageType.INFO``:
+    #         An informative message from the stream server.
+
+    #         type: str
+
+    #     ``MessageType.FILTERS``:
+    #         A list of filters currently subscribed to.
+
+    #         type: list[:py:class:`energyquantified.events.EventFilterOptions`
+    #         | :py:class:`energyquantified.events.EventCurveOptions`]
+
+    #     ``MessageType.ERRORS``:
+    #         An error message that could either be from the stream (e.g., after
+    #         subscribing with invalid filters), or if something went wrong while
+    #         parsing a message.
+
+    #         type: str
+
+    #     ``MessageType.TIMEOUT``:
+    #         This means that the client is connected to the stream and no messages has
+    #         been received in the last ``timeout`` (i.e., the number supplied to the
+    #         ``timeout`` parameter) seconds, and the second element is simply ``None``
+    #         and can be ignored. The intention of this message type is to provider users
+    #         with a way to act inbetween events (e.g., to change filters).
+
+    #         type: None
+
+    #     ``MessageType.DISCONNECTED``:
+    #         This means that the client is neither connected to the stream, nor is it
+    #         trying to (re)connect. This happens if
+    #         :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>` is
+    #         called before :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`,
+    #         if the initial connection failed, or if the connection dropped and the maximum number
+    #         of reconnect attempts was exceeded. The
+    #         :py:class:`energyquantified.events.ConnectionEvent` describes the cause of the error.
+    #         Since this means that the the client will **not** automatically reconnect,
+    #         :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>` must be manually
+    #         invoked in order to reconnect.
+
+    #         type: :py:class:`energyquantified.events.ConnectionEvent`
+
+    #     ``get_next()`` blocks program execution until a new message is available. If the
+    #     ``timeout`` parameter is set, a tuple with ``MessageType.TIMEOUT`` is yielded
+    #     whenever the timeout is reached. 
+            
+    #     :param timeout: The number of seconds to wait (blocking) for a new message,\
+    #             yielding a MessageType.TIMEOUT if the timeout occurs. Waits indefinetly\
+    #             if timeout is None. Defaults to None.
+    #     :type timeout: int, optional
+    #     :yield: A generator of messages from the stream, blocks while waiting for new
+    #     :rtype: tuple
+    #     """
+    #     # TODO should probably use _messages_lock here
+    #     while True:
+    #         # Make sure 
+    #         if not self._is_connected.is_set():
+    #             try:
+    #                 # Block=False since not connected
+    #                 msg = self._messages.get(block=False)
+    #                 yield msg
+    #                 self._messages.task_done()
+    #             except queue.Empty:
+    #                 # Wait if trying to (re)connect
+    #                 self._done_trying_to_connect.wait()
+    #                 # Yield DC ConnectionEvent if not connected and not retrying
+    #                 # ^ either if never connected or exceeded max reconnect attempts
+    #                 if self._should_not_connect.is_set():
+    #                     yield (MessageType.DISCONNECTED, self._last_connection_event)
+    #                     # Wait up to 2 seconds before next iteration. Breaks early if
+    #                     # a new connection has been established (in case of incoming events)
+    #                     self._is_connected.wait(2)
+    #         else:
+    #             try:
+    #                 msg = self._messages.get(timeout=timeout)
+    #                 yield msg
+    #                 self._messages.task_done()
+    #             except queue.Empty:
+    #                 # If connection dropped while waiting for a message 
+    #                 if not self._is_connected.is_set():
+    #                     continue
+    #                 yield (MessageType.TIMEOUT, None)
 
     def get_next(self, timeout=None):
         """
@@ -927,104 +1120,140 @@ class CurveUpdateEventAPI:
         :yield: A generator of messages from the stream, blocks while waiting for new
         :rtype: tuple
         """
+        if timeout is not None:
+            last_timeout_timestamp = int(time.time())
         while True:
-            # Make sure 
+            self._messages_lock.acquire()
             if not self._is_connected.is_set():
                 try:
                     # Block=False since not connected
-                    msg = self._messages.get(block=False)
-                    yield msg
+                    msg = self._messages.get_nowait()
                     self._messages.task_done()
+                    self._messages_lock.release()
+                    yield msg
                 except queue.Empty:
+                    self._messages_lock.release()
                     # Wait if trying to (re)connect
                     self._done_trying_to_connect.wait()
                     # Yield DC ConnectionEvent if not connected and not retrying
                     # ^ either if never connected or exceeded max reconnect attempts
                     if self._should_not_connect.is_set():
-                        yield (MessageType.DISCONNECTED, self._last_connection_event)
+                        yield (self._last_connection_event)
                         # Wait up to 2 seconds before next iteration. Breaks early if
                         # a new connection has been established (in case of incoming events)
                         self._is_connected.wait(2)
             else:
                 try:
-                    msg = self._messages.get(timeout=timeout)
-                    yield msg
+                    msg = self._messages.get_nowait()
                     self._messages.task_done()
+                    self._messages_lock.release()
+                    yield msg
                 except queue.Empty:
+                    self._messages_lock.release()
                     # If connection dropped while waiting for a message 
                     if not self._is_connected.is_set():
                         continue
-                    yield (MessageType.TIMEOUT, None)
+                    # Yield TimeoutEvent if n seconds since last
+                    if timeout is not None:
+                        current_timestamp = int(time.time())
+                        if current_timestamp - last_timeout_timestamp > timeout:
+                            yield TimeoutEvent()
+                    time.sleep(1)
 
-    def send_get_filters(self, request_id=None):
-        """
-        Send a message to the stream requesting the currently active filters.
-        When the server responds with the filters it will be added to the
-        message queue that is accessible through
-        :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`,
-        and the first element of the message will have ``MessageType.FILTERS``.
+    def on_curves_filters(response):
+        if response.ok:
+            filters = response.data.filters
+            log.info("Currently active curve event filters: %s" % filters)
+        else:
+            errors = response.errors
+            log.error("Failed to get currently active curve event filters: %s" % errors)
 
-        The server responds with a message that includes the filters and a unique
-        id. The id in the response can be manually chosen by supplying the
-        ``request_id`` parameter with an id, which can be useful if you want to
-        be certain that the filters you get in return are for a specific request.
-        ``request_id`` must be a uuid.UUID object in version 4.
+    def get_curve_filters(self, callback=on_curves_filters):
+        request_id = uuid.uuid4()
+        get_filters_msg = RequestCurvesFilters(request_id).to_message()
+        with self._messages_lock:
+            for _, obj in self._callbacks.items(): 
+                if obj.callback_type == GET_CURVE_FILTERS:
+                    obj.latest = False
+                    # TODO or just del the old callbacks?
+            # Callback
+            callback = Callback(callback, callback_type=GET_CURVE_FILTERS, latest=True)
+            self._callbacks[request_id] = callback
+        # Send msg
+        msg = json.dumps(get_filters_msg)
+        #log.debug(f"Sending message to get latest filters:\n{msg}")
+        self._ws.send(msg)
 
-        # TODO remove uuid
-        Create a uuid as shown below:
 
-            >>> import uuid
-            >>> get_filters_id = uuid.uuid4()
+    # def send_get_filters(self, request_id=None):
+    #     """
+    #     Send a message to the stream requesting the currently active filters.
+    #     When the server responds with the filters it will be added to the
+    #     message queue that is accessible through
+    #     :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`,
+    #     and the first element of the message will have ``MessageType.FILTERS``.
 
-        Preset the request_id when requesting the active filters:
-            >>> import uuid
-            >>> get_filters_id = uuid.uuid4()
-            >>> send_get_filters(request_id=get_filters_id)
+    #     The server responds with a message that includes the filters and a unique
+    #     id. The id in the response can be manually chosen by supplying the
+    #     ``request_id`` parameter with an id, which can be useful if you want to
+    #     be certain that the filters you get in return are for a specific request.
+    #     ``request_id`` must be a uuid.UUID object in version 4.
 
-        Find the response related to your message by comparing the id:
+    #     # TODO remove uuid
+    #     Create a uuid as shown below:
 
-            >>> import uuid
-            >>> from energyquantified.events import MessageType
-            >>> get_filters_id = uuid.uuid4()
-            >>> send_get_filters(request_id=get_filters_id)
-            >>> # Compare ID while reading from the stream
-            >>> for msg_type, msg in eq.events.get_next():
-            >>>     if msg_type == MessageType.FILTERS:
-            >>>         if msg.request_id == get_filters_id:
-            >>>             # ID match so we know which message the response regards
+    #         >>> import uuid
+    #         >>> get_filters_id = uuid.uuid4()
 
-        :param request_id: Preset id for the response
-        :type request_id: ``uuid.UUID`` (v4), optional
-        """
-        msg = {"action": "filter.get"}
-        if request_id is not None:
-            # Assert uuid and version
-            _assert_uuid4(request_id)
-            msg["id"] = str(request_id)
-        self._ws.send(json.dumps(msg))
+    #     Preset the request_id when requesting the active filters:
+    #         >>> import uuid
+    #         >>> get_filters_id = uuid.uuid4()
+    #         >>> send_get_filters(request_id=get_filters_id)
 
-    # TODO remove, this is a test
-    def sub2(self, last_id, request_id=None):
-        msg = {
-            "action": "events.get",
-            "last_id": last_id,
-        }
-        if request_id is not None:
-            msg["id"] = str(request_id)
+    #     Find the response related to your message by comparing the id:
 
-        print(f"sending msg: {msg}")
-        self._ws.send(json.dumps(msg))
+    #         >>> import uuid
+    #         >>> from energyquantified.events import MessageType
+    #         >>> get_filters_id = uuid.uuid4()
+    #         >>> send_get_filters(request_id=get_filters_id)
+    #         >>> # Compare ID while reading from the stream
+    #         >>> for msg_type, msg in eq.events.get_next():
+    #         >>>     if msg_type == MessageType.FILTERS:
+    #         >>>         if msg.request_id == get_filters_id:
+    #         >>>             # ID match so we know which message the response regards
 
-def _assert_uuid4(id):
-    """
-    Asserts that an id is a valid uuid v4.
+    #     :param request_id: Preset id for the response
+    #     :type request_id: ``uuid.UUID`` (v4), optional
+    #     """
+    #     msg = {"action": "filter.get"}
+    #     if request_id is not None:
+    #         # Assert uuid and version
+    #         _assert_uuid4(request_id)
+    #         msg["id"] = str(request_id)
+    #     self._ws.send(json.dumps(msg))
 
-    :param id: The id
-    :type id: ``uuid.UUID``
-    """
-    assert isinstance(id, uuid.UUID), (
-        "Optionally parameter request_id must be type uuid if set"
-    )
-    assert id.version == 4, (
-        f"Expected uuid version 4 but found: {id.version}"
-    )
+    # # TODO remove, this is a test
+    # def sub2(self, last_id, request_id=None):
+    #     msg = {
+    #         "action": "events.get",
+    #         "last_id": last_id,
+    #     }
+    #     if request_id is not None:
+    #         msg["id"] = str(request_id)
+
+    #     print(f"sending msg: {msg}")
+    #     self._ws.send(json.dumps(msg))
+
+# def _assert_uuid4(id):
+#     """
+#     Asserts that an id is a valid uuid v4.
+
+#     :param id: The id
+#     :type id: ``uuid.UUID``
+#     """
+#     assert isinstance(id, uuid.UUID), (
+#         "Optionally parameter request_id must be type uuid if set"
+#     )
+#     assert id.version == 4, (
+#         f"Expected uuid version 4 but found: {id.version}"
+#     )
