@@ -1,6 +1,6 @@
 from energyquantified.events import EventCurveOptions, EventFilterOptions
 
-def _parse_event_options(json):
+def parse_event_options(json):
     # Event type
     curve_names = json.get("curve_names")
     # Either EventCurveOptions or EventFilterOptions

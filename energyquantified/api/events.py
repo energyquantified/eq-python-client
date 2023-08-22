@@ -12,8 +12,8 @@ from energyquantified.events import (
     EventCurveOptions,
     EventFilterOptions,
     ConnectionEvent,
-    CurveEventFilters,
     CurveUpdateEvent,
+    EventType,
 )
 from energyquantified.events.events import TimeoutEvent
 from energyquantified.events.responses import CurvesSubscribeResponse, CurvesFiltersResponse
@@ -40,7 +40,6 @@ from energyquantified.events.messages import (
 from energyquantified.events.callback import Callback, SUBSCRIBE_CURVES, GET_CURVE_FILTERS
 from energyquantified.events.connection_event import TIMEOUT, UNKNOWN_ERROR
 import random
-from energyquantified.parser.events import parse_event_options, parse_curve_event, parse_filters#, parse_subscribe_response
 import atexit
 from socket import timeout
 from websocket import (
@@ -131,7 +130,11 @@ class CurveUpdateEventAPI:
         self._wst = None
         self._messages = queue.Queue()
         self._is_connected = threading.Event()
-        self._last_connection_event = ConnectionEvent(status_code=1000, message="Not connected to the server")
+        self._last_connection_event = ConnectionEvent(
+            event_type=EventType.DISCONNECTED,
+            status_code=1000,
+            message="Not connected to the server"
+        )
         self._should_not_connect = threading.Event()
         # Should not try until connect() invoked
         self._should_not_connect.set()
@@ -155,7 +158,7 @@ class CurveUpdateEventAPI:
         self._last_id_file_atexit = None
         # Message handlers
         self._message_handler = lambda msg: log.info("Message from server: %s" % msg)
-        # TODO what if response.request_id is in callbacks? 
+        # TODO what if response.request_id is in callbacks?
         self._error_handler = lambda err: log.error(err)
 
     def set_message_handler(self, func):
@@ -272,7 +275,6 @@ class CurveUpdateEventAPI:
             data["last_id"] = last_id
             # Write from start of file
             f.seek(0,0)
-            #f.truncate()
             json.dump(data, f)
             # Truncate in case the new data is shorter
             f.truncate()
@@ -291,175 +293,16 @@ class CurveUpdateEventAPI:
             if self._last_id is not None:
                 self._latest_curves_subscribe_message["last_id"] = self._last_id
                 log.info("Reconnected to the stream, sending %s to subscribe with previous filters" % self._latest_curves_subscribe_message)
-                #self._messages.put((MessageType.INFO, "Successfully reconnected to the server, setting previous filters.."))
                 self._ws.send(json.dumps(self._latest_curves_subscribe_message))
 
-    # def _on_message(self, _ws, message):
-    #     print(f"msg: {message}")
-    #     try:
-    #         msg = json.loads(message)
-    #         msg_tag = msg.pop("type")
-    #         if not MessageType.is_valid_tag(msg_tag):
-    #             # Convert message to info
-    #             if msg_tag.lower() == "message":
-    #                 msg_type = MessageType.INFO
-    #             else:
-    #                 raise ValueError(f"Unknown message type: '{message}'")
-    #         else:
-    #             msg_type = MessageType.by_tag(msg_tag)
-    #         if msg_type == MessageType.EVENT:
-    #             data = parse_event(msg)
-    #             self._set_last_id(data.event_id)
-    #             self._last_id_to_file(last_id=data.event_id)
-    #         elif msg_type == MessageType.FILTERS:
-    #             if not self._filters_is_active.is_set():
-    #                 request_id = json.get("request_id")
-    #                 try:
-    #                     request_id_uuid = uuid.UUID(request_id, version=4)
-    #                     if request_id_uuid == self._latest_filters_uuid:
-    #                         data = parse_filters(msg)
-    #                 except Exception as _:
-    #                     data = f"Failed to parse request id from server message,"
-    #                     return
-    #                 finally:
-                    
-
-    #         elif msg_type == MessageType.INFO:
-    #             data = msg["message"]
-    #         elif msg_type == MessageType.ERROR:
-    #             data = msg
-    #         else:
-    #             raise ValueError(f"Unknown MessageType: {msg_type} for message: {message}")
-    #     except Exception as e:
-    #         msg_type = MessageType.ERROR
-    #         data = f"Failed to parse message: '{message}' from stream, cause: {e}"
-    #     finally:
-    #         self._messages.put((msg_type, data))
-
-    # def _on_message(self, _ws, message):
-    #     print(f"msg: {message}")
-    #     try:
-    #         msg = json.loads(message)
-    #         msg_type = msg["type"]
-    #         if not MessageType.is_valid_tag(msg_type):
-    #             if msg_type.lower() == "message":
-    #                 msg_type = MessageType.INFO
-    #             else:
-    #                 raise ValueError(f"Failed to parse MessageType from {msg_type}")
-    #         else:
-    #             msg_type = MessageType.by_tag(msg_type)
-    #         # TODO wip start
-    #         # if response is type subscribe
-    #         # parse subscribe response
-    #         # 
-    #         # TODO wip end
-    #         if MessageType == MessageType.ERROR:
-    #             if msg["code"] == "json failed ..":
-    #                 pass # SubscribeResponse
-    #             elif msg["code"] == "too many filters ..":
-    #                 pass # SubscribeResponse
-    #             elif msg["code"] == "bad last_id ..":
-    #                 pass # SubscribeResponse
-    #             else:
-    #                 pass # Unknown?
-    #         elif msg_type == MessageType.FILTERS:
-    #             request_id = msg.get("request_id")
-
-    #             last_id = msg.get("last_id")
-    #             filters = parse_filters(msg)
-    #             response = SubscribeResponse(True, filters, last_id=last_id)
-
-    #     except Exception as e:
-    #         f"Failed to parse message: {message} from stream, cause: {e}"
-    #     # TODO
-    #     if subscribe or sub errror:
-    #         callback = self._callbacks[msg["request_id"]]
-    #         if callback:
-    #             if callback.latest and not msg_error:
-    #                 # set events active
-    #                 pass
-    #             callback.callback(to_response(msg))
-    #     # TODO
-
-    # def _on_message(self, _ws, message):
-    #     log.debug("")
-    #     log.debug(message)
-    #     log.debug("")
-    #     with self._messages_lock:
-    #         try:
-    #             msg = json.loads(message)
-    #         except Exception as e:
-    #             self._messages.put((MessageType.ERROR, f"Failed to parse message: {message}, exception: {e}"))
-    #             return
-    #         if msg["type"].lower() == "curves.subscribe":
-    #             self._handle_message_subscribe_curves(msg)
-    #             return
-    #         if not MessageType.is_valid_tag(msg["type"]):
-    #             self._messages.put((MessageType.ERROR, f"Unknown message type: {msg.get('type')}"))
-    #             return
-    #         msg_type = MessageType.by_tag(msg["type"])
-    #         if msg_type == MessageType.CURVE_EVENT:
-    #             if self._is_subscribed_curves.is_set():
-    #                 obj = parse_event(msg)
-    #                 self._update_last_id(obj.event_id)
-    #                 self._last_id_to_file(obj.event_id)
-    #         elif msg_type == MessageType.MESSAGE:
-    #             obj = msg["message"]
-    #         elif msg_type == MessageType.ERROR:
-    #             # TODO Can this ever happen?
-    #             obj = msg
-    #         else:
-    #             self._messages.put((MessageType.ERROR, f"Missing handler for MessageType {msg_type}"))
-    #             return
-    #         self._messages.put((msg_type, obj))
-
-    # def _on_message(self, _ws, message):
-    #     log.debug("")
-    #     log.debug(message)
-    #     log.debug("")
-    #     with self._messages_lock:
-    #         try:
-    #             json = json.loads(message)
-    #         except Exception as e:
-    #             self._messages.put((MessageType.ERROR, f"Failed to parse message: {message}, exception: {e}"))
-    #             return
-    #         # TODO
-    #         #server_msg = 
-    #         if json["type"].lower() == "curves.subscribe":
-    #             self._handle_message_subscribe_curves(json)
-    #             return
-    #         if not MessageType.is_valid_tag(json["type"]):
-    #             self._messages.put((MessageType.ERROR, f"Unknown message type: {json.get('type')}"))
-    #             return
-    #         msg_type = MessageType.by_tag(json["type"])
-    #         if msg_type == MessageType.CURVE_EVENT:
-    #             if self._is_subscribed_curves.is_set():
-    #                 obj = parse_event(json)
-    #                 self._update_last_id(obj.event_id)
-    #                 self._last_id_to_file(obj.event_id)
-    #         elif msg_type == MessageType.MESSAGE:
-    #             obj = json["message"]
-    #         elif msg_type == MessageType.ERROR:
-    #             # TODO Can this ever happen?
-    #             obj = json
-    #         else:
-    #             self._messages.put((MessageType.ERROR, f"Missing handler for MessageType {msg_type}"))
-    #             return
-    #         self._messages.put((msg_type, obj))
-
     def _on_message(self, _ws, message):
-        #log.debug(message)
         with self._messages_lock:
-            # TODO probably want to stop execution if this fails
-            try:
-                message_json = json.loads(message)
-            except Exception as e:
-                self._messages.put((MessageType.ERROR, f"Failed to parse message: {message}, exception: {e}"))
-                return
+            message_json = json.loads(message)
+            #print(f"msg: {message_json}")
             msg_type_tag = ServerMessageType.tag_from_json(message_json)
             if not ServerMessageType.is_valid_tag(msg_type_tag):
                 # Unkown type, skip. Might be a new type that is not supported in this version.
-                pass
+                return
             msg_obj = ServerMessageType.by_tag(msg_type_tag).model.from_message(message_json)
             # Check type
             if isinstance(msg_obj, ServerMessageMessage):
@@ -480,8 +323,9 @@ class CurveUpdateEventAPI:
                         data=msg_obj.data,
                         errors=msg_obj.errors,
                     )
+                    print(f"subscribe response: {subscribe_response}")
                     callback.callback(subscribe_response)
-                    if callback.latest and subscribe_response.subscribe_ok:
+                    if callback.latest and subscribe_response.status:
                         self._is_subscribed_curves.set()
                 elif isinstance(msg_obj, ServerResponseCurvesFilters):
                     filters_response = CurvesFiltersResponse(
@@ -491,97 +335,15 @@ class CurveUpdateEventAPI:
                     )
                     callback.callback(filters_response)
                 elif isinstance(msg_obj, ServerResponseError):
-                    # TODO what to do here?
                     # Should only really happen if server fails to parse 'type' (so shouldnt happen)
                     # TODO what if callback exists for request_id?
                     self._error_handler(". ".join[[err.capitalize() for err in msg_obj.errors]])
                 else:
-                    # Might be a new type that is not supported in this version. Skip.
+                    # Might be a new response type that is not supported in this version. Skip.
                     pass
             else:
-                # Might be a new type that is not supported in this version. Skip.
+                # Might be a new type with parser not implemented in this version. Skip.
                 pass
-            # if isinstance(msg_obj, ServerResponseCurvesSubscribe):
-            #     callback = self._callbacks.pop(msg_obj.request_id, None)
-            #     if callback is not None:
-            #         subscribe_response = SubscribeResponse(
-            #             subscribe_ok=msg_obj.status,
-            #             last_id=msg_obj.data.last_id,
-            #             filters=msg_obj.data.filters,
-            #             errors=msg_obj.errors,
-            #         )
-            #         callback.callback(subscribe_response)
-            #         if callback.latest and subscribe_response.subscribe_ok:
-            #             self._is_subscribed_curves.set()
-            # elif isinstance(msg_obj, ServerResponseCurvesFilters):
-            #     callback = self._callbacks.pop(msg_obj.request_id, None)
-            #     if callback is not None:
-            #         pass
-            # elif isinstance(msg_obj, ServerResponseError):
-            #     pass
-            # else:
-            #     # Unkown type, skip. Might be a new type that is not supported in this version.
-            #     pass
-            # TODO
-            # if message_json["type"].lower() == "curves.subscribe":
-            #     self._handle_message_subscribe_curves(message_json)
-            #     return
-            # if not MessageType.is_valid_tag(message_json["type"]):
-            #     self._messages.put((MessageType.ERROR, f"Unknown message type: {message_json.get('type')}"))
-            #     return
-            # msg_type = MessageType.by_tag(message_json["type"])
-            # if msg_type == MessageType.CURVE_EVENT:
-            #     if self._is_subscribed_curves.is_set():
-            #         obj = parse_event(message_json)
-            #         self._update_last_id(obj.event_id)
-            #         self._last_id_to_file(obj.event_id)
-            # elif msg_type == MessageType.MESSAGE:
-            #     obj = message_json["message"]
-            # elif msg_type == MessageType.ERROR:
-            #     # TODO Can this ever happen?
-            #     obj = message_json
-            # else:
-            #     self._messages.put((MessageType.ERROR, f"Missing handler for MessageType {msg_type}"))
-            #     return
-            # self._messages.put((msg_type, obj))
-
-    # def _handle_message_subscribe_curves(self, msg):
-    #     # Parse uuid from request_id
-    #     request_id = msg["request_id"]
-    #     try:
-    #         request_id = uuid.UUID(request_id, version=4)
-    #     except ValueError as e:
-    #         self._messages.put((MessageType.ERROR, f"Failed to parse uuid from message: {msg}, error: {e}"))
-    #         return
-    #     # TODO do we want to pop? Would be nice to keep latest in case of a disconnect (to 
-    #     # automatically reconnect with previous filters)
-    #     callback = self._callbacks.pop(request_id, None)
-    #     #callback = self._callbacks.get(request_id) TODO
-    #     if callback is not None:
-    #         subscribe_response = parse_subscribe_response(msg)
-    #         callback.callback(subscribe_response)
-    #         if callback.latest and subscribe_response.subscribe_ok:
-    #             # TODO use a lock when calling the callback and flagging is_subscribed_curves
-    #             self._is_subscribed_curves.set()
-
-    # def _handle_message_subscribe_curves(self, msg):
-    #     # Parse uuid from request_id
-    #     request_id = msg["request_id"]
-    #     try:
-    #         request_id = uuid.UUID(request_id, version=4)
-    #     except ValueError as e:
-    #         self._messages.put((MessageType.ERROR, f"Failed to parse uuid from message: {msg}, error: {e}"))
-    #         return
-    #     # TODO do we want to pop? Would be nice to keep latest in case of a disconnect (to 
-    #     # automatically reconnect with previous filters)
-    #     callback = self._callbacks.pop(request_id, None)
-    #     #callback = self._callbacks.get(request_id) TODO
-    #     if callback is not None:
-    #         subscribe_response = parse_subscribe_response(msg)
-    #         callback.callback(subscribe_response)
-    #         # TODO use lock here or outer?
-    #         if callback.latest and subscribe_response.subscribe_ok:
-    #             self._is_subscribed_curves.set()
 
     def _on_close(self, _ws, status_code, msg):
         # last_connection_event should only be set once for each time connecting
@@ -599,22 +361,28 @@ class CurveUpdateEventAPI:
 
     def _on_error(self, _ws, error):
         if not isinstance(error, (timeout, ConnectionError, WebSocketException)):
-            # TODO raise error instead of returning? or create connection event?
-            # self._messages.put((MessageType.ERROR, getattr(error, "strerror", str(error))))
-            print(f"on er: {error}")
-            self._error_handler(getattr(error, "strerror", str(error)))
-            return
-        # Set _last_connection_event (only if not already)
+            # TODO Probably want to raise this error (not just send to error handler and return)
+            # self._error_handler(getattr(error, "strerror", str(error)))
+            # return
+            raise error
+        #  self._last_connection_event should only be set once for each time connecting
         if self._last_connection_event is not None:
-           print(f"hm: {error}")
            return
         if isinstance(error, timeout):
-            self._last_connection_event = ConnectionEvent(status=TIMEOUT, message=str(error))
+            self._last_connection_event = ConnectionEvent(
+                event_type=EventType.DISCONNECTED,
+                status=TIMEOUT,
+                message=str(error)
+            )
         elif isinstance(error, ConnectionError):
             # TODO if Errno111 -> only use message (not status code)
             status_code = error.errno
             error_message = error.strerror
-            self._last_connection_event = ConnectionEvent(status_code=status_code, message=error_message)
+            self._last_connection_event = ConnectionEvent(
+                event_type=EventType.DISCONNECTED,
+                status_code=status_code,
+                message=error_message
+            )
         elif isinstance(error, WebSocketException):
             # Type of exception
             if hasattr(error, "status_code"):
@@ -636,9 +404,10 @@ class CurveUpdateEventAPI:
                 status_code = 1006
             # Create the connection event
             self._last_connection_event = ConnectionEvent(
-                    status_code=status_code,
-                    message=str(error),
-                )
+                event_type=EventType.DISCONNECTED,
+                status_code=status_code,
+                message=str(error),
+            )
 
     @property
     def last_id(self):
@@ -720,7 +489,7 @@ class CurveUpdateEventAPI:
         if self._ws is not None:
             self._ws.close()
         websocket.setdefaulttimeout(timeout)
-        print(f"ws url: {self._ws_url}")
+        log.debug("Subscribing to events at url: %s", self._ws_url)
         self._ws = websocket.WebSocketApp(
             self._ws_url,
             header={
@@ -766,7 +535,11 @@ class CurveUpdateEventAPI:
         """
         Close the stream connection (if open) and disables automatic reconnect.
         """
-        self._last_connection_event = ConnectionEvent(status_code=1000, message="Connection closed by user")
+        self._last_connection_event = ConnectionEvent(
+            event_type=EventType.DISCONNECTED,
+            status_code=1000,
+            message="Connection closed by user"
+        )
         self._should_not_connect.set()
         if self._ws is not None:
             self._ws.close()
@@ -1154,6 +927,7 @@ class CurveUpdateEventAPI:
                         current_timestamp = int(time.time())
                         if current_timestamp - last_timeout_timestamp > timeout:
                             yield TimeoutEvent()
+                            last_timeout_timestamp = int(time.time())
                     time.sleep(0.1)
 
     def on_curves_filters(response):

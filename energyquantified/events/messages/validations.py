@@ -1,6 +1,6 @@
 import uuid
 import re
-from energyquantified.events import EventCurveOptions, EventFilterOptions, CurveEventFilters
+from energyquantified.events import EventCurveOptions, EventFilterOptions
 
 def assert_uuid(id, version=None):
     assert isinstance(id, uuid.UUID)

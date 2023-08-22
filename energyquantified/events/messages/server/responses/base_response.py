@@ -46,10 +46,6 @@ class _ServerResponse(_BaseServerMessage):
     def _parse_message(self, json):
         self._set_status(json)
         self._set_request_id(json)
-        print("status:")
-        print(self.status)
-        print("msg:")
-        print(json)
         if not self.status:
             self._set_errors(json)
         else:

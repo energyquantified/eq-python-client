@@ -1,8 +1,4 @@
-from dataclasses import dataclass
-from typing import Optional
-from enum import Enum
 from .events import _Event
-from .event_type import EventType
 
 NETWORK_ERROR = "NETWORK ERROR"
 # 1000
@@ -129,11 +125,10 @@ CONNECTION_ERROR_LOOKUP = {
 
 class ConnectionEvent(_Event):
 
-    def __init__(self, status=None, status_code=None, message=None):
-        super().__init__(event_type=EventType.DISCONNECTED)
-        if status is None:
-            if status_code is not None:
-                status = CONNECTION_ERROR_LOOKUP.get(status_code, CONNECTION_ERROR)
+    def __init__(self, event_type, status=None, status_code=None, message=None):
+        super().__init__(event_type=event_type)
+        if status is None and status_code is not None:
+            status = CONNECTION_ERROR_LOOKUP.get(status_code, CONNECTION_ERROR)
         self.status = status
         self.status_code = status_code
         self.message = message
@@ -146,6 +141,7 @@ class ConnectionEvent(_Event):
         :rtype: str
         """
         return (f"<ConnectionEvent: "
+                f"event_type={self.event_type}, "
                 f"status={self.status}, "
                 f"status_code={self.status_code}, "
                 f"message={self.message}>")
@@ -155,6 +151,6 @@ class ConnectionEvent(_Event):
     
     def _set_event_type(self, event_type):
         assert event_type.is_connection_type, (
-            f"Cannot create a ConnectionEvent with EventType={event_type}"
+            f"Cannot create a ConnectionEvent with EventType={event_type}, event type must be a connection type"
         )
         self.event_type = event_type

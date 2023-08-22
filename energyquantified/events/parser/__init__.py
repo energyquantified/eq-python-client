@@ -1,1 +1,1 @@
-from .options import _parse_event_options
+from .options import parse_event_options
