@@ -26,7 +26,7 @@ If values were updated at 15-minute frequency for Germany's consumption normal a
     >>> <CurveUpdateEvent:
     >>>     event_id="123"
     >>>     curve="DE Consumption MWh/h 15min Normal",
-    >>>     event_type=EventType.UPDATE,
+    >>>     event_type=EventType.CURVE_UPDATE,
     >>>     begin="2023-01-01 01:15,
     >>>     end="2023-01-01 02:00",
     >>>     num_values=2>
@@ -61,11 +61,10 @@ Subscribe with the filters as follows:
     >>> from energyquantified import EnergyQuantified
     >>> eq = EnergyQuantified(...)
     >>> eq.events.connect()
-    >>> filter_1 = EventFilterOptions()
-    >>> filter_1.set_areas(["DE", "FR"])
-    >>> filter_2 = EventCurveOptions()
-    >>> filter_2.set_curve_names([<insert exact curve name here>])
-    >>> filters = [filter_1, filter_2]
+    >>> filters = [
+    >>>     EventFilterOptions(areas=["DE", "FR"]),
+    >>>     filter_2
+    >>> ]
     >>> eq.events.subscribe(filters)
 
 The filters can be updated on the fly while listening to the stream, due to websockets

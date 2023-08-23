@@ -4,6 +4,9 @@ from energyquantified.events.messages.server.responses import CurvesSubscribeDat
 
 @dataclass(frozen=True)
 class _Response:
+    """
+    Base model for push feed responses.
+    """
     status: bool
     errors: Optional[List[str]] = None
 
@@ -25,6 +28,9 @@ class _Response:
 
 @dataclass(frozen=True)
 class CurvesSubscribeResponse(_Response):
+    """
+    Response model from subscribing to curve events.
+    """
     data: Optional[CurvesSubscribeData] = None
 
     def __str__(self):
@@ -41,6 +47,9 @@ class CurvesSubscribeResponse(_Response):
 
 @dataclass(frozen=True)
 class CurvesFiltersResponse(_Response):
+    """
+    Response model from requesting currently active curve filters.
+    """
     data: Optional[CurvesFiltersData] = None
 
     def __str__(self):

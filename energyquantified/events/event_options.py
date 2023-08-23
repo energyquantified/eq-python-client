@@ -8,8 +8,8 @@ from .event_type import EventType
 
 class _BaseEventOptions:
     """
-    Base class with filters shared between EventCurveOptions and EventFilterOptions. This includes
-    begin, end, and event_types.
+    Base filter class with variables that can be used by all filter types (e.g., 
+    EventCurveoptions, EventFilterOptions). 
     """
 
     def __init__(self, begin=None, end=None, event_types=None):
@@ -81,9 +81,9 @@ class _BaseEventOptions:
     def set_event_types(self, event_types):
         """
         Set one or more EventTypes in this filter, excluding events not matching
-        at least one.
+        at least one. The EventTypes must be curve type (check with .is_curve_type).
 
-        :param event_types: EventTypes (optionally by tag) to include
+        :param event_types: EventTypes (or tags) to include
         :type event_types: list[EventType, str]
         :raises ValueError: Invalid arg type
         :raises ValueError: Invalid event tag
@@ -152,7 +152,7 @@ class _BaseEventOptions:
 class EventCurveOptions(_BaseEventOptions):
     """
     In addition to the inherited filters (begin, end, event_type), 
-    this option provides filtering on exact curve_names(s).
+    this option provides filtering on exact curve_names.
     """
 
     def __init__(

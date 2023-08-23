@@ -1,6 +1,11 @@
 from enum import Enum
-from .messages import ServerMessageMessage, ServerMessageCurveEvent
-from .responses import ServerResponseCurvesFilters, ServerResponseCurvesSubscribe, ServerResponseError
+from energyquantified.events.messages.server import (
+    ServerMessageMessage,
+    ServerMessageCurveEvent,
+    ServerResponseCurvesFilters,
+    ServerResponseCurvesSubscribe,
+    ServerResponseError,
+)
 
 STREAM_MESSAGE_TYPE_FIELD = "type"
 

@@ -8,24 +8,14 @@ import logging
 import os
 import re
 from energyquantified.events import (
-    MessageType,
     EventCurveOptions,
     EventFilterOptions,
     ConnectionEvent,
     CurveUpdateEvent,
     EventType,
+    TimeoutEvent,
 )
-from energyquantified.events.events import TimeoutEvent
 from energyquantified.events.responses import CurvesSubscribeResponse, CurvesFiltersResponse
-#from energyquantified.events.messages.requests import RequestCurvesSubscribe, RequestCurvesFilters
-# from energyquantified.events.server_message import (
-    # StreamMessageType,
-    # StreamMessageResponseCurvesSubscribe,
-    # StreamMessageResponseCurvesFilters,
-    # StreamMessageResponseError,
-    # StreamMessageMessage,
-    # StreamMessageCurveEvent,
-# )
 from energyquantified.events.messages import (
     RequestCurvesSubscribe,
     RequestCurvesFilters,
@@ -38,7 +28,7 @@ from energyquantified.events.messages import (
     ServerMessageType,
 )
 from energyquantified.events.callback import Callback, SUBSCRIBE_CURVES, GET_CURVE_FILTERS
-from energyquantified.events.connection_event import TIMEOUT, UNKNOWN_ERROR
+from energyquantified.events.connection_event import TIMEOUT
 import random
 import atexit
 from socket import timeout
@@ -169,8 +159,8 @@ class CurveUpdateEventAPI:
 
     def _setup_last_id_file(self):
         """
-        Finds last_id if the file exists with correct access.
-        Creates the file if not.
+        Creates a 'last_id'-file if the file does not already exist. If exists, update
+        last_id in memory with the value from the file.
         """
         if os.path.exists(self._last_id_file_path):
             # Raise error if path exists but it's not a file
@@ -247,10 +237,10 @@ class CurveUpdateEventAPI:
 
     def _last_id_to_file(self, last_id=None, write_interval_s=120):
         """
-        Saves the last_id to disk if the file path exists, last_id is not None,
-        and it's at least 'write_interval_s' seconds since last save.
+        Saves the last_id to disk if the file path exists, last_id (or self._last_id)
+        is not None, and it's at least 'write_interval_s' seconds since last save.
 
-        :param last_id: The id
+        :param last_id: The id (defaults to self._last_id if None)
         :type last_id: str, optional
         :param write_interval_s: The minimum number of seconds since last write, defaults to 120
         :type write_interval_s: int, optional
@@ -281,6 +271,9 @@ class CurveUpdateEventAPI:
         self._last_id_timestamp = time.time()
 
     def _on_open(self, _ws):
+        """
+        Callback function that is called whenever a new websocket connection is established.
+        """
         self._last_connection_event = None
         # Reset reconnect counter on successfull connection
         with self._remaining_reconnect_attempts_lock:
@@ -296,6 +289,9 @@ class CurveUpdateEventAPI:
                 self._ws.send(json.dumps(self._latest_curves_subscribe_message))
 
     def _on_message(self, _ws, message):
+        """
+        Callback func that is called whenever there is a new message on the ws.
+        """
         with self._messages_lock:
             message_json = json.loads(message)
             #print(f"msg: {message_json}")
@@ -417,7 +413,7 @@ class CurveUpdateEventAPI:
         """
         Connect to the curve update events stream.
 
-        To keep track of the last event received between sesssions, supply the
+        To keep track of the last event received between sessions, supply the
         ``last_id_file`` parameter with a file path. The file will be created
         for you if it does not already exist. This is useful in the case of
         a disconnect or an unexpected termination.
@@ -427,7 +423,7 @@ class CurveUpdateEventAPI:
         failing.
 
         The client tries to automatically reconnect if the connections drops. The
-        number of reconnect attempts can be changed with the ``reconnect_attempts``
+        number of reconnect attempts can be set through the ``reconnect_attempts``
         parameter.
 
         >>> from energyquantified import EnergyQuantified
@@ -448,10 +444,6 @@ class CurveUpdateEventAPI:
         :param last_id_file: A file path to a file that keeps track of the last\
                        event id received from the curve events stream
         :type last_id_file: str, optional
-        # TODO last_id moved to subscribe_curves_..(..)
-        :param last_id: ID of the latest event received. Used for excluding older events.\
-                Takes priority over the id from a potential last_id file.
-        :type last_id: str, optional
         :param timeout: The time in seconds to wait for a connection to be established.\
                 Also used as the minimum wait-time inbetween reconnect attempts. Defaults to 5.
         :type timeout: int, optional
@@ -552,10 +544,10 @@ class CurveUpdateEventAPI:
 
     def on_curves_subscribed(response):
         """
-        Default callback for how to handle a subscribe response.
+        Default callback function for handling a subscribe response.
 
-        :param response: The response for the subscribe message
-        :type response: SubscribeResponse
+        :param response: The response from subscribing to curve events
+        :type response: :py:class:`energyquantified.events.CurvesSubscribeResponse`
         """
         if response.ok:
             filters = response.data.filters
@@ -569,52 +561,45 @@ class CurveUpdateEventAPI:
         """
         Send a filter or a list of filters to the stream, subscribing to
         curve events matching any of the filters.
+
+        # TODO
+        1: subscribe_curve_events deletes events from message queue (those not handled)
+        2: last_id="keep" will use last_id from memory. The id from memory is probably from
+        the newest event in the message queue (an event that is potentially ignored by the user).
+        3: = missing events from queue
+        Solution: should update last_id in memoery whenever an event is yielded from the queue,
+        rather than when adding it to the queue.
+
+        First make sure to connect
+        (see :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`):
+
+            >>> from energyquantified import EnergyQuantified
+            >>> eq = EnergyQuantified(
+            >>>     api_key="aaaa-bbbb-cccc-dddd
+            >>> )
+            >>> eq.events.connect(last_id_file="last_id_file.json")
         
-        The server responds with the new filters if the subscribe was successful,
-        and the response is added to the message queue that can be accessed through
-        :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
-        The message will have the ``MessageType.FILTERS`` type. The response also
-        includes a unique id that can be preset by supplying the ``request_id``
-        parameter with an id in the call to subscribe. The id must be a ``uuid``
-        object in version 4 format, created as shown in the code snippet below:
+        Create a filter and subscribe:
 
-        # TODO update doc (remove uuid)
-            >>> import uuid
-            >>> subscribe_id = uuid.uuid4()
-
-        Subscribe with the preset request id:
-
-            >>> import uuid
-            >>> subscribe_id = uuid.uuid4()
-            >>> filters = ...
-            >>> subscribe(filters, request_id=subscribe_id)
-
-        Find out when you are successfully subscribed with the provided filters
-        by comparing your id with with the id's of new messages:
-
-            >>> import uuid
-            >>> from energyquantfied.events import MessageType
-            >>> subscribe_id = uuid.uuid4()
-            >>> filters = ...
-            >>> subscribe(filters, request_id=subscribe_id)
-            >>> # Compare ID while reading from the stream
-            >>> for msg_type, msg in eq.events.get_next():
-            >>>     if msg_type == MessageType.FILTERS:
-            >>>         if msg.request_id == subscribe_id:
-            >>>             # ID match so we know the filters are set
-
-        # TODO last_id=None, options: "keep"
+            >>> from energyquantified.events import EventFilterOptions
+            >>> filters = [EventFilterOptions(event_types=["CURVE_UPDATE"])]
+            >>> eq.events.subscribe_curve_events(filters=filters)
+        
+        If a custom callback function is not provided, the default ``on_curves_subscribe``
+        logs when a response is received.
 
         :param filters: The filters. Can be a single filter or a list of filters.
-        :type filters: list[:py:class:`energyquantified.events.EventFilterOptions` | \
+        :type filters: list[:py:class:`energyquantified.events.EventFilterOptions`, \
             :py:class:`energyquantified.events.EventCurveOptions`]
-        :param request_id: Preset id for the response
-        :type request_id: ``uuid.UUID`` (v4), optional
-        # TODO params
-        :param fill_last_id: If last_id is not set in the filters, this can be set to\
-            True in order to use subscribe to events after the last_id saved in memory.\
-            Does nothing if last_id is set in the filters. Defaults to False.
-        :type fill_last_id: bool
+        :param last_id: ID of the latest event received. Used for ex-/including older events.\
+                Takes priority over the id from a potential last_id file. Set to "keep"\
+                in order to use the last id from memory.
+        :type last_id: str, optional
+        :param callback: Set a custom callback function to handle the subscribe response. Defaults to\
+            :py:meth:`on_curves_subscribed() <energyquantified.api.CurveUpdateEventAPI.on_curves_subscribed>`.
+        :type callback: Callable, optional
+        :return: The obj instance this method was invoked upon, so the APi can be used fluently
+        :rtype: :py:class:`energyquantified.events.CurveUpdateEventAPI`
         """
         # Validate filters
         if not isinstance(filters, list):
@@ -632,7 +617,7 @@ class CurveUpdateEventAPI:
         # Validate last_id
         if last_id is not None:
             assert isinstance(last_id, str), "param 'last_id' must be None or a str"
-            # Use id from memeory if 'keep'
+            # Use id from memory if 'keep'
             if last_id.lower() == "keep":
                 last_id = self._last_id
             else:
@@ -682,179 +667,77 @@ class CurveUpdateEventAPI:
         msg = json.dumps(subscribe_message)
         #log.debug(f"Sending messsage to subscribe curves:\n{msg}")
         self._ws.send(msg)
+        return self
 
-    # def get_next(self, timeout=None):
-    #     """
-    #     Returns a generator over messages from the stream, and blocks
-    #     while waiting for new messages.
-        
-    #     Each messages is a tuple of two objects; (1) a
-    #     :py:class:`energyquantified.events.MessageType` and (2) one of
-    #     (:py:class:`energyquantified.events.CurveUpdateEvent`,
-    #     :py:class:`energyquantified.events.ConnectionEvent`, str, None). The
-    #     ``MessageType`` is used for describing the second element. Example:
+    def on_curves_filters(response):
+        """
+        Default callback function for handling a filters response.
 
-    #     >>> for msg_type, msg in enumerate(get_next(3)):
-    #     >>>     if msg_type == MessageType.EVENT:
-    #     >>>         # Got a new event
-    #     >>>         # msg. ...
-    #     >>>     elif msg_type == MessageType.INFO:
-    #     >>>         # Got an informative message from the server
-    #     >>>         # Maybe I want to skip this
-    #     >>>     elif msg_type == MessageType.FILTERS:
-    #     >>>         # Got the currently active filters on the stream, let's
-    #     >>>         # check it out
-    #     >>>         print(msg)
-    #     >>>     elif msg_type == MessageType.TIMEOUT:
-    #     >>>         # No new message or event in the last 'timeout' seconds
-    #     >>>         # Maybe I want to change filters soon ..
+        :param response: The response from requesting active curve event filters
+        :type response: :py:class:`energyquantified.events.CurvesFiltersResponse`
+        """
+        if response.ok:
+            filters = response.data.filters
+            log.info("Active curve event filters: %s" % filters)
+        else:
+            errors = response.errors
+            log.error("Failed to get active curve event filters: %s" % errors)
 
-    #     See also :py:class:`energyquantified.events.MessageType`.
+    def get_curve_filters(self, callback=on_curves_filters):
+        """
+        Request the active curve event filters.
 
-    #     The different message types and what they mean:
+        First make sure to connect
+        (see :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`):
 
-    #     What the second element is based on the first element:
-    #     ``MessageType.EVENT``:
-    #         A new event.
+            >>> from energyquantified import EnergyQuantified
+            >>> eq = EnergyQuantified(
+            >>>     api_key="aaaa-bbbb-cccc-dddd
+            >>> )
+            >>> eq.events.connect(last_id_file="last_id_file.json")
 
-    #         type: :py:class:`energyquantified.events.CurveUpdateEvent`
+        Request the active curve event filters:
 
-    #     ``MessageType.INFO``:
-    #         An informative message from the stream server.
+            >>> eq.events.get_curve_filters()
 
-    #         type: str
+        If a custom callback function is not provided, the default ``on_curves_filters``
+        logs when a response is received.
 
-    #     ``MessageType.FILTERS``:
-    #         A list of filters currently subscribed to.
-
-    #         type: list[:py:class:`energyquantified.events.EventFilterOptions`
-    #         | :py:class:`energyquantified.events.EventCurveOptions`]
-
-    #     ``MessageType.ERRORS``:
-    #         An error message that could either be from the stream (e.g., after
-    #         subscribing with invalid filters), or if something went wrong while
-    #         parsing a message.
-
-    #         type: str
-
-    #     ``MessageType.TIMEOUT``:
-    #         This means that the client is connected to the stream and no messages has
-    #         been received in the last ``timeout`` (i.e., the number supplied to the
-    #         ``timeout`` parameter) seconds, and the second element is simply ``None``
-    #         and can be ignored. The intention of this message type is to provider users
-    #         with a way to act inbetween events (e.g., to change filters).
-
-    #         type: None
-
-    #     ``MessageType.DISCONNECTED``:
-    #         This means that the client is neither connected to the stream, nor is it
-    #         trying to (re)connect. This happens if
-    #         :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>` is
-    #         called before :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`,
-    #         if the initial connection failed, or if the connection dropped and the maximum number
-    #         of reconnect attempts was exceeded. The
-    #         :py:class:`energyquantified.events.ConnectionEvent` describes the cause of the error.
-    #         Since this means that the the client will **not** automatically reconnect,
-    #         :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>` must be manually
-    #         invoked in order to reconnect.
-
-    #         type: :py:class:`energyquantified.events.ConnectionEvent`
-
-    #     ``get_next()`` blocks program execution until a new message is available. If the
-    #     ``timeout`` parameter is set, a tuple with ``MessageType.TIMEOUT`` is yielded
-    #     whenever the timeout is reached. 
-            
-    #     :param timeout: The number of seconds to wait (blocking) for a new message,\
-    #             yielding a MessageType.TIMEOUT if the timeout occurs. Waits indefinetly\
-    #             if timeout is None. Defaults to None.
-    #     :type timeout: int, optional
-    #     :yield: A generator of messages from the stream, blocks while waiting for new
-    #     :rtype: tuple
-    #     """
-    #     # TODO should probably use _messages_lock here
-    #     while True:
-    #         # Make sure 
-    #         if not self._is_connected.is_set():
-    #             try:
-    #                 # Block=False since not connected
-    #                 msg = self._messages.get(block=False)
-    #                 yield msg
-    #                 self._messages.task_done()
-    #             except queue.Empty:
-    #                 # Wait if trying to (re)connect
-    #                 self._done_trying_to_connect.wait()
-    #                 # Yield DC ConnectionEvent if not connected and not retrying
-    #                 # ^ either if never connected or exceeded max reconnect attempts
-    #                 if self._should_not_connect.is_set():
-    #                     yield (MessageType.DISCONNECTED, self._last_connection_event)
-    #                     # Wait up to 2 seconds before next iteration. Breaks early if
-    #                     # a new connection has been established (in case of incoming events)
-    #                     self._is_connected.wait(2)
-    #         else:
-    #             try:
-    #                 msg = self._messages.get(timeout=timeout)
-    #                 yield msg
-    #                 self._messages.task_done()
-    #             except queue.Empty:
-    #                 # If connection dropped while waiting for a message 
-    #                 if not self._is_connected.is_set():
-    #                     continue
-    #                 yield (MessageType.TIMEOUT, None)
+        :param callback: Set a custom callback function to handle the subscribe response. Defaults to\
+            :py:meth:`on_curves_filters() <energyquantified.api.CurveUpdateEventAPI.on_curves_filters>`.
+        :type callback: Callable, optional
+        :return: The obj instance this method was invoked upon, so the APi can be used fluently
+        :rtype: :py:class:`energyquantified.events.CurveUpdateEventAPI`
+        """
+        request_id = uuid.uuid4()
+        get_filters_msg = RequestCurvesFilters(request_id).to_message()
+        with self._messages_lock:
+            for _, obj in self._callbacks.items(): 
+                if obj.callback_type == GET_CURVE_FILTERS:
+                    obj.latest = False
+                    # TODO or just del the old callbacks?
+            # Callback
+            callback = Callback(callback, callback_type=GET_CURVE_FILTERS, latest=True)
+            self._callbacks[request_id] = callback
+        # Send msg
+        msg = json.dumps(get_filters_msg)
+        #log.debug(f"Sending message to get latest filters:\n{msg}")
+        self._ws.send(msg)
+        return self
 
     def get_next(self, timeout=None):
         """
         Returns a generator over messages from the stream, and blocks
-        while waiting for new messages.
+        while waiting for new.
         
-        Each messages is a tuple of two objects; (1) a
-        :py:class:`energyquantified.events.MessageType` and (2) one of
-        (:py:class:`energyquantified.events.CurveUpdateEvent`,
-        :py:class:`energyquantified.events.ConnectionEvent`, str, None). The
-        ``MessageType`` is used for describing the second element. Example:
 
+        # TODO (delete or use comment)
         >>> for msg_type, msg in enumerate(get_next(3)):
-        >>>     if msg_type == MessageType.EVENT:
-        >>>         # Got a new event
-        >>>         # msg. ...
-        >>>     elif msg_type == MessageType.INFO:
-        >>>         # Got an informative message from the server
-        >>>         # Maybe I want to skip this
-        >>>     elif msg_type == MessageType.FILTERS:
-        >>>         # Got the currently active filters on the stream, let's
-        >>>         # check it out
-        >>>         print(msg)
         >>>     elif msg_type == MessageType.TIMEOUT:
         >>>         # No new message or event in the last 'timeout' seconds
         >>>         # Maybe I want to change filters soon ..
 
-        See also :py:class:`energyquantified.events.MessageType`.
-
-        The different message types and what they mean:
-
-        What the second element is based on the first element:
-        ``MessageType.EVENT``:
-            A new event.
-
-            type: :py:class:`energyquantified.events.CurveUpdateEvent`
-
-        ``MessageType.INFO``:
-            An informative message from the stream server.
-
-            type: str
-
-        ``MessageType.FILTERS``:
-            A list of filters currently subscribed to.
-
-            type: list[:py:class:`energyquantified.events.EventFilterOptions`
-            | :py:class:`energyquantified.events.EventCurveOptions`]
-
-        ``MessageType.ERRORS``:
-            An error message that could either be from the stream (e.g., after
-            subscribing with invalid filters), or if something went wrong while
-            parsing a message.
-
-            type: str
-
+        # TODO (delete or use comment)
         ``MessageType.TIMEOUT``:
             This means that the client is connected to the stream and no messages has
             been received in the last ``timeout`` (i.e., the number supplied to the
@@ -864,6 +747,7 @@ class CurveUpdateEventAPI:
 
             type: None
 
+        # TODO (delete or use comment)
         ``MessageType.DISCONNECTED``:
             This means that the client is neither connected to the stream, nor is it
             trying to (re)connect. This happens if
@@ -883,11 +767,13 @@ class CurveUpdateEventAPI:
         whenever the timeout is reached. 
             
         :param timeout: The number of seconds to wait (blocking) for a new message,\
-                yielding a MessageType.TIMEOUT if the timeout occurs. Waits indefinetly\
+                yielding a ``TimeoutEvent`` if the timeout occurs. Waits indefinetly\
                 if timeout is None. Defaults to None.
         :type timeout: int, optional
-        :yield: A generator of messages from the stream, blocks while waiting for new
-        :rtype: tuple
+        :yield: A generator of events. Blocks while waiting for a new event.
+        :rtype: :py:class:`energyquantified.events.CurveUpdateEvent`,\
+            :py:class:`energyquantified.events.ConnectionEvent`,\
+            :py:class:`energyquantified.events.TimeoutEvent`
         """
         if timeout is not None:
             last_timeout_timestamp = int(time.time())
@@ -929,101 +815,3 @@ class CurveUpdateEventAPI:
                             yield TimeoutEvent()
                             last_timeout_timestamp = int(time.time())
                     time.sleep(0.1)
-
-    def on_curves_filters(response):
-        if response.ok:
-            filters = response.data.filters
-            log.info("Currently active curve event filters: %s" % filters)
-        else:
-            errors = response.errors
-            log.error("Failed to get currently active curve event filters: %s" % errors)
-
-    def get_curve_filters(self, callback=on_curves_filters):
-        request_id = uuid.uuid4()
-        get_filters_msg = RequestCurvesFilters(request_id).to_message()
-        with self._messages_lock:
-            for _, obj in self._callbacks.items(): 
-                if obj.callback_type == GET_CURVE_FILTERS:
-                    obj.latest = False
-                    # TODO or just del the old callbacks?
-            # Callback
-            callback = Callback(callback, callback_type=GET_CURVE_FILTERS, latest=True)
-            self._callbacks[request_id] = callback
-        # Send msg
-        msg = json.dumps(get_filters_msg)
-        #log.debug(f"Sending message to get latest filters:\n{msg}")
-        self._ws.send(msg)
-
-
-    # def send_get_filters(self, request_id=None):
-    #     """
-    #     Send a message to the stream requesting the currently active filters.
-    #     When the server responds with the filters it will be added to the
-    #     message queue that is accessible through
-    #     :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`,
-    #     and the first element of the message will have ``MessageType.FILTERS``.
-
-    #     The server responds with a message that includes the filters and a unique
-    #     id. The id in the response can be manually chosen by supplying the
-    #     ``request_id`` parameter with an id, which can be useful if you want to
-    #     be certain that the filters you get in return are for a specific request.
-    #     ``request_id`` must be a uuid.UUID object in version 4.
-
-    #     # TODO remove uuid
-    #     Create a uuid as shown below:
-
-    #         >>> import uuid
-    #         >>> get_filters_id = uuid.uuid4()
-
-    #     Preset the request_id when requesting the active filters:
-    #         >>> import uuid
-    #         >>> get_filters_id = uuid.uuid4()
-    #         >>> send_get_filters(request_id=get_filters_id)
-
-    #     Find the response related to your message by comparing the id:
-
-    #         >>> import uuid
-    #         >>> from energyquantified.events import MessageType
-    #         >>> get_filters_id = uuid.uuid4()
-    #         >>> send_get_filters(request_id=get_filters_id)
-    #         >>> # Compare ID while reading from the stream
-    #         >>> for msg_type, msg in eq.events.get_next():
-    #         >>>     if msg_type == MessageType.FILTERS:
-    #         >>>         if msg.request_id == get_filters_id:
-    #         >>>             # ID match so we know which message the response regards
-
-    #     :param request_id: Preset id for the response
-    #     :type request_id: ``uuid.UUID`` (v4), optional
-    #     """
-    #     msg = {"action": "filter.get"}
-    #     if request_id is not None:
-    #         # Assert uuid and version
-    #         _assert_uuid4(request_id)
-    #         msg["id"] = str(request_id)
-    #     self._ws.send(json.dumps(msg))
-
-    # # TODO remove, this is a test
-    # def sub2(self, last_id, request_id=None):
-    #     msg = {
-    #         "action": "events.get",
-    #         "last_id": last_id,
-    #     }
-    #     if request_id is not None:
-    #         msg["id"] = str(request_id)
-
-    #     print(f"sending msg: {msg}")
-    #     self._ws.send(json.dumps(msg))
-
-# def _assert_uuid4(id):
-#     """
-#     Asserts that an id is a valid uuid v4.
-
-#     :param id: The id
-#     :type id: ``uuid.UUID``
-#     """
-#     assert isinstance(id, uuid.UUID), (
-#         "Optionally parameter request_id must be type uuid if set"
-#     )
-#     assert id.version == 4, (
-#         f"Expected uuid version 4 but found: {id.version}"
-#     )

@@ -1,6 +1,3 @@
-
-
-    
 class _BaseServerMessage:
 
     @staticmethod

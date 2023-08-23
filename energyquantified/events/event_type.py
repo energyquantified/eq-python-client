@@ -4,12 +4,13 @@ _event_lookup = {}
 
 class EventType(Enum):
     """
-    A field in a CurveUpdateEvent object, also used for filtering
-    events from the stream. Describes the data operation of an event.
+    A field in event objects, describing the type of event.
 
-     * ``UPDATE`` – Data is created or modified
-     * ``DELETE`` – Data is deleted
-     * ``TRUNCATE`` – All data for a curve is deleted
+     * ``CURVE_UPDATE`` –Data for a curve is created or modified
+     * ``CURVE_DELETE`` – Some data for a curve is deleted
+     * ``CURVE_TRUNCATE`` – All data for a curve is deleted
+     * ``DISCONNECTED`` – Disconnected from the stream
+     * ``TIMEOUT`` – Timeout
     """
 
     CURVE_UPDATE = ("CURVE_UPDATE", "Curve Update", True, False, False)
@@ -59,12 +60,30 @@ class EventType(Enum):
 
     @property
     def is_curve_type(self):
+        """
+        Check if this event type is for curve events.
+
+        :return: True if this event type is used for curve events, otherwise False.
+        :rtype: bool
+        """
         return self._is_curve_type
 
     @property
     def is_connection_type(self):
+        """
+        Check if this event type is for connection events.
+
+        :return: True if this event type is used by connection events, otherwise False.
+        :rtype: bool
+        """
         return self._is_connection_type
 
     @property
     def is_timeout_type(self):
+        """
+        Check if this event type is for timeout events.
+
+        :return: True if this event type is used by timeout events, otherwise False.
+        :rtype: bool
+        """
         return self._is_timeout_type
