@@ -256,29 +256,43 @@ Metadata
 Curve events
 -------------
 
-.. autoclass:: energyquantified.events.ConnectionEvent
-   :inherited-members:
-   :special-members: __str__, __repr__
-
-.. autoclass:: energyquantified.events.EventCurveOptions
-   :inherited-members:
-   :special-members: __str__, __repr__
-
-.. autoclass:: energyquantified.events.EventFilterOptions
-   :inherited-members:
-   :special-members: __str__, __repr__
-
 .. autoclass:: energyquantified.events.EventType
    :inherited-members:
-   :special-members: __str__, __repr__
+
+------
 
 .. autoclass:: energyquantified.events.CurveUpdateEvent
    :inherited-members:
-   :special-members: __str__, __repr__
 
-.. autoclass:: energyquantified.events.MessageType
+------
+
+.. autoclass:: energyquantified.events.ConnectionEvent
    :inherited-members:
-   :special-members: __str__, __repr__
+
+------
+
+.. autoclass:: energyquantified.events.TimeoutEvent
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.events.EventCurveOptions
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.events.EventFilterOptions
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.events.CurvesSubscribeResponse
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.events.CurvesFiltersResponse
+   :inherited-members:
 
 
 Date and time

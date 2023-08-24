@@ -582,7 +582,9 @@ class CurveUpdateEventAPI:
         Create a filter and subscribe:
 
             >>> from energyquantified.events import EventFilterOptions
-            >>> filters = [EventFilterOptions(event_types=["CURVE_UPDATE"])]
+            >>> filters = [
+            >>>     EventFilterOptions(event_types="CURVE_UPDATE")
+            >>> ]
             >>> eq.events.subscribe_curve_events(filters=filters)
         
         If a custom callback function is not provided, the default ``on_curves_subscribe``
@@ -727,45 +729,37 @@ class CurveUpdateEventAPI:
 
     def get_next(self, timeout=None):
         """
-        Returns a generator over messages from the stream, and blocks
-        while waiting for new.
+        Returns a generator over new events, and blocks while waiting for new.
         
+        Every event returned is one of the following types:
+        1: :py:class:`energyquantified.events.CurveUpdateEvent`
+        2: :py:class:`energyquantified.events.ConnectionEvent`
+        3: :py:class:`energyquantified.events.TimeoutEvent`
 
-        # TODO (delete or use comment)
-        >>> for msg_type, msg in enumerate(get_next(3)):
-        >>>     elif msg_type == MessageType.TIMEOUT:
-        >>>         # No new message or event in the last 'timeout' seconds
-        >>>         # Maybe I want to change filters soon ..
+        The ``event_type`` attribute is common for all events and can be used to
+        check the type of an event.
 
-        # TODO (delete or use comment)
-        ``MessageType.TIMEOUT``:
-            This means that the client is connected to the stream and no messages has
-            been received in the last ``timeout`` (i.e., the number supplied to the
-            ``timeout`` parameter) seconds, and the second element is simply ``None``
-            and can be ignored. The intention of this message type is to provider users
-            with a way to act inbetween events (e.g., to change filters).
+        :py:class:`energyquantified.events.CurveUpdateEvent` is the model that
+        describes change in data for a curve. :py:class:`energyquantified.events.ConnectionEvent`
+        describes a new event related to the connection.
+        
+        >>> import time
+        >>> from energyquantified.events import EventType
+        >>> for event in eq.events.get_next(timeout=10):
+        >>>     if event.event_type.is_curve_type():
+        >>>         # This is a curve event, so we can load data
+        >>>         data = event.load_data()
+        >>>     elif event.event_type.is_connection_type():
+        >>>         if event.event_type == EventType.DISCONNECTED
+        >>>             # You are not connected
+        >>>             # Wait a moment before reconnecting
+        >>>             time.sleep(10)
+        >>>             eq.events.connect()
+        >>>     elif event.event_type.is_timeout_type():
+        >>>         # Nothing happened in the last 10 seconds
+        >>>         # Use this event to act in between events during quiet times
+        >>>         pass
 
-            type: None
-
-        # TODO (delete or use comment)
-        ``MessageType.DISCONNECTED``:
-            This means that the client is neither connected to the stream, nor is it
-            trying to (re)connect. This happens if
-            :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>` is
-            called before :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`,
-            if the initial connection failed, or if the connection dropped and the maximum number
-            of reconnect attempts was exceeded. The
-            :py:class:`energyquantified.events.ConnectionEvent` describes the cause of the error.
-            Since this means that the the client will **not** automatically reconnect,
-            :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>` must be manually
-            invoked in order to reconnect.
-
-            type: :py:class:`energyquantified.events.ConnectionEvent`
-
-        ``get_next()`` blocks program execution until a new message is available. If the
-        ``timeout`` parameter is set, a tuple with ``MessageType.TIMEOUT`` is yielded
-        whenever the timeout is reached. 
-            
         :param timeout: The number of seconds to wait (blocking) for a new message,\
                 yielding a ``TimeoutEvent`` if the timeout occurs. Waits indefinetly\
                 if timeout is None. Defaults to None.

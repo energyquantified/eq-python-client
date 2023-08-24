@@ -140,11 +140,13 @@ class ConnectionEvent(_Event):
         :return: String representation of this object
         :rtype: str
         """
-        return (f"<ConnectionEvent: "
-                f"event_type={self.event_type}, "
-                f"status={self.status}, "
-                f"status_code={self.status_code}, "
-                f"message={self.message}>")
+        return (
+            f"<ConnectionEvent: "
+            f"event_type={self.event_type}, "
+            f"status={self.status}, "
+            f"status_code={self.status_code}, "
+            f"message={self.message}>"
+        )
 
     def __repr__(self):
         return str(self)
