@@ -7,15 +7,15 @@ class _Event:
 
     @property
     def is_curve_event(self):
-        return self.event_type.is_curve_type
+        return self.event_type.is_curve_type()
 
     @property
     def is_connection_event(self):
-        return self.event_type.is_connection_type
+        return self.event_type.is_connection_type()
     
     @property
     def is_timeout_event(self):
-        return self.event_type.is_timeout_type
+        return self.event_type.is_timeout_type()
 
     def _set_event_type(self, event_type):
         raise NotImplementedError    
@@ -25,7 +25,7 @@ class TimeoutEvent(_Event):
         super().__init__(event_type=EventType.TIMEOUT)
 
     def _set_event_type(self, event_type):
-        assert event_type.is_timeout_type, f"Cannot create TimeoutEvent with EventType={event_type}"
+        assert event_type.is_timeout_type(), f"Cannot create TimeoutEvent with EventType={event_type}"
         self.event_type = event_type
 
     def __str__(self):
@@ -59,7 +59,7 @@ class CurveUpdateEvent(_Event):
         self.num_values = num_values
 
     def _set_event_type(self, event_type):
-        assert event_type.is_curve_type, (
+        assert event_type.is_curve_type(), (
             f"Cannot create CurveUpdateEvent with EventType={event_type}"
         )
         self.event_type = event_type

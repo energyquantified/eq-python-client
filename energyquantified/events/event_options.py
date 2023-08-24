@@ -81,7 +81,7 @@ class _BaseEventOptions:
     def set_event_types(self, event_types):
         """
         Set one or more EventTypes in this filter, excluding events not matching
-        at least one. The EventTypes must be curve type (check with .is_curve_type).
+        at least one. The EventTypes must be curve type (check with .is_curve_type()).
 
         :param event_types: EventTypes (or tags) to include
         :type event_types: list[EventType, str]
@@ -101,7 +101,7 @@ class _BaseEventOptions:
                 event_type = EventType.by_tag(event_type)
             if not isinstance(event_type, EventType):
                 raise ValueError(f"'{event_type}' is not type 'EventType' or 'str'")
-            if not event_type.is_curve_type:
+            if not event_type.is_curve_type():
                 raise ValueError(f"EventType: {event_type} not valid for curve filters")
             new_event_types.add(event_type)
         self._event_types = list(new_event_types)

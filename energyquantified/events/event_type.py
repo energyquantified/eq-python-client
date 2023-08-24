@@ -16,9 +16,9 @@ class EventType(Enum):
     timeout events:
 
         >>> from energyquantified.events import EventType
-        >>> EventType.CURVE_UPDATE.is_curve_type
+        >>> EventType.CURVE_UPDATE.is_curve_type()
         >>> > True
-        >>> EventType.CURVE_UPDATE.is_connection_type
+        >>> EventType.CURVE_UPDATE.is_connection_type()
         >>> > False
     """
 
@@ -67,7 +67,6 @@ class EventType(Enum):
         """
         return _event_lookup[tag.lower()]
 
-    @property
     def is_curve_type(self):
         """
         Check if this event type is for curve events.
@@ -77,7 +76,6 @@ class EventType(Enum):
         """
         return self._is_curve_type
 
-    @property
     def is_connection_type(self):
         """
         Check if this event type is for connection events.
@@ -87,7 +85,6 @@ class EventType(Enum):
         """
         return self._is_connection_type
 
-    @property
     def is_timeout_type(self):
         """
         Check if this event type is for timeout events.

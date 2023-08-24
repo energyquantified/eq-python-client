@@ -150,7 +150,7 @@ class ConnectionEvent(_Event):
         return str(self)
     
     def _set_event_type(self, event_type):
-        assert event_type.is_connection_type, (
+        assert event_type.is_connection_type(), (
             f"Cannot create a ConnectionEvent with EventType={event_type}, event type must be a connection type"
         )
         self.event_type = event_type
