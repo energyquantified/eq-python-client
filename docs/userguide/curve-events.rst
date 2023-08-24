@@ -50,10 +50,10 @@ Connect to the stream with :py:meth:`connect() <energyquantified.api.CurveUpdate
     >>> eq.events.connect()
 
 After connecting, one must first subscribe with one or more filters in order to receive events.
-The filters specify which curves to receive events for. There are two different models for the filters:
+The filters specify which curves to receive events for. There are two different filter models:
 
-- :py:class:`~energyquantified.events.EventCurveOptions`: By curve a list of curves
-- :py:class:`~energyquantified.events.EventFilterOptions`: Providing search filters similar
+- :py:class:`~energyquantified.events.EventCurveOptions`: Filter by exact curves
+- :py:class:`~energyquantified.events.EventFilterOptions`: Search filters similar
   to the curve search
 
 Subscribe with the filters as follows:
@@ -63,31 +63,33 @@ Subscribe with the filters as follows:
     >>> eq.events.connect()
     >>> filters = [
     >>>     EventFilterOptions(areas=["DE", "FR"]),
-    >>>     filter_2
+    >>>     filter_2,
     >>> ]
     >>> eq.events.subscribe(filters)
 
 The filters can be updated on the fly while listening to the stream, due to websockets
 bidirectional communication protocol.
 
-Message and event types
+Server messages
 ~~~~~~~~~~~~~~
 
-Data from the stream is not limited to events, but can be informative messages (e.g., connection
-is established) or error messages (e.g., invalid filters). Events and messages is accessed through
-:py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
-:py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>` is a generator
-and each object will be a tuple of two elements;
+By default, messages from the server will be logged at the info level. Override the default by
+setting a custom callback function with 
+:py:meth:`eq.events.set_message_handler() <energyquantified.api.CurveUpdateEventAPI.set_message_handler>`.
+The custom function must take in one parameter; the server message which is a string.
 
-#. A :py:class:`~energyquantified.events.MessageType` describing the second item
-#. The event or message received (e.g., :py:class:`~energyquantified.events.CurveUpdateEvent`)
+Types of events
+~~~~~~~~~~~~~~
 
-If the latest message is a curve event the pair will look like: (``MessageType.EVENT``,
-:py:class:`~energyquantified.events.CurveUpdateEvent`), and if it is just a simple message
-from the server it would be (``MessageType.INFO``, "Hello, client.").
+Events are accessed through :py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
 
-The types of combinations is further described in
-:py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
+Curve event: :py:class:`energyquantified.events.CurveUpdateEvent`:
+    Describes change in data for a curve
+
+Connection event: :py:class:`energyquantified.events.ConnectionEvent`:
+    Describes an event related to the stream connection (e.g., disconnect)
+
+What is common for all event models is that they all have the ``event_type`` property.
 
 Quickstart
 ---------------------
@@ -97,36 +99,52 @@ Connect to the stream and subscribe to events
 
 Connect to the stream by calling
 :py:meth:`eq.events.connect() <energyquantified.api.CurveUpdateEventAPI.connect>`. Note that this
-blocks program execution until a connection to the stream has been established, or max (re)connect
-attempts is exceeded.
+temporarily blocks program execution while trying to establish a connection to the stream.
 
     >>> eq.events.connect()
 
-After successfully connecting to the stream you will immediately start to receive messages. Handle messages as
-they come with :py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`:
+Note that you will not immediately start to receive events after connecting to the stream. In order to
+receive curve events you must also subscribe. Subscribe to curve events with
+:py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.CurveUpdateEventAPI.subscribe_curve_events>`.
+The example below illustrates how to subscribing for curve events that concern actual-data in Germany:
 
+    >>> from energyquantified.events import EventFilterOptions
     >>> eq.events.connect()
-    >>> for msg_type, data in eq.events.get_next():
-    >>>     if msg_type == MessageType.INFO:
-    >>>         print(f"New message from the stream: {data}")
+    >>> filters = [
+    >>>     EventFilterOptions(
+    >>>         areas="DE",
+    >>>         data_types="ACTUAL",
+    >>>     )
+    >>> ]
+    >>> eq.events.subscribe_curve_events(filters=filters)
 
-Note that you **must subscribe with a filter in order to start receiving events**. The example below
-illustrates how to subscribe to events that concern actual-data in Germany:
+After subscribing you will automatically start to receive events. These events can be accessed in the generator
+:py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`:
 
-    >>> from energyquantified.event_options import EventFilterOptions
-    >>> from energyquantified.events import MessageType
+    >>> from energyquantified.events import EventFilterOptions
     >>> eq.events.connect()
-    >>> # Create filter for actual-data in Germany
-    >>> filter = EventFilterOptions()
-    >>>             .set_areas("DE")
-    >>>             .set_data_types("ACTUAL")
-    >>> # Subscribe with the filter
-    >>> eq.events.subscribe(filter)
-    >>> for msg_type, data in eq.events.get_next():
-    >>>     if msg_type == MessageType.EVENT:
-    >>>         print(f"New event: {data}")
-    >>>     elif msg_type == MessageType.INFO:
-    >>>         print(f"New message from the stream: {data}")
+    >>> # Subscribe to all events for Germany
+    >>> filters = [EventFilterOptions(areas="DE")]
+    >>> eq.events.subscribe_curve_events(filters=filters)
+    >>> for event in eq.events.get_next():
+    >>>     # Handle event
+
+Events from :py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`
+can be of different types, so you will sometimes get events of different type than
+:py:class:`~energyquantified.events.CurveUpdateEvent`. For instance, you will get a
+:py:class:`~energyquantified.events.ConnectionEvent` in the case of an unexpected disconnect.
+The ``event_type`` attribute is common for all events from ``get_next()``, and may be used to
+check the type of an event.
+
+    >>> from energyquantified.events import EventType
+    >>> # After connecting and subscribing
+    >>> for event in eq.events.get_next():
+    >>>     if event.event_type.is_curve_type:
+    >>>         # Handle the curve event
+    >>>     elif event.event_type.is_connection_type:
+    >>>         # Handle connection event
+    >>>         if event.event_type == EventType.DISCONNECTED:
+    >>>             # Maybe reconect?
 
 Network error and reconnecting
 ~~~~~~~~~~~~~~
@@ -630,3 +648,7 @@ Or by using `atexit <https://docs.python.org/3/library/atexit.html>`:
     >>>         # ...
     >>>         # Done handling the event, let's save the id
     >>>         last_id = data.event_id
+
+Message and error handlers
+~~~~~~~~~~~~~~
+todo

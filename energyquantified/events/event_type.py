@@ -11,6 +11,15 @@ class EventType(Enum):
      * ``CURVE_TRUNCATE`` – All data for a curve is deleted
      * ``DISCONNECTED`` – Disconnected from the stream
      * ``TIMEOUT`` – Timeout
+
+    Check if an EventType object is for curve-, connection- or
+    timeout events:
+
+        >>> from energyquantified.events import EventType
+        >>> EventType.CURVE_UPDATE.is_curve_type
+        >>> > True
+        >>> EventType.CURVE_UPDATE.is_connection_type
+        >>> > False
     """
 
     CURVE_UPDATE = ("CURVE_UPDATE", "Curve Update", True, False, False)

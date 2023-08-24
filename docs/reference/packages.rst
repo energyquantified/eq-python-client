@@ -111,16 +111,17 @@ Implementation of curve event models and related metadata classes:
    :py:class:`EventType <energyquantified.events.EventType>`.
 
  * :py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`:
-   An event that describes the cause of a disconnect.
+   A model for describing events related to the stream connection (e.g., disconnect).
+
+ * :py:class:`TimeoutEvent <energyquantified.events.TimeoutEvent>`:
+   A filler event that enables users act between actual events from
+   :py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
 
  * :py:class:`EventType <energyquantified.events.EventType>`:
-   Enumerator of event types for
-   :py:class:`CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`
-   objects.
-
- * :py:class:`MessageType <energyquantified.events.MessageType>`:
-   Enumerator of message types that describes the data type of messages
-   received from listening to the curve stream.
+   Enumerator of event types for event models (e.g.,
+   :py:class:`CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`,
+   :py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`,
+   :py:class:`TimeoutEvent <energyquantified.events.TimeoutEvent>`).
 
  * :py:class:`EventFilterOptions <energyquantified.events.EventFilterOptions>`:
    One of two classes used for filtering events when subscribing to the curve
@@ -131,6 +132,12 @@ Implementation of curve event models and related metadata classes:
    One of two classes used for filtering events when subscribing to the curve
    stream. This options class is for filtering on specific 
    :py:class:`Curve <energyquantified.metadata.Curve>`'s.
+
+ * :py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`:
+   Model for response from subscribing to curve events.
+
+ * :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`:
+   Model for response from requesting active curve event filters.
 
 ``energyquantified.time``
 -------------------------
