@@ -306,8 +306,6 @@ class CurveUpdateEventAPI:
             elif isinstance(msg_obj, ServerMessageCurveEvent):
                 if self._is_subscribed_curves.is_set():
                     event = msg_obj.event
-                    self._update_last_id(event.event_id)
-                    self._last_id_to_file(event.event_id)
                     self._messages.put(event)
             elif isinstance(msg_obj, _ServerResponse):
                 callback = self._callbacks.pop(msg_obj.request_id, None)
@@ -561,14 +559,6 @@ class CurveUpdateEventAPI:
         Send a filter or a list of filters to the stream, subscribing to
         curve events matching any of the filters.
 
-        # TODO
-        1: subscribe_curve_events deletes events from message queue (those not handled)
-        2: last_id="keep" will use last_id from memory. The id from memory is probably from
-        the newest event in the message queue (an event that is potentially ignored by the user).
-        3: = missing events from queue
-        Solution: should update last_id in memoery whenever an event is yielded from the queue,
-        rather than when adding it to the queue.
-
         First make sure to connect
         (see :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`):
 
@@ -778,6 +768,11 @@ class CurveUpdateEventAPI:
                 self._messages.task_done()
                 self._messages_lock.release()
                 last_event_timestamp = time.time()
+                # Update last_id if curve event
+                if isinstance(event, CurveUpdateEvent):
+                    # Assumes we are subscribed
+                    self._update_last_id(event.event_id)
+                    self._last_id_to_file(event.event_id)
                 yield event
             except queue.Empty:
                 self._messages_lock.release()
