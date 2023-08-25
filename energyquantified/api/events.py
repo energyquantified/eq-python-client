@@ -769,44 +769,37 @@ class CurveUpdateEventAPI:
             :py:class:`energyquantified.events.TimeoutEvent`
         """
         if timeout is not None:
-            last_event_timestamp = int(time.time())
+            last_event_timestamp = None
         while True:
             self._messages_lock.acquire()
-            if not self._is_connected.is_set():
-                try:
-                    # Block=False since not connected
-                    msg = self._messages.get_nowait()
-                    self._messages.task_done()
-                    self._messages_lock.release()
-                    last_event_timestamp = time.time()
-                    yield msg
-                except queue.Empty:
-                    self._messages_lock.release()
-                    # Wait if trying to (re)connect
-                    self._done_trying_to_connect.wait()
-                    # Yield DC ConnectionEvent if not connected and not retrying
-                    # ^ either if never connected or exceeded max reconnect attempts
-                    if self._should_not_connect.is_set():
-                        yield (self._last_connection_event)
-                        # Wait up to 2 seconds before next iteration. Breaks early if
-                        # a new connection has been established (in case of incoming events)
-                        self._is_connected.wait(2)
-            else:
-                try:
-                    msg = self._messages.get_nowait()
-                    self._messages.task_done()
-                    self._messages_lock.release()
-                    last_event_timestamp =  time.time()
-                    yield msg
-                except queue.Empty:
-                    self._messages_lock.release()
-                    # If connection dropped while waiting for a message 
-                    if not self._is_connected.is_set():
-                        continue
-                    # Yield TimeoutEvent if n seconds since last
+            try:
+                # Non-blocking get to not occupy _message_lock
+                event = self._messages.get_nowait()
+                self._messages.task_done()
+                self._messages_lock.release()
+                last_event_timestamp = time.time()
+                yield event
+            except queue.Empty:
+                self._messages_lock.release()
+                # If connected and 'timeout' is set, yield a TimeoutEvent if 'timeout' seconds since last
+                if self._is_connected.is_set():
                     if timeout is not None:
-                        current_timestamp = int(time.time())
-                        if current_timestamp - last_event_timestamp >= timeout:
-                            last_event_timestamp = current_timestamp
-                            yield TimeoutEvent()
+                        if last_event_timestamp is None:
+                            last_event_timestamp = time.time()
+                        else:
+                            current_timestamp = time.time()
+                            if current_timestamp - last_event_timestamp >= timeout:
+                                last_event_timestamp = current_timestamp
+                                yield TimeoutEvent()
                     time.sleep(0.1)
+                else:
+                    if timeout is not None:
+                        last_event_timestamp = None
+                    # Wait if currently trying to connect
+                    self._done_trying_to_connect.wait()
+                    # Yield ConnectionEvent if not connectd and not trying to connect
+                    # ^This happens if failing to reconnect after a disconnect, or if never initially conntected
+                    if self._should_not_connect.is_set():
+                        yield self._last_connection_event
+                        # Wait up to two seconds. Break early if connected
+                        self._is_connected.wait(2)
