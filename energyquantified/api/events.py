@@ -805,7 +805,7 @@ class CurveUpdateEventAPI:
                     # Yield TimeoutEvent if n seconds since last
                     if timeout is not None:
                         current_timestamp = int(time.time())
-                        if current_timestamp - last_timeout_timestamp > timeout:
-                            yield TimeoutEvent()
+                        if current_timestamp - last_timeout_timestamp >= timeout:
                             last_timeout_timestamp = int(time.time())
+                            yield TimeoutEvent()
                     time.sleep(0.1)
