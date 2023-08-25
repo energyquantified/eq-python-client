@@ -319,7 +319,6 @@ class CurveUpdateEventAPI:
                         data=msg_obj.data,
                         errors=msg_obj.errors,
                     )
-                    print(f"subscribe response: {subscribe_response}")
                     callback.callback(subscribe_response)
                     if callback.latest and subscribe_response.status:
                         self._is_subscribed_curves.set()
@@ -770,7 +769,7 @@ class CurveUpdateEventAPI:
             :py:class:`energyquantified.events.TimeoutEvent`
         """
         if timeout is not None:
-            last_timeout_timestamp = int(time.time())
+            last_event_timestamp = int(time.time())
         while True:
             self._messages_lock.acquire()
             if not self._is_connected.is_set():
@@ -779,6 +778,7 @@ class CurveUpdateEventAPI:
                     msg = self._messages.get_nowait()
                     self._messages.task_done()
                     self._messages_lock.release()
+                    last_event_timestamp = time.time()
                     yield msg
                 except queue.Empty:
                     self._messages_lock.release()
@@ -796,6 +796,7 @@ class CurveUpdateEventAPI:
                     msg = self._messages.get_nowait()
                     self._messages.task_done()
                     self._messages_lock.release()
+                    last_event_timestamp =  time.time()
                     yield msg
                 except queue.Empty:
                     self._messages_lock.release()
@@ -805,7 +806,7 @@ class CurveUpdateEventAPI:
                     # Yield TimeoutEvent if n seconds since last
                     if timeout is not None:
                         current_timestamp = int(time.time())
-                        if current_timestamp - last_timeout_timestamp >= timeout:
-                            last_timeout_timestamp = int(time.time())
+                        if current_timestamp - last_event_timestamp >= timeout:
+                            last_event_timestamp = current_timestamp
                             yield TimeoutEvent()
                     time.sleep(0.1)
