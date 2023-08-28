@@ -186,10 +186,10 @@ Subscribe to events
 ~~~~~~~~~~~~~~
 
 Note that you will not immediately start to receive events after connecting to the stream. In order to
-receive curve events you must also subscribe.
+receive events you must also subscribe.
 
 
-Curve events
+Subscribe to curve events
 ^^^^^^^^^^^^^^
 
 Subscribe to curve events with
@@ -208,7 +208,7 @@ The example below illustrates how to subscribing for curve events that concern a
 
 You can supply the ``callback`` parameter with a custom callback function that is called when receiving a response.
 The callback function takes in one parameter of type
-:py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`.
+:py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`.
     
     >>> def subscribe_callback(response):
     >>>     if response.ok:
@@ -220,6 +220,7 @@ The callback function takes in one parameter of type
     >>>         log.error("Failed to subscribe, error: %s" % errors)
     >>>
     >>> eq.events.subscribe_curve_events(filters, callback=subscribe_callback)
+
 
 Loop over incoming events
 ~~~~~~~~~~~~~~
@@ -343,6 +344,7 @@ Close the connection by caling
 handled. The reason of a disconnect (e.g., intentional close by user, server downtime) is described
 in the ``ConnectionEvent``.
 
+
 Remembering received events
 ---------------------
 
@@ -434,17 +436,17 @@ events that describe deleted data, as said data no longer exists.
 Filter events
 ---------------------
 
-Method reference: :py:meth:`eq.events.subscribe() <energyquantified.api.CurveUpdateEventAPI.subscribe>`
+Method reference: :py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.CurveUpdateEventAPI.subscribe_curve_events>`
 
 In order to start receving events you must first subscribe with one or more filters. Simply create
-a filter and pass it along when calling ``subscribe``:
+a filter and pass it along in ``subscribe_curve_events``:
 
     >>> from energyquantified.events import EventFilterOptions
     >>> # First connect
     >>> eq.events.connect()
     >>> # Create filter and subscribe
-    >>> filter = EventFilterOptions()
-    >>> eq.events.subscribe(filter)
+    >>> filters = EventFilterOptions()
+    >>> eq.events.subscribe_curve_events(filters)
 
     >>> from energyquantified import EnergyQuantified
     >>> # First initialize api client and then connect
@@ -457,9 +459,9 @@ a filter and pass it along when calling ``subscribe``:
     >>> filter_2.set_curve_names([<insert exact curve name here>])
     >>> filters = [filter_1, filter_2]
     >>> # Subscribe with multiple filters ..
-    >>> eq.events.subscribe(filters)
+    >>> eq.events.subscribe_curve_events(filters=filters)
     >>> # .. or with a single
-    >>> eq.events.subscribe(fitler_1)
+    >>> eq.events.subscribe_curve_events(filters=filter_1)
 
 You can subscribe with one or multiple filters, and will receive events matching at least one of
 the filters. If a variable in a filter has multiple values (e.g., two areas), an event is considered
@@ -480,17 +482,38 @@ for germany would not be match becuase of data type mismatch. The example below 
 that is for Germany and/or France, **and** has the ``ACTUAL`` data-type.
 
     >>> from energyquantified.events import EventFilterOptions
-    >>> filter = EventFilterOptions()
-    >>> filter.set_areas(["DE", "FR"])
-    >>> filter.set_data_types("actual")
-    >>> # Matches all events for Germany and/or France that concern actual-data
+    >>> filters = EventFilterOptions()
+    >>> filters.set_areas(["DE", "FR"])
+    >>> filters.set_data_types("actual")
+    >>> # Matches curves for actual data in Germany and/or France
 
 The implementation of the filters is fluent so setting variables can be chained:
 
     >>> from energyquantified.events import EventFilterOptions
-    >>> filter = EventFilterOptions()
-    >>> filter.set_areas(["DE", "FR"]).set_data_types("actual") #.set( .. )
-    >>> # Matches all events for Germany and/or France that concern actual-data
+    >>> filters = EventFilterOptions()
+    >>> filters.set_areas(["DE", "FR"]).set_data_types("actual") #.set( .. )
+
+Or you can set variables directly when creating the filter:
+
+    >>> from energyquantified.events import EventFilterOptions
+    >>> filters = EventFilterOptions(
+    >>>     areas=["DE", "FR"],
+    >>>     data_types=["actual"]
+    >>> )
+
+Variables can be set using both objects and strings (by tag):
+
+    >>> from energyquantified.events import EventFilterOptions
+    >>> from energyquantified.metadata import Area, DataType
+    >>> filter_1 = EventFilterOptions(
+    >>>     areas=["DE", "FR"],
+    >>>     data_types=["actual"]
+    >>> )
+    >>> filter_2 = EventFilterOptions(
+    >>>     areas=[Area.DE, Area.FR],
+    >>>     data_types=[DataType.ACTUAL]
+    >>> )
+    >>> # The two filters above are identical
 
 
 Filter types
@@ -521,7 +544,7 @@ See :py:class:`energyquantified.events.EventCurveOptions`
     :py:meth:`set_begin() <energyquantified.events.EventCurveOptions.set_begin>`
 ``event_types``:
     Filter by one or more :py:class:`EventType <energyquantified.events.EventType>`'s
-    (e.g., ``UPDATE`` or ``DELETE``).
+    (e.g., ``CURVE_UPDATE`` or ``CURVE_DELETE``).
 
     :py:meth:`set_event_types() <energyquantified.events.EventCurveOptions.set_event_types>`
 ``curve_names``:
@@ -547,7 +570,7 @@ See :py:class:`energyquantified.events.EventFilterOptions`
     :py:meth:`set_begin() <energyquantified.events.EventFilterOptions.set_begin>`
 ``event_types``:
     Filter by one or more :py:class:`EventType <energyquantified.events.EventType>`'s
-    (e.g., ``UPDATE`` or ``DELETE``).
+    (e.g., ``CURVE_UPDATE`` or ``CURVE_DELETE``).
 
     :py:meth:`set_event_types() <energyquantified.events.EventFilterOptions.set_event_types>`
 
@@ -703,8 +726,3 @@ Or by using `atexit <https://docs.python.org/3/library/atexit.html>`:
     >>>         # ...
     >>>         # Done handling the event, let's save the id
     >>>         last_id = data.event_id
-
-
-Message and error handlers
-~~~~~~~~~~~~~~
-todo
