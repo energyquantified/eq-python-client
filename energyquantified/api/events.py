@@ -692,7 +692,8 @@ class CurveUpdateEventAPI:
             >>> eq.events.get_curve_filters()
 
         If a custom callback function is not provided, the default ``on_curves_filters``
-        logs when a response is received.
+        logs when a response is received. The callback function must take in one parameter
+        of type :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`.
 
         :param callback: Set a custom callback function to handle the subscribe response. Defaults to\
             :py:meth:`on_curves_filters() <energyquantified.api.CurveUpdateEventAPI.on_curves_filters>`.

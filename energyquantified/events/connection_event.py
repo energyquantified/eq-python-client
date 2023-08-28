@@ -124,6 +124,9 @@ CONNECTION_ERROR_LOOKUP = {
 }
 
 class ConnectionEvent(_Event):
+    """
+    Model for describing events related to push feed connection.
+    """
 
     def __init__(self, event_type, status=None, status_code=None, message=None):
         super().__init__(event_type=event_type)
