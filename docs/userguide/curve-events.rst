@@ -66,7 +66,7 @@ Subscribe with the filters as follows:
     >>>     EventFilterOptions(areas=["DE", "FR"]),
     >>>     filter_2,
     >>> ]
-    >>> eq.events.subscribe(filters)
+    >>> eq.events.subscribe_curve_events(filters=filters)
 
 The filters can be updated on the fly while listening to the stream, due to websockets
 bidirectional communication protocol.
@@ -79,6 +79,19 @@ By default, messages from the server will be logged at the info level. Override 
 setting a custom callback function with 
 :py:meth:`eq.events.set_message_handler() <energyquantified.api.CurveUpdateEventAPI.set_message_handler>`.
 The custom function must take in one parameter; the server message which is a string.
+
+    >>> def message_handler(msg):
+    >>>     log.info("New message: %s" % msg)
+    >>>
+    >>> eq.events.set_message_handler(message_handler)
+
+Similarly, you can also override the callback for handling error messages with
+:py:meth:`eq.events.set_error_handler() <energyquantified.api.CurveUpdateEventAPI.set_error_handler>`:
+    
+    >>> def error_message_handler(msg):
+    >>>     log.info("New message: %s" % msg)
+    >>>
+    >>> eq.events.set_error_handler(error_message_handler)
 
 
 Types of events
