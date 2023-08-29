@@ -179,7 +179,6 @@ Implementation of event models and related metadata classes:
       :py:class:`CurvesFiltersData <energyquantified.events.CurvesFiltersData>`,
       which is a list of curve event filters.
 
-
 ``energyquantified.time``
 -------------------------
 
