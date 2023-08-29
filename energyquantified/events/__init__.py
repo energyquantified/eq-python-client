@@ -2,7 +2,7 @@ from .event_type import EventType
 from .event_options import EventFilterOptions, EventCurveOptions
 from .connection_event import ConnectionEvent
 from .events import CurveUpdateEvent, TimeoutEvent
-from .responses import CurvesSubscribeResponse, CurvesFiltersResponse
+from .responses import CurvesSubscribeResponse, CurvesFiltersResponse, CurvesSubscribeData, CurvesFiltersData
 
 __all__ = [
     # Types
@@ -16,5 +16,7 @@ __all__ = [
     "TimeoutEvent",
     # Responses
     "CurvesSubscribeResponse",
+    "CurvesSubscribeData",
     "CurvesFiltersResponse",
+    "CurvesFiltersData",
 ]

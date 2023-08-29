@@ -1,6 +1,6 @@
-from .base_response import _ServerResponse
+from .base_response import ServerResponse
 
-class ServerResponseError(_ServerResponse):
+class ServerResponseError(ServerResponse):
 
     @staticmethod
     def from_message(json):

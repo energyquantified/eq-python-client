@@ -2,9 +2,11 @@ from .client import RequestCurvesSubscribe, RequestCurvesFilters
 from .server import (
     ServerMessageMessage,
     ServerMessageCurveEvent,
-    _ServerResponse,
+    ServerResponse,
     ServerResponseCurvesSubscribe,
     ServerResponseCurvesFilters,
     ServerResponseError,
     ServerMessageType,
+    CurvesSubscribeData,
+    CurvesFiltersData,
 )

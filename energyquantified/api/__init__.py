@@ -5,7 +5,7 @@ from .periods import PeriodsAPI
 from .period_instances import PeriodInstancesAPI
 from .ohlc import OhlcAPI
 from .srmc import SrmcAPI
-from .events import CurveUpdateEventAPI
+from .events import EventsAPI
 
 __all__ = [
     "InstancesAPI",
@@ -16,5 +16,5 @@ __all__ = [
     "PeriodInstancesAPI",
     "OhlcAPI",
     "SrmcAPI",
-    "CurveUpdateEventAPI"
+    "EventsAPI"
 ]

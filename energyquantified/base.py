@@ -9,7 +9,7 @@ from .api import (
     PeriodInstancesAPI,
     OhlcAPI,
     SrmcAPI,
-    CurveUpdateEventAPI,
+    EventsAPI,
 )
 from .exceptions import UnauthorizedError, InitializationError
 
@@ -46,9 +46,6 @@ class EnergyQuantified:
     :type api_url: string, optional
     :param proxies: Map of proxies, defaults to None (no proxy)
     :type proxies: dict, optional
-    :param last_id_file: A file path to a file that keeps track of the last\
-                       event id received from the curve events stream
-    :type last_id_file: string, optional
 
     **Basic usage:**
 
@@ -56,25 +53,6 @@ class EnergyQuantified:
        >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd")
        >>> eq.metadata.curves(q="de wind power actual")
 
-    If you intend to listen to the curve events stream, keep track of the
-    last event received between sesssions by supplying the **last_id_file**
-    parameter with a file path. The file will be created for you if it does
-    not already exist. This is useful in the case of a disconnect or
-    an unexpected termination.
-    # TODO upadte docs (last_id file)
-        >>> from energyquantified import EnergyQuantified
-        >>> eq = EnergyQuantified(
-        >>>     api_key="aaaa-bbbb-cccc-dddd,
-        >>>     last_id_file="last_id_file.json", # file path
-        >>> )
-    
-    The file can also be created inside a folder (which will also be created):
-    
-        >>> from energyquantified import EnergyQuantified
-        >>> eq = EnergyQuantified(
-        >>>     api_key="aaaa-bbbb-cccc-dddd,
-        >>>     last_id_file="folder_name/last_id_file.json",
-        >>> )
     """
 
     def __init__(
@@ -147,9 +125,9 @@ class EnergyQuantified:
         #: See :py:class:`energyquantified.api.SrmcAPI`. For loading and
         #: calculating short-run marginal costs (SRMC) from OHLC data.
         self.srmc = SrmcAPI(self)
-        #: See :py:class:`energyquantified.api.CurveUpdateEventAPI`. For
+        #: See :py:class:`energyquantified.api.EventsAPI`. For
         #: using the curve events stream.
-        self.events = CurveUpdateEventAPI(events_ws_url, self._api_key)
+        self.events = EventsAPI(events_ws_url, self._api_key)
 
     def is_api_key_valid(self):
         """

@@ -13,7 +13,7 @@ class _ResponseStatus(Enum):
         self.tag = tag
         self.label = label
         _response_status_lookup[tag.lower()] = self
-    
+
     def __str__(self):
         return self.name
 
@@ -28,7 +28,7 @@ class _ResponseStatus(Enum):
     def by_tag(tag):
         return _response_status_lookup[tag.lower()]
 
-class _ServerResponse(_BaseServerMessage):
+class ServerResponse(_BaseServerMessage):
     REQUEST_ID_KEY = "request_id"
     STATUS_KEY = "status"
     DATA_KEY = "data"

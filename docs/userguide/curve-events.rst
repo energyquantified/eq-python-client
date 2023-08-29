@@ -24,7 +24,7 @@ If values were updated at 15-minute frequency for Germany's consumption normal a
 ``2023-01-01 01:15`` and ``2023-01-01 01:45``, the following event would be produced:
 
     >>> <CurveUpdateEvent:
-    >>>     event_id="123"
+    >>>     event_id="1234567890123-0"
     >>>     curve="DE Consumption MWh/h 15min Normal",
     >>>     event_type=EventType.CURVE_UPDATE,
     >>>     begin="2023-01-01 01:15,
@@ -33,18 +33,18 @@ If values were updated at 15-minute frequency for Germany's consumption normal a
 
 
 WebSocket and filters
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Curve events are streamed in real-time from EQ's WebSocket API. After initializing the
 :py:class:`EnergyQuantified <energyquantified.EnergyQuantified>` API client, the
-:py:class:`CurveUpdateEventAPI <energyquantified.api.CurveUpdateEventAPI>` is accessible
+:py:class:`EventsAPI <energyquantified.api.EventsAPI>` is accessible
 through ``eq.events``:
 
     >>> from energyquantified import EnergyQuantified
     >>> eq = EnergyQuantified(...)
     >>> eq.events. # ...
 
-Connect to the stream with :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`:
+Connect to the stream with :py:meth:`connect() <energyquantified.api.EventsAPI.connect>`:
 
     >>> from energyquantified import EnergyQuantified
     >>> eq = EnergyQuantified(...)
@@ -73,11 +73,11 @@ bidirectional communication protocol.
 
 
 Server messages
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 By default, messages from the server will be logged at the info level. Override the default by
-setting a custom callback function with 
-:py:meth:`eq.events.set_message_handler() <energyquantified.api.CurveUpdateEventAPI.set_message_handler>`.
+setting a custom callback function with
+:py:meth:`eq.events.set_message_handler() <energyquantified.api.EventsAPI.set_message_handler>`.
 The custom function must take in one parameter; the server message which is a string.
 
     >>> def message_handler(msg):
@@ -86,8 +86,8 @@ The custom function must take in one parameter; the server message which is a st
     >>> eq.events.set_message_handler(message_handler)
 
 Similarly, you can also override the callback for handling error messages with
-:py:meth:`eq.events.set_error_handler() <energyquantified.api.CurveUpdateEventAPI.set_error_handler>`:
-    
+:py:meth:`eq.events.set_error_handler() <energyquantified.api.EventsAPI.set_error_handler>`:
+
     >>> def error_message_handler(msg):
     >>>     log.info("New message: %s" % msg)
     >>>
@@ -97,7 +97,7 @@ Similarly, you can also override the callback for handling error messages with
 Types of events
 ~~~~~~~~~~~~~~
 
-Events are accessed through :py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
+Events are accessed through :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`.
 What is common for all event models is that they all have the ``event_type`` property, which is an
 :py:class:`EventType <energyquantified.events.EventType>`.
 
@@ -124,7 +124,7 @@ Timeout event - :py:class:`TimeoutEvent <energyquantified.events.TimeoutEvent>`:
     :py:class:`EventType.TIMEOUT <energyquantified.events.EventType.TIMEOUT>`:
         Filler event that enables users to act in between events during quiet times. Timeout events are
         only generated if the ``timeout`` parameter is set in
-        :py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`.
+        :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`.
 
 
 Quickstart
@@ -154,13 +154,13 @@ Quickstart
 
         # Loop over incoming events (blocking)
         for event in eq.events.get_next():
-            
+
             if event.event_type == EventType.CURVE_UPDATE:
                 # A curve is updated, so we can load its data
                 data = event.load_data()
                 # Store it in your database?
                 continue
-            
+
             if event.event_type == EventType.DISCONNECTED:
                 # Not connected and event queue is empty
                 log.error("Not connected")
@@ -176,7 +176,7 @@ Connect to the stream
 ~~~~~~~~~~~~~~
 
 Connect to the stream by calling
-:py:meth:`eq.events.connect() <energyquantified.api.CurveUpdateEventAPI.connect>`. Note that this
+:py:meth:`eq.events.connect() <energyquantified.api.EventsAPI.connect>`. Note that this
 temporarily blocks program execution while trying to establish a connection to the stream.
 
     >>> eq.events.connect()
@@ -193,7 +193,7 @@ Subscribe to curve events
 ^^^^^^^^^^^^^^
 
 Subscribe to curve events with
-:py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.CurveUpdateEventAPI.subscribe_curve_events>`.
+:py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`.
 The example below illustrates how to subscribing for curve events that concern actual-data in Germany:
 
     >>> from energyquantified.events import EventFilterOptions
@@ -209,7 +209,7 @@ The example below illustrates how to subscribing for curve events that concern a
 You can supply the ``callback`` parameter with a custom callback function that is called when receiving a response.
 The callback function takes in one parameter of type
 :py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`.
-    
+
     >>> def subscribe_callback(response):
     >>>     if response.ok:
     >>>         filters = response.data.filters
@@ -226,7 +226,7 @@ Loop over incoming events
 ~~~~~~~~~~~~~~
 
 After subscribing you will automatically start to receive events. These events can be accessed in the generator
-:py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`:
+:py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`:
 
     >>> from energyquantified.events import EventFilterOptions
     >>> eq.events.connect()
@@ -236,7 +236,7 @@ After subscribing you will automatically start to receive events. These events c
     >>> for event in eq.events.get_next():
     >>>     # Handle event
 
-Events from :py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>`
+Events from :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`
 can be of different types, so you will sometimes get events of different type than
 :py:class:`~energyquantified.events.CurveUpdateEvent`. For instance, you will get a
 :py:class:`~energyquantified.events.ConnectionEvent` in the case of an unexpected disconnect.
@@ -253,13 +253,13 @@ check the type of an event.
 
         # Loop over incoming events (blocking)
         for event in eq.events.get_next():
-            
+
             if event.event_type == EventType.CURVE_UPDATE:
                 # A curve is updated, so we can load its data
                 data = event.load_data()
                 # Store it in your database?
                 continue
-            
+
             if event.event_Type == EventType.CURVE_DELETE:
                 # Some data in a curve or a whole isntance is removed
                 continue
@@ -271,7 +271,7 @@ check the type of an event.
             if event.event_type == EventType.DISCONNECTED:
                 # Not connected and event queue is empty
 
-:py:meth:`eq.events.get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>` blocks the thread
+:py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>` blocks the thread
 while waiting for a new message from the stream. If you might want to act when the stream is quiet (e.g.,
 changing filters), supply the ``timeout`` parameter with the number of seconds to wait for an event. If
 more than ``timeout`` seconds passes before a new event is received, you will get a
@@ -304,16 +304,16 @@ Network error and reconnecting
 ~~~~~~~~~~~~~~
 
 The client will automactically try to reconnect to the stream if the connection drops, unless the
-user manually closes it with :py:meth:`eq.events.close() <energyquantified.api.CurveUpdateEventAPI.close>`.
+user manually closes it with :py:meth:`eq.events.close() <energyquantified.api.EventsAPI.close>`.
 
 If the client is not connected to stream **and** is not trying to (re)connect (**and** all received
 events have been handled),
-:py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>` will start to yield
+:py:meth:`get_next() <energyquantified.api.EventsAPI.get_next>` will start to yield
 :py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`'s that describes the cause of the disconnect.
-In this situation you need to manually invoke :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`
+In this situation you need to manually invoke :py:meth:`connect() <energyquantified.api.EventsAPI.connect>`
 in order to (re)connect to the stream. Please wait a brief moment before trying to reconnect, by sleeping
 the program as shown below:
-    
+
     >>> import time
     >>> from energyquantified.events import EventType
     >>> eq.events.connect()
@@ -335,11 +335,11 @@ automatically subscribes with the last used filters.
 Closing the connection
 ---------------------
 
-Method reference: :py:meth:`eq.events.close() <energyquantified.api.CurveUpdateEventAPI.close>`
+Method reference: :py:meth:`eq.events.close() <energyquantified.api.EventsAPI.close>`
 
-Close the connection by caling 
-:py:meth:`eq.events.close() <energyquantified.api.CurveUpdateEventAPI.close>`.This also causes 
-:py:meth:`get_next() <energyquantified.api.CurveUpdateEventAPI.get_next>` to yield
+Close the connection by caling
+:py:meth:`eq.events.close() <energyquantified.api.EventsAPI.close>`.This also causes
+:py:meth:`get_next() <energyquantified.api.EventsAPI.get_next>` to yield
 :py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`'s after all events have been
 handled. The reason of a disconnect (e.g., intentional close by user, server downtime) is described
 in the ``ConnectionEvent``.
@@ -359,7 +359,7 @@ Network error and missed events
 
 The client always keeps track of the most recent event received by storing the ``event_id``
 in-memory. If you for any reason lose connection the stream, with the exception of manually closing
-(i.e., calling :py:meth:`eq.events.close() <energyquantified.api.CurveUpdateEventAPI.close>`) it,
+(i.e., calling :py:meth:`eq.events.close() <energyquantified.api.EventsAPI.close>`) it,
 the client automatically tries to reconnect and requests all events since the last received ``event_id``.
 
 When reconnecting with the same instance of
@@ -372,7 +372,7 @@ Request all events since last session
 
 Getting events that were streamed after you were last connected to the stream can be done in one of two
 ways; (1) supplying the ``last_id`` parameter in
-:py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.CurveUpdateEventAPI.subscribe_curve_events>`
+:py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
 with the ``event_id`` from the last :py:class:`~energyquantified.events.CurveUpdateEvent` you
 received, or (2) by supplying the ``last_id_file`` parameter with a file path when initializing
 :py:class:`EnergyQuantified <energyquantified.EnergyQuantified>`. The two options are briefly described
@@ -384,14 +384,14 @@ Storing last event id in a file
 
 The simplest way to request events missed while not connected is to supply the ``last_id_file``
 parameter with a file path when connecting with
-:py:meth:`eq.events.connect(last_id_file="path_to_file.json") <energyquantified.api.CurveUpdateEventAPI.connect>`:
+:py:meth:`eq.events.connect(last_id_file="path_to_file.json") <energyquantified.api.EventsAPI.connect>`:
 
         >>> from energyquantified import EnergyQuantified
         >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd)
         >>> eq.events.connect(last_id_file="last_id_file.json") # file path
 
 The file can be nested in a directory (which is also created if it does not already exists):
-    
+
         >>> from energyquantified import EnergyQuantified
         >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd)
         >>> eq.events.connect(last_id_file="folder_name/last_id_file.json") # file path
@@ -402,7 +402,7 @@ connect to the stream, assuming the same file path for ``last_id_file``, you wil
 all (available) events that you missed since last session.
 
 The ID used when the last id file is updated is the ``event_id`` from the latest event received
-through py:meth:`eq.events.get:next() <energyquantified.api.CurveUpdateEventAPI.get_next>`).
+through :py:meth:`eq.events.get:next() <energyquantified.api.EventsAPI.get_next>`.
 
 
 Load data for curve events
@@ -436,7 +436,7 @@ events that describe deleted data, as said data no longer exists.
 Filter events
 ---------------------
 
-Method reference: :py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.CurveUpdateEventAPI.subscribe_curve_events>`
+Method reference: :py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
 
 In order to start receving events you must first subscribe with one or more filters. Simply create
 a filter and pass it along in ``subscribe_curve_events``:
@@ -519,7 +519,7 @@ Variables can be set using both objects and strings (by tag):
 Filter types
 ~~~~~~~~~~~~~~
 
-Choose between two types of filters when subscribing to events; (1) 
+Choose between two types of filters when subscribing to events; (1)
 :py:class:`~energyquantified.events.EventCurveOptions` for filtering by exact curve names,
 useful for when you want events for a specific selection of curves, and (2)
 :py:class:`~energyquantified.events.EventFilterOptions` for filtering by a selection of
@@ -610,7 +610,7 @@ Update filters
 ~~~~~~~~~~~~~~
 
 Update your stream filters by calling
-:py:meth:`subscribe() <energyquantified.api.CurveUpdateEventAPI.subscribe>`
+:py:meth:`subscribe() <energyquantified.api.EventsAPI.subscribe>`
 with your new filters. Filters can be updated while already connected to the stream.
 
     >>> from energyquantified.events import EventCurveOptions, EventFilterOptions
@@ -648,11 +648,11 @@ Query for current filters
 
 Although you automatically get a message every time the filters are updated, it is also possible to
 manually request the currently active filters with
-:py:meth:`get_curve_filters() <energyquantified.api.CurveUpdateEventAPI.get_curve_filters>`.
+:py:meth:`get_curve_filters() <energyquantified.api.EventsAPI.get_curve_filters>`.
 You can supply the ``callback`` parameter with a custom callback function that is called when receiving a response.
 The callback function takes in one parameter of type
 :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`.
-    
+
     >>> def filters_callback(response):
     >>>     if response.ok:
     >>>         filters = response.data.filters
@@ -682,7 +682,7 @@ at program termination with the use of the `atexit <https://docs.python.org/3/li
 However, the ID saved when using a file is the last ID that is added to the message queue, and not
 necessarily the last event handled by the user. If you want to keep track of the ID from the last event you
 were done handling, the following code may be helpful:
-    
+
 # TODO remove this?
     >>> import json
     >>>
@@ -710,7 +710,7 @@ Or by using `atexit <https://docs.python.org/3/library/atexit.html>`:
 
     >>> import atexit
     >>> import json
-    >>> 
+    >>>
     >>> last_id = None
     >>>
     >>> def save_file():

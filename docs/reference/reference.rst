@@ -72,7 +72,7 @@ Here are the different API section classes:
 
 ------
 
-.. autoclass:: energyquantified.api.CurveUpdateEventAPI
+.. autoclass:: energyquantified.api.EventsAPI
    :inherited-members:
 
 

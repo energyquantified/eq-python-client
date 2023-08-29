@@ -32,6 +32,5 @@ __all__ = [
     "OHLCField",
     "ContractPeriod",
     "ContinuousContract",
-    "SpecificContract",
-    ""
+    "SpecificContract"
 ]

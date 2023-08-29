@@ -3,6 +3,7 @@ import websocket
 import threading
 import json
 import queue
+import sys
 import time
 import logging
 import os
@@ -15,13 +16,16 @@ from energyquantified.events import (
     EventType,
     TimeoutEvent,
 )
-from energyquantified.events.responses import CurvesSubscribeResponse, CurvesFiltersResponse
+from energyquantified.events.responses import (
+    CurvesSubscribeResponse,
+    CurvesFiltersResponse,
+)
 from energyquantified.events.messages import (
     RequestCurvesSubscribe,
     RequestCurvesFilters,
     ServerMessageMessage,
     ServerMessageCurveEvent,
-    _ServerResponse,
+    ServerResponse,
     ServerResponseCurvesSubscribe,
     ServerResponseCurvesFilters,
     ServerResponseError,
@@ -40,79 +44,43 @@ from websocket import (
     WebSocketPayloadException,
 )
 from energyquantified.events.callback import Callback, SUBSCRIBE_CURVES
-import sys
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
 
-class CurveUpdateEventAPI:
+class EventsAPI:
     """
     The curve events API client.
 
     Wraps the Energy Quantified websocket API for curve events. Handles validation,
     network errors, and parsing of API responses.
-    
-    :param ws_url: The root URL for the curve events websocket API
+
+    :param ws_url: The root URL for the events websocket API
     :type ws_url: str
     :param api_key: The API key for your user account
-    :type api_key: str, required
-    :param last_id_file: A file path to a file that keeps track of the last\
-                       event id received from the curve events stream
-    :type last_id_file: str, optional
+    :type api_key: str
 
     **Basic usage:**
 
     Access these operation via an instance of the
     :py:class:`energyquantified.EnergyQuantified` class:
 
-        >>> from energyquantified import EnergyQuantified
         >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd)
 
-    Establishing a connection and connecting to the stream:
+    Connect to the stream and subscribe to curve events:
 
-        >>> from energyquantified import EnergyQuantified
-        >>> from energyquantified.events.events import MessageType
-        >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd)
+        >>> # Connect
         >>> events = eq.events.connect()
+        >>> # Subscribe to curve events in Germany
+        >>> filters = EventFilterOptions(areas=[Area.DE])
+        >>> eq.events.subscribe_curve_events(filters=filters)
         >>> # Loop over events as they come
-        >>> for msg_type, event in events.get_next():
-        >>>     if msg_type == MessageType.EVENT:
-        >>>         # Optionally load event data from API
-        >>>         data = event.load_data()
+        >>> for event in events.get_next():
+        >>>     # Handle events
 
-    At least one filter (of type
-    :py:class:`energyquantified.events.EventFilterOptions`
-    or :py:class:`energyquantified.events.EventFilterOptions`)
-    must be set in order to receive curve events:
-
-        >>> from energyquantified import EnergyQuantified
-        >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd)
-        >>> ws_client = eq.events.connect()
-        >>> from energyquantified.events.event_options import EventFilterOptions
-        >>> To receive all UPDATE-events for Germany
-        >>> filter = EventFilterOptions().set_areas("DE").set_event_types("UPDATE")
-        >>> ws_client.subscribe(filter)
-        
-    To keep track of the last event received between sesssions, supply the
-    ``last_id_file`` parameter with a file path. The file will be created
-    for you if it does not already exist. This is useful in the case of
-    a disconnect or an unexpected termination.
-        
-        >>> from energyquantified import EnergyQuantified
-        >>> eq = EnergyQuantified(
-        >>>     api_key="aaaa-bbbb-cccc-dddd,
-        >>>     last_id_file="last_id_file.json"
-        >>> )
-    
-    The file can also be created inside a folder (which will be created for you):
-    
-        >>> from energyquantified import EnergyQuantified
-        >>> eq = EnergyQuantified(
-        >>>     api_key="aaaa-bbbb-cccc-dddd,
-        >>>     last_id_file="folder_name/last_id_file.json"
-        >>> )
     """
+
     def __init__(self, ws_url, api_key):
         self._ws_url = ws_url
         self._api_key = api_key
@@ -167,7 +135,7 @@ class CurveUpdateEventAPI:
             if not os.path.isfile(self._last_id_file_path):
                 raise FileNotFoundError(
                     f"Path last_id_file: '{self._last_id_file_path}' exists but it is not a file"
-                    )
+                )
             # Read-access
             if not os.access(self._last_id_file_path, os.R_OK):
                 raise PermissionError(f"Missing read-access to last_id_file: '{self._last_id_file_path}'")
@@ -179,7 +147,6 @@ class CurveUpdateEventAPI:
                 data = json.load(f)
                 # Default to None
                 self._last_id = data.get("last_id")
-
         else:
             # Try to create parent dirs if not exists
             parent_dir = os.path.dirname(self._last_id_file_path)
@@ -192,7 +159,7 @@ class CurveUpdateEventAPI:
                     raise PermissionError(
                         f"last_id_file: '{self._last_id_file_path}' does not exist "
                         f"and missing write-access to parent directory: '{parent_dir}'"
-                        )
+                    )
             # Create file
             with open(self._last_id_file_path, "w") as f:
                 json.dump({"last_id": ""}, f)
@@ -235,14 +202,14 @@ class CurveUpdateEventAPI:
             if new_n > current_n:
                 self._last_id = last_id
 
-    def _last_id_to_file(self, last_id=None, write_interval_s=120):
+    def _last_id_to_file(self, last_id=None, write_interval_s=30):
         """
         Saves the last_id to disk if the file path exists, last_id (or self._last_id)
         is not None, and it's at least 'write_interval_s' seconds since last save.
 
         :param last_id: The id (defaults to self._last_id if None)
         :type last_id: str, optional
-        :param write_interval_s: The minimum number of seconds since last write, defaults to 120
+        :param write_interval_s: The minimum number of seconds since last write, defaults to 30
         :type write_interval_s: int, optional
         """
         # Ignore if user didn't provide a file path
@@ -251,7 +218,7 @@ class CurveUpdateEventAPI:
         if last_id is None:
             if self._last_id is None:
                 return
-            # Fallback to 
+            # Fallback to
             last_id = self._last_id
         # Don't write if less than 'write_interval_s' since last
         if self._last_id_timestamp is not None and time.time() < self._last_id_timestamp + write_interval_s:
@@ -307,7 +274,7 @@ class CurveUpdateEventAPI:
                 if self._is_subscribed_curves.is_set():
                     event = msg_obj.event
                     self._messages.put(event)
-            elif isinstance(msg_obj, _ServerResponse):
+            elif isinstance(msg_obj, ServerResponse):
                 callback = self._callbacks.pop(msg_obj.request_id, None)
                 if callback is None:
                     return
@@ -354,10 +321,8 @@ class CurveUpdateEventAPI:
 
     def _on_error(self, _ws, error):
         if not isinstance(error, (timeout, ConnectionError, WebSocketException)):
-            # TODO Probably want to raise this error (not just send to error handler and return)
-            # self._error_handler(getattr(error, "strerror", str(error)))
-            # return
-            raise error
+            self._error_handler(getattr(error, "strerror", str(error)))
+            return
         #  self._last_connection_event should only be set once for each time connecting
         if self._last_connection_event is not None:
            return
@@ -402,53 +367,50 @@ class CurveUpdateEventAPI:
                 message=str(error),
             )
 
-    @property
-    def last_id(self):
-        return self._last_id
-
     def connect(self, last_id_file=None, timeout=10, reconnect_attempts=5):
         """
         Connect to the curve update events stream.
 
-        To keep track of the last event received between sessions, supply the
-        ``last_id_file`` parameter with a file path. The file will be created
-        for you if it does not already exist. This is useful in the case of
-        a disconnect or an unexpected termination.
+        To keep track of the last event received in between sesssions, supply
+        the ``last_id_file`` parameter with a file path. The file will be
+        created for you if it does not already exist. The id from the last
+        event received will be stored in the file, and the client will
+        automatically request old events (starting from the saved id) the next
+        time you connect. This is useful in the case of disconnects or
+        unexpected terminations.
+
+            >>> eq.events.connect(last_id_file="last_id_file.json")
+
+        The file can also be created inside a folder (which will be created for
+        you if it does not already exist):
+
+            >>> eq.events.connect(
+            >>>     last_id_file="folder_name/last_id_file.json"
+            >>> )
 
         Optionally supply the ``timeout`` parameter with an integer to change the
-        default number of seconds to wait for a connection to be established before
-        failing.
+        default number of seconds to wait for a connection to be established
+        before failing. It is not recommended to change this too low, as
+        connecting always takes a certain amount of time at minimum.
 
-        The client tries to automatically reconnect if the connections drops. The
-        number of reconnect attempts can be set through the ``reconnect_attempts``
-        parameter.
-
-        >>> from energyquantified import EnergyQuantified
-        >>> eq = EnergyQuantified(
-        >>>     api_key="aaaa-bbbb-cccc-dddd
-        >>> )
-        >>> eq.events.connect(last_id_file="last_id_file.json")
-    
-        The file can also be created inside a folder (which will be created for you if
-        it does not already exist):
-    
-        >>> from energyquantified import EnergyQuantified
-        >>> eq = EnergyQuantified(
-        >>>     api_key="aaaa-bbbb-cccc-dddd
-        >>> )
-        >>> eq.events.connect(last_id_file="folder_name/last_id_file.json")
+        The client tries to automatically reconnect if the connections drops.
+        The number of reconnect attempts can be set through the
+        ``reconnect_attempts`` parameter.
 
         :param last_id_file: A file path to a file that keeps track of the last\
                        event id received from the curve events stream
         :type last_id_file: str, optional
-        :param timeout: The time in seconds to wait for a connection to be established.\
-                Also used as the minimum wait-time inbetween reconnect attempts. Defaults to 5.
+        :param timeout: The time in seconds to wait for a connection to be\
+            established. Also used as the minimum wait-time inbetween reconnect\
+                attempts. Defaults to 10.
         :type timeout: int, optional
-        :param reconnect_attempts: The number of reconnect attempts after each disconnect.\
-                The counter is reset whenever a connection is established. Defaults to 5.
+        :param reconnect_attempts: The number of reconnect attempts after each\
+            disconnect. The counter is reset whenever a connection is\
+                established. Defaults to 5.
         :type reconnect_attempts: int, optional
-        :return: The obj instance this method was invoked upon, so the APi can be used fluently
-        :rtype: :py:class:`energyquantified.events.CurveUpdateEventAPI`
+        :return: The obj instance this method was invoked upon, so the API\
+            can be used fluently
+        :rtype: :py:class:`energyquantified.events.EventsAPI`
         """
         assert self._should_not_connect.is_set(), (
             "'connect()' invoked while already connected. "
@@ -483,7 +445,7 @@ class CurveUpdateEventAPI:
             self._ws_url,
             header={
                 "X-API-KEY": self._api_key
-            },  
+            },
             on_open=self._on_open,
             on_message=self._on_message,
             on_close=self._on_close,
@@ -506,9 +468,6 @@ class CurveUpdateEventAPI:
                         self._should_not_connect.set()
                         self._done_trying_to_connect.set()
                         return
-                    elif self._remaining_reconnect_attempts == self._max_reconnect_attempts:
-                        # TODO what? x1 (first dc after connect)
-                        pass
                 # Wait delta longer than the default ws timeout,
                 # plus a random amount of time to spread traffic
                 time.sleep(timeout + 0.5 + random.uniform(1,5))
@@ -560,22 +519,20 @@ class CurveUpdateEventAPI:
         curve events matching any of the filters.
 
         First make sure to connect
-        (see :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`):
+        (see :py:meth:`connect() <energyquantified.api.EventsAPI.connect>`):
 
-            >>> from energyquantified import EnergyQuantified
             >>> eq = EnergyQuantified(
             >>>     api_key="aaaa-bbbb-cccc-dddd
             >>> )
             >>> eq.events.connect(last_id_file="last_id_file.json")
-        
+
         Create a filter and subscribe:
 
-            >>> from energyquantified.events import EventFilterOptions
             >>> filters = [
             >>>     EventFilterOptions(event_types="CURVE_UPDATE")
             >>> ]
             >>> eq.events.subscribe_curve_events(filters=filters)
-        
+
         If a custom callback function is not provided, the default ``on_curves_subscribe``
         logs when a response is received.
 
@@ -587,10 +544,10 @@ class CurveUpdateEventAPI:
                 in order to use the last id from memory.
         :type last_id: str, optional
         :param callback: Set a custom callback function to handle the subscribe response. Defaults to\
-            :py:meth:`on_curves_subscribed() <energyquantified.api.CurveUpdateEventAPI.on_curves_subscribed>`.
+            :py:meth:`on_curves_subscribed() <energyquantified.api.EventsAPI.on_curves_subscribed>`.
         :type callback: Callable, optional
         :return: The obj instance this method was invoked upon, so the APi can be used fluently
-        :rtype: :py:class:`energyquantified.events.CurveUpdateEventAPI`
+        :rtype: :py:class:`energyquantified.events.EventsAPI`
         """
         # Validate filters
         if not isinstance(filters, list):
@@ -679,7 +636,7 @@ class CurveUpdateEventAPI:
         Request the active curve event filters.
 
         First make sure to connect
-        (see :py:meth:`connect() <energyquantified.api.CurveUpdateEventAPI.connect>`):
+        (see :py:meth:`connect() <energyquantified.api.EventsAPI.connect>`):
 
             >>> from energyquantified import EnergyQuantified
             >>> eq = EnergyQuantified(
@@ -696,106 +653,111 @@ class CurveUpdateEventAPI:
         of type :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`.
 
         :param callback: Set a custom callback function to handle the subscribe response. Defaults to\
-            :py:meth:`on_curves_filters() <energyquantified.api.CurveUpdateEventAPI.on_curves_filters>`.
+            :py:meth:`on_curves_filters() <energyquantified.api.EventsAPI.on_curves_filters>`.
         :type callback: Callable, optional
         :return: The obj instance this method was invoked upon, so the APi can be used fluently
-        :rtype: :py:class:`energyquantified.events.CurveUpdateEventAPI`
+        :rtype: :py:class:`energyquantified.events.EventsAPI`
         """
         request_id = uuid.uuid4()
         get_filters_msg = RequestCurvesFilters(request_id).to_message()
         with self._messages_lock:
-            for _, obj in self._callbacks.items(): 
+            for _, obj in self._callbacks.items():
                 if obj.callback_type == GET_CURVE_FILTERS:
                     obj.latest = False
-                    # TODO or just del the old callbacks?
             # Callback
             callback = Callback(callback, callback_type=GET_CURVE_FILTERS, latest=True)
             self._callbacks[request_id] = callback
         # Send msg
         msg = json.dumps(get_filters_msg)
-        #log.debug(f"Sending message to get latest filters:\n{msg}")
         self._ws.send(msg)
         return self
 
     def get_next(self, timeout=None):
         """
         Returns a generator over new events, and blocks while waiting for new.
-        
+
         Every event returned is one of the following types:
         1: :py:class:`energyquantified.events.CurveUpdateEvent`
         2: :py:class:`energyquantified.events.ConnectionEvent`
         3: :py:class:`energyquantified.events.TimeoutEvent`
 
-        The ``event_type`` attribute is common for all events and can be used to
-        check the type of an event.
+        The ``event_type`` attribute is common for all events (type:
+        :py:class:`EventType <energyquantified.events.EventType>`) and is
+        used to check the type of an event.
 
-        :py:class:`energyquantified.events.CurveUpdateEvent` is the model that
-        describes change in data for a curve. :py:class:`energyquantified.events.ConnectionEvent`
+        :py:class:`CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`
+        is the model that describes change in data for a curve.
+        :py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`
         describes a new event related to the connection.
-        
-        >>> import time
-        >>> from energyquantified.events import EventType
+
         >>> for event in eq.events.get_next(timeout=10):
-        >>>     if event.event_type.is_curve_type():
-        >>>         # This is a curve event, so we can load data
+        >>>     if event.event_type == EventType.CURVE_UPDATE:
+        >>>         # Data in a curve is updated, let's load the new data
         >>>         data = event.load_data()
-        >>>     elif event.event_type.is_connection_type():
-        >>>         if event.event_type == EventType.DISCONNECTED
-        >>>             # You are not connected
-        >>>             # Wait a moment before reconnecting
-        >>>             time.sleep(10)
-        >>>             eq.events.connect()
-        >>>     elif event.event_type.is_timeout_type():
-        >>>         # Nothing happened in the last 10 seconds
+        >>>         continue
+        >>>
+        >>>     if event.event_type == EventType.DISCONNECTED::
+        >>>         # Not connected
+        >>>         log.error("Disconnected")
+        >>>         # Wait a short moment before reconnecting
+        >>>         time.sleep(10)
+        >>>         eq.events.connect()
+        >>>         continue
+        >>>
+        >>>     if event.event_type == EventType.TIMEOUT:
+        >>>         # Nothing happened in the last 10 (timeout param) seconds
         >>>         # Use this event to act in between events during quiet times
         >>>         pass
 
-        :param timeout: The number of seconds to wait (blocking) for a new message,\
-                yielding a ``TimeoutEvent`` if the timeout occurs. Waits indefinetly\
-                if timeout is None. Defaults to None.
+        :param timeout: The number of seconds to wait (blocking) for a\
+            new message, yielding a ``TimeoutEvent`` if no new event occurs.\
+                Waits indefinetly if timeout is None. Defaults to None.
         :type timeout: int, optional
         :yield: A generator of events. Blocks while waiting for a new event.
         :rtype: :py:class:`energyquantified.events.CurveUpdateEvent`,\
             :py:class:`energyquantified.events.ConnectionEvent`,\
             :py:class:`energyquantified.events.TimeoutEvent`
         """
-        if timeout is not None:
-            last_event_timestamp = None
+        last_event_timestamp = None
         while True:
-            self._messages_lock.acquire()
-            try:
-                # Non-blocking get to not occupy _message_lock
-                event = self._messages.get_nowait()
-                self._messages.task_done()
-                self._messages_lock.release()
+            with self._messages_lock:
+                try:
+                    event = self._messages.get_nowait()
+                    self._messages.task_done()
+                except queue.Empty:
+                    event = None
+            # Yield event from queue
+            if event is not None:
                 last_event_timestamp = time.time()
                 # Update last_id if curve event
                 if isinstance(event, CurveUpdateEvent):
-                    # Assumes we are subscribed
                     self._update_last_id(event.event_id)
                     self._last_id_to_file(event.event_id)
                 yield event
-            except queue.Empty:
-                self._messages_lock.release()
-                # If connected and 'timeout' is set, yield a TimeoutEvent if 'timeout' seconds since last
-                if self._is_connected.is_set():
-                    if timeout is not None:
-                        if last_event_timestamp is None:
-                            last_event_timestamp = time.time()
-                        else:
-                            current_timestamp = time.time()
-                            if current_timestamp - last_event_timestamp >= timeout:
-                                last_event_timestamp = current_timestamp
-                                yield TimeoutEvent()
-                    time.sleep(0.1)
-                else:
-                    if timeout is not None:
-                        last_event_timestamp = None
-                    # Wait if currently trying to connect
-                    self._done_trying_to_connect.wait()
-                    # Yield ConnectionEvent if not connectd and not trying to connect
-                    # ^This happens if failing to reconnect after a disconnect, or if never initially conntected
-                    if self._should_not_connect.is_set():
-                        yield self._last_connection_event
-                        # Wait up to two seconds. Break early if connected
-                        self._is_connected.wait(2)
+                continue
+            # Empty event queue
+            # Check if connected (TimeoutEvent) or not (wait)
+            if self._is_connected.is_set():
+                if timeout is not None:
+                    if last_event_timestamp is None:
+                        last_event_timestamp = time.time()
+                    else:
+                        current_timestamp = time.time()
+                        if current_timestamp - last_event_timestamp >= timeout:
+                            last_event_timestamp = current_timestamp
+                            yield TimeoutEvent()
+                time.sleep(0.1)
+            # Not connected
+            else:
+                # Reset last_event_timestamp
+                if timeout is not None:
+                    last_event_timestamp = None
+                # Wait if currently trying to connect
+                self._done_trying_to_connect.wait()
+                # If stopped trying to connect (or never started), yield
+                # ConnectionEvent
+                if self._should_not_connect.is_set():
+                    yield self._last_connection_event.copy()
+                    # Wait up to two seconds. Break early if connected.
+                    # ^This is the interval at which ConnectionEvents are sent
+                    self._is_connected.wait(2)

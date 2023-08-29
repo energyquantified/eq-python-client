@@ -39,20 +39,6 @@ def _parse_curve_event(json):
     instance = json.get("instance")
     if instance is not None:
         instance = parse_instance(instance, curve=curve)
-    # Validations
-    # TODO do we want to force this validation?
-    if curve.curve_type in (CurveType.PERIOD, CurveType.INSTANCE_PERIOD):
-        if curve.frequency.is_iterable:
-            raise ValueError(
-                f"Cannot create CurveUpdateEvent with iterable frequency "
-                f"for curve with CurveType={curve.curve_type}"
-            )
-    if curve.curve_type in (CurveType.INSTANCE, CurveType.INSTANCE_PERIOD):
-        if instance is None:
-            raise ValueError(
-                f"Cannot create CurveUpdateEvent without an instance "
-                f"for curve with CurveType={curve.curve_type}"
-            )
     return CurveUpdateEvent(
         json["id"],
         curve,

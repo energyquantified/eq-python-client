@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, List, Union
 from energyquantified.events import EventFilterOptions, EventCurveOptions
-from .base_response import _ServerResponse
+from .base_response import ServerResponse
 
 @dataclass(frozen=True)
 class CurvesFiltersData:
@@ -19,7 +19,7 @@ class CurvesFiltersData:
     def __repr__(self):
         return self.__str__()
 
-class ServerResponseCurvesFilters(_ServerResponse):
+class ServerResponseCurvesFilters(ServerResponse):
     DATA_FILTERS_KEY = "filters"
 
     @staticmethod
