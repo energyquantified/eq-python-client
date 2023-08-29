@@ -180,52 +180,6 @@ Implementation of event models and related metadata classes:
       which is a list of curve event filters.
 
 
- * :py:class:`CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`: The
-   curve event data model. A curve event describes some change in data for a
-   :py:class:`Curve <energyquantified.metadata.Curve>`, sometimes also related
-   to an :py:class:`Instance <energyquantified.metadata.Instance>`. The type of
-   data operation (e.g., create or delete) is described by the
-   :py:class:`EventType <energyquantified.events.EventType>`.
-
- * :py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`:
-   A model for describing events related to the stream connection (e.g., disconnect).
-
- * :py:class:`TimeoutEvent <energyquantified.events.TimeoutEvent>`:
-   A filler event that enables users act between actual events from
-   :py:meth:`get_next() <energyquantified.api.EventsAPI.get_next>`.
-
- * :py:class:`EventType <energyquantified.events.EventType>`:
-   Enumerator of event types for event models (e.g.,
-   :py:class:`CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`,
-   :py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`,
-   :py:class:`TimeoutEvent <energyquantified.events.TimeoutEvent>`).
-
- * :py:class:`EventFilterOptions <energyquantified.events.EventFilterOptions>`:
-   One of two classes used for filtering events when subscribing to the curve
-   stream. This options class is for filtering on different
-   :py:class:`Curve <energyquantified.metadata.Curve>` attributes.
-
- * :py:class:`EventCurveOptions <energyquantified.events.EventCurveOptions>`:
-   One of two classes used for filtering events when subscribing to the curve
-   stream. This options class is for filtering on specific
-   :py:class:`Curve <energyquantified.metadata.Curve>`'s.
-
- * :py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`:
-   Model for response from subscribing to curve events.
-
- * :py:class:`CurvesSubscribeData <energyquantified.events.CurvesSubscribeData>`:
-   The ``data`` field in a
-   :py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`.
-   Consists of a list of curve event filters and optionally an event id.
-
- * :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`:
-   Model for response from requesting active curve event filters.
-
- * :py:class:`CurvesFiltersData <energyquantified.events.CurvesFiltersData>`:
-   The ``data`` field in a
-   :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`.
-   Consists of a list of curve event filters.
-
 ``energyquantified.time``
 -------------------------
 
