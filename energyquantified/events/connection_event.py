@@ -129,11 +129,17 @@ class ConnectionEvent(_Event):
     """
 
     def __init__(self, event_type, status=None, status_code=None, message=None):
+        #: See :py:class:`energyquantified.events.EventType`. Is always
+        #: ``DISCONNECTED`` for connection events.
+        self.event_type = None
         super().__init__(event_type=event_type)
         if status is None and status_code is not None:
             status = CONNECTION_ERROR_LOOKUP.get(status_code, CONNECTION_ERROR)
+        #: Status name
         self.status = status
+        #: Status code number
         self.status_code = status_code
+        #: Error message
         self.message = message
 
     def __str__(self):

@@ -26,6 +26,9 @@ class TimeoutEvent(_Event):
     """
 
     def __init__(self):
+        #: See :py:class:`energyquantified.events.EventType`. Is always
+        #: ``TIMEOUT`` for timeout events.
+        self.event_type = None
         super().__init__(event_type=EventType.TIMEOUT)
 
     def _set_event_type(self, event_type):
@@ -59,12 +62,23 @@ class CurveUpdateEvent(_Event):
         instance = None,
         num_values = None,
     ):
+        #: See :py:class:`energyquantified.events.EventType`. Is one of
+        #: ``CURVE_UPDATE``, ``CURVE_DELETE`` or ``CURVE_TRUNCATE``.
+        self.event_type = None
         super().__init__(event_type=event_type)
+        #: The unique identifier for this event
         self.event_id = event_id
+        #: See :py:class:`energyquantified.metadata.Curve`. The curve with
+        #: modified data.
         self.curve = curve
-        self.begin = begin
-        self.end = end
+        #: See :py:class:`energyquantified.metadata.Instance`. The instace
+        #: with modified data. Only provided where applicable.
         self.instance = instance
+        #: The begin date (inclusive)
+        self.begin = begin
+        #: The end date (exclusive)
+        self.end = end
+        #: The number of affected values
         self.num_values = num_values
 
     def _set_event_type(self, event_type):

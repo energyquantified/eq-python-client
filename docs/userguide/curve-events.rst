@@ -28,13 +28,15 @@ affected values. It also includes an
 If values were updated at 15-minute frequency for Germany's consumption normal at
 ``2023-01-01 01:15`` and ``2023-01-01 01:45``, the following event would be produced:
 
-    >>> <CurveUpdateEvent:
-    >>>     event_id="1234567890123-0"
-    >>>     curve="DE Consumption MWh/h 15min Normal",
-    >>>     event_type=EventType.CURVE_UPDATE,
-    >>>     begin="2023-01-01 01:15,
-    >>>     end="2023-01-01 02:00",
-    >>>     num_values=2>
+.. code-block:: python
+
+    <CurveUpdateEvent:
+        event_id="1234567890123-0"
+        curve="DE Consumption MWh/h 15min Normal",
+        event_type=EventType.CURVE_UPDATE,
+        begin="2023-01-01 01:15,
+        end="2023-01-01 02:00",
+        num_values=2>
 
 Curve events are uniquely identified by the ``event_id`` attribute. Event id's
 are strings that consists of two numbers separated by a dash ("-"), where the

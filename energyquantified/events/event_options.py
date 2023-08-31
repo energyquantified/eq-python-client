@@ -162,7 +162,6 @@ class EventCurveOptions(_BaseEventOptions):
             event_types=None,
             curve_names=None,
         ):
-
         super().__init__(begin=begin, end=end, event_types=event_types)
         self._curve_names = None
         if curve_names:
