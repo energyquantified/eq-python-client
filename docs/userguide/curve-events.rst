@@ -90,42 +90,50 @@ stream, due to websockets bidirectional communication protocol.
 
 First, we must connect to the WebSockets endpoint:
 
-    >>> eq.events.connect()
+.. code-block:: python
+
+    eq.events.connect()
 
 Once connected, we can specify our filters and subscribe to them. Here we create
 filters for ACTUAL and FORECAST events in DE, FR and GB:
 
-    >>> filter_1 = CurveAttributeFilter(
-    >>>     areas=[Area.DE, Area.FR, Area.GB],
-    >>>     data_types=[DataType.ACTUAL, DataType.FORECAST],
-    >>> )
+.. code-block:: python
+
+    filter_1 = CurveAttributeFilter(
+        areas=[Area.DE, Area.FR, Area.GB],
+        data_types=[DataType.ACTUAL, DataType.FORECAST],
+    )
 
 Subscribe to curve events with the filter:
 
-    >>> # Single filter
-    >>> eq.events.subscribe_curve_events(filters=filter_1)
-    >>> # Or with multiple filters
-    >>> eq.events.subscribe_curve_events(filters=[
-    >>>     filter_1,
-    >>>     ..,
-    >>>     filter_n
-    >>>     ]
-    >>> )
+.. code-block:: python
+
+    # Single filter
+    eq.events.subscribe_curve_events(filters=filter_1)
+    # Or with multiple filters
+    eq.events.subscribe_curve_events(filters=[
+            filter_1,
+        ..,
+        filter_n
+        ]
+    )
 
 Then you can loop over incoming events forever:
 
-    >>> # Loop over incoming events (blocking)
-    >>> for event in eq.events.get_next():
-    >>>
-    >>> if event.event_type == EventType.CURVE_UPDATE:
-    >>>     # A curve is updated, so we can load its data
-    >>>     data = event.load_data()
-    >>>     # Store it in your database?
-    >>>     continue
-    >>>
-    >>> if event.event_type == EventType.DISCONNECTED:
-    >>>     # Not connected and no more events to process
-    >>>     break
+.. code-block:: python
+
+    # Loop over incoming events (blocking)
+    for event in eq.events.get_next():
+
+    if event.event_type == EventType.CURVE_UPDATE:
+        # A curve is updated, so we can load its data
+        data = event.load_data()
+        # Store it in your database?
+        continue
+
+    if event.event_type == EventType.DISCONNECTED:
+        # Not connected and no more events to process
+        break
 
 Putting it all together, this is a minimal example on how to connect, subscribe,
 and start listening for curve events:
@@ -256,26 +264,30 @@ considered a match if **all set variables** matches the event.
 
 Subscribe to curve events with one or more filters:
 
-    >>> # Single filter
-    >>> eq.events.subscribe_curve_events(filters=filter_1)
-    >>> # Or with multiple filters
-    >>> eq.events.subscribe_curve_events(filters=[
-    >>>     filter_1,
-    >>>     ..,
-    >>>     filter_n
-    >>>     ]
-    >>> )
+.. code-block:: python
+
+    # Single filter
+    eq.events.subscribe_curve_events(filters=filter_1)
+    # Or with multiple filters
+    eq.events.subscribe_curve_events(filters=[
+        filter_1,
+        ..,
+        filter_n
+        ]
+    )
 
 
 Both filters support setting the variables in various ways:
 
-    >>> # Through the constructor
-    >>> filter_1 = CurveNameFilter(areas=[Area.DE])
-    >>> # Through .set_ methods
-    >>> filter_1 = CurveNameFilter()
-    >>> filter_1.set_areas([Area.DE])
-    >>> # And can be used fluently
-    >>> filter_1.set_areas(Area.DE).set_data_types(DataType.ACTUAL)
+.. code-block:: python
+
+    # Through the constructor
+    filter_1 = CurveNameFilter(areas=[Area.DE])
+    # Through .set_ methods
+    filter_1 = CurveNameFilter()
+    filter_1.set_areas([Area.DE])
+    # And can be used fluently
+    filter_1.set_areas(Area.DE).set_data_types(DataType.ACTUAL)
 
 Common variables in both filters are ``event_types``, ``begin`` and ``begin``.
 
@@ -362,8 +374,10 @@ Method reference: :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI
 After subscribing to curve events you will immediately start receiving events
 matching your filters. Loop over incoming events:
 
-    >>> for event in eq.events.get_next():
-    >>>     # Handle event
+.. code-block:: python
+
+    for event in eq.events.get_next():
+        # Handle event
 
 Events can be of different types, so you may not always get a
 :py:class:`~energyquantified.events.CurveUpdateEvent`. For instance, unexpected
@@ -385,9 +399,11 @@ Method reference:
 
 Check if the event represent a curve update and load it's data:
 
-    >>> for event in eq.events.get_next():
-    >>>     if event.event_type = EventType.CURVE_UPDATE:
-    >>>         data = event.load_data()
+.. code-block:: python
+
+    for event in eq.events.get_next():
+        if event.event_type = EventType.CURVE_UPDATE:
+            data = event.load_data()
 
 The type of data loaded depends on the curve, and may be a
 :py:class:`~energyquantified.data.Timeseries`,
