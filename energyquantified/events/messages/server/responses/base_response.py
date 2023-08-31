@@ -1,7 +1,7 @@
 import uuid
 from enum import Enum
 from energyquantified.events.messages.server.base import _BaseServerMessage
-from energyquantified.events import EventFilterOptions, EventCurveOptions
+from energyquantified.events import CurveAttributeFilter, CurveNameFilter
 
 _response_status_lookup = {}
 
@@ -81,19 +81,19 @@ class ServerResponse(_BaseServerMessage):
     def _parse_curve_filter(self, json):
         # Event type
         curve_names = json.get("curve_names")
-        # Either EventCurveOptions or EventFilterOptions
+        # Either CurveNameFilter or CurveAttributeFilter
         if curve_names is not None:
             return _parse_curve_options(json, curve_names)
         return _parse_filter_options(json)
 
 def _parse_curve_options(json, curve_names):
-    # EventCurveOptions
-    options = EventCurveOptions().set_curve_names(curve_names)
+    # CurveNameFilter
+    options = CurveNameFilter().set_curve_names(curve_names)
     return _parse_shared_options(json, options)
 
 def _parse_filter_options(json):
-    # EventFilterOptions
-    options = EventFilterOptions()
+    # CurveAttributeFilter
+    options = CurveAttributeFilter()
     _parse_shared_options(json, options)
     # q  (freetext)
     q = json.get("q")

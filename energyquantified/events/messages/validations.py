@@ -1,6 +1,6 @@
 import uuid
 import re
-from energyquantified.events import EventCurveOptions, EventFilterOptions
+from energyquantified.events import CurveNameFilter, CurveAttributeFilter
 
 def assert_uuid(id, version=None):
     assert isinstance(id, uuid.UUID)
@@ -21,8 +21,8 @@ def assert_last_id(id):
 def assert_filters(filters):
     assert isinstance(filters, list)
     for filter in filters:
-        assert isinstance(filter,(EventFilterOptions, EventCurveOptions)), (
-            f"filter must be type EventFilterOptions or EventCurveOptions"
+        assert isinstance(filter,(CurveAttributeFilter, CurveNameFilter)), (
+            f"filter must be type CurveAttributeFilter or CurveNameFilter"
         )
         is_valid, errors = filter.validate()
         assert is_valid, (

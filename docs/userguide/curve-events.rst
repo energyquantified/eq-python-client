@@ -95,7 +95,7 @@ First, we must connect to the WebSockets endpoint:
 Once connected, we can specify our filters and subscribe to them. Here we create
 filters for ACTUAL and FORECAST events in DE, FR and GB:
 
-    >>> filter_1 = EventFilterOptions(
+    >>> filter_1 = CurveAttributeFilter(
     >>>     areas=[Area.DE, Area.FR, Area.GB],
     >>>     data_types=[DataType.ACTUAL, DataType.FORECAST],
     >>> )
@@ -134,7 +134,7 @@ and start listening for curve events:
 
     import time
     from energyquantified import EnergyQuantified
-    from energyquantified.events import EventType, EventFilterOptions
+    from energyquantified.events import EventType, CurveAttributeFilter
     from energyquantified.metadata import Area, DataType
 
     # Initialize the client
@@ -144,7 +144,7 @@ and start listening for curve events:
     eq.events.connect()
 
     # Create filters for ACTUAL and FORECAST events in DE, FR and GB
-    filters = EventFilterOptions(
+    filters = CurveAttributeFilter(
         areas=[Area.DE, Area.FR, Area.GB],
         data_types=[DataType.ACTUAL, DataType.FORECAST],
     )
@@ -242,14 +242,14 @@ Providing filters
 
 There are two different types of filters for curve events:
 
-:py:class:`~energyquantified.events.EventCurveOptions`: Filter by exact curves
+:py:class:`~energyquantified.events.CurveNameFilter`: Filter by exact curves
 
-:py:class:`~energyquantified.events.EventFilterOptions`: Search filters similar
+:py:class:`~energyquantified.events.CurveAttributeFilter`: Search filters similar
 to the curve search
 
 You can subscribe with a combination of both
-:py:class:`EventCurveOptions <energyquantified.events.EventCurveOptions>` and
-:py:class:`EventFilterOptions <energyquantified.events.EventFilterOptions>`.
+:py:class:`CurveNameFilter <energyquantified.events.CurveNameFilter>` and
+:py:class:`CurveAttributeFilter <energyquantified.events.CurveAttributeFilter>`.
 The maximum number of filters allowed is limited to ten (10). You will receive
 events for curves that match **any** of your filters, and a filters is
 considered a match if **all set variables** matches the event.
@@ -270,9 +270,9 @@ Subscribe to curve events with one or more filters:
 Both filters support setting the variables in various ways:
 
     >>> # Through the constructor
-    >>> filter_1 = EventCurveOptions(areas=[Area.DE])
+    >>> filter_1 = CurveNameFilter(areas=[Area.DE])
     >>> # Through .set_ methods
-    >>> filter_1 = EventCurveOptions()
+    >>> filter_1 = CurveNameFilter()
     >>> filter_1.set_areas([Area.DE])
     >>> # And can be used fluently
     >>> filter_1.set_areas(Area.DE).set_data_types(DataType.ACTUAL)
@@ -283,62 +283,62 @@ Common variables in both filters are ``event_types``, ``begin`` and ``begin``.
 Filter specific curves
 ^^^^^^^^^^^^^^
 
-Class reference: :py:class:`energyquantified.events.EventCurveOptions`
+Class reference: :py:class:`energyquantified.events.CurveNameFilter`
 
 This filter is used to match specific curves through ``curve_names``.
 
-``begin``: :py:meth:`set_begin() <energyquantified.events.EventCurveOptions.set_begin>`
+``begin``: :py:meth:`set_begin() <energyquantified.events.CurveNameFilter.set_begin>`
     Start of the range to receive events for. Events partially in the
     begin/end interval is also considered to match.
 
-``end``: :py:meth:`set_end() <energyquantified.events.EventCurveOptions.set_end>`
+``end``: :py:meth:`set_end() <energyquantified.events.CurveNameFilter.set_end>`
     End of the range to receive events for. Events partially in the begin/end
     interval is also considered to match.
 
-``event_types``: :py:meth:`set_event_types() <energyquantified.events.EventCurveOptions.set_event_types>`
+``event_types``: :py:meth:`set_event_types() <energyquantified.events.CurveNameFilter.set_event_types>`
     Filter by one or more :py:class:`EventType <energyquantified.events.EventType>`'s
     (e.g., ``CURVE_UPDATE`` or ``CURVE_DELETE``)
 
-``curve_names``: :py:meth:`set_curve_names() <energyquantified.events.EventCurveOptions.set_curve_names>`
+``curve_names``: :py:meth:`set_curve_names() <energyquantified.events.CurveNameFilter.set_curve_names>`
     Filter by exact curve name(s)
 
 
 Filter by curve attributes
 ^^^^^^^^^^^^^^
 
-Class reference: :py:class:`energyquantified.events.EventFilterOptions`
+Class reference: :py:class:`energyquantified.events.CurveAttributeFilter`
 
 This filter is used for filtering curves based on different metadata such as
 area or data type.
 
-``begin``: :py:meth:`set_begin() <energyquantified.events.EventCurveOptions.set_begin>`
+``begin``: :py:meth:`set_begin() <energyquantified.events.CurveNameFilter.set_begin>`
     Start of the range to receive events for. Events partially in the
     begin/end interval is also considered to match.
 
-``end``: :py:meth:`set_end() <energyquantified.events.EventCurveOptions.set_end>`
+``end``: :py:meth:`set_end() <energyquantified.events.CurveNameFilter.set_end>`
     End of the range to receive events for. Events partially in the begin/end
     interval is also considered to match.
 
-``event_types``: :py:meth:`set_event_types() <energyquantified.events.EventCurveOptions.set_event_types>`
+``event_types``: :py:meth:`set_event_types() <energyquantified.events.CurveNameFilter.set_event_types>`
     Filter by one or more :py:class:`EventType <energyquantified.events.EventType>`'s
     (e.g., ``CURVE_UPDATE`` or ``CURVE_DELETE``)
 
-``q``: :py:meth:`set_q() <energyquantified.events.EventFilterOptions.set_q>`
+``q``: :py:meth:`set_q() <energyquantified.events.CurveAttributeFilter.set_q>`
     Freetext search alike the curve search (e.g., "wind power germany")
 
-``areas``: :py:meth:`set_areas() <energyquantified.events.EventFilterOptions.set_areas>`
+``areas``: :py:meth:`set_areas() <energyquantified.events.CurveAttributeFilter.set_areas>`
     Filter by :py:class:`Area <energyquantified.metadata.Area>`'s
 
-``data_types``: :py:meth:`set_data_types() <energyquantified.events.EventFilterOptions.set_data_types>`
+``data_types``: :py:meth:`set_data_types() <energyquantified.events.CurveAttributeFilter.set_data_types>`
     Filter by :py:class:`DataType <energyquantified.metadata.DataType>`'s
 
-``commodities``: :py:meth:`set_commodities() <energyquantified.events.EventFilterOptions.set_commodities>`
+``commodities``: :py:meth:`set_commodities() <energyquantified.events.CurveAttributeFilter.set_commodities>`
     Filter by commodities
 
-``categories``: :py:meth:`set_categories() <energyquantified.events.EventFilterOptions.set_categories>`
+``categories``: :py:meth:`set_categories() <energyquantified.events.CurveAttributeFilter.set_categories>`
     Filter by categories
 
-``exact_categories``: :py:meth:`set_exact_categories() <energyquantified.events.EventFilterOptions.set_exact_categories>`
+``exact_categories``: :py:meth:`set_exact_categories() <energyquantified.events.CurveAttributeFilter.set_exact_categories>`
     Filter by one or more exact categories. An exact category is a string of
     categories (order matter) separated by space.
 

@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional, List, Union
-from energyquantified.events import EventFilterOptions, EventCurveOptions
+from energyquantified.events import CurveAttributeFilter, CurveNameFilter
 from .base_response import ServerResponse
 
 @dataclass(frozen=True)
 class CurvesFiltersData:
-    filters: Optional[List[Union[EventFilterOptions, EventCurveOptions]]] = None
+    filters: Optional[List[Union[CurveAttributeFilter, CurveNameFilter]]] = None
 
     def has_filters(self):
         return self.filters is not None

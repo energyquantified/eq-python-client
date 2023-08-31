@@ -6,10 +6,10 @@ from energyquantified.metadata.curve import Curve, DataType
 from energyquantified.metadata.area import Area
 from .event_type import EventType
 
-class _BaseEventOptions:
+class _BaseCurveFilter:
     """
     Base filter class with variables that can be used by all filter types (e.g.,
-    EventCurveoptions, EventFilterOptions).
+    CurveNameFilter, CurveAttributeFilter).
     """
 
     def __init__(self, begin=None, end=None, event_types=None):
@@ -35,8 +35,8 @@ class _BaseEventOptions:
         :type begin: str, date, datetime
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.EventCurveOptions` | \
-                :py:class:`energyquantified.events.EventFilterOptions`
+        :rtype: :py:class:`energyquantified.events.CurveNameFilter` | \
+                :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         if isinstance(begin, str):
             begin = isoparse(begin)
@@ -60,8 +60,8 @@ class _BaseEventOptions:
         :type end: str, date, datetime
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.EventCurveOptions` | \
-                :py:class:`energyquantified.events.EventFilterOptions`
+        :rtype: :py:class:`energyquantified.events.CurveNameFilter` | \
+                :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         if isinstance(end, str):
             end = isoparse(end)
@@ -88,8 +88,8 @@ class _BaseEventOptions:
         :raises ValueError: Invalid arg type
         :raises ValueError: Invalid event tag
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.EventCurveOptions` | \
-                :py:class:`energyquantified.events.EventFilterOptions`
+        :rtype: :py:class:`energyquantified.events.CurveNameFilter` | \
+                :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         new_event_types = set()
         if not isinstance(event_types, (list, tuple, set)):
@@ -149,7 +149,7 @@ class _BaseEventOptions:
         return len(errors) == 0, errors
 
 
-class EventCurveOptions(_BaseEventOptions):
+class CurveNameFilter(_BaseCurveFilter):
     """
     In addition to the inherited filters (begin, end, event_type),
     this option provides filtering on exact curve_names.
@@ -184,7 +184,7 @@ class EventCurveOptions(_BaseEventOptions):
         if self.has_end():
             str_list.append(f"end={self._end.isoformat(sep=' ')}")
         return (
-            f"<EventCurveOptions: "
+            f"<CurveNameFilter: "
             f"{', '.join(str_list)}"
             f">"
         )
@@ -207,7 +207,7 @@ class EventCurveOptions(_BaseEventOptions):
         :raises ValueError: Curve missing name attr
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.EventCurveOptions`
+        :rtype: :py:class:`energyquantified.events.CurveNameFilter`
         """
         new_curves = set()
         if not isinstance(curves, (list, tuple, set)):
@@ -261,7 +261,7 @@ class EventCurveOptions(_BaseEventOptions):
         return len(errors) == 0, errors
 
 
-class EventFilterOptions(_BaseEventOptions):
+class CurveAttributeFilter(_BaseCurveFilter):
     """
     In addition to the inherited filters (begin, end, event_type),
     this option provides filtering on curves attributes.
@@ -326,7 +326,7 @@ class EventFilterOptions(_BaseEventOptions):
         if self.has_exact_categories():
             str_list.append(f"exact_categories={self._exact_categories}")
         return (
-            f"<EventFilterOptions: "
+            f"<CurveAttributeFilter: "
             f"{', '.join(str_list)}"
             f">"
         )
@@ -345,7 +345,7 @@ class EventFilterOptions(_BaseEventOptions):
         :type q: str, required
         :raises ValueError: If q is not a string
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
+        :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         if not isinstance(q, str):
             raise ValueError(f"q: '{q}' is not a string")
@@ -367,7 +367,7 @@ class EventFilterOptions(_BaseEventOptions):
         :raises ValueError: Invalid arg type
         :raises ValueError: Tag is not a valid Area tag
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
+        :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         new_areas = set()
         if not isinstance(areas, (list, tuple, set)):
@@ -399,7 +399,7 @@ class EventFilterOptions(_BaseEventOptions):
         :raises ValueError: Invalid arg type
         :raises ValueError: Tag is not a valid DataType tag
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
+        :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         new_data_types = set()
         if not isinstance(data_types, (list, tuple, set)):
@@ -430,7 +430,7 @@ class EventFilterOptions(_BaseEventOptions):
         :type commodities: list, str
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
+        :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         if not isinstance(commodities, (list, tuple, set)):
             # Set to remove duplicates
@@ -455,7 +455,7 @@ class EventFilterOptions(_BaseEventOptions):
         :type categories: list, str
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.EventFilterOptions`
+        :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         if not isinstance(categories, (list, tuple, set)):
             # Set to remove duplicates
@@ -481,7 +481,7 @@ class EventFilterOptions(_BaseEventOptions):
         :type exact_categories: list, str
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: EventFilterOptions
+        :rtype: CurveAttributeFilter
         """
         if not isinstance(exact_categories, (list, tuple, set)):
             # Set to remove duplicates

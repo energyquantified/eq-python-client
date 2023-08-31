@@ -9,8 +9,8 @@ import logging
 import os
 import re
 from energyquantified.events import (
-    EventCurveOptions,
-    EventFilterOptions,
+    CurveNameFilter,
+    CurveAttributeFilter,
     ConnectionEvent,
     CurveUpdateEvent,
     EventType,
@@ -73,7 +73,7 @@ class EventsAPI:
         >>> # Connect
         >>> events = eq.events.connect()
         >>> # Subscribe to curve events in Germany
-        >>> filters = EventFilterOptions(areas=[Area.DE])
+        >>> filters = CurveAttributeFilter(areas=[Area.DE])
         >>> eq.events.subscribe_curve_events(filters=filters)
         >>> # Loop over events as they come
         >>> for event in events.get_next():
@@ -529,7 +529,7 @@ class EventsAPI:
         Create a filter and subscribe:
 
             >>> filters = [
-            >>>     EventFilterOptions(event_types="CURVE_UPDATE")
+            >>>     CurveAttributeFilter(event_types="CURVE_UPDATE")
             >>> ]
             >>> eq.events.subscribe_curve_events(filters=filters)
 
@@ -537,8 +537,8 @@ class EventsAPI:
         logs when a response is received.
 
         :param filters: The filters. Can be a single filter or a list of filters.
-        :type filters: list[:py:class:`energyquantified.events.EventFilterOptions`, \
-            :py:class:`energyquantified.events.EventCurveOptions`]
+        :type filters: list[:py:class:`energyquantified.events.CurveAttributeFilter`, \
+            :py:class:`energyquantified.events.CurveNameFilter`]
         :param last_id: ID of the latest event received. Used for ex-/including older events.\
                 Takes priority over the id from a potential last_id file. Set to "keep"\
                 in order to use the last id from memory.
@@ -553,8 +553,8 @@ class EventsAPI:
         if not isinstance(filters, list):
             filters = [filters]
         for curve_filter in filters:
-            assert isinstance(curve_filter, (EventCurveOptions, EventFilterOptions)), (
-                f"Invalid filter type, expected EventCurveOptions or EventFilterOptions "
+            assert isinstance(curve_filter, (CurveNameFilter, CurveAttributeFilter)), (
+                f"Invalid filter type, expected CurveNameFilter or CurveAttributeFilter "
                 f"but found {type(curve_filter)}"
             )
             is_valid, errors = curve_filter.validate()

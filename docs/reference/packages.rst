@@ -149,10 +149,10 @@ Implementation of event models and related metadata classes:
       :py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
       with a list of any of the following filters:
 
-        * :py:class:`EventCurveOptions <energyquantified.events.EventCurveOptions>`:
+        * :py:class:`CurveNameFilter <energyquantified.events.CurveNameFilter>`:
           Filter by exact curves
 
-        * :py:class:`EventFilterOptions <energyquantified.events.EventFilterOptions>`:
+        * :py:class:`CurveAttributeFilter <energyquantified.events.CurveAttributeFilter>`:
           Search filters similar to the curve search (metadata)
 
     Note that all curve filters support filtering on event types and date range.

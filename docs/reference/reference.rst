@@ -276,12 +276,12 @@ Curve events
 
 ------
 
-.. autoclass:: energyquantified.events.EventCurveOptions
+.. autoclass:: energyquantified.events.CurveNameFilter
    :inherited-members:
 
 ------
 
-.. autoclass:: energyquantified.events.EventFilterOptions
+.. autoclass:: energyquantified.events.CurveAttributeFilter
    :inherited-members:
 
 ------

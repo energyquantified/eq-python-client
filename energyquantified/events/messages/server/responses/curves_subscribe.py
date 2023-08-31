@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional, List, Union
-from energyquantified.events import EventFilterOptions, EventCurveOptions
+from energyquantified.events import CurveAttributeFilter, CurveNameFilter
 from .base_response import ServerResponse
 
 @dataclass(frozen=True)
 class CurvesSubscribeData:
-    filters: List[Union[EventFilterOptions, EventCurveOptions]]
+    filters: List[Union[CurveAttributeFilter, CurveNameFilter]]
     last_id: Optional[str] = None
 
     def has_last_id(self):
