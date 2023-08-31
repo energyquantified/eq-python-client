@@ -8,8 +8,8 @@ from .event_type import EventType
 
 class _BaseEventOptions:
     """
-    Base filter class with variables that can be used by all filter types (e.g., 
-    EventCurveoptions, EventFilterOptions). 
+    Base filter class with variables that can be used by all filter types (e.g.,
+    EventCurveoptions, EventFilterOptions).
     """
 
     def __init__(self, begin=None, end=None, event_types=None):
@@ -134,7 +134,7 @@ class _BaseEventOptions:
 
     def validate(self):
         raise NotImplementedError
-    
+
     def _validate(self):
         errors = []
         if self.has_begin():
@@ -151,7 +151,7 @@ class _BaseEventOptions:
 
 class EventCurveOptions(_BaseEventOptions):
     """
-    In addition to the inherited filters (begin, end, event_type), 
+    In addition to the inherited filters (begin, end, event_type),
     this option provides filtering on exact curve_names.
     """
 
@@ -192,7 +192,7 @@ class EventCurveOptions(_BaseEventOptions):
 
     def __repr__(self):
         return self.__str__()
-    
+
     def has_curve_names(self):
         if not isinstance(self._curve_names, list):
             return False
@@ -200,7 +200,7 @@ class EventCurveOptions(_BaseEventOptions):
 
     def set_curve_names(self, curves):
         """
-        Set one ore more curve names for this filter. Limit the events to events 
+        Set one or more curve names for this filter. Limit the events to events
         with a curve matching one of the curve_names.
 
         :param curves: Filter events by exact curve names
@@ -264,7 +264,7 @@ class EventCurveOptions(_BaseEventOptions):
 
 class EventFilterOptions(_BaseEventOptions):
     """
-    In addition to the inherited filters (begin, end, event_type), 
+    In addition to the inherited filters (begin, end, event_type),
     this option provides filtering on curves attributes.
     """
 
@@ -449,7 +449,7 @@ class EventFilterOptions(_BaseEventOptions):
 
     def set_categories(self, categories):
         """
-        Set one or more categories. Limits events to those having a curve 
+        Set one or more categories. Limits events to those having a curve
         with at least one matching category.
 
         :param categories: The categories to include

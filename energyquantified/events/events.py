@@ -12,14 +12,14 @@ class _Event:
     @property
     def is_connection_event(self):
         return self.event_type.is_connection_type()
-    
+
     @property
     def is_timeout_event(self):
         return self.event_type.is_timeout_type()
 
     def _set_event_type(self, event_type):
-        raise NotImplementedError    
-    
+        raise NotImplementedError
+
 class TimeoutEvent(_Event):
     """
     Filler event used to indicate that a certain time has passed without any new events.
@@ -38,10 +38,10 @@ class TimeoutEvent(_Event):
             f"event_type={self.event_type}"
             f">"
         )
-    
+
     def __repr__(self) -> str:
         return self.__str__()
-    
+
 
 class CurveUpdateEvent(_Event):
     """
@@ -72,7 +72,7 @@ class CurveUpdateEvent(_Event):
             f"Cannot create CurveUpdateEvent with EventType={event_type}"
         )
         self.event_type = event_type
-    
+
     def __str__(self):
         begin_str = self.begin.isoformat(sep=" ") if self.begin is not None else None
         end_str = self.end.isoformat(sep=" ") if self.end is not None else None
@@ -165,7 +165,7 @@ class CurveUpdateEvent(_Event):
         # OHLC
         if self.curve.curve_type == CurveType.OHLC:
             return eq.ohlc.load(
-                self.curve, 
-                begin=self.begin, 
+                self.curve,
+                begin=self.begin,
                 end=self.end,
             )
