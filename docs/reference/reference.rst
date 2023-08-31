@@ -291,9 +291,18 @@ Curve events
 
 ------
 
+.. autoclass:: energyquantified.events.CurvesSubscribeData
+   :inherited-members:
+
+------
+
 .. autoclass:: energyquantified.events.CurvesFiltersResponse
    :inherited-members:
 
+------
+
+.. autoclass:: energyquantified.events.CurvesFiltersData
+   :inherited-members:
 
 Date and time
 -------------
