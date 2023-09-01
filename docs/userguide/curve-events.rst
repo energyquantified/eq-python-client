@@ -251,13 +251,16 @@ with your own function:
 Providing filters
 ~~~~~~~~~~~~~~~~~
 
-There are two different types of filters for curve events:
+There are two different filter types for curve events:
 
     * :py:class:`~energyquantified.events.CurveNameFilter`: Filter by
       curves/curve names
 
     * :py:class:`~energyquantified.events.CurveAttributeFilter`: Search filters
       similar to the curve search
+
+However, both filter types support filtering on ``event_types``, ``begin``
+and ``end``.
 
 You can subscribe with a combination of both
 :py:class:`CurveNameFilter <energyquantified.events.CurveNameFilter>` and
@@ -272,28 +275,61 @@ Subscribe to curve events with one or more filters:
 
     # Single filter
     eq.events.subscribe_curve_events(filters=filter_1)
-    # Or with multiple filters
+    # Multiple filters
     eq.events.subscribe_curve_events(filters=[
         filter_1,
-        ..,
-        filter_n
-        ]
-    )
+        filter_2,
+        filter_3,
+    ])
 
 
-Both filters support setting the variables in various ways:
+Creating a filter
+^^^^^^^^^^^^^^^^^^^^^^
+
+The filter variables can be set in the constructor or through set methods:
 
 .. code-block:: python
 
-    # Through the constructor
-    filter_1 = CurveNameFilter(areas=[Area.DE])
-    # Through .set_ methods
-    filter_1 = CurveNameFilter()
-    filter_1.set_areas([Area.DE])
-    # And can be used fluently
-    filter_1.set_areas(Area.DE).set_data_types(DataType.ACTUAL)
+    from datetime import datetime
 
-Common variables in both filters are ``event_types``, ``begin`` and ``begin``.
+    # In constructor
+    my_filter = CurveNameFilter(event_types=[EventType.CURVE_UPDATE])
+    my_filter = CurveAttributeFilter(event_types=[EventType.CURVE_UPDATE])
+
+    # In methods (fluently)
+    my_filter = CurveNameFilter().set_event_types([
+        EventType.CURVE_UPDATE
+        ]).set_begin(datetime(2023,9,1))
+    my_filter = CurveAttributeFilter().set_event_types([
+        EventType.CURVE_UPDATE
+        ]).set_begin(datetime(2023,9,1))
+
+Variables that support multiple values can be set from a single object or a list
+of objects:
+
+.. code-block:: python
+
+    # Single element in constructor
+    my_filter = CurveNameFilter(event_types=[EventType.CURVE_UPDATE])
+    my_filter = CurveAttributeFilter(event_types=[EventType.CURVE_UPDATE])
+
+    # List in constructor
+    my_filter = CurveNameFilter(event_types=EventType.CURVE_UPDATE)
+    my_filter = CurveAttributeFilter(event_types=EventType.CURVE_UPDATE)
+
+    # Single element in set method
+    my_filter = CurveNameFilter().set_event_types([
+        EventType.CURVE_UPDATE
+        ])
+    my_filter = CurveAttributeFilter().set_event_types(EventType.CURVE_UPDATE)
+
+    # List in set method
+    my_filter = CurveNameFilter().set_event_types([
+        EventType.CURVE_UPDATE
+        ])
+    my_filter = CurveAttributeFilter().set_event_types([
+        EventType.CURVE_UPDATE
+        ]).set_begin(datetime(2023,9,1))
 
 
 Filter specific curves
@@ -303,20 +339,34 @@ Class reference: :py:class:`energyquantified.events.CurveNameFilter`
 
 This filter is used to match specific curves through ``curve_names``.
 
-``begin``: :py:meth:`set_begin() <energyquantified.events.CurveNameFilter.set_begin>`
-    Start of the range to receive events for. Events partially in the
-    begin/end interval is also considered to match.
+    * ``begin``: Begin date of events (inclusive). Events even partially in the
+      begin/end interval is also considered to match.
 
-``end``: :py:meth:`set_end() <energyquantified.events.CurveNameFilter.set_end>`
-    End of the range to receive events for. Events partially in the begin/end
-    interval is also considered to match.
+    * ``end``: End of the range to receive events for (exclusive). Events
+      even partially in the begin/end interval is also considered to match.
 
-``event_types``: :py:meth:`set_event_types() <energyquantified.events.CurveNameFilter.set_event_types>`
-    Filter by one or more :py:class:`EventType <energyquantified.events.EventType>`'s
-    (e.g., ``CURVE_UPDATE`` or ``CURVE_DELETE``)
+    * ``event_types``: Filter by one or more
+      :py:class:`EventType <energyquantified.events.EventType>`'s (e.g.,
+      ``CURVE_UPDATE`` or ``CURVE_DELETE``)
 
-``curve_names``: :py:meth:`set_curve_names() <energyquantified.events.CurveNameFilter.set_curve_names>`
-    Filter by exact curve name(s)
+    * ``curve_names``: Filter by exact curve names
+
+The code snippet below illustrates how to create a filter for updates in a
+certain date range for two curves. You will receive a curve event whenever
+date in the ``begin`` (inclusive) - ``end`` (exclusive) interval is updated
+for either of the two curves.
+
+.. code-block:: python
+
+    my_filter = CurveNameFilter(
+        event_types=EventType.CURVE_UPDATE,
+        begin=date(2023,1,1),
+        end=date(2023,2,1),
+        curve_names=[
+            "DE Wind Power Production MWh/h 15min Actual",
+            "FR Wind Power Production MWh/h 15min Forecast",
+        ],
+    )
 
 
 Filter by curve attributes
@@ -327,36 +377,56 @@ Class reference: :py:class:`energyquantified.events.CurveAttributeFilter`
 This filter is used for filtering curves based on different metadata such as
 area or data type.
 
-``begin``: :py:meth:`set_begin() <energyquantified.events.CurveNameFilter.set_begin>`
-    Start of the range to receive events for. Events partially in the
-    begin/end interval is also considered to match.
+    * ``begin``: Begin date of events (inclusive). Events even partially in the
+      begin/end interval is also considered to match.
 
-``end``: :py:meth:`set_end() <energyquantified.events.CurveNameFilter.set_end>`
-    End of the range to receive events for. Events partially in the begin/end
-    interval is also considered to match.
+    * ``end``: End of the range to receive events for (exclusive). Events
+      even partially in the begin/end interval is also considered to match.
 
-``event_types``: :py:meth:`set_event_types() <energyquantified.events.CurveNameFilter.set_event_types>`
-    Filter by one or more :py:class:`EventType <energyquantified.events.EventType>`'s
-    (e.g., ``CURVE_UPDATE`` or ``CURVE_DELETE``)
+    * ``event_types``: Filter by
+      :py:class:`EventType <energyquantified.events.EventType>` (e.g.,
+      ``CURVE_UPDATE`` or ``CURVE_DELETE``)
 
-``q``: :py:meth:`set_q() <energyquantified.events.CurveAttributeFilter.set_q>`
-    Freetext search alike the curve search (e.g., "wind power germany")
+    * ``q``: Freetext search alike the curve search (e.g., "wind power germany")
 
-``areas``: :py:meth:`set_areas() <energyquantified.events.CurveAttributeFilter.set_areas>`
-    Filter by :py:class:`Area <energyquantified.metadata.Area>`'s
+    * ``areas``: Filter by :py:class:`Area <energyquantified.metadata.Area>`
 
-``data_types``: :py:meth:`set_data_types() <energyquantified.events.CurveAttributeFilter.set_data_types>`
-    Filter by :py:class:`DataType <energyquantified.metadata.DataType>`'s
+    * ``data_types``: Filter by
+      :py:class:`DataType <energyquantified.metadata.DataType>`
 
-``commodities``: :py:meth:`set_commodities() <energyquantified.events.CurveAttributeFilter.set_commodities>`
-    Filter by commodities
+    * ``commodities``: Filter by commodities
 
-``categories``: :py:meth:`set_categories() <energyquantified.events.CurveAttributeFilter.set_categories>`
-    Filter by categories
+    * ``categories``: Filter by categories
 
-``exact_categories``: :py:meth:`set_exact_categories() <energyquantified.events.CurveAttributeFilter.set_exact_categories>`
-    Filter by one or more exact categories. An exact category is a string of
-    categories (order matter) separated by space.
+    * ``exact_categories``: Filter by one or more exact categories. An exact
+      category is a string of categories (ordered) separated by space (e.g.,
+      "Wind Power")
+
+The code snippet below illustrates how to create a filter for curve updates
+for january of 2023 in ``actual`` or ``forecast`` data with the
+``Wind Power Production`` category, in either Germany or France.
+
+.. code-block:: python
+
+    my_filter = CurveAttributeFilter(
+        event_types=EventType.CURVE_UPDATE,
+        begin=date(2023,1,1),
+        end=date(2023,2,1),
+        data_types=[
+            DataType.ACTUAL,
+            DataType.FORECAST,
+        ],
+        exact_categories="Wind Power Production",
+        areas=[Area.DE, Area.FR],
+    )
+
+For a curve event to match it must meet all of the following requirements:
+
+    * The event type is ``CURVE_UPDATE`` (data is added or changed)
+    * At least one value in january 2023 is updated
+    * The data type is ``actual`` or ``forecast``
+    * The exact category is ``Wind Power Production``
+    * The related area is Germany or France
 
 
 Providing last id
