@@ -1,5 +1,5 @@
 Curve update events
-===========
+===================
 
 This page shows how to load curve events that are streamed in real-time from
 EQ's WebSocket API. The examples below expects you to have an initialzied
@@ -10,11 +10,11 @@ Operation described here are available under ``eq.events.*``.
 
 
 Terminology
----------------------
+-----------
 
 
 Curve events
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 Class reference: :py:class:`eq.events.CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`
 
@@ -31,10 +31,10 @@ If values were updated at 15-minute frequency for Germany's consumption normal a
 .. code-block:: python
 
     <CurveUpdateEvent:
-        event_id="1234567890123-0"
+        event_id="1234567890123-0",
         curve="DE Consumption MWh/h 15min Normal",
         event_type=EventType.CURVE_UPDATE,
-        begin="2023-01-01 01:15,
+        begin="2023-01-01 01:15",
         end="2023-01-01 02:00",
         num_values=2>
 
@@ -45,31 +45,31 @@ the event was created. The second number is a serial.
 
 
 Event types
-~~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 All events have an :py:class:`EventType <energyquantified.events.EventType>`
 at the ``event_type`` attribute. Event types describe what an event means.
 
-:py:class:`EventType.CURVE_UPDATE <energyquantified.events.EventType>`:
-Data in a curve is updated
+    * :py:class:`EventType.CURVE_UPDATE <energyquantified.events.EventType>`:
+      Data in a curve is updated
 
-:py:class:`EventType.CURVE_DELETE <energyquantified.events.EventType>`:
-Some data in a curve or a whole instance is removed
+    * :py:class:`EventType.CURVE_DELETE <energyquantified.events.EventType>`:
+      Some data in a curve or a whole instance is removed
 
-:py:class:`EventType.CURVE_TRUNCATE <energyquantified.events.EventType>`:
-All data in a curve is removed
+    * :py:class:`EventType.CURVE_TRUNCATE <energyquantified.events.EventType>`:
+      All data in a curve is removed
 
-:py:class:`EventType.DISCONNECTED <energyquantified.events.EventType>`:
-Not connected to the push feed (reason described by other attributes in the event)
+    * :py:class:`EventType.DISCONNECTED <energyquantified.events.EventType>`:
+      Not connected to the push feed (reason described by other attributes in the event)
 
-:py:class:`EventType.TIMEOUT <energyquantified.events.EventType>`:
-Filler event that enables users to act in between events during quiet times.
-Timeout events are only generated if the ``timeout`` parameter is set in
-:py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`.
+    * :py:class:`EventType.TIMEOUT <energyquantified.events.EventType>`:
+      Filler event that enables users to act in between events during quiet times.
+      Timeout events are only generated if the ``timeout`` parameter is set in
+      :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`.
 
 
 Filters
-~~~~~~~~~~~~~~
+~~~~~~~
 
 In order to receive events, one must first subscribe to the events of interest.
 When subscribing to curve events you must provide a list of filters for which
@@ -85,8 +85,8 @@ You can re-subscribe with new filters on the fly while already listening to the
 stream, due to websockets bidirectional communication protocol.
 
 
-## Quickstart
----------------------
+Quickstart
+----------
 
 First, we must connect to the WebSockets endpoint:
 
@@ -99,24 +99,24 @@ filters for ACTUAL and FORECAST events in DE, FR and GB:
 
 .. code-block:: python
 
-    filter_1 = CurveAttributeFilter(
+    my_filter = CurveAttributeFilter(
         areas=[Area.DE, Area.FR, Area.GB],
         data_types=[DataType.ACTUAL, DataType.FORECAST],
     )
 
-Subscribe to curve events with the filter:
+Subscribe to curve events with the filters:
 
 .. code-block:: python
 
     # Single filter
-    eq.events.subscribe_curve_events(filters=filter_1)
-    # Or with multiple filters
+    eq.events.subscribe_curve_events(filters=my_filter)
+
+    # Multiple filters
     eq.events.subscribe_curve_events(filters=[
-            filter_1,
-        ..,
-        filter_n
-        ]
-    )
+        my_filter,
+        another_filter,
+        third_filter,
+    ])
 
 Then you can loop over incoming events forever:
 
@@ -125,15 +125,15 @@ Then you can loop over incoming events forever:
     # Loop over incoming events (blocking)
     for event in eq.events.get_next():
 
-    if event.event_type == EventType.CURVE_UPDATE:
-        # A curve is updated, so we can load its data
-        data = event.load_data()
-        # Store it in your database?
-        continue
+        if event.event_type == EventType.CURVE_UPDATE:
+            # A curve is updated, so we can load its data
+            data = event.load_data()
+            # Store it in your database?
+            continue
 
-    if event.event_type == EventType.DISCONNECTED:
-        # Not connected and no more events to process
-        break
+        if event.event_type == EventType.DISCONNECTED:
+            # Not connected and no more events to process
+            break
 
 Putting it all together, this is a minimal example on how to connect, subscribe,
 and start listening for curve events:
@@ -166,7 +166,7 @@ and start listening for curve events:
         if event.event_type == EventType.CURVE_UPDATE:
             # A curve is updated, so we can load its data
             print("Curve updated: ", event)
-            # Load data?
+            # Load data
             data = event.load_data()
             # Store it in your database?
             continue
@@ -177,7 +177,7 @@ and start listening for curve events:
 
 
 Connecting
----------------------
+----------
 
 Method reference: :py:meth:`eq.events.connect() <energyquantified.api.EventsAPI.connect>`
 
@@ -199,7 +199,7 @@ in connect. The number of attempts reset once if a connection is re-established.
 
 
 Disconnecting
----------------------
+-------------
 
 Method reference: :py:meth:`eq.events.disconnect() <energyquantified.api.EventsAPI.disconnect>`
 
@@ -209,17 +209,20 @@ Connect to the stream by calling
 to closing the connection continues to be available in
 :py:meth:`get_next() <energyquantified.api.EventsAPI.get_next>`.
 
+.. code-block:: python
+
+    eq.events.disconnect()
 
 Subscribing
----------------------
+-----------
 
-Method reference: :py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`:
+Method reference: :py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
 
 
 In order to receive events one must first subscribe with a list of filters,
 limiting the events you receive to those of interest. You can update your
 filters while already subscribed by calling
-:py:meth:`subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`:
+:py:meth:`subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
 with the new filters.
 
 After subscribing, the server responds with a
@@ -246,14 +249,15 @@ with your own function:
 
 
 Providing filters
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 There are two different types of filters for curve events:
 
-:py:class:`~energyquantified.events.CurveNameFilter`: Filter by exact curves
+    * :py:class:`~energyquantified.events.CurveNameFilter`: Filter by
+      curves/curve names
 
-:py:class:`~energyquantified.events.CurveAttributeFilter`: Search filters similar
-to the curve search
+    * :py:class:`~energyquantified.events.CurveAttributeFilter`: Search filters
+      similar to the curve search
 
 You can subscribe with a combination of both
 :py:class:`CurveNameFilter <energyquantified.events.CurveNameFilter>` and
@@ -293,7 +297,7 @@ Common variables in both filters are ``event_types``, ``begin`` and ``begin``.
 
 
 Filter specific curves
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
 Class reference: :py:class:`energyquantified.events.CurveNameFilter`
 
@@ -316,7 +320,7 @@ This filter is used to match specific curves through ``curve_names``.
 
 
 Filter by curve attributes
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Class reference: :py:class:`energyquantified.events.CurveAttributeFilter`
 
@@ -356,7 +360,7 @@ area or data type.
 
 
 Providing last id
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 Provide an event id to the optional parameter ``last_id`` in
 :py:meth:`subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
@@ -367,7 +371,7 @@ described :ref:`here <remember last id>`).
 
 
 Handling events
----------------------
+---------------
 
 Method reference: :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`
 
@@ -392,7 +396,7 @@ deciding how to act.
 
 
 Loading data data for events
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Method reference:
 :py:meth:`event.load_data() <energyquantified.events.CurveUpdateEvent.load_data>`
@@ -414,7 +418,7 @@ type ``CURVE_DELETE`` or ``CURVE_TRUNCATE`` as deleted data no longer exists.
 
 
 Connection events
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 Class reference:
 :py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`
@@ -461,7 +465,7 @@ took place.
 
 
 Timeouts
-~~~~~~~~~~~~~~
+~~~~~~~~
 
 Class reference:
 :py:class:`TimeoutEvent <energyquantified.events.TimeoutEvent>`
@@ -489,7 +493,7 @@ You can safely ignore this event if you do not find it useful.
 
 
 Capturing messages and errors
----------------------
+-----------------------------
 
 By default, messages from the server will be logged at info level. Override the
 default by setting a custom callback function with
@@ -526,13 +530,12 @@ You can attach the handlers even before you connect:
 
 
 Restarts and network errors
----------------------
-
+---------------------------
 
 .. _remember last id:
 
 Remember ``last_id`` between processes runs
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The client can remember the last event received, and continue where it left off
 on restarts.
@@ -557,7 +560,7 @@ will override the id from file (and update the file).
 
 
 Automatic subscribe after reconnect
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When a client reconnects, it will resubscribe with the previous filters, and ask
 for events that occured during downtime.
@@ -578,7 +581,7 @@ for events that occured during downtime.
 
 
 Server only keeps the most recent events
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 While the API supports fetching older events, we only keep the latest ~10.000
 (at the time of writing). In most cases that should cover events for the last
