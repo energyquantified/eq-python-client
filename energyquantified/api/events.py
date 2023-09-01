@@ -345,6 +345,7 @@ class EventsAPI:
                 # https://www.rfc-editor.org/rfc/rfc6455.html#section-7.1.5
                 status_code = 1005
             self._last_connection_event = ConnectionEvent(
+                event_type=EventType.DISCONNECTED,
                 status_code=status_code,
                 message=msg
             )
@@ -677,10 +678,10 @@ class EventsAPI:
         """
         if response.ok:
             filters = response.data.filters
-            log.info("Active curve event filters: %s" % filters)
+            log.info("Active curve event filters: %s", filters)
         else:
             errors = response.errors
-            log.error("Failed to get active curve event filters: %s" % errors)
+            log.error("Failed to get active curve event filters: %s", errors)
 
     def get_curve_filters(self, callback=on_curves_filters):
         """

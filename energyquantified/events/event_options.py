@@ -89,7 +89,7 @@ class _BaseCurveFilter:
         .is_curve_type()).
 
         :param event_types: EventTypes (or tags) to include
-        :type event_types: list[EventType, str]
+        :type event_types: EventType, str, list[EventType, str]
         :raises ValueError: Invalid arg type
         :raises ValueError: Invalid event tag
         :return: The instance this method was invoked upon
@@ -168,7 +168,7 @@ class _BaseCurveFilter:
 class CurveNameFilter(_BaseCurveFilter):
     """
     In addition to the inherited filters (begin, end, event_type),
-    this option provides filtering on exact curve_names.
+    this option provides filtering on curves.
 
     :param begin: The begin date (inclusive). Ignored if None, defaults to None.
     :type begin: date, datetime, str, optional
@@ -177,8 +177,8 @@ class CurveNameFilter(_BaseCurveFilter):
     :param event_types: The event types to filter. Ignored if None, defaults\
         to None.
     :type event_types: EventType, str, list[EventType, str], optional
-    :param curve_names: Filter curves by name. Ignored if None, defaults to None.
-    :type curve_names: str, list[str], optional
+    :param curves: Filter by curves. Ignored if None, defaults to None.
+    :type curves: Curve, str, list[Curve, str], optional
     """
 
     def __init__(
@@ -186,12 +186,12 @@ class CurveNameFilter(_BaseCurveFilter):
             begin=None,
             end=None,
             event_types=None,
-            curve_names=None,
+            curves=None,
     ):
         super().__init__(begin=begin, end=end, event_types=event_types)
-        self._curve_names = None
-        if curve_names:
-            self.set_curve_names(curve_names)
+        self._curves = None
+        if curves:
+            self.set_curves(curves)
 
     def __str__(self):
         """
@@ -203,8 +203,8 @@ class CurveNameFilter(_BaseCurveFilter):
         str_list = []
         if self.has_event_types():
             str_list.append(f"event_types={self._event_types}")
-        if self.has_curve_names():
-            str_list.append(f"curve_names={self._curve_names}")
+        if self.has_curves():
+            str_list.append(f"curves={self._curves}")
         if self.has_begin():
             str_list.append(f"begin={self._begin.isoformat(sep=' ')}")
         if self.has_end():
@@ -218,18 +218,18 @@ class CurveNameFilter(_BaseCurveFilter):
     def __repr__(self):
         return self.__str__()
 
-    def has_curve_names(self):
-        if not isinstance(self._curve_names, list):
+    def has_curves(self):
+        if not isinstance(self._curves, list):
             return False
-        return len(self._curve_names) > 0
+        return len(self._curves) > 0
 
-    def set_curve_names(self, curves):
+    def set_curves(self, curves):
         """
-        Set one or more curve names for this filter. Limit the events to events
-        with a curve matching one of the curve_names.
+        Set one or more curves in this filter. Limit the events to events
+        with a curve matching one of the curves.
 
-        :param curves: Filter events by exact curve names
-        :type curves: list[Curve, str]
+        :param curves: Filter events by curves
+        :type curves: Curve, str, list[Curve, str]
         :raises ValueError: Curve missing name attr
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
@@ -248,7 +248,7 @@ class CurveNameFilter(_BaseCurveFilter):
                     f"curve: '{curve}' is not type 'str' or 'Curve'"
                 )
             new_curves.add(curve)
-        self._curve_names = list(new_curves)
+        self._curves = list(new_curves)
         return self
 
     def to_json(self):
@@ -268,8 +268,8 @@ class CurveNameFilter(_BaseCurveFilter):
         :rtype: dict
         """
         filters = self._to_dict(include_not_set=include_not_set)
-        if self.has_curve_names():
-            filters["curve_names"] = self._curve_names
+        if self.has_curves():
+            filters["curve_names"] = self._curves
         elif include_not_set:
             filters["curve_names"] = None
         return filters
@@ -283,12 +283,12 @@ class CurveNameFilter(_BaseCurveFilter):
         :rtype: tuple[bool, list[str]]
         """
         _, errors = self._validate()
-        if self.has_curve_names():
+        if self.has_curves():
             if not all(
                 isinstance(curve_name, str)
-                for curve_name in self._curve_names
+                for curve_name in self._curves
             ):
-                errors.append("All objects in 'curve_names' must be type str")
+                errors.append("All objects in 'curves' must be type str")
         return len(errors) == 0, errors
 
 
@@ -418,7 +418,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         a curve with a matching Area.
 
         :param areas: The areas or area tags to receive events
-        :type areas: list[Area, str]
+        :type areas: Area, str, list[Area, str]
         :raises ValueError: Invalid arg type
         :raises ValueError: Tag is not a valid Area tag
         :return: The instance this method was invoked upon
@@ -450,7 +450,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         curve with a matching DataType.
 
         :param data_types: The DataTypes (optionally by tag) to receive events for
-        :type data_types: list[DataType, str]
+        :type data_types: DataType, str, list[DataType, str]
         :raises ValueError: Invalid arg type
         :raises ValueError: Tag is not a valid DataType tag
         :return: The instance this method was invoked upon
@@ -484,7 +484,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         having a curve with a matching commodity.
 
         :param commodities: The commidities to filter for
-        :type commodities: list, str
+        :type commodities: str, list[str]
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
@@ -511,7 +511,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         with at least one matching category.
 
         :param categories: The categories to include
-        :type categories: list, str
+        :type categories: str, list[str]
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
@@ -539,7 +539,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         be one or more categories in a single str, separated by space.
 
         :param exact_categories: The exact categories to include
-        :type exact_categories: list, str
+        :type exact_categories: str, list[str]
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
         :rtype: CurveAttributeFilter

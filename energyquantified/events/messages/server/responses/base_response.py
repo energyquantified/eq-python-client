@@ -95,21 +95,22 @@ class ServerResponse(_BaseServerMessage):
 
     def _parse_curve_filter(self, json):
         # Event type
-        curve_names = json.get("curve_names")
+        curves = json.get("curve_names")
         # Either CurveNameFilter or CurveAttributeFilter
-        if curve_names is not None:
-            return _parse_curve_options(json, curve_names)
+        if curves is not None:
+            return _parse_curve_options(json, curves)
         return _parse_filter_options(json)
 
-def _parse_curve_options(json, curve_names):
+def _parse_curve_options(json, curves):
     # CurveNameFilter
-    options = CurveNameFilter().set_curve_names(curve_names)
-    return _parse_shared_options(json, options)
+    options = CurveNameFilter().set_curves(curves)
+    options = _parse_shared_options(json, options)
+    return options
 
 def _parse_filter_options(json):
     # CurveAttributeFilter
     options = CurveAttributeFilter()
-    _parse_shared_options(json, options)
+    options = _parse_shared_options(json, options)
     # q  (freetext)
     q = json.get("q")
     if q is not None:
@@ -136,7 +137,6 @@ def _parse_filter_options(json):
         options.set_exact_categories(exact_categories)
     return options
 
-
 def _parse_shared_options(json, options):
     # Variables in both CurveOption and FilterOptions
     # Event type
@@ -149,3 +149,6 @@ def _parse_shared_options(json, options):
         options.set_begin(begin)
     # End
     end = json.get("end")
+    if end is not None:
+        options.set_end(end)
+    return options

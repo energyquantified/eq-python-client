@@ -38,5 +38,5 @@ class ServerResponseCurvesFilters(ServerResponse):
         # Parse filters
         filters = data_obj.get(self.DATA_FILTERS_KEY)
         if filters is not None:
-            filters = [self._parse_curve_filter(filter for filter in filters)]
+            filters = [self._parse_curve_filter(filter) for filter in filters]
         self.data = CurvesFiltersData(filters=filters)

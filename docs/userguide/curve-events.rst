@@ -348,7 +348,7 @@ Filter specific curves
 
 Class reference: :py:class:`energyquantified.events.CurveNameFilter`
 
-This filter is used to match specific curves through ``curve_names``.
+This filter is used to match specific curves through ``curves``.
 
     * ``begin``: Begin date of events (inclusive). Events even partially in the
       begin/end interval is also considered to match.
@@ -360,7 +360,7 @@ This filter is used to match specific curves through ``curve_names``.
       :py:class:`EventType <energyquantified.events.EventType>`'s (e.g.,
       ``CURVE_UPDATE`` or ``CURVE_DELETE``)
 
-    * ``curve_names``: Filter by exact curve names
+    * ``curves``: Filter by exact curve names
 
 The code snippet below illustrates how to create a filter for updates in a
 certain date range for two curves. You will receive a curve event whenever
@@ -373,7 +373,7 @@ for either of the two curves.
         event_types=EventType.CURVE_UPDATE,
         begin=date(2023,1,1),
         end=date(2023,2,1),
-        curve_names=[
+        curves=[
             "DE Wind Power Production MWh/h 15min Actual",
             "FR Wind Power Production MWh/h 15min Forecast",
         ],
