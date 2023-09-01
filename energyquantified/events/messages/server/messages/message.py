@@ -10,5 +10,8 @@ class ServerMessageMessage(_BaseServerMessage):
     def from_message(json):
         msg = json.get(ServerMessageMessage.MESSAGE_KEY)
         if msg is None:
-            raise ValueError(f"Failed to parse StreamMessageMessage because field '{ServerMessageMessage.MESSAGE_KEY}' is missing")
+            raise ValueError(
+                f"Failed to parse StreamMessageMessage because "
+                f"field '{ServerMessageMessage.MESSAGE_KEY}' is missing"
+            )
         return ServerMessageMessage(msg)

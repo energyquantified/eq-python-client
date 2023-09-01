@@ -31,7 +31,10 @@ class ServerResponseCurvesFilters(ServerResponse):
     def _set_data(self, json):
         data_obj = json.get(self.DATA_KEY)
         if data_obj is None:
-            raise ValueError(f"Failed parsing response from stream, missing field '{self.DATA_KEY}'")
+            raise ValueError(
+                f"Failed parsing response from stream, "
+                f"missing field '{self.DATA_KEY}'"
+            )
         # Parse filters
         filters = data_obj.get(self.DATA_FILTERS_KEY)
         if filters is not None:

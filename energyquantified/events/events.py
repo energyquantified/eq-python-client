@@ -22,7 +22,8 @@ class _Event:
 
 class TimeoutEvent(_Event):
     """
-    Filler event used to indicate that a certain time has passed without any new events.
+    Filler event used to indicate that a certain time has passed without
+    any new events.
     """
 
     def __init__(self):
@@ -32,7 +33,9 @@ class TimeoutEvent(_Event):
         super().__init__(event_type=EventType.TIMEOUT)
 
     def _set_event_type(self, event_type):
-        assert event_type.is_timeout_type(), f"Cannot create TimeoutEvent with EventType={event_type}"
+        assert event_type.is_timeout_type(), (
+            f"Cannot create TimeoutEvent with EventType={event_type}"
+        )
         self.event_type = event_type
 
     def __str__(self):
@@ -49,7 +52,8 @@ class TimeoutEvent(_Event):
 class CurveUpdateEvent(_Event):
     """
     Describes change in data for a :py:class:`energyquantified.metadata.Curve`,
-    which may also be related to an :py:class:`energyquantified.metadata.Instance`.
+    which may also be related to an
+    :py:class:`energyquantified.metadata.Instance`.
     """
 
     def __init__(
@@ -108,7 +112,8 @@ class CurveUpdateEvent(_Event):
     def load_data(self, eq):
         """
         Load data in the range described by the event. Returns 'None' if the
-        event type is either ``EventType.CURVE_TRUNCATE`` or ``EventType.CURVE_DELETE``.
+        event type is either ``EventType.CURVE_TRUNCATE`` or
+        ``EventType.CURVE_DELETE``.
 
         :param eq: Instance of the api client
         :type eq: :py:class:`energyquantified.EnergyQuantified`
@@ -121,9 +126,14 @@ class CurveUpdateEvent(_Event):
             issues while loading the data
         """
         if not self.event_type == EventType.CURVE_UPDATE:
-            raise ValueError(f"Cannot load data for curve event with EventType={self.event_type}")
+            raise ValueError(
+                f"Cannot load data for curve event with EventType={self.event_type}"
+            )
         # Timeseries and scenarios
-        if self.curve.curve_type in (CurveType.TIMESERIES, CurveType.SCENARIO_TIMESERIES):
+        if self.curve.curve_type in (
+            CurveType.TIMESERIES,
+            CurveType.SCENARIO_TIMESERIES
+        ):
             return eq.timeseries.load(
                 self.curve,
                 begin=self.begin,
@@ -134,7 +144,8 @@ class CurveUpdateEvent(_Event):
             if self.instance is None:
                 raise ValueError(
                     f"Cannot load data for event: {self}, "
-                    f"instance cannot be None for curve type: {CurveType.INSTANCE}"
+                    f"instance cannot be None for "
+                    f"curve type: {CurveType.INSTANCE}"
                 )
             return eq.instances.get(
                 self.curve,
@@ -146,8 +157,8 @@ class CurveUpdateEvent(_Event):
             if self.curve.frequency.is_iterable:
                 raise ValueError(
                     f"Cannot load data for event: {self}, "
-                    f"curve.frequency: {self.curve.frequency} cannot be iterable "
-                    f"for curve type: {CurveType.PERIOD}"
+                    f"curve.frequency: {self.curve.frequency} "
+                    f"cannot be iterable for curve type: {CurveType.PERIOD}"
                 )
             # Periods
             return eq.periods.load(
@@ -160,13 +171,15 @@ class CurveUpdateEvent(_Event):
             if self.instance is None:
                 raise ValueError(
                     f"Cannot load data for event: {self}, "
-                    f"instance cannot be None for curve type: {CurveType.INSTANCE_PERIOD}"
+                    f"instance cannot be None for "
+                    f"curve type: {CurveType.INSTANCE_PERIOD}"
                 )
             if self.curve.frequency.is_iterable:
                 raise ValueError(
                     f"Cannot load data for event: {self}, "
-                    f"curve.frequency: {self.curve.frequency} cannot be iterable "
-                    f"for curve type: {CurveType.INSTANCE_PERIOD}"
+                    f"curve.frequency: {self.curve.frequency} "
+                    f"cannot be iterable for "
+                    f"curve type: {CurveType.INSTANCE_PERIOD}"
                 )
             # InstancePeriod
             return eq.period_instances.get(

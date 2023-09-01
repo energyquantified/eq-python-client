@@ -28,7 +28,14 @@ class EventType(Enum):
     DISCONNECTED = ("DISCONNECTED", "Disconnected", False, True, False)
     TIMEOUT = ("TIMEOUT", "Timeout", False, False, True)
 
-    def __init__(self, tag, label, is_curve_type, is_connection_type, is_timeout_type):
+    def __init__(
+        self,
+        tag,
+        label,
+        is_curve_type,
+        is_connection_type,
+        is_timeout_type
+    ):
         self.tag = tag
         self.label = label
         self._is_curve_type = is_curve_type
@@ -41,7 +48,7 @@ class EventType(Enum):
 
     def __repr__(self):
         return self.__str__()
-    
+
     @staticmethod
     def is_valid_tag(tag):
         """
@@ -71,7 +78,8 @@ class EventType(Enum):
         """
         Check if this event type is for curve events.
 
-        :return: True if this event type is used for curve events, otherwise False.
+        :return: True if this event type is used for curve events,\
+            otherwise False.
         :rtype: bool
         """
         return self._is_curve_type
@@ -80,7 +88,8 @@ class EventType(Enum):
         """
         Check if this event type is for connection events.
 
-        :return: True if this event type is used by connection events, otherwise False.
+        :return: True if this event type is used by connection events,\
+            otherwise False.
         :rtype: bool
         """
         return self._is_connection_type
@@ -89,7 +98,8 @@ class EventType(Enum):
         """
         Check if this event type is for timeout events.
 
-        :return: True if this event type is used by timeout events, otherwise False.
+        :return: True if this event type is used by timeout events,\
+            otherwise False.
         :rtype: bool
         """
         return self._is_timeout_type

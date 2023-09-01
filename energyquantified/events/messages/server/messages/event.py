@@ -17,8 +17,8 @@ class ServerMessageCurveEvent(_BaseServerMessage):
         event_json = json.get(ServerMessageCurveEvent.EVENT_KEY)
         if event_json is None:
             raise ValueError(
-                f"Failed to parse StreamMessageEvent because field '{ServerMessageCurveEvent.EVENT_KEY}' "
-                f"is missing"
+                f"Failed to parse StreamMessageEvent because "
+                f"field '{ServerMessageCurveEvent.EVENT_KEY}' is missing"
             )
         event = _parse_curve_event(event_json)
         return ServerMessageCurveEvent(event)

@@ -8,6 +8,16 @@ import time
 import logging
 import os
 import re
+import random
+import atexit
+from socket import timeout
+from websocket import (
+    WebSocketException,
+    WebSocketConnectionClosedException,
+    WebSocketProtocolException,
+    WebSocketBadStatusException,
+    WebSocketPayloadException,
+)
 from energyquantified.events import (
     CurveNameFilter,
     CurveAttributeFilter,
@@ -31,19 +41,13 @@ from energyquantified.events.messages import (
     ServerResponseError,
     ServerMessageType,
 )
-from energyquantified.events.callback import Callback, SUBSCRIBE_CURVES, GET_CURVE_FILTERS
-from energyquantified.events.connection_event import TIMEOUT
-import random
-import atexit
-from socket import timeout
-from websocket import (
-    WebSocketException,
-    WebSocketConnectionClosedException,
-    WebSocketProtocolException,
-    WebSocketBadStatusException,
-    WebSocketPayloadException,
+from energyquantified.events.callback import (
+    Callback,
+    SUBSCRIBE_CURVES,
+    GET_CURVE_FILTERS,
 )
-from energyquantified.events.callback import Callback, SUBSCRIBE_CURVES
+from energyquantified.events.connection_event import TIMEOUT
+
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -53,8 +57,8 @@ class EventsAPI:
     """
     The curve events API client.
 
-    Wraps the Energy Quantified websocket API for curve events. Handles validation,
-    network errors, and parsing of API responses.
+    Wraps the Energy Quantified websocket API for curve events. Handles
+    validation, network errors, and parsing of API responses.
 
     :param ws_url: The root URL for the events websocket API
     :type ws_url: str
@@ -115,7 +119,9 @@ class EventsAPI:
         self._last_id_file_updated = None
         self._last_id_file_atexit = None
         # Message handlers
-        self._message_handler = lambda msg: log.info("Message from server: %s" % msg)
+        self._message_handler = lambda msg: log.info(
+            "Message from server: %s" % msg
+        )
         # TODO what if response.request_id is in callbacks?
         self._error_handler = lambda err: log.error(err)
 
@@ -127,21 +133,28 @@ class EventsAPI:
 
     def _setup_last_id_file(self):
         """
-        Creates a 'last_id'-file if the file does not already exist. If exists, update
-        last_id in memory with the value from the file.
+        Creates a 'last_id'-file if the file does not already exist. If exists,
+        update last_id in memory with the value from the file.
         """
         if os.path.exists(self._last_id_file_path):
             # Raise error if path exists but it's not a file
             if not os.path.isfile(self._last_id_file_path):
                 raise FileNotFoundError(
-                    f"Path last_id_file: '{self._last_id_file_path}' exists but it is not a file"
+                    f"Path last_id_file: '{self._last_id_file_path}' exists "
+                    f"but it is not a file"
                 )
             # Read-access
             if not os.access(self._last_id_file_path, os.R_OK):
-                raise PermissionError(f"Missing read-access to last_id_file: '{self._last_id_file_path}'")
+                raise PermissionError(
+                    f"Missing read-access to "
+                    f"last_id_file: '{self._last_id_file_path}'"
+                )
             # Write-access
             if not os.access(self._last_id_file_path, os.W_OK):
-                raise PermissionError(f"Missing write-access to last_id_file: {self._last_id_file_path}")
+                raise PermissionError(
+                    f"Missing write-access to "
+                    f"last_id_file: {self._last_id_file_path}"
+                )
             # Find from file and set
             with open(self._last_id_file_path, "r") as f:
                 data = json.load(f)
@@ -157,8 +170,9 @@ class EventsAPI:
                 os.makedirs(parent_dir, exist_ok=True)
             if not os.access(parent_dir, os.W_OK):
                     raise PermissionError(
-                        f"last_id_file: '{self._last_id_file_path}' does not exist "
-                        f"and missing write-access to parent directory: '{parent_dir}'"
+                        f"last_id_file: '{self._last_id_file_path}' "
+                        f"does not exist, and missing write-access to "
+                        f"parent directory: '{parent_dir}'"
                     )
             # Create file
             with open(self._last_id_file_path, "w") as f:
@@ -170,8 +184,9 @@ class EventsAPI:
 
         :param last_id: The new id
         :type last_id: str
-        :param force_update: Overwrites the current last_id without comparing if True.\
-                            Saves the greates of the two id's if False. Defaults to False.
+        :param force_update: Overwrites the current last_id without comparing\
+            if True. Saves the greates of the two id's if False.\
+                Defaults to False.
         :type force_update: bool, optional
         """
         if force_update:
@@ -185,9 +200,9 @@ class EventsAPI:
             self._last_id = last_id
             return
         # At this point we know neither are None. Time to keep compare and keep
-        # the greatest of the two id's.
-        # last_id format: str of timestamp (millis) and a seq. number separated by dash
-        # format: ^\\d{13}-{1}\\d+$
+        #   the greatest of the two id's.
+        # last_id format: str of timestamp (millis) and a seq. number separated
+        #   by dash -> ^\\d{13}-{1}\\d+$
         current_id = self._last_id.split("-")
         new_id = last_id.split("-")
         # First compare timestamps
@@ -204,12 +219,14 @@ class EventsAPI:
 
     def _last_id_to_file(self, last_id=None, write_interval_s=30):
         """
-        Saves the last_id to disk if the file path exists, last_id (or self._last_id)
-        is not None, and it's at least 'write_interval_s' seconds since last save.
+        Saves the last_id to disk if the file path exists, last_id (or
+        self._last_id) is not None, and it's at least 'write_interval_s' seconds
+        since last save.
 
         :param last_id: The id (defaults to self._last_id if None)
         :type last_id: str, optional
-        :param write_interval_s: The minimum number of seconds since last write, defaults to 30
+        :param write_interval_s: The minimum number of seconds since last\
+            write, defaults to 30
         :type write_interval_s: int, optional
         """
         # Ignore if user didn't provide a file path
@@ -221,7 +238,9 @@ class EventsAPI:
             # Fallback to
             last_id = self._last_id
         # Don't write if less than 'write_interval_s' since last
-        if self._last_id_timestamp is not None and time.time() < self._last_id_timestamp + write_interval_s:
+        if self._last_id_timestamp is not None and (
+            time.time() < self._last_id_timestamp + write_interval_s
+        ):
             return
         # Block other access to file
         with open(self._last_id_file_path, "r+") as f:
@@ -239,7 +258,8 @@ class EventsAPI:
 
     def _on_open(self, _ws):
         """
-        Callback function that is called whenever a new websocket connection is established.
+        Callback function that is called whenever a new websocket connection
+        is established.
         """
         self._last_connection_event = None
         # Reset reconnect counter on successfull connection
@@ -252,7 +272,10 @@ class EventsAPI:
         if self._latest_curves_subscribe_message is not None:
             if self._last_id is not None:
                 self._latest_curves_subscribe_message["last_id"] = self._last_id
-                log.info("Reconnected to the stream, sending %s to subscribe with previous filters" % self._latest_curves_subscribe_message)
+                log.info(
+                    "Reconnected to the stream, sending %s to subscribe with previous filters",
+                    self._latest_curves_subscribe_message
+                )
                 self._ws.send(json.dumps(self._latest_curves_subscribe_message))
 
     def _on_message(self, _ws, message):
@@ -261,12 +284,14 @@ class EventsAPI:
         """
         with self._messages_lock:
             message_json = json.loads(message)
-            #print(f"msg: {message_json}")
             msg_type_tag = ServerMessageType.tag_from_json(message_json)
             if not ServerMessageType.is_valid_tag(msg_type_tag):
-                # Unkown type, skip. Might be a new type that is not supported in this version.
+                # Unkown type, skip. Might be a new type that is not supported
+                #   in this version.
                 return
-            msg_obj = ServerMessageType.by_tag(msg_type_tag).model.from_message(message_json)
+            msg_obj = ServerMessageType.by_tag(
+                msg_type_tag
+                ).model.from_message(message_json)
             # Check type
             if isinstance(msg_obj, ServerMessageMessage):
                 self._message_handler(msg_obj.message)
@@ -295,14 +320,19 @@ class EventsAPI:
                     )
                     callback.callback(filters_response)
                 elif isinstance(msg_obj, ServerResponseError):
-                    # Should only really happen if server fails to parse 'type' (so shouldnt happen)
+                    # Should only really happen if server fails to
+                    # parse 'type' (so shouldnt happen)
                     # TODO what if callback exists for request_id?
-                    self._error_handler(". ".join[[err.capitalize() for err in msg_obj.errors]])
+                    self._error_handler(". ".join[
+                        [err.capitalize() for err in msg_obj.errors]
+                    ])
                 else:
-                    # Might be a new response type that is not supported in this version. Skip.
+                    # Might be a new response type that is not supported in
+                    #   this version. Skip.
                     pass
             else:
-                # Might be a new type with parser not implemented in this version. Skip.
+                # Might be a new type with parser not implemented in this
+                #   version. Skip.
                 pass
 
     def _on_close(self, _ws, status_code, msg):
@@ -310,10 +340,14 @@ class EventsAPI:
         if self._last_connection_event is None:
             # Network error if no status_code
             if status_code is None:
-                # 1005 if first close frame, no status code and NOT closed by user. Source:
-                #   https://www.rfc-editor.org/rfc/rfc6455.html#section-7.1.5
+                # 1005 if first close frame, no status code and NOT closed
+                # by user. Source:
+                # https://www.rfc-editor.org/rfc/rfc6455.html#section-7.1.5
                 status_code = 1005
-            self._last_connection_event = ConnectionEvent(status_code=status_code, message=msg)
+            self._last_connection_event = ConnectionEvent(
+                status_code=status_code,
+                message=msg
+            )
         if self._is_connected.is_set():
             self._is_connected.clear()
             with self._last_id_file_lock:
@@ -323,7 +357,8 @@ class EventsAPI:
         if not isinstance(error, (timeout, ConnectionError, WebSocketException)):
             self._error_handler(getattr(error, "strerror", str(error)))
             return
-        #  self._last_connection_event should only be set once for each time connecting
+        # self._last_connection_event should only be set once for each time
+        #   connecting.
         if self._last_connection_event is not None:
            return
         if isinstance(error, timeout):
@@ -344,8 +379,8 @@ class EventsAPI:
         elif isinstance(error, WebSocketException):
             # Type of exception
             if hasattr(error, "status_code"):
-                # At the time of writing, WebSocketBadStatusException is the only
-                #   WebsocketException with this attribute
+                # At the time of writing, WebSocketBadStatusException
+                #   is the only WebsocketException with this attribute
                 status_code = error.status_code
             elif isinstance(error, WebSocketBadStatusException):
                 status_code = error.status_code
@@ -358,7 +393,7 @@ class EventsAPI:
                 status_code = 1006
             else:
                 # Default to abnormal (no close frame received)
-                # (https://www.rfc-editor.org/rfc/rfc6455.html#section-7.2)
+                #   (https://www.rfc-editor.org/rfc/rfc6455.html#section-7.2)
                 status_code = 1006
             # Create the connection event
             self._last_connection_event = ConnectionEvent(
@@ -388,8 +423,8 @@ class EventsAPI:
             >>>     last_id_file="folder_name/last_id_file.json"
             >>> )
 
-        Optionally supply the ``timeout`` parameter with an integer to change the
-        default number of seconds to wait for a connection to be established
+        Optionally supply the ``timeout`` parameter with an integer to change
+        the default number of seconds to wait for a connection to be established
         before failing. It is not recommended to change this too low, as
         connecting always takes a certain amount of time at minimum.
 
@@ -469,7 +504,7 @@ class EventsAPI:
                         self._done_trying_to_connect.set()
                         return
                 # Wait delta longer than the default ws timeout,
-                # plus a random amount of time to spread traffic
+                #   plus a random amount of time to spread traffic
                 time.sleep(timeout + 0.5 + random.uniform(1,5))
 
         self._wst = threading.Thread(target=_ws_thread)
@@ -513,7 +548,12 @@ class EventsAPI:
             errors = response.errors
             log.error("Failed to subscribe - %s" % errors)
 
-    def subscribe_curve_events(self, filters=None, last_id=None, callback=on_curves_subscribed):
+    def subscribe_curve_events(
+            self,
+            filters=None,
+            last_id=None,
+            callback=on_curves_subscribed,
+        ):
         """
         Send a filter or a list of filters to the stream, subscribing to
         curve events matching any of the filters.
@@ -533,27 +573,33 @@ class EventsAPI:
             >>> ]
             >>> eq.events.subscribe_curve_events(filters=filters)
 
-        If a custom callback function is not provided, the default ``on_curves_subscribe``
-        logs when a response is received.
+        If a custom callback function is not provided, the default
+        ``on_curves_subscribe`` logs when a response is received.
 
         :param filters: The filters. Can be a single filter or a list of filters.
         :type filters: list[:py:class:`energyquantified.events.CurveAttributeFilter`, \
             :py:class:`energyquantified.events.CurveNameFilter`]
-        :param last_id: ID of the latest event received. Used for ex-/including older events.\
-                Takes priority over the id from a potential last_id file. Set to "keep"\
-                in order to use the last id from memory.
+        :param last_id: ID of the latest event received. Used for ex-/including\
+            older events. Takes priority over the id from a potential\
+                last_id file. Set to "keep" in order to use the last id\
+                    from memory.
         :type last_id: str, optional
-        :param callback: Set a custom callback function to handle the subscribe response. Defaults to\
-            :py:meth:`on_curves_subscribed() <energyquantified.api.EventsAPI.on_curves_subscribed>`.
+        :param callback: Set a custom callback function to handle the subscribe\
+            response. Defaults to\
+                :py:meth:`on_curves_subscribed() <energyquantified.api.EventsAPI.on_curves_subscribed>`.
         :type callback: Callable, optional
-        :return: The obj instance this method was invoked upon, so the APi can be used fluently
+        :return: The obj instance this method was invoked upon, so the APi can\
+            be used fluently
         :rtype: :py:class:`energyquantified.events.EventsAPI`
         """
         # Validate filters
         if not isinstance(filters, list):
             filters = [filters]
         for curve_filter in filters:
-            assert isinstance(curve_filter, (CurveNameFilter, CurveAttributeFilter)), (
+            assert isinstance(
+                curve_filter,
+                (CurveNameFilter, CurveAttributeFilter)
+            ), (
                 f"Invalid filter type, expected CurveNameFilter or CurveAttributeFilter "
                 f"but found {type(curve_filter)}"
             )
@@ -564,7 +610,9 @@ class EventsAPI:
             )
         # Validate last_id
         if last_id is not None:
-            assert isinstance(last_id, str), "param 'last_id' must be None or a str"
+            assert isinstance(last_id, str), (
+                "param 'last_id' must be None or a str"
+            )
             # Use id from memory if 'keep'
             if last_id.lower() == "keep":
                 last_id = self._last_id
@@ -576,7 +624,8 @@ class EventsAPI:
                 )
         # At least one of 'last_id' and 'filters' must be set
         assert last_id is not None or filters is not None, (
-            f"Minimum one of 'last_id' and 'filters' must be set in order to subscribe to curve events"
+            f"Minimum one of 'last_id' and 'filters' must be set "
+            f"in order to subscribe to curve events"
         )
         # Validation done. Create request id
         request_id = uuid.uuid4()
@@ -605,15 +654,17 @@ class EventsAPI:
                     # TODO or just del other curves.subscribe callbacks instead?
                     #del self._callbacks[k] #_ / k
             # Callback
-            callback = Callback(callback, callback_type=SUBSCRIBE_CURVES, latest=True)
+            callback = Callback(
+                callback,
+                callback_type=SUBSCRIBE_CURVES,
+                latest=True,
+            )
             self._callbacks[request_id] = callback
         # Send msg
         self._latest_curves_subscribe_message = subscribe_message
         self._update_last_id(last_id, force_update=True)
         self._last_id_to_file(write_interval_s=0)
-        #log.debug(f"sub msg: {subscribe_message}")
         msg = json.dumps(subscribe_message)
-        #log.debug(f"Sending messsage to subscribe curves:\n{msg}")
         self._ws.send(msg)
         return self
 
@@ -648,14 +699,17 @@ class EventsAPI:
 
             >>> eq.events.get_curve_filters()
 
-        If a custom callback function is not provided, the default ``on_curves_filters``
-        logs when a response is received. The callback function must take in one parameter
-        of type :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`.
+        If a custom callback function is not provided, the default
+        ``on_curves_filters`` logs when a response is received. The callback
+        function must take in one parameter of type
+        :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`.
 
-        :param callback: Set a custom callback function to handle the subscribe response. Defaults to\
-            :py:meth:`on_curves_filters() <energyquantified.api.EventsAPI.on_curves_filters>`.
+        :param callback: Set a custom callback function to handle the subscribe\
+            response. Defaults to\
+                :py:meth:`on_curves_filters() <energyquantified.api.EventsAPI.on_curves_filters>`.
         :type callback: Callable, optional
-        :return: The obj instance this method was invoked upon, so the APi can be used fluently
+        :return: The obj instance this method was invoked upon, so the APi can\
+            be used fluently
         :rtype: :py:class:`energyquantified.events.EventsAPI`
         """
         request_id = uuid.uuid4()
@@ -665,7 +719,11 @@ class EventsAPI:
                 if obj.callback_type == GET_CURVE_FILTERS:
                     obj.latest = False
             # Callback
-            callback = Callback(callback, callback_type=GET_CURVE_FILTERS, latest=True)
+            callback = Callback(
+                callback,
+                callback_type=GET_CURVE_FILTERS,
+                latest=True,
+            )
             self._callbacks[request_id] = callback
         # Send msg
         msg = json.dumps(get_filters_msg)

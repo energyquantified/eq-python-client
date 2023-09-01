@@ -44,7 +44,9 @@ class _BaseCurveFilter:
             if not isinstance(begin, datetime):
                 begin = datetime.combine(begin, datetime.min.time())
         else:
-            raise ValueError("begin must be a date, datetime, or an isoformatted string")
+            raise ValueError(
+                "begin must be a date, datetime, or an isoformatted string"
+            )
         self._begin = begin
         return self
 
@@ -69,7 +71,9 @@ class _BaseCurveFilter:
             if not isinstance(end, datetime):
                 end = datetime.combine(end, datetime.min.time())
         else:
-            raise ValueError("end must be a date, datetime, or an isoformatted string")
+            raise ValueError(
+                "end must be a date, datetime, or an isoformatted string"
+            )
         self._end = end
         return self
 
@@ -81,7 +85,8 @@ class _BaseCurveFilter:
     def set_event_types(self, event_types):
         """
         Set one or more EventTypes in this filter, excluding events not matching
-        at least one. The EventTypes must be curve type (check with .is_curve_type()).
+        at least one. The EventTypes must be curve type (check with
+        .is_curve_type()).
 
         :param event_types: EventTypes (or tags) to include
         :type event_types: list[EventType, str]
@@ -89,7 +94,7 @@ class _BaseCurveFilter:
         :raises ValueError: Invalid event tag
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.CurveNameFilter`,\
-                :py:class:`energyquantified.events.CurveAttributeFilter`
+            :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         new_event_types = set()
         if not isinstance(event_types, (list, tuple, set)):
@@ -100,9 +105,13 @@ class _BaseCurveFilter:
                     raise ValueError(f"EventType not found for tag: {event_type}")
                 event_type = EventType.by_tag(event_type)
             if not isinstance(event_type, EventType):
-                raise ValueError(f"'{event_type}' is not type 'EventType' or 'str'")
+                raise ValueError(
+                    f"'{event_type}' is not type 'EventType' or 'str'"
+                )
             if not event_type.is_curve_type():
-                raise ValueError(f"EventType: {event_type} not valid for curve filters")
+                raise ValueError(
+                    f"EventType: {event_type} not valid for curve filters"
+                )
             new_event_types.add(event_type)
         self._event_types = list(new_event_types)
         return self
@@ -117,7 +126,9 @@ class _BaseCurveFilter:
         filters = {}
         # Event types
         if self.has_event_types():
-            filters["event_types"] = list(event_type.tag for event_type in self._event_types)
+            filters["event_types"] = list(
+                event_type.tag for event_type in self._event_types
+            )
         elif include_not_set:
             filters["event_types"] = None
         # Begin
@@ -144,8 +155,13 @@ class _BaseCurveFilter:
             if not isinstance(self._end, datetime):
                 errors.append("'end' is not a datetime")
         if self.has_event_types():
-            if not all(isinstance(event_type, EventType) for event_type in self._event_types):
-                errors.append("All objects in 'event_types' must be type EventType")
+            if not all(
+                isinstance(event_type, EventType)
+                for event_type in self._event_types
+            ):
+                errors.append(
+                    "All objects in 'event_types' must be type EventType"
+                )
         return len(errors) == 0, errors
 
 
@@ -171,8 +187,7 @@ class CurveNameFilter(_BaseCurveFilter):
             end=None,
             event_types=None,
             curve_names=None,
-        ):
-
+    ):
         super().__init__(begin=begin, end=end, event_types=event_types)
         self._curve_names = None
         if curve_names:
@@ -229,7 +244,9 @@ class CurveNameFilter(_BaseCurveFilter):
                     raise ValueError("curve.name must be a string")
                 curve = curve.name
             if not isinstance(curve, str):
-                raise ValueError(f"curve: '{curve}' is not type 'str' or 'Curve'")
+                raise ValueError(
+                    f"curve: '{curve}' is not type 'str' or 'Curve'"
+                )
             new_curves.add(curve)
         self._curve_names = list(new_curves)
         return self
@@ -267,7 +284,10 @@ class CurveNameFilter(_BaseCurveFilter):
         """
         _, errors = self._validate()
         if self.has_curve_names():
-            if not all(isinstance(curve_name, str) for curve_name in self._curve_names):
+            if not all(
+                isinstance(curve_name, str)
+                for curve_name in self._curve_names
+            ):
                 errors.append("All objects in 'curve_names' must be type str")
         return len(errors) == 0, errors
 
@@ -313,7 +333,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
             commodities=None,
             categories=None,
             exact_categories=None,
-        ):
+    ):
         super().__init__(begin=begin, end=end, event_types=event_types)
         self._q = None
         self._areas = None
@@ -446,7 +466,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
                     raise ValueError(f"DataType not found for tag: {data_type}")
                 data_type = DataType.by_tag(data_type)
             if not isinstance(data_type, DataType):
-                raise ValueError(f"'{data_type}' must be type DataType or string")
+                raise ValueError(
+                    f"'{data_type}' must be type DataType or string"
+                )
             new_data_types.add(data_type)
         self._data_types = list(new_data_types)
         return self
@@ -458,8 +480,8 @@ class CurveAttributeFilter(_BaseCurveFilter):
 
     def set_commodities(self, commodities):
         """
-        Set one or more commodities in this filter. Limit events to those having a
-        curve with a matching commodity.
+        Set one or more commodities in this filter. Limit events to those
+        having a curve with a matching commodity.
 
         :param commodities: The commidities to filter for
         :type commodities: list, str
@@ -471,7 +493,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
             # Set to remove duplicates
             commodities = set([commodities])
         if not all(isinstance(commodity, str) for commodity in commodities):
-            raise ValueError("commodities must be a str or a list/tuple/set of strings")
+            raise ValueError(
+                "commodities must be a str or a list/tuple/set of strings"
+            )
         # Store as list
         self._commodities = list(commodities)
         return self
@@ -496,7 +520,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
             # Set to remove duplicates
             categories = set([categories])
         if not all(isinstance(category, str) for category in categories):
-            raise ValueError("categories must be a str or a list/tuple/set of string")
+            raise ValueError(
+                "categories must be a str or a list/tuple/set of string"
+            )
         # Store as list
         self._categories = list(categories)
         return self
@@ -508,9 +534,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
 
     def set_exact_categories(self, exact_categories):
         """
-        Set one or more exact categories. Limits events to those with a curve matching at least one
-        of the exact_categories. An exact category should be one or more categories in a single str,
-        separated by space.
+        Set one or more exact categories. Limits events to those with a curve
+        matching at least one of the exact_categories. An exact category should
+        be one or more categories in a single str, separated by space.
 
         :param exact_categories: The exact categories to include
         :type exact_categories: list, str
@@ -522,7 +548,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
             # Set to remove duplicates
             exact_categories = set([exact_categories])
         if not all(isinstance(category, str) for category in exact_categories):
-            raise ValueError("exact_categories must be a str or a list/tuple/set of strings")
+            raise ValueError(
+                "exact_categories must be a str or a list/tuple/set of strings"
+            )
         # Store as list
         self._exact_categories = list(exact_categories)
         return self
@@ -556,7 +584,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
             filters["areas"] = None
         # Data type
         if self.has_data_types():
-            filters["data_types"] = list(data_type.tag for data_type in self._data_types)
+            filters["data_types"] = list(
+                data_type.tag for data_type in self._data_types
+            )
         elif include_not_set:
             filters["data_types"] = None
         # Commodities
@@ -593,22 +623,30 @@ class CurveAttributeFilter(_BaseCurveFilter):
                     "All objects in 'areas' must be type Area"
                 )
         if self.has_data_types():
-            if not all(isinstance(data_type, DataType) for data_type in self._data_types):
+            if not all(
+                isinstance(data_type, DataType) for data_type in self._data_types
+            ):
                 errors.append(
                     "All objects in 'data_types' must be type DataType"
                 )
         if self.has_commodities():
-            if not all(isinstance(commodity, str) for commodity in self._commodities):
+            if not all(
+                isinstance(commodity, str) for commodity in self._commodities
+            ):
                 errors.append(
                     "All objects in 'commodities' must be type str"
                 )
         if self.has_categories():
-            if not all(isinstance(category, str) for category in self._categories):
+            if not all(
+                isinstance(category, str) for category in self._categories
+            ):
                 errors.append(
                     "All objects in 'categories' must be type str"
                 )
         if self.has_exact_categories():
-            if not all(isinstance(category, str) for category in self._exact_categories):
+            if not all(
+                isinstance(category, str) for category in self._exact_categories
+            ):
                 errors.append(
                     "All objects in 'exact_categories' must be type str"
                 )

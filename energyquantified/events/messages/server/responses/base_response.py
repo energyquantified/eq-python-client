@@ -56,13 +56,19 @@ class ServerResponse(_BaseServerMessage):
         # TODO how to handle if server failed to parse request_id (and how to know)
         request_id = json.get(self.REQUEST_ID_KEY)
         if request_id is None:
-            raise ValueError(f"Failed parsing StreamMessageResponse due to missing field '{self.REQUEST_ID_KEY}'")
+            raise ValueError(
+                f"Failed parsing StreamMessageResponse due to "
+                f"missing field '{self.REQUEST_ID_KEY}'"
+            )
         self.request_id = uuid.UUID(request_id, version=4)
 
     def _set_status(self, json):
         status_tag = json.get(self.STATUS_KEY)
         if not _ResponseStatus.is_valid_tag(status_tag):
-            raise ValueError(f"Failed parsing StreamMessageResponse due to invalid status: {status_tag}")
+            raise ValueError(
+                f"Failed parsing StreamMessageResponse due to invalid "
+                f"status: {status_tag}"
+            )
         self.status = _ResponseStatus.by_tag(status_tag) == _ResponseStatus.OK
 
     def _set_data(self, _):
@@ -71,11 +77,20 @@ class ServerResponse(_BaseServerMessage):
     def _set_errors(self, json):
         errors = json.get(self.ERRORS_KEY)
         if errors is None:
-            raise ValueError(f"Failed parsing stream response due to missing field '{self.ERRORS_KEY}'")
+            raise ValueError(
+                f"Failed parsing stream response due to "
+                f"missing field '{self.ERRORS_KEY}'"
+            )
         if not isinstance(errors, list):
-            raise ValueError(f"Failed parsing stream response, expected field '{self.ERRORS_KEY}' to be a list")
+            raise ValueError(
+                f"Failed parsing stream response, "
+                f"expected field '{self.ERRORS_KEY}' to be a list"
+                )
         if not all(isinstance(err, str) for err in errors):
-            raise ValueError(f"Failed parsing stream response, expected all elements in field '{self.ERRORS_KEY}' to be strings")
+            raise ValueError(
+                f"Failed parsing stream response, expected all elements in "
+                f"field '{self.ERRORS_KEY}' to be strings"
+            )
         self.errors = errors
 
     def _parse_curve_filter(self, json):

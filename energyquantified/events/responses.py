@@ -17,7 +17,7 @@ class _Response:
     @property
     def ok(self):
         return self.status is True
-    
+
     @property
     def success(self):
         return self.status is True

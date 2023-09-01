@@ -238,9 +238,9 @@ with your own function:
 
     def on_subscribe(response: CurvesSubscribeResponse):
         if response.ok:
-            log.info("subscribed")
+            print("Subscribed")
         else:
-            log.error("something went wrong")
+            print("Failed to subscribe")
 
     eq.events.subscribe_curve_events(
         filters=[...],
