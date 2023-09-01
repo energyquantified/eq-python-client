@@ -153,6 +153,16 @@ class CurveNameFilter(_BaseCurveFilter):
     """
     In addition to the inherited filters (begin, end, event_type),
     this option provides filtering on exact curve_names.
+
+    :param begin: The begin date (inclusive). Ignored if None, defaults to None.
+    :type begin: date, datetime, str, optional
+    :param end: The end date (exclusive). Ignored if None, defaults to None.
+    :type end: date, datetime, str, optional
+    :param event_types: The event types to filter. Ignored if None, defaults\
+        to None.
+    :type event_types: EventType, str, list[EventType, str], optional
+    :param curve_names: Filter curves by name. Ignored if None, defaults to None.
+    :type curve_names: str, list[str], optional
     """
 
     def __init__(
@@ -162,6 +172,7 @@ class CurveNameFilter(_BaseCurveFilter):
             event_types=None,
             curve_names=None,
         ):
+
         super().__init__(begin=begin, end=end, event_types=event_types)
         self._curve_names = None
         if curve_names:
@@ -265,8 +276,32 @@ class CurveAttributeFilter(_BaseCurveFilter):
     """
     In addition to the inherited filters (begin, end, event_type),
     this option provides filtering on curves attributes.
-    """
 
+    :param begin: The begin date (inclusive). Ignored if None, defaults to None.
+    :type begin: date, datetime, str, optional
+    :param end: The end date (exclusive). Ignored if None, defaults to None.
+    :type end: date, datetime, str, optional
+    :param event_types: The event types to filter. Ignored if None, defaults\
+        to None.
+    :type event_types: EventType, str, list[EventType, str], optional
+    :param q: Freetext search. Ignored if None, defaults to None.
+    :type q: str, optional
+    :param areas: Filter curves by area. Ignored if None, defaults to None.
+    :type areas: Area, str, list[Area, str], optional
+    :param data_types: Filter curves by data types. Ignored if None, defaults\
+        to None.
+    :type data_types: DataType, str, list[DataType, str], optional
+    :param commodities: Commodities (e.g., "Gas"). Ignored if None, defaults\
+        to None.
+    :type commodities: str, list[str], optional
+    :param categories: Categories (e.g., "Power"). Ignored if None, defaults\
+        to None.
+    :type categories: str, list[str], optional
+    :param exact_categories: An exact category is a combination of categories\
+        (e.g., "Wind Power"). The order matter. Ignored if None, defaults\
+            to None.
+    :type exact_categories: str, list[str], optional
+    """
     def __init__(
             self,
             begin=None,
