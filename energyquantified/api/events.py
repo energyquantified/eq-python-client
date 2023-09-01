@@ -273,7 +273,8 @@ class EventsAPI:
             if self._last_id is not None:
                 self._latest_curves_subscribe_message["last_id"] = self._last_id
                 log.info(
-                    "Reconnected to the stream, sending %s to subscribe with previous filters",
+                    "Reconnected to the stream, sending %s to subscribe with "
+                    "previous filters",
                     self._latest_curves_subscribe_message
                 )
                 self._ws.send(json.dumps(self._latest_curves_subscribe_message))
