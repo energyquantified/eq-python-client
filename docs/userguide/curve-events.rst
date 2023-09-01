@@ -272,6 +272,8 @@ Subscribe to curve events with one or more filters:
     # Single filter
     eq.events.subscribe_curve_events(filters=filter_1)
 
+.. code-block:: python
+
     # Multiple filters
     eq.events.subscribe_curve_events(filters=[
         filter_1,
