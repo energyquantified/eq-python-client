@@ -113,9 +113,9 @@ class CurveUpdateEvent(_Event):
         :param eq: Instance of the api client
         :type eq: :py:class:`energyquantified.EnergyQuantified`
         :return: The range of data the event describes
-        :rtype: :py:class:`energyquantified.data.TimeSeries`\
-            | :py:class:`energyquantified.data.Periodseries`\
-            | :py:class:`energyquantified.data.OHLCList`
+        :rtype: :py:class:`energyquantified.data.TimeSeries`,\
+            :py:class:`energyquantified.data.Periodseries`,\
+            :py:class:`energyquantified.data.OHLCList`
         :raises ValueError: Invalid object
         :raises APIError: If there were any network- or server-related \
             issues while loading the data

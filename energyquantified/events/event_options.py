@@ -35,7 +35,7 @@ class _BaseCurveFilter:
         :type begin: str, date, datetime
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.CurveNameFilter` | \
+        :rtype: :py:class:`energyquantified.events.CurveNameFilter`,\
                 :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         if isinstance(begin, str):
@@ -60,7 +60,7 @@ class _BaseCurveFilter:
         :type end: str, date, datetime
         :raises ValueError: Invalid arg type
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.CurveNameFilter` | \
+        :rtype: :py:class:`energyquantified.events.CurveNameFilter`,\
                 :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         if isinstance(end, str):
@@ -88,7 +88,7 @@ class _BaseCurveFilter:
         :raises ValueError: Invalid arg type
         :raises ValueError: Invalid event tag
         :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.CurveNameFilter` | \
+        :rtype: :py:class:`energyquantified.events.CurveNameFilter`,\
                 :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         new_event_types = set()
