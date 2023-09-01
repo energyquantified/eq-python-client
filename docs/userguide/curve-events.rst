@@ -256,8 +256,8 @@ There are two different filter types for curve events:
     * :py:class:`~energyquantified.events.CurveNameFilter`: Filter by
       curves/curve names
 
-    * :py:class:`~energyquantified.events.CurveAttributeFilter`: Search filters
-      similar to the curve search
+    * :py:class:`~energyquantified.events.CurveAttributeFilter`: Filter by curve
+      attributes similar to the curve search
 
 However, both filter types support filtering on ``event_types``, ``begin``
 and ``end``.
@@ -291,45 +291,56 @@ The filter variables can be set in the constructor or through set methods:
 .. code-block:: python
 
     from datetime import datetime
+    from energyquantified.events import CurveAttributeFilter, EventType
+    from energyquantified.metadata import Area
 
     # In constructor
-    my_filter = CurveNameFilter(event_types=[EventType.CURVE_UPDATE])
-    my_filter = CurveAttributeFilter(event_types=[EventType.CURVE_UPDATE])
+    my_filter = CurveAttributeFilter(
+        event_types=EventType.CURVE_UPDATE,
+        begin=datetime(2023, 9, 1),
+        areas=Area.DE,
+    )
 
     # In methods (fluently)
-    my_filter = CurveNameFilter().set_event_types([
-        EventType.CURVE_UPDATE
-        ]).set_begin(datetime(2023,9,1))
-    my_filter = CurveAttributeFilter().set_event_types([
-        EventType.CURVE_UPDATE
-        ]).set_begin(datetime(2023,9,1))
+    my_filter = (
+        CurveAttributeFilter()
+        .set_event_types(EventType.CURVE_UPDATE)
+        .set_begin(datetime(2023, 9, 1))
+        .set_areas(Area.DE),
+    )
 
-Variables that support multiple values can be set from a single object or a list
-of objects:
+Set multiple variables with a list:
 
 .. code-block:: python
 
-    # Single element in constructor
-    my_filter = CurveNameFilter(event_types=[EventType.CURVE_UPDATE])
-    my_filter = CurveAttributeFilter(event_types=[EventType.CURVE_UPDATE])
+    from energyquantified.events import CurveAttributeFilter, EventType
+    from energyquantified.metadata import Area, DataType
 
     # List in constructor
-    my_filter = CurveNameFilter(event_types=EventType.CURVE_UPDATE)
-    my_filter = CurveAttributeFilter(event_types=EventType.CURVE_UPDATE)
-
-    # Single element in set method
-    my_filter = CurveNameFilter().set_event_types([
-        EventType.CURVE_UPDATE
-        ])
-    my_filter = CurveAttributeFilter().set_event_types(EventType.CURVE_UPDATE)
+    my_filter = CurveAttributeFilter(
+        event_types=[EventType.CURVE_UPDATE, EventType.CURVE_DELETE],
+        areas=[Area.DE, Area.FR],
+        data_types=[DataType.ACTUAL, DataType.FORECAST],
+    )
 
     # List in set method
-    my_filter = CurveNameFilter().set_event_types([
-        EventType.CURVE_UPDATE
-        ])
-    my_filter = CurveAttributeFilter().set_event_types([
-        EventType.CURVE_UPDATE
-        ]).set_begin(datetime(2023,9,1))
+    my_filter = (
+        CurveAttributeFilter()
+        .set_event_types([EventType.CURVE_UPDATE, EventType.CURVE_DELETE])
+        .set_areas([Area.DE, Area.FR]),
+        .set_data_types([DataType.ACTUAL, DataType.FORECAST])
+    )
+
+You can also provide strings instead of types. Note that the strings must be
+valid tags.
+
+.. code-block:: python
+
+    my_filter = CurveAttributeFilter(
+        event_types=["CURVE_UPDATE", "CURVE_DELETE"],
+        areas=["DE", "FR"],
+        data_types=["ACTUAL", "FORECAST"],
+    )
 
 
 Filter specific curves
