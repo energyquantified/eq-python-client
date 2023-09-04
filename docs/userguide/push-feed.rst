@@ -1,4 +1,4 @@
-Curve update events
+Push feed
 ===================
 
 This page shows how to load curve events from Energy Quantified's WebSocket API
