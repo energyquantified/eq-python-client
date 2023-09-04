@@ -20,6 +20,8 @@ class EventType(Enum):
         >>> > True
         >>> EventType.CURVE_UPDATE.is_connection_type()
         >>> > False
+        >>> EventType.CURVE_UPDATE.is_timeout_type()
+        >>> > False
     """
 
     CURVE_UPDATE = ("CURVE_UPDATE", "Curve Update", True, False, False)

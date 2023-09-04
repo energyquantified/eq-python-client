@@ -253,8 +253,8 @@ Metadata
    :inherited-members:
 
 
-Curve events
--------------
+Events
+------
 
 .. autoclass:: energyquantified.events.EventType
    :inherited-members:

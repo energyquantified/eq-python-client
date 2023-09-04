@@ -84,6 +84,14 @@ matches curves for France or Germany, with data type Actual or Forecast.
 Due to WebSockets' bidirectional communication protocol, you can re-subscribe
 with new filters on the fly while already listening to the stream.
 
+There are two different filter types for curve events:
+
+    * :py:class:`~energyquantified.events.CurveNameFilter`: Filter by
+      curves/curve names
+
+    * :py:class:`~energyquantified.events.CurveAttributeFilter`: Filter by curve
+      attributes similar to the curve search
+
 
 Quickstart
 ----------
