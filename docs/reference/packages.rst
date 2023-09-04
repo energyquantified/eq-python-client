@@ -229,7 +229,7 @@ handlers by supplying the ``callback`` parameter with a callable when sending
 requests (e.g., subscribing with
 :py:meth:`subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`).
 All callbacks take in a single parameter of a type extending
-:py:class:`ServerResponse <energyquantified.events.messages.ServerResponse>`.
+:py:class:`~energyquantified.events.responses.BaseServerResponse`.
 All responses are in the same format, where only type of the ``data`` field
 differ. Responses and types:
 

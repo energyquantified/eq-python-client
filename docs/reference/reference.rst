@@ -286,7 +286,13 @@ Curve events
 
 ------
 
+.. autoclass:: energyquantified.events.responses.BaseServerResponse
+   :inherited-members:
+
+------
+
 .. autoclass:: energyquantified.events.CurvesSubscribeResponse
+   :show-inheritance:
    :inherited-members:
 
 ------
@@ -297,6 +303,7 @@ Curve events
 ------
 
 .. autoclass:: energyquantified.events.CurvesFiltersResponse
+   :show-inheritance:
    :inherited-members:
 
 ------

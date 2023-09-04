@@ -1,5 +1,5 @@
 from energyquantified.metadata import CurveType
-from . import EventType
+from .event_type import EventType
 
 class _Event:
     def __init__(self, event_type):

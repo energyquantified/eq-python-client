@@ -1,9 +1,12 @@
 from dataclasses import dataclass
 from typing import Optional, List
-from energyquantified.events.messages.server.responses import CurvesSubscribeData, CurvesFiltersData
+from energyquantified.events.messages.server.responses import (
+    CurvesSubscribeData,
+    CurvesFiltersData,
+)
 
 @dataclass(frozen=True)
-class _Response:
+class BaseServerResponse:
     """
     Base model for push feed responses.
     """
@@ -27,7 +30,7 @@ class _Response:
         return self.status is False
 
 @dataclass(frozen=True)
-class CurvesSubscribeResponse(_Response):
+class CurvesSubscribeResponse(BaseServerResponse):
     """
     Response model from subscribing to curve events.
     """
@@ -46,7 +49,7 @@ class CurvesSubscribeResponse(_Response):
         return self.__str__()
 
 @dataclass(frozen=True)
-class CurvesFiltersResponse(_Response):
+class CurvesFiltersResponse(BaseServerResponse):
     """
     Response model from requesting currently active curve filters.
     """

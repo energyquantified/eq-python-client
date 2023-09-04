@@ -1,7 +1,7 @@
 import uuid
 from enum import Enum
 from energyquantified.events.messages.server.base import _BaseServerMessage
-from energyquantified.events import CurveAttributeFilter, CurveNameFilter
+from energyquantified.events.event_options import CurveAttributeFilter, CurveNameFilter
 
 _response_status_lookup = {}
 
