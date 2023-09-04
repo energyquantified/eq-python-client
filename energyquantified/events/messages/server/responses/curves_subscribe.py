@@ -1,29 +1,5 @@
-from dataclasses import dataclass
-from typing import Optional, List, Union
-from energyquantified.events import CurveAttributeFilter, CurveNameFilter
+from energyquantified.events.responses import CurvesSubscribeData
 from .base_response import ServerResponse
-
-@dataclass(frozen=True)
-class CurvesSubscribeData:
-    filters: List[Union[CurveAttributeFilter, CurveNameFilter]]
-    last_id: Optional[str] = None
-
-    def has_last_id(self):
-        return self.last_id is not None
-
-    def has_filters(self):
-        return self.filters is not None
-
-    def __str__(self):
-        return (
-            f"<CurvesSubscribeData: "
-            f"last_id={self.last_id}, "
-            f"filters={self.filters}"
-            f">"
-        )
-
-    def __repr__(self):
-        return self.__str__()
 
 
 class ServerResponseCurvesSubscribe(ServerResponse):

@@ -1,23 +1,6 @@
-from dataclasses import dataclass
-from typing import Optional, List, Union
-from energyquantified.events import CurveAttributeFilter, CurveNameFilter
+from energyquantified.events.responses import CurvesFiltersData
 from .base_response import ServerResponse
 
-@dataclass(frozen=True)
-class CurvesFiltersData:
-    filters: Optional[List[Union[CurveAttributeFilter, CurveNameFilter]]] = None
-
-    def has_filters(self):
-        return self.filters is not None
-
-    def __str__(self):
-        return (
-            f"<CurvesFiltersData: "
-            f"filters={self.filters}"
-            f">"
-        )
-    def __repr__(self):
-        return self.__str__()
 
 class ServerResponseCurvesFilters(ServerResponse):
     DATA_FILTERS_KEY = "filters"

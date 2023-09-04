@@ -4,7 +4,5 @@ from .responses import (
     ServerResponseCurvesFilters,
     ServerResponseError,
     ServerResponse,
-    CurvesSubscribeData,
-    CurvesFiltersData,
 )
 from .server_message_type import ServerMessageType

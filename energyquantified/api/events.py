@@ -25,8 +25,6 @@ from energyquantified.events import (
     CurveUpdateEvent,
     EventType,
     TimeoutEvent,
-)
-from energyquantified.events.responses import (
     CurvesSubscribeResponse,
     CurvesFiltersResponse,
 )
@@ -552,7 +550,7 @@ class EventsAPI:
 
     def subscribe_curve_events(
             self,
-            filters=None,
+            filters,
             last_id=None,
             callback=on_curves_subscribed,
         ):
@@ -578,8 +576,10 @@ class EventsAPI:
         If a custom callback function is not provided, the default
         ``on_curves_subscribe`` logs when a response is received.
 
-        :param filters: The filters. Can be a single filter or a list of filters.
-        :type filters: list[:py:class:`energyquantified.events.CurveAttributeFilter`, \
+        :param filters: A single filter object or a list of filters
+        :type filters: :py:class:`energyquantified.events.CurveAttributeFilter`,\
+            :py:class:`energyquantified.events.CurveNameFilter`,\
+            list[:py:class:`energyquantified.events.CurveAttributeFilter`, \
             :py:class:`energyquantified.events.CurveNameFilter`]
         :param last_id: ID of the latest event received. Used for ex-/including\
             older events. Takes priority over the id from a potential\

@@ -7,6 +7,4 @@ from .server import (
     ServerResponseCurvesFilters,
     ServerResponseError,
     ServerMessageType,
-    CurvesSubscribeData,
-    CurvesFiltersData,
 )
