@@ -95,7 +95,7 @@ User guide
    userguide/ohlc
    userguide/srmc
    userguide/pandas
-   userguide/curve-events
+   userguide/push-feed
 
 
 Reference
