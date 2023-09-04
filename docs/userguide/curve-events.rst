@@ -45,6 +45,8 @@ The second number is a serial, which increments when multiple events are
 within the same millisecond.
 
 
+.. _event types:
+
 Event types
 ~~~~~~~~~~~
 
@@ -473,76 +475,103 @@ Handling events
 
 Method reference: :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`
 
-After subscribing to curve events, you will immediately start to receive events
-matching your filters. Loop over the incoming events like so:
+You loop over incoming events as if you are looping over a list. The loop will
+wait until new events arrive during quiet times:
 
 .. code-block:: python
 
     for event in eq.events.get_next():
         # Handle event
 
+An event can be one of the following classes:
 
-Events can be of different types, so you may not always get a
-:py:class:`~energyquantified.events.CurveUpdateEvent`. For instance, unexpected
-you will get a :py:class:`~energyquantified.events.ConnectionEvent` in the case
-of an unexpected disconnect, or a
-:py:class:`~energyquantified.events.TimeoutEvent` if a timeout occurs. The
-different events are described further in this section.
+    * :py:class:`~energyquantified.events.CurveUpdateEvent`
+    * :py:class:`~energyquantified.events.ConnectionEvent`
+    * :py:class:`~energyquantified.events.TimeoutEvent`
 
-Note that all events have the ``event_type`` property with an
-:py:class:`~energyquantified.events.TimeoutEvent`, which can be of use when
-deciding how to act.
+All events have the ``event_type`` attribute. Use it to figure out
+how what type of event you receive. See the :ref:`Event types <event types>`
+section for details.
+
+The different events are described further in this section.
 
 
-Loading data data for events
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Curve events
+~~~~~~~~~~~~
 
-Method reference:
-:py:meth:`event.load_data() <energyquantified.events.CurveUpdateEvent.load_data>`
+Class reference: :py:class:`energyquantified.events.CurveUpdateEvent`
 
-Check if the event represent a curve update and load it's data:
+Whenever a data in a curve is updated or deleted, you will receive a
+:py:class:`~energyquantified.events.CurveUpdateEvent`:
+
+.. code-block:: python
+
+    for event in eq.events.get_next():
+        if event.event_type == EventType.CURVE_UPDATE:
+            # Data is updated
+            print("UPDATE event:", event)
+        if event.event_type == EventType.CURVE_DELETE:
+            # Some data is deleted
+            print("DELETE event:", event)
+        if event.event_type == EventType.CURVE_TRUNCATE:
+            # *All* data in a curve is deleted
+            print("TRUNCATE event:", event)
+
+When ``event_type`` is :py:class:`EventType.CURVE_UPDATE <energyquantified.events.EventType>`,
+you can use the :py:meth:`CurveUpdateEvent.load_data() <energyquantified.events.CurveUpdateEvent.load_data>`
+method to load the modified data. That will load all values between the first and last
+modified value, even those that have not changed.
 
 .. code-block:: python
 
     for event in eq.events.get_next():
         if event.event_type = EventType.CURVE_UPDATE:
+            # Data is updated
+            print("UPDATE event:", event)
+            # Load the data
             data = event.load_data()
+            # You now have the modified data
+            print("Updated data:", data)
 
-The type of data loaded depends on the curve, and may be a
-:py:class:`~energyquantified.data.Timeseries`,
-:py:class:`~energyquantified.data.Periodseries`, or some other type.
+The data loaded can either be a :py:class:`~energyquantified.data.Timeseries`, a
+:py:class:`~energyquantified.data.Periodseries` or an :py:class:`~energyquantified.data.OHLCList`,
+depending on the :py:attr:`CurveUpdateEvent.curve <energyquantified.events.CurveUpdateEvent.curve>`'s curve type.
 
-Note that not all curve events support loading of data, such as events with
-type ``CURVE_DELETE`` or ``CURVE_TRUNCATE`` as deleted data no longer exists.
+Note that you cannot load data for ``CURVE_DELETE`` and ``CURVE_TRUNCATE`` events,
+as deleted data no longer exists.
 
 
 Connection events
 ~~~~~~~~~~~~~~~~~
 
 Class reference:
-:py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`
+:py:class:`energyquantified.events.ConnectionEvent`
 
-Connection events describe a change or status in the stream connection, and is
-primarily used with the ``DISCONNECTED`` event type. This type indicates that
-you are not connected, and further details can be found in the connection event.
-You will not receive events of this type until after all received curve events
-have been processed.
+Connection events occur if you are disconnected from the server or did not
+connect in the first place. It has the ``DISCONNECTED`` event type. The
+event contains the cause for the disconnect.
 
-Capture these events like you can see below. In this example we simply break out
-of the loop and stop processing events:
+You will not receive events of this type until **after** all received curve
+events are processed.
+
+Capture these events as seen below. In this example, we simply break out of
+the loop and stop processing events:
 
 .. code-block:: python
 
     for event in eq.events.get_next():
         if event.event_type == EventType.DISCONNECTED:
-            # Not connected and event queue is empty
-            print(f"Not connected: {event}")
+            # Not connected and all curve events
+            # are processed
+            print("Not connected:", event)
             break
 
-Optionally you can use the disconnected event to try reconnecting manually. Note
-that the client will always try to reconnect a couple of times before it gives
-up and emits this event. Once reconnected the client will resubscribe with the
-previous filters, and ask for events that occured during downtime.
+Optionally, you can use the disconnected event to reconnect manually. Note that
+the client will always try to reconnect a couple of times before it gives up
+and emits this event.
+
+Once reconnected, the client will resubscribe with the previous filters and ask
+for events missed during downtime.
 
 .. code-block:: python
 
@@ -551,7 +580,7 @@ previous filters, and ask for events that occured during downtime.
     for event in eq.events.get_next():
         if event.event_type == EventType.DISCONNECTED:
             # Not connected and event queue is empty
-            print(f"Not connected: {event}")
+            print("Not connected:", event)
             # Wait 30 seconds before reconnecting
             time.sleep(30)
             # Try to reconnect
@@ -563,18 +592,17 @@ connected in the first place, so it does not necessarily mean that a disconnect
 took place.
 
 
-Timeouts
-~~~~~~~~
+Timeout events
+~~~~~~~~~~~~~~
 
 Class reference:
-:py:class:`TimeoutEvent <energyquantified.events.TimeoutEvent>`
+:py:class:`energyquantified.events.TimeoutEvent`
 
-:py:meth:`get_next() <energyquantified.api.EventsAPI.get_next>` is blocking
-which means that you cannot act while waiting for a new event. The timeout event
-is designed as a filler event that enables users to act in between events during
-quiet times. Supply the optional ``timeout`` parameter with the number of
-seconds you want to wait for new events. You will then receive a timeout event
-whenever the set number of seconds passes without any new event.
+:py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>` is blocking,
+meaning you cannot act while waiting for a new event. Supply the optional timeout
+parameter to :py:meth:`get_next() <energyquantified.api.EventsAPI.get_next>` with
+the number of seconds you want to wait for new events. You will then receive a
+timeout event whenever the set number of seconds passes without any new event.
 
 .. code-block:: python
 
@@ -583,10 +611,13 @@ whenever the set number of seconds passes without any new event.
             print("No events in the last 10 seconds")
             continue
 
+We designed the timeout event as a filler event that enables users to act in
+between events during quiet times.
+
 Timeout events can be useful if you intend to execute some code after a certain
-amount of time. Setting the timout interval eliminates the risk of being stuck
-and unable to act while waiting for the next event, due to the blocking nature
-of ``get_next()``.
+time. Setting the timeout interval eliminates the risk of being stuck and unable
+to act while waiting for new events due to the blocking nature of
+:py:meth:`get_next() <energyquantified.api.EventsAPI.get_next>`.
 
 You can safely ignore this event if you do not find it useful.
 
@@ -594,30 +625,29 @@ You can safely ignore this event if you do not find it useful.
 Capturing messages and errors
 -----------------------------
 
-By default, messages from the server will be logged at info level. Override the
-default by setting a custom callback function with
+By default, the client logs messages from the server at ``INFO`` level. Override
+the default by setting a custom callback function with
 :py:meth:`eq.events.set_message_handler() <energyquantified.api.EventsAPI.set_message_handler>`.
-The custom function must take in one parameter; the server message which is a
-string.
+The callback function takes in one parameter: the server message, which is a string.
 
 .. code-block:: python
 
     def message_handler(message):
-        print(f"Message from server: {message}")
+        print("Message from server:", message)
 
     eq.events.set_message_handler(message_handler)
 
-Similarly, you can also override the callback for handling error messages with
+Similarly, you can override the callback for handling error messages with
 :py:meth:`eq.events.set_error_handler() <energyquantified.api.EventsAPI.set_error_handler>`:
 
 .. code-block:: python
 
     def error_message_handler(error):
-        print(f"Error occured: {error}")
+        print("Error occured:", error)
 
     eq.events.set_error_handler(error_message_handler)
 
-You can attach the handlers even before you connect:
+You can attach the handlers before you connect:
 
 .. code-block:: python
 
@@ -636,33 +666,35 @@ Restarts and network errors
 Remember ``last_id`` between processes runs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The client can remember the last event received, and continue where it left off
+The client can remember the last event received and continue where it left off
 on restarts.
 
-To enable this feature, supply the ``last_id_file`` parameter in
-:py:meth:`eq.events.connect <energyquantified.api.EventsAPI.connect>` with a
+Enable this feature by supplying the ``last_id_file`` parameter to
+:py:meth:`eq.events.connect() <energyquantified.api.EventsAPI.connect>` with a
 file path. Make sure that you have read and write access to the file path.
 
 .. code-block:: python
 
     eq.events.connect(last_id_file="last_id_file.json")
 
-The client regurarly updates the file at a defined interval (~0.5/min), when
-the connection drops, and when execution of the program is terminated (for any
-reason). The next time you connect to the stream, assuming the same file path
-for ``last_id_file`` and that you have not altered the file, the client will
+The client regularly updates the file at a defined interval (~0.5/min), when the
+connection drops, and when execution of the process terminates for any reason.
+
+The next time you connect to the stream, assuming the same file path for
+``last_id_file`` and that you have not altered the file, the client will
 request all events after the last one you received.
 
 Providing the ``last_id`` parameter to
-:py:meth:`subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
-will override the id from file (and update the file).
+:py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
+will override the ID from the last_id_file feature.
 
 
 Automatic subscribe after reconnect
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When a client reconnects, it will resubscribe with the previous filters, and ask
-for events that occured during downtime.
+When the client reconnects (automatically or manually – like in the example below),
+it will resubscribe with the previous filters and ask for events that occurred
+during downtime.
 
 .. code-block:: python
 
@@ -671,17 +703,19 @@ for events that occured during downtime.
     for event in eq.events.get_next():
         if event.event_type == EventType.DISCONNECTED:
             # Not connected and event queue is empty
-            print(f"Not connected: {event}")
+            print("Not connected:", event)
             # Wait 30 seconds before reconnecting
             time.sleep(30)
             # Try to reconnect
             eq.events.connect()
+            # Resubscribed automatically after
+            # successful connect
             continue
 
 
 Server only keeps the most recent events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-While the API supports fetching older events, we only keep the latest ~10.000
-(at the time of writing). In most cases that should cover events for the last
+While the API supports fetching older events, we only keep the latest ~10 000
+(at the time of writing). In most cases, that should cover events for the last
 10-15 minutes.
