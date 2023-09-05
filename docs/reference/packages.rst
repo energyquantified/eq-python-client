@@ -229,18 +229,25 @@ handlers by supplying the ``callback`` parameter with a callable when sending
 requests (e.g., subscribing with
 :py:meth:`subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`).
 All callbacks take in a single parameter of a type extending
-:py:class:`~energyquantified.events.responses.BaseServerResponse`.
-All responses are in the same format, where only type of the ``data`` field
-differ. Responses and types:
+:py:class:`energyquantified.events.responses.BaseServerResponse`.
+All responses have the same three attributes:
 
-* Response from :py:meth:`subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`:
-  :py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`.
-  The ``data`` field is a
-  :py:class:`CurvesSubscribeData <energyquantified.events.CurvesSubscribeData>`,
-  which consists of a list of curve event filters and optionally an event id.
+  * ``status``: See
+    :py:class:`energyquantified.events.responses.ResponseStatus`. Describes
+    if the request succeeded or not.
+  * ``errors``: A list of strings (error messages)
+  * ``data``: The response data (type differes depending on response)
 
-* Response from :py:meth:`get_curve_filters() <energyquantified.api.EventsAPI.get_curve_filters>`:
-  :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`.
+One of ``data`` and ``errors`` is always None. Which of the two is set and which
+is None depends on the status. The response types:
+
+* Response from :py:meth:`energyquantified.api.EventsAPI.subscribe_curve_events`:
+  Response type: :py:class:`energyquantified.events.CurvesSubscribeResponse`.
   The ``data`` field is a
-  :py:class:`CurvesFiltersData <energyquantified.events.CurvesFiltersData>`,
+  :py:class:`energyquantified.events.CurvesSubscribeData`, which consists of a
+  list of curve event filters and optionally an event id.
+
+* Response from :py:meth:`energyquantified.api.EventsAPI.get_curve_filters`:
+  Response type: :py:class:`energyquantified.events.CurvesFiltersResponse`. The
+  ``data`` field is a :py:class:`energyquantified.events.CurvesFiltersData`,
   which is a list of curve event filters.
