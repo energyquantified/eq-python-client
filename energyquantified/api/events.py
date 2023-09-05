@@ -540,7 +540,7 @@ class EventsAPI:
         :param response: The response from subscribing to curve events
         :type response: :py:class:`energyquantified.events.CurvesSubscribeResponse`
         """
-        if response.ok:
+        if response.success:
             filters = response.data.filters
             last_id = response.data.last_id
             log.info("Subscribe OK - from id %s with filters %s" % (last_id, filters))
@@ -677,7 +677,7 @@ class EventsAPI:
         :param response: The response from requesting active curve event filters
         :type response: :py:class:`energyquantified.events.CurvesFiltersResponse`
         """
-        if response.ok:
+        if response.success:
             filters = response.data.filters
             log.info("Active curve event filters: %s", filters)
         else:
