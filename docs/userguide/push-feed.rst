@@ -227,7 +227,6 @@ Subscribing
 
 Method reference: :py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
 
-
 To receive curve events, one must subscribe by providing a list of filters.
 
 You can update your filters while already subscribed by calling
@@ -237,20 +236,20 @@ with the new filters.
 After subscribing, the server responds with a
 :py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`
 object. By default, the client logs the result (``INFO`` level for a successful
-subcription, ``ERROR`` when it fails). You can override this behaviour by supplying
-the ``callback`` parameter with your function:
+subcription, ``ERROR`` when it fails). You can override this behaviour
+by supplying the ``callback`` parameter with your function:
 
 .. code-block:: python
 
     def on_subscribe(response: CurvesSubscribeResponse):
-        if response.ok:
+        if response.success:
             print("Subscribed")
         else:
             print("Failed to subscribe")
 
     eq.events.subscribe_curve_events(
         filters=[...],
-        callback=on_subscribe
+        callback=on_subscribe,
     )
 
 

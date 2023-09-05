@@ -6,7 +6,7 @@ class EventType(Enum):
     """
     A field in event objects, describing the type of event.
 
-     * ``CURVE_UPDATE`` –Data for a curve is created or modified
+     * ``CURVE_UPDATE`` – Data for a curve is created or modified
      * ``CURVE_DELETE`` – Some data for a curve is deleted
      * ``CURVE_TRUNCATE`` – All data for a curve is deleted
      * ``DISCONNECTED`` – Disconnected from the stream

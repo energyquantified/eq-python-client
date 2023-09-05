@@ -286,6 +286,11 @@ Events
 
 ------
 
+.. autoclass:: energyquantified.events.responses.ResponseStatus
+   :inherited-members:
+
+------
+
 .. autoclass:: energyquantified.events.responses.BaseServerResponse
    :inherited-members:
 

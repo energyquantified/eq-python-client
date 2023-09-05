@@ -1,32 +1,11 @@
 import uuid
-from enum import Enum
 from energyquantified.events.messages.server.base import _BaseServerMessage
-from energyquantified.events.event_options import CurveAttributeFilter, CurveNameFilter
+from energyquantified.events.event_options import (
+    CurveAttributeFilter,
+    CurveNameFilter,
+)
+from energyquantified.events.responses import ResponseStatus
 
-_response_status_lookup = {}
-
-class _ResponseStatus(Enum):
-    OK = ("OK", "Ok")
-    ERROR = ("ERROR", "Error")
-
-    def __init__(self, tag, label):
-        self.tag = tag
-        self.label = label
-        _response_status_lookup[tag.lower()] = self
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return self.__str__()
-
-    @staticmethod
-    def is_valid_tag(tag):
-        return isinstance(tag, str) and tag.lower() in _response_status_lookup
-
-    @staticmethod
-    def by_tag(tag):
-        return _response_status_lookup[tag.lower()]
 
 class ServerResponse(_BaseServerMessage):
     REQUEST_ID_KEY = "request_id"
@@ -47,7 +26,7 @@ class ServerResponse(_BaseServerMessage):
     def _parse_message(self, json):
         self._set_status(json)
         self._set_request_id(json)
-        if not self.status:
+        if self.status == ResponseStatus.ERROR:
             self._set_errors(json)
         else:
             self._set_data(json)
@@ -64,12 +43,12 @@ class ServerResponse(_BaseServerMessage):
 
     def _set_status(self, json):
         status_tag = json.get(self.STATUS_KEY)
-        if not _ResponseStatus.is_valid_tag(status_tag):
+        if not ResponseStatus.is_valid_tag(status_tag):
             raise ValueError(
                 f"Failed parsing StreamMessageResponse due to invalid "
                 f"status: {status_tag}"
             )
-        self.status = _ResponseStatus.by_tag(status_tag) == _ResponseStatus.OK
+        self.status = ResponseStatus.by_tag(status_tag)
 
     def _set_data(self, _):
         raise NotImplementedError
