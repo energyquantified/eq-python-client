@@ -262,6 +262,7 @@ class EventsAPI:
         is established.
         """
         print("last_id:",self._last_id)
+        # TODO change _latest_subscribe_request to filter?
         print("on open, last sub msg:", self._latest_curves_subscribe_request)
         self._last_connection_event = None
         # Reset reconnect counter on successfull connection
@@ -361,8 +362,6 @@ class EventsAPI:
 
     def _on_error(self, _ws, error):
         print(f"on_error: {error}")
-        print(error)
-        print(error.__dict__)
         #from IPython import embed
         #embed()
         if not isinstance(error, (timeout, ConnectionError, WebSocketException)):
@@ -518,6 +517,10 @@ class EventsAPI:
                 # Reset flags
                 self._is_connected.clear()
                 self._done_trying_to_connect.clear()
+                 # Check if it should continue or abort (closed by user)
+                if self._should_not_connect.is_set():
+                    self._done_trying_to_connect.set()
+                    continue
                 # Safely acquire the reconnect_counter
                 with self._remaining_reconnect_attempts_lock:
                     # Stop if no more attempts
@@ -525,9 +528,6 @@ class EventsAPI:
                         self._should_not_connect.set()
                         self._done_trying_to_connect.set()
                         return
-                if self._should_not_connect.is_set():
-                    self._done_trying_to_connect.set()
-                    continue
                 # Wait delta longer than the default ws timeout,
                 #   plus a random amount of time to spread traffic
                 time.sleep(timeout + 0.5 + random.uniform(1,5))
@@ -539,7 +539,6 @@ class EventsAPI:
 
         self._done_trying_to_connect.wait()
         if not self._is_connected.is_set():
-            print(self._last_connection_event)
             if self._last_connection_event is not None:
                 raise WebSocketsError(
                     "Failed to connect",
@@ -563,7 +562,7 @@ class EventsAPI:
         )
         self._should_not_connect.set()
         if self._ws is not None:
-            print("calling ws.close()")
+            print("calling self._ws.close()")
             self._ws.close()
         if self._wst is not None:
             self._wst.join()
@@ -673,7 +672,6 @@ class EventsAPI:
                 "param 'last_id' must be None or a str"
             )
             # Use id from memory if 'keep'
-            print("check if last_id is 'keep'")
             if last_id.lower() == "keep":
                 last_id = self._last_id
             else:
@@ -688,7 +686,7 @@ class EventsAPI:
         subscribe_request = RequestCurvesSubscribe(
             request_id,
             last_id=last_id,
-            filters=filters
+            filters=filters,
         )
         self._latest_curves_subscribe_request = subscribe_request
         subscribe_message = subscribe_request.to_message()
@@ -734,11 +732,13 @@ class EventsAPI:
             from IPython import embed
             #embed()
             response_callback = self._callbacks.pop(request_id)
-            subscribe_response = CurvesSubscribeResponse(
-                status=ResponseStatus.ERROR,
-                errors=["Not connected to the server"]
-            )
-            response_callback.callback(subscribe_response)
+            # TODO can be None?
+            if response_callback is not None:
+                subscribe_response = CurvesSubscribeResponse(
+                    status=ResponseStatus.ERROR,
+                    errors=["Not connected to the server"]
+                )
+                response_callback.callback(subscribe_response)
         #except Exception as e:
         #    from IPython import embed
         #    #embed()
