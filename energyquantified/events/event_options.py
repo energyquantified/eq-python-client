@@ -304,8 +304,6 @@ class CurveAttributeFilter(_BaseCurveFilter):
     :param event_types: The event types to filter. Ignored if None, defaults\
         to None.
     :type event_types: EventType, str, list[EventType, str], optional
-    :param q: Freetext search. Ignored if None, defaults to None.
-    :type q: str, optional
     :param areas: Filter curves by area. Ignored if None, defaults to None.
     :type areas: Area, str, list[Area, str], optional
     :param data_types: Filter curves by data types. Ignored if None, defaults\
@@ -327,7 +325,6 @@ class CurveAttributeFilter(_BaseCurveFilter):
             begin=None,
             end=None,
             event_types=None,
-            q=None,
             areas=None,
             data_types=None,
             commodities=None,
@@ -335,14 +332,11 @@ class CurveAttributeFilter(_BaseCurveFilter):
             exact_categories=None,
     ):
         super().__init__(begin=begin, end=end, event_types=event_types)
-        self._q = None
         self._areas = None
         self._data_types = None
         self._commodities = None
         self._categories = None
         self._exact_categories = None
-        if q:
-            self.set_q(q)
         if areas:
             self.set_areas(areas)
         if data_types:
@@ -368,8 +362,6 @@ class CurveAttributeFilter(_BaseCurveFilter):
             str_list.append(f"begin={self._begin.isoformat(sep=' ')}")
         if self.has_end():
             str_list.append(f"end={self._end.isoformat(sep=' ')}")
-        if self.has_q():
-            str_list.append(f"q={self._q}")
         if self.has_areas():
             str_list.append(f"areas={self._areas}")
         if self.has_data_types():
@@ -388,24 +380,6 @@ class CurveAttributeFilter(_BaseCurveFilter):
 
     def __repr__(self):
         return self.__str__()
-
-    def has_q(self):
-        return self._q is not None
-
-    def set_q(self, q):
-        """
-        Filter events by a query/freetext search
-
-        :param q: Query/freetext
-        :type q: str, required
-        :raises ValueError: If q is not a string
-        :return: The instance this method was invoked upon
-        :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
-        """
-        if not isinstance(q, str):
-            raise ValueError(f"q: '{q}' is not a string")
-        self._q = q
-        return self
 
     def has_areas(self):
         if not isinstance(self._areas, list):
@@ -572,11 +546,6 @@ class CurveAttributeFilter(_BaseCurveFilter):
         :rtype: dict
         """
         filters = self._to_dict(include_not_set=include_not_set)
-        # q (freetext)
-        if self.has_q():
-            filters["q"] = self._q
-        elif include_not_set:
-            filters["q"] = None
         # Areas
         if self.has_areas():
             filters["areas"] = list(area.tag for area in self._areas)
@@ -614,9 +583,6 @@ class CurveAttributeFilter(_BaseCurveFilter):
         :rtype: tuple[bool, list[str]]
         """
         _, errors = self._validate()
-        if self.has_q():
-            if not isinstance(self._q, str):
-                errors.append("q must be type str")
         if self.has_areas():
             if not all(isinstance(area, Area) for area in self._areas):
                 errors.append(

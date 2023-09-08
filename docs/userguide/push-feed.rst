@@ -222,6 +222,8 @@ all events received before disconnecting.
     eq.events.disconnect()
 
 
+.. _subscribe section:
+
 Subscribing
 -----------
 
@@ -236,8 +238,10 @@ with the new filters.
 After subscribing, the server responds with a
 :py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`
 object. By default, the client logs the result (``INFO`` level for a successful
-subcription, ``ERROR`` when it fails). You can override this behaviour
-by supplying the ``callback`` parameter with your function:
+subcription, ``ERROR`` when it fails). The result from a successful subscription
+includes the filters confirmed by the server and the event ID subscribed from
+(if provided). You can override this behaviour by supplying the ``callback``
+parameter with your function:
 
 .. code-block:: python
 
@@ -408,8 +412,6 @@ attributes.
     * ``event_types``: Filter by
       :py:class:`EventType <energyquantified.events.EventType>`.
 
-    * ``q``: Freetext search alike the curve search (e.g., "wind power germany").
-
     * ``areas``: Filter by :py:class:`Area <energyquantified.metadata.Area>`.
 
     * ``data_types``: Filter by
@@ -475,6 +477,33 @@ you will receive events created after this ID:
 
 This ID takes priority over the recommended ``last_id_file`` approach (further
 described in :ref:`Remember last_id between processes runs <remember last id>`).
+
+
+Requesting active filters
+-------------------------
+
+Method reference: :py:meth:`eq.events.get_curve_filters() <energyquantified.api.EventsAPI.get_curve_filters>`
+
+Request the currently active curve event filters from the server.
+
+The server responds with a
+:py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`
+object. Similarly to
+:py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events()>`
+(see :ref:`Subscribing <subscribe section>`), a default callback function handles
+the response and logs the result (``INFO`` level for a successful request,
+``ERROR`` when it fails). You can override this behaviour by supplying the
+``callback`` parameter with your function:
+
+.. code-block:: python
+
+    def on_get_curve_filters(response: CurvesFiltersResponse):
+        if response.success:
+            print("Active filters:", response.data.filters)
+        else:
+            print("Failed to get filters from server")
+
+    eq.events.get_curve_filters(callback=on_get_curve_filters)
 
 
 Handling events

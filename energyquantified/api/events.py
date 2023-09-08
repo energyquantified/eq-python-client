@@ -613,7 +613,7 @@ class EventsAPI:
         curve events matching any of the filters.
 
         First make sure to connect
-        (see :py:meth:`connect() <energyquantified.api.EventsAPI.connect>`):
+        (see :py:meth:`eq.events.connect() <energyquantified.api.EventsAPI.connect>`):
 
             >>> eq = EnergyQuantified(
             >>>     api_key="aaaa-bbbb-cccc-dddd
@@ -628,7 +628,8 @@ class EventsAPI:
             >>> eq.events.subscribe_curve_events(filters=filters)
 
         If a custom callback function is not provided, the default
-        ``on_curves_subscribe`` logs when a response is received.
+        :py:meth:`eq.events.on_curves_subscribed() <energyquantified.api.EventsAPI.on_curves_subscribed>`
+        logs when a response is received.
 
         :param filters: A single filter object or a list of filters
         :type filters: :py:class:`energyquantified.events.CurveAttributeFilter`,\
@@ -762,21 +763,21 @@ class EventsAPI:
         Request the active curve event filters.
 
         First make sure to connect
-        (see :py:meth:`connect() <energyquantified.api.EventsAPI.connect>`):
+        (see :py:meth:`eq.events.connect() <energyquantified.api.EventsAPI.connect>`):
 
-            >>> from energyquantified import EnergyQuantified
             >>> eq = EnergyQuantified(
             >>>     api_key="aaaa-bbbb-cccc-dddd
             >>> )
             >>> eq.events.connect(last_id_file="last_id_file.json")
 
-        Request the active curve event filters:
+        Request the currently active curve event filters:
 
             >>> eq.events.get_curve_filters()
 
         If a custom callback function is not provided, the default
-        ``on_curves_filters`` logs when a response is received. The callback
-        function must take in one parameter of type
+        :py:meth:`eq.events.on_curves_filters<energyquantified.api.EventsAPI.on_curves_filters>`
+        logs when a response is received. The callback function must take in one
+        parameter of type
         :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`.
 
         :param callback: Set a custom callback function to handle the subscribe\
@@ -810,9 +811,10 @@ class EventsAPI:
         Returns a generator over new events, and blocks while waiting for new.
 
         Every event returned is one of the following types:
-        1: :py:class:`energyquantified.events.CurveUpdateEvent`
-        2: :py:class:`energyquantified.events.ConnectionEvent`
-        3: :py:class:`energyquantified.events.TimeoutEvent`
+
+          * :py:class:`energyquantified.events.CurveUpdateEvent`
+          * :py:class:`energyquantified.events.ConnectionEvent`
+          * :py:class:`energyquantified.events.TimeoutEvent`
 
         The ``event_type`` attribute is common for all events (type:
         :py:class:`EventType <energyquantified.events.EventType>`) and is

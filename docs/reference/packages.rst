@@ -224,6 +224,9 @@ with a list of any of the following filters:
   * :py:class:`CurveAttributeFilter <energyquantified.events.CurveAttributeFilter>`:
     Search filters similar to the curve search (metadata)
 
+Request the currently active curve event filters from the server with
+:py:meth:`eq.events.get_curve_filters() <energyquantified.api.EventsAPI.get_curve_filters>`.
+
 Server responses are handled by default callback functions. Set custom
 handlers by supplying the ``callback`` parameter with a callable when sending
 requests (e.g., subscribing with
