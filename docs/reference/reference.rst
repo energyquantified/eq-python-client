@@ -407,3 +407,7 @@ in module ``energyquantified.exceptions``.
 **Parser exceptions**
 
 .. autoexception:: energyquantified.exceptions.ParseException
+
+**Push feed exceptions**
+
+.. autoexception:: energyquantified.exceptions.WebSocketsError

@@ -27,6 +27,7 @@ from energyquantified.events import (
     TimeoutEvent,
     CurvesSubscribeResponse,
     CurvesFiltersResponse,
+    ResponseStatus,
 )
 from energyquantified.events.messages import (
     RequestCurvesSubscribe,
@@ -39,6 +40,7 @@ from energyquantified.events.messages import (
     ServerResponseError,
     ServerMessageType,
 )
+from energyquantified.exceptions import WebSocketsError
 from energyquantified.events.callback import (
     Callback,
     SUBSCRIBE_CURVES,
@@ -107,7 +109,7 @@ class EventsAPI:
         self._callbacks = {}
         self._is_subscribed_curves = threading.Event()
         self._messages_lock = threading.Lock()
-        self._latest_curves_subscribe_message = None
+        self._latest_curves_subscribe_request = None
         # Last event id
         self._last_id = None
         self._last_id_timestamp = None
@@ -259,6 +261,8 @@ class EventsAPI:
         Callback function that is called whenever a new websocket connection
         is established.
         """
+        print("last_id:",self._last_id)
+        print("on open, last sub msg:", self._latest_curves_subscribe_request)
         self._last_connection_event = None
         # Reset reconnect counter on successfull connection
         with self._remaining_reconnect_attempts_lock:
@@ -267,15 +271,16 @@ class EventsAPI:
         self._is_connected.set()
         self._done_trying_to_connect.set()
         # Send the last active filters
-        if self._latest_curves_subscribe_message is not None:
-            if self._last_id is not None:
-                self._latest_curves_subscribe_message["last_id"] = self._last_id
-                log.info(
-                    "Reconnected to the stream, sending %s to subscribe with "
-                    "previous filters",
-                    self._latest_curves_subscribe_message
-                )
-                self._ws.send(json.dumps(self._latest_curves_subscribe_message))
+        if self._latest_curves_subscribe_request is not None:
+            log.info(
+                "Reconnected to the stream, sending %s to subscribe with "
+                "previous filters",
+                self._latest_curves_subscribe_request
+            )
+            self.subscribe_curve_events(
+                filters=self._latest_curves_subscribe_request.filters,
+                last_id="keep",
+            )
 
     def _on_message(self, _ws, message):
         """
@@ -335,6 +340,7 @@ class EventsAPI:
                 pass
 
     def _on_close(self, _ws, status_code, msg):
+        print(f"_on_close, status_code:{status_code}, msg:{msg}")
         # last_connection_event should only be set once for each time connecting
         if self._last_connection_event is None:
             # Network error if no status_code
@@ -354,7 +360,13 @@ class EventsAPI:
                 self._last_id_to_file(write_interval_s=0)
 
     def _on_error(self, _ws, error):
+        print(f"on_error: {error}")
+        print(error)
+        print(error.__dict__)
+        #from IPython import embed
+        #embed()
         if not isinstance(error, (timeout, ConnectionError, WebSocketException)):
+            # TODO Temprorary failure in name resolution
             self._error_handler(getattr(error, "strerror", str(error)))
             return
         # self._last_connection_event should only be set once for each time
@@ -447,10 +459,25 @@ class EventsAPI:
             can be used fluently
         :rtype: :py:class:`energyquantified.events.EventsAPI`
         """
-        assert self._should_not_connect.is_set(), (
-            "'connect()' invoked while already connected. "
-            "Please close the existing connection first by calling 'close()'"
+        # Assert that not already connected
+        assert not self._is_connected.is_set(), (
+            "'connect()' invoked while already connected. Please first close the "
+            "exsting connection with 'close()'"
         )
+        assert self._should_not_connect.is_set(), (
+            "'connect()' invoked while trying to connect or already connected. "
+            "Please first close the existing connection with 'close()'"
+        )
+        # Wait if shutdown of last connection is still in process
+        if self._wst is not None:
+            self._wst.join()
+        # Reset flags
+        self._should_not_connect.clear()
+        self._done_trying_to_connect.clear()
+        self._last_connection_event = None
+        # Reset reconnect attempts
+        self._remaining_reconnect_attempts = 1
+        self._max_reconnect_attempts = reconnect_attempts
         # Last id file
         with self._last_id_file_lock:
             # Unregister if previously registered for atexit
@@ -466,16 +493,7 @@ class EventsAPI:
                 # Store the method in a variable so it can be unregistered later
                 self._last_id_file_atexit = save_id
                 atexit.register(self._last_id_file_atexit)
-        self._max_reconnect_attempts = reconnect_attempts
-        # Reset flags
-        self._should_not_connect.clear()
-        self._done_trying_to_connect.clear()
-        self._last_connection_event = None
-        # Close if already set
-        if self._ws is not None:
-            self._ws.close()
         websocket.setdefaulttimeout(timeout)
-        log.debug("Subscribing to events at url: %s", self._ws_url)
         self._ws = websocket.WebSocketApp(
             self._ws_url,
             header={
@@ -488,13 +506,17 @@ class EventsAPI:
         )
 
         def _ws_thread():
+            print("starting thread:", threading.get_ident())
             while not self._should_not_connect.is_set():
                 # Decrement reconnect counter
                 with self._remaining_reconnect_attempts_lock:
                     self._remaining_reconnect_attempts -= 1
                 # Blocking until dc (ping timeout to detect local network error)
+                print("before run_forever")
                 self._ws.run_forever(ping_interval=15, ping_timeout=10)
-                # Reset flag and last connection event
+                print("after run_forever")
+                # Reset flags
+                self._is_connected.clear()
                 self._done_trying_to_connect.clear()
                 # Safely acquire the reconnect_counter
                 with self._remaining_reconnect_attempts_lock:
@@ -503,21 +525,37 @@ class EventsAPI:
                         self._should_not_connect.set()
                         self._done_trying_to_connect.set()
                         return
+                if self._should_not_connect.is_set():
+                    self._done_trying_to_connect.set()
+                    continue
                 # Wait delta longer than the default ws timeout,
                 #   plus a random amount of time to spread traffic
                 time.sleep(timeout + 0.5 + random.uniform(1,5))
+            print("exiting thread:", threading.get_ident())
 
         self._wst = threading.Thread(target=_ws_thread)
         self._wst.daemon = True
         self._wst.start()
 
         self._done_trying_to_connect.wait()
+        if not self._is_connected.is_set():
+            print(self._last_connection_event)
+            if self._last_connection_event is not None:
+                raise WebSocketsError(
+                    "Failed to connect",
+                    status_code=self._last_connection_event.status_code,
+                    status=self._last_connection_event.status,
+                    description=self._last_connection_event.message,
+                )
+            else:
+                raise WebSocketsError("Failed to connect")
         return self
 
     def close(self):
         """
         Close the stream connection (if open) and disables automatic reconnect.
         """
+        print("close()")
         self._last_connection_event = ConnectionEvent(
             event_type=EventType.DISCONNECTED,
             status_code=1000,
@@ -525,7 +563,23 @@ class EventsAPI:
         )
         self._should_not_connect.set()
         if self._ws is not None:
+            print("calling ws.close()")
             self._ws.close()
+        if self._wst is not None:
+            self._wst.join()
+        if (
+            self._is_connected.is_set()
+            or not self._done_trying_to_connect.is_set()
+            or not self._should_not_connect.is_set()
+        ):
+            # TODO unfortunate if this is raised while a user has
+            # unproccessed events
+            raise WebSocketsError(
+                "Failed to close the connection"
+                f"self._is_connected: {self._is_connected.is_set()}"
+                f"self._done_trying_to_connect: {self._done_trying_to_connect.is_set()}"
+                f"self._should_not_connect: {self._should_not_connect.is_set()}"
+            )
 
     def disconnect(self):
         """
@@ -594,6 +648,8 @@ class EventsAPI:
             be used fluently
         :rtype: :py:class:`energyquantified.events.EventsAPI`
         """
+        # TODO self._is_subscribed_curves.clear() here? and/or message_lock?
+        assert filters is not None, f"Required parameter 'filters' cannot be None"
         # Validate filters
         if not isinstance(filters, list):
             filters = [filters]
@@ -616,6 +672,7 @@ class EventsAPI:
                 "param 'last_id' must be None or a str"
             )
             # Use id from memory if 'keep'
+            print("check if last_id is 'keep'")
             if last_id.lower() == "keep":
                 last_id = self._last_id
             else:
@@ -624,31 +681,32 @@ class EventsAPI:
                     f"expected two numbers separated by a dash ('-'), "
                     f"where the first number is exactly 13 digits long"
                 )
-        # At least one of 'last_id' and 'filters' must be set
-        assert last_id is not None or filters is not None, (
-            f"Minimum one of 'last_id' and 'filters' must be set "
-            f"in order to subscribe to curve events"
-        )
+                self._last_id = last_id
         # Validation done. Create request id
         request_id = uuid.uuid4()
-        subscribe_message = RequestCurvesSubscribe(
+        subscribe_request = RequestCurvesSubscribe(
             request_id,
             last_id=last_id,
             filters=filters
-        ).to_message()
+        )
+        self._latest_curves_subscribe_request = subscribe_request
+        subscribe_message = subscribe_request.to_message()
         # Stop receiving events until subscribed with new filters
         with self._messages_lock:
             self._is_subscribed_curves.clear()
             # Clear existing curve events from message queue
             messages = []
-            try:
-                for msg in self._messages.get(block=False):
+            while True:
+                try:
+                    msg = self._messages.get_nowait()
                     if not isinstance(msg, CurveUpdateEvent):
                         messages.append(msg)
                     self._messages.task_done()
-            except queue.Empty:
-                for msg in messages:
-                    self._messages.put(msg)
+                except queue.Empty:
+                    print("messasges:", messages)
+                    for msg in messages:
+                        self._messages.put(msg)
+                    break
             # Make sure none of the existing callbacks are marked as latest
             for _, obj in self._callbacks.items():
                 if obj.callback_type == SUBSCRIBE_CURVES:
@@ -663,11 +721,26 @@ class EventsAPI:
             )
             self._callbacks[request_id] = callback
         # Send msg
-        self._latest_curves_subscribe_message = subscribe_message
-        self._update_last_id(last_id, force_update=True)
         self._last_id_to_file(write_interval_s=0)
         msg = json.dumps(subscribe_message)
-        self._ws.send(msg)
+        try:
+            log.debug(
+                "Sending message to subscribe to curve events: %s",
+                subscribe_message
+            )
+            self._ws.send(msg)
+        except WebSocketConnectionClosedException as e:
+            from IPython import embed
+            #embed()
+            response_callback = self._callbacks.pop(request_id)
+            subscribe_response = CurvesSubscribeResponse(
+                status=ResponseStatus.ERROR,
+                errors=["Not connected to the server"]
+            )
+            response_callback.callback(subscribe_response)
+        #except Exception as e:
+        #    from IPython import embed
+        #    #embed()
         return self
 
     def on_curves_filters(response):
