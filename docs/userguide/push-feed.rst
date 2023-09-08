@@ -408,8 +408,6 @@ attributes.
     * ``event_types``: Filter by
       :py:class:`EventType <energyquantified.events.EventType>`.
 
-    * ``q``: Freetext search alike the curve search (e.g., "wind power germany").
-
     * ``areas``: Filter by :py:class:`Area <energyquantified.metadata.Area>`.
 
     * ``data_types``: Filter by

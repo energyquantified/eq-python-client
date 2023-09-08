@@ -90,10 +90,6 @@ def _parse_filter_options(json):
     # CurveAttributeFilter
     options = CurveAttributeFilter()
     options = _parse_shared_options(json, options)
-    # q  (freetext)
-    q = json.get("q")
-    if q is not None:
-        options.set_q(q)
     # Areas
     areas = json.get("areas")
     if areas is not None:
