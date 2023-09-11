@@ -286,23 +286,8 @@ Events
 
 ------
 
-.. autoclass:: energyquantified.events.responses.ResponseStatus
-   :inherited-members:
-
-------
-
-.. autoclass:: energyquantified.events.responses.BaseServerResponse
-   :inherited-members:
-
-------
-
 .. autoclass:: energyquantified.events.CurvesSubscribeResponse
    :show-inheritance:
-   :inherited-members:
-
-------
-
-.. autoclass:: energyquantified.events.CurvesSubscribeData
    :inherited-members:
 
 ------
@@ -311,10 +296,6 @@ Events
    :show-inheritance:
    :inherited-members:
 
-------
-
-.. autoclass:: energyquantified.events.CurvesFiltersData
-   :inherited-members:
 
 Date and time
 -------------

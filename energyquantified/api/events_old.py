@@ -18,7 +18,6 @@ from websocket import (
     WebSocketBadStatusException,
     WebSocketPayloadException,
 )
-from energyquantified.exceptions import ValidationError
 from energyquantified.events import (
     CurveNameFilter,
     CurveAttributeFilter,
@@ -28,6 +27,7 @@ from energyquantified.events import (
     TimeoutEvent,
     CurvesSubscribeResponse,
     CurvesFiltersResponse,
+    ResponseStatus,
 )
 from energyquantified.events.messages import (
     RequestCurvesSubscribe,
@@ -110,9 +110,6 @@ class EventsAPI:
         self._is_subscribed_curves = threading.Event()
         self._messages_lock = threading.Lock()
         self._latest_curves_subscribe_request = None
-        # Response queues
-        self._subscribe_responses = queue.Queue()
-        self._filters_responses = queue.Queue()
         # Last event id
         self._last_id = None
         self._last_id_timestamp = None
@@ -264,6 +261,9 @@ class EventsAPI:
         Callback function that is called whenever a new websocket connection
         is established.
         """
+        print("last_id:",self._last_id)
+        # TODO change _latest_subscribe_request to filter?
+        print("on open, last sub msg:", self._latest_curves_subscribe_request)
         self._last_connection_event = None
         # Reset reconnect counter on successfull connection
         with self._remaining_reconnect_attempts_lock:
@@ -309,13 +309,21 @@ class EventsAPI:
                 if callback is None:
                     return
                 if isinstance(msg_obj, ServerResponseCurvesSubscribe):
-                    if callback.latest:
-                        if msg_obj.success:
-                            self._is_subscribed_curves.set()
-                        self._subscribe_responses.put(msg_obj)
+                    subscribe_response = CurvesSubscribeResponse(
+                        status=msg_obj.status,
+                        data=msg_obj.data,
+                        errors=msg_obj.errors,
+                    )
+                    callback.callback(subscribe_response)
+                    if callback.latest and subscribe_response.status:
+                        self._is_subscribed_curves.set()
                 elif isinstance(msg_obj, ServerResponseCurvesFilters):
-                    if callback.latest:
-                        self._filters_responses.put(msg_obj)
+                    filters_response = CurvesFiltersResponse(
+                        status=msg_obj.status,
+                        data=msg_obj.data,
+                        errors=msg_obj.errors,
+                    )
+                    callback.callback(filters_response)
                 elif isinstance(msg_obj, ServerResponseError):
                     # Should only really happen if server fails to
                     # parse 'type' (so shouldnt happen)
@@ -333,6 +341,7 @@ class EventsAPI:
                 pass
 
     def _on_close(self, _ws, status_code, msg):
+        print(f"_on_close, status_code:{status_code}, msg:{msg}")
         # last_connection_event should only be set once for each time connecting
         if self._last_connection_event is None:
             # Network error if no status_code
@@ -352,6 +361,9 @@ class EventsAPI:
                 self._last_id_to_file(write_interval_s=0)
 
     def _on_error(self, _ws, error):
+        print(f"on_error: {error}")
+        #from IPython import embed
+        #embed()
         if not isinstance(error, (timeout, ConnectionError, WebSocketException)):
             # TODO Temprorary failure in name resolution
             self._error_handler(getattr(error, "strerror", str(error)))
@@ -462,7 +474,6 @@ class EventsAPI:
         self._should_not_connect.clear()
         self._done_trying_to_connect.clear()
         self._last_connection_event = None
-        self._latest_curves_subscribe_request = None
         # Reset reconnect attempts
         self._remaining_reconnect_attempts = 1
         self._max_reconnect_attempts = reconnect_attempts
@@ -492,26 +503,24 @@ class EventsAPI:
             on_close=self._on_close,
             on_error=self._on_error,
         )
-        connect_error = None
 
         def _ws_thread():
-            nonlocal connect_error
+            print("starting thread:", threading.get_ident())
             while not self._should_not_connect.is_set():
                 # Decrement reconnect counter
                 with self._remaining_reconnect_attempts_lock:
                     self._remaining_reconnect_attempts -= 1
                 # Blocking until dc (ping timeout to detect local network error)
-                try:
-                    self._ws.run_forever(ping_interval=15, ping_timeout=10)
-                except Exception as e:
-                    connect_error = e
-                    self._is_connected.clear()
-                    self._should_not_connect.set()
-                    self._done_trying_to_connect.set()
-                    return
+                print("before run_forever")
+                self._ws.run_forever(ping_interval=15, ping_timeout=10)
+                print("after run_forever")
                 # Reset flags
                 self._is_connected.clear()
                 self._done_trying_to_connect.clear()
+                 # Check if it should continue or abort (closed by user)
+                if self._should_not_connect.is_set():
+                    self._done_trying_to_connect.set()
+                    continue
                 # Safely acquire the reconnect_counter
                 with self._remaining_reconnect_attempts_lock:
                     # Stop if no more attempts
@@ -519,13 +528,10 @@ class EventsAPI:
                         self._should_not_connect.set()
                         self._done_trying_to_connect.set()
                         return
-                # Check if it should continue or abort (closed by user)
-                if self._should_not_connect.is_set():
-                    self._done_trying_to_connect.set()
-                    return
                 # Wait delta longer than the default ws timeout,
                 #   plus a random amount of time to spread traffic
                 time.sleep(timeout + 0.5 + random.uniform(1,5))
+            print("exiting thread:", threading.get_ident())
 
         self._wst = threading.Thread(target=_ws_thread)
         self._wst.daemon = True
@@ -533,8 +539,6 @@ class EventsAPI:
 
         self._done_trying_to_connect.wait()
         if not self._is_connected.is_set():
-            if connect_error is not None:
-                raise WebSocketsError("Failed to connect test") from connect_error
             if self._last_connection_event is not None:
                 raise WebSocketsError(
                     "Failed to connect",
@@ -542,14 +546,15 @@ class EventsAPI:
                     status=self._last_connection_event.status,
                     description=self._last_connection_event.message,
                 )
-            raise WebSocketsError("Failed to connect")
+            else:
+                raise WebSocketsError("Failed to connect")
         return self
 
     def close(self):
         """
         Close the stream connection (if open) and disables automatic reconnect.
         """
-        self._latest_curves_subscribe_request = None
+        print("close()")
         self._last_connection_event = ConnectionEvent(
             event_type=EventType.DISCONNECTED,
             status_code=1000,
@@ -557,6 +562,7 @@ class EventsAPI:
         )
         self._should_not_connect.set()
         if self._ws is not None:
+            print("calling self._ws.close()")
             self._ws.close()
         if self._wst is not None:
             self._wst.join()
@@ -580,12 +586,27 @@ class EventsAPI:
         """
         self.close()
 
+    def on_curves_subscribed(response):
+        """
+        Default callback function for handling a subscribe response.
+
+        :param response: The response from subscribing to curve events
+        :type response: :py:class:`energyquantified.events.CurvesSubscribeResponse`
+        """
+        if response.success:
+            filters = response.data.filters
+            last_id = response.data.last_id
+            log.info("Subscribe OK - from id %s with filters %s" % (last_id, filters))
+        else:
+            errors = response.errors
+            log.error("Failed to subscribe - %s" % errors)
+
     def subscribe_curve_events(
             self,
             filters,
             last_id=None,
-            timeout=30,
-    ):
+            callback=on_curves_subscribed,
+        ):
         """
         Send a filter or a list of filters to the stream, subscribing to
         curve events matching any of the filters.
@@ -605,6 +626,10 @@ class EventsAPI:
             >>> ]
             >>> eq.events.subscribe_curve_events(filters=filters)
 
+        If a custom callback function is not provided, the default
+        :py:meth:`eq.events.on_curves_subscribed() <energyquantified.api.EventsAPI.on_curves_subscribed>`
+        logs when a response is received.
+
         :param filters: A single filter object or a list of filters
         :type filters: :py:class:`energyquantified.events.CurveAttributeFilter`,\
             :py:class:`energyquantified.events.CurveNameFilter`,\
@@ -615,54 +640,47 @@ class EventsAPI:
                 last_id file. Set to "keep" in order to use the last id\
                     from memory.
         :type last_id: str, optional
-        :return: The filters and (optionally) event ID subscribed with,\
-            confirmed by the server.
-        :rtype: :py:class:`energyquantified.events.CurvesSubscribeResponse`
+        :param callback: Set a custom callback function to handle the subscribe\
+            response. Defaults to\
+                :py:meth:`on_curves_subscribed() <energyquantified.api.EventsAPI.on_curves_subscribed>`.
+        :type callback: Callable, optional
+        :return: The obj instance this method was invoked upon, so the APi can\
+            be used fluently
+        :rtype: :py:class:`energyquantified.events.EventsAPI`
         """
-        if self._should_not_connect.is_set():
-            raise WebSocketsError("Please connect before subscribing")
+        # TODO self._is_subscribed_curves.clear() here? and/or message_lock?
+        assert filters is not None, f"Required parameter 'filters' cannot be None"
         # Validate filters
         if not isinstance(filters, list):
             filters = [filters]
         for curve_filter in filters:
-            if not isinstance(curve_filter, (CurveNameFilter, CurveAttributeFilter)):
-                raise ValidationError(
-                    parameter="filters",
-                    reason=(
-                        "Invalid filter type, expected CurveNameFilter or "
-                        f"CurveAttributeFilter, but found {type(curve_filter)}"
-                    ),
-                )
+            assert isinstance(
+                curve_filter,
+                (CurveNameFilter, CurveAttributeFilter)
+            ), (
+                f"Invalid filter type, expected CurveNameFilter or CurveAttributeFilter "
+                f"but found {type(curve_filter)}"
+            )
             is_valid, errors = curve_filter.validate()
-            if not is_valid:
-                raise ValidationError(
-                    parameter="filters",
-                    reason=f"Invalid filter: {curve_filter}, reason: {errors}"
-                )
+            assert is_valid, (
+                f"Invalid filter {curve_filter}, "
+                f"errors: {errors}"
+            )
         # Validate last_id
         if last_id is not None:
-            if not isinstance(last_id, str):
-                raise ValidationError(
-                    parameter="last_id",
-                    reason=f"Expected type None or str, found: {type(last_id)}"
-                )
+            assert isinstance(last_id, str), (
+                "param 'last_id' must be None or a str"
+            )
             # Use id from memory if 'keep'
             if last_id.lower() == "keep":
                 last_id = self._last_id
             else:
-                if not re.fullmatch("^\\d{13}-{1}\\d+$", last_id):
-                    raise ValidationError(
-                        parameter="last_id",
-                        reason=(
-                            f"Invalid format, expected two numbers separated "
-                            f"by a dash ('-'), where the first number is "
-                            f"exactly 13 digits long"
-                        ),
-                    )
-                # Update last_id
+                assert re.fullmatch("^\\d{13}-{1}\\d+$", last_id), (
+                    f"Invalid last_id format: {last_id}, "
+                    f"expected two numbers separated by a dash ('-'), "
+                    f"where the first number is exactly 13 digits long"
+                )
                 self._last_id = last_id
-                # Update in file
-                self._last_id_to_file(write_interval_s=0)
         # Validation done. Create request id
         request_id = uuid.uuid4()
         subscribe_request = RequestCurvesSubscribe(
@@ -670,11 +688,11 @@ class EventsAPI:
             last_id=last_id,
             filters=filters,
         )
-        subscribe_message = json.dumps(subscribe_request.to_message())
+        self._latest_curves_subscribe_request = subscribe_request
+        subscribe_message = subscribe_request.to_message()
+        # Stop receiving events until subscribed with new filters
         with self._messages_lock:
-            # Stop handling incoming events
             self._is_subscribed_curves.clear()
-            self._latest_curves_subscribe_request = subscribe_request
             # Clear existing curve events from message queue
             messages = []
             while True:
@@ -684,6 +702,7 @@ class EventsAPI:
                         messages.append(msg)
                     self._messages.task_done()
                 except queue.Empty:
+                    print("messasges:", messages)
                     for msg in messages:
                         self._messages.put(msg)
                     break
@@ -691,42 +710,55 @@ class EventsAPI:
             for _, obj in self._callbacks.items():
                 if obj.callback_type == SUBSCRIBE_CURVES:
                     obj.latest = False
+                    # TODO or just del other curves.subscribe callbacks instead?
+                    #del self._callbacks[k] #_ / k
             # Callback
             callback = Callback(
+                callback,
                 callback_type=SUBSCRIBE_CURVES,
                 latest=True,
             )
             self._callbacks[request_id] = callback
-        # Clear responses before subscribing
-        while True:
-            try:
-                self._subscribe_responses.get_nowait()
-                self._subscribe_responses.task_done()
-            except queue.Empty:
-                break
-        # Send subscribe message
+        # Send msg
+        self._last_id_to_file(write_interval_s=0)
+        msg = json.dumps(subscribe_message)
         try:
-            self._ws.send(subscribe_message)
-        except WebSocketConnectionClosedException as e:
-            raise WebSocketsError("Lost connection while trying to subscribe") from e
-        except Exception as e:
-            raise WebSocketsError("Failed to subscribe") from e
-        # Wait for subscribe response
-        response = None
-        try:
-            response = self._subscribe_responses.get(timeout=timeout)
-        except queue.Empty:
-            pass
-        if response is None:
-            raise WebSocketsError("Timed out trying to subscribe")
-        if not response.success:
-            raise WebSocketsError(
-                message="Subscribe rejected by server",
-                description=response.errors,
+            log.debug(
+                "Sending message to subscribe to curve events: %s",
+                subscribe_message
             )
-        return response.data
+            self._ws.send(msg)
+        except WebSocketConnectionClosedException as e:
+            from IPython import embed
+            #embed()
+            response_callback = self._callbacks.pop(request_id)
+            # TODO can be None?
+            if response_callback is not None:
+                subscribe_response = CurvesSubscribeResponse(
+                    status=ResponseStatus.ERROR,
+                    errors=["Not connected to the server"]
+                )
+                response_callback.callback(subscribe_response)
+        #except Exception as e:
+        #    from IPython import embed
+        #    #embed()
+        return self
 
-    def get_curve_filters(self, timeout=30):
+    def on_curves_filters(response):
+        """
+        Default callback function for handling a filters response.
+
+        :param response: The response from requesting active curve event filters
+        :type response: :py:class:`energyquantified.events.CurvesFiltersResponse`
+        """
+        if response.success:
+            filters = response.data.filters
+            log.info("Active curve event filters: %s", filters)
+        else:
+            errors = response.errors
+            log.error("Failed to get active curve event filters: %s", errors)
+
+    def get_curve_filters(self, callback=on_curves_filters):
         """
         Request the active curve event filters.
 
@@ -742,8 +774,19 @@ class EventsAPI:
 
             >>> eq.events.get_curve_filters()
 
-        :return: A list of currently active curve event filters
-        :rtype: :py:class:`energyquantified.events.CurvesFiltersResponse`
+        If a custom callback function is not provided, the default
+        :py:meth:`eq.events.on_curves_filters<energyquantified.api.EventsAPI.on_curves_filters>`
+        logs when a response is received. The callback function must take in one
+        parameter of type
+        :py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`.
+
+        :param callback: Set a custom callback function to handle the subscribe\
+            response. Defaults to\
+                :py:meth:`on_curves_filters() <energyquantified.api.EventsAPI.on_curves_filters>`.
+        :type callback: Callable, optional
+        :return: The obj instance this method was invoked upon, so the APi can\
+            be used fluently
+        :rtype: :py:class:`energyquantified.events.EventsAPI`
         """
         request_id = uuid.uuid4()
         get_filters_msg = RequestCurvesFilters(request_id).to_message()
@@ -753,42 +796,15 @@ class EventsAPI:
                     obj.latest = False
             # Callback
             callback = Callback(
+                callback,
                 callback_type=GET_CURVE_FILTERS,
                 latest=True,
             )
             self._callbacks[request_id] = callback
-        # Clear filters responses
-        while True:
-            try:
-                self._filters_responses.get_nowait()
-            except queue.Empty:
-                break
-        # Create messages
-        filters_msg = json.dumps(get_filters_msg)
-        # Send subscribe message
-        try:
-            self._ws.send(filters_msg)
-        except WebSocketConnectionClosedException as e:
-            raise WebSocketsError(
-                "Lost connection while trying to get active curve event filters"
-            ) from e
-        except Exception as e:
-            raise WebSocketsError("Failed to get active curve event filters") from e
-        # Wait for response
-        response = None
-        try:
-            response = self._filters_responses.get(timeout=timeout)
-        except queue.Empty:
-            pass
-        if response is None:
-            raise WebSocketsError(
-                "Timed out trying to get active curve evnet filters"
-            )
-        if not response.success:
-            raise WebSocketsError(
-                "Failed to get active curve events filters"
-            )
-        return response.data
+        # Send msg
+        msg = json.dumps(get_filters_msg)
+        self._ws.send(msg)
+        return self
 
     def get_next(self, timeout=None):
         """

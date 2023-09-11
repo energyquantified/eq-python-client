@@ -1,10 +1,42 @@
 import uuid
+from enum import Enum
 from energyquantified.events.messages.server.base import _BaseServerMessage
 from energyquantified.events.event_options import (
     CurveAttributeFilter,
     CurveNameFilter,
 )
-from energyquantified.events.responses import ResponseStatus
+
+
+_response_status_lookup = {}
+
+class ResponseStatus(Enum):
+    """
+    A field in server responses. Indicates if the request succeeded or not.
+
+     * ``OK`` – The request succeeded
+     * ``ERROR`` – The request failed
+    """
+    OK = ("OK", "Ok")
+    ERROR = ("ERROR", "Error")
+
+    def __init__(self, tag, label):
+        self.tag = tag
+        self.label = label
+        _response_status_lookup[tag.lower()] = self
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.__str__()
+
+    @staticmethod
+    def is_valid_tag(tag):
+        return isinstance(tag, str) and tag.lower() in _response_status_lookup
+
+    @staticmethod
+    def by_tag(tag):
+        return _response_status_lookup[tag.lower()]
 
 
 class ServerResponse(_BaseServerMessage):
@@ -18,6 +50,26 @@ class ServerResponse(_BaseServerMessage):
         self.status = None
         self.data = None
         self.errors = None
+
+    @property
+    def success(self):
+        """
+        Check if the request being responded to was successful or not.
+
+        :return: True if status indicates success, otherwise False
+        :rtype: bool
+        """
+        return self.status == ResponseStatus.OK
+
+    @property
+    def error(self):
+        """
+        Check if the request being responded to failed or not.
+
+        :return: True if status indicates failure, else False
+        :rtype: bool
+        """
+        return not self.success
 
     @staticmethod
     def from_message(_):
