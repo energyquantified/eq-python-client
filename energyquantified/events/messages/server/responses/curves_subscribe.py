@@ -1,4 +1,4 @@
-from energyquantified.events.responses import CurvesSubscribeData
+from energyquantified.events.responses import CurvesSubscribeResponse
 from .base_response import ServerResponse
 
 
@@ -25,4 +25,4 @@ class ServerResponseCurvesSubscribe(ServerResponse):
         filters = data_obj.get(self.DATA_FILTERS_KEY)
         if filters is not None:
             filters = [self._parse_curve_filter(filter) for filter in filters]
-        self.data = CurvesSubscribeData(filters=filters, last_id=last_id)
+        self.data = CurvesSubscribeResponse(filters=filters, last_id=last_id)

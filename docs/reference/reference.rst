@@ -286,35 +286,10 @@ Events
 
 ------
 
-.. autoclass:: energyquantified.events.responses.ResponseStatus
-   :inherited-members:
-
-------
-
-.. autoclass:: energyquantified.events.responses.BaseServerResponse
-   :inherited-members:
-
-------
-
 .. autoclass:: energyquantified.events.CurvesSubscribeResponse
    :show-inheritance:
    :inherited-members:
 
-------
-
-.. autoclass:: energyquantified.events.CurvesSubscribeData
-   :inherited-members:
-
-------
-
-.. autoclass:: energyquantified.events.CurvesFiltersResponse
-   :show-inheritance:
-   :inherited-members:
-
-------
-
-.. autoclass:: energyquantified.events.CurvesFiltersData
-   :inherited-members:
 
 Date and time
 -------------
@@ -407,3 +382,7 @@ in module ``energyquantified.exceptions``.
 **Parser exceptions**
 
 .. autoexception:: energyquantified.exceptions.ParseException
+
+**Push feed exceptions**
+
+.. autoexception:: energyquantified.exceptions.WebSocketsError

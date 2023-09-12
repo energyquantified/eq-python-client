@@ -26,6 +26,6 @@ def assert_filters(filters):
         )
         is_valid, errors = filter.validate()
         assert is_valid, (
-            f"fitler: {filter} is not valid for "
+            f"filter: {filter} is not valid for "
             f"the following reason(s): {errors}"
         )

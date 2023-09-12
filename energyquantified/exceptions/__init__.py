@@ -10,3 +10,4 @@ from .api import (
 from .client import InitializationError
 from .page import PageError
 from .parser import ParseException
+from .events import WebSocketsError

@@ -178,7 +178,7 @@ Events from the stream are accessed through
 :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`,
 and there are a few different event models. What is common for all events is
 that they have the ``event_type`` property with an
-:py:class:`EventType <energyquantified.events.EventType>`. The different
+:py:class:`energyquantified.events.EventType`. The different
 events and possible event types:
 
 * :py:class:`CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`:
@@ -224,33 +224,11 @@ with a list of any of the following filters:
   * :py:class:`CurveAttributeFilter <energyquantified.events.CurveAttributeFilter>`:
     Search filters similar to the curve search (metadata)
 
+A successful subscribe returns a
+:py:class:`energyquantified.events.CurvesSubscribeResponse` object which
+consists of the filters and (optionally) event ID subscribed with, confirmed by
+the server.
+
+
 Request the currently active curve event filters from the server with
 :py:meth:`eq.events.get_curve_filters() <energyquantified.api.EventsAPI.get_curve_filters>`.
-
-Server responses are handled by default callback functions. Set custom
-handlers by supplying the ``callback`` parameter with a callable when sending
-requests (e.g., subscribing with
-:py:meth:`subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`).
-All callbacks take in a single parameter of a type extending
-:py:class:`energyquantified.events.responses.BaseServerResponse`.
-All responses have the same three attributes:
-
-  * ``status``: See
-    :py:class:`energyquantified.events.responses.ResponseStatus`. Describes
-    if the request succeeded or not.
-  * ``errors``: A list of strings (error messages)
-  * ``data``: The response data (type differes depending on response)
-
-One of ``data`` and ``errors`` is always None. Which of the two is set and which
-is None depends on the status. The response types:
-
-* Response from :py:meth:`energyquantified.api.EventsAPI.subscribe_curve_events`:
-  Response type: :py:class:`energyquantified.events.CurvesSubscribeResponse`.
-  The ``data`` field is a
-  :py:class:`energyquantified.events.CurvesSubscribeData`, which consists of a
-  list of curve event filters and optionally an event id.
-
-* Response from :py:meth:`energyquantified.api.EventsAPI.get_curve_filters`:
-  Response type: :py:class:`energyquantified.events.CurvesFiltersResponse`. The
-  ``data`` field is a :py:class:`energyquantified.events.CurvesFiltersData`,
-  which is a list of curve event filters.
