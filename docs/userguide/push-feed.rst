@@ -733,17 +733,17 @@ after the provided ID.
 Automatic subscribe after reconnect
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As mentioned previously, the client silently tries to reconnect on network
+As mentioned, the client silently tries to reconnect on network
 errors automatically. After successfully reconnecting, it subscribes with the same
-filters and requests all events that occured during downtime.
+filters and requests all events that occurred during downtime.
 
-If you receive events with the
+When you are not connected, you will receive events with the
 :py:class:`EventType.DISCONNECTED <energyquantified.events.EventType>` type
-from :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`, it
-means that you are not connected. If you were previously connected and did not
-close the connection, it means that the connection dropped and automatic
-reconnect failed (maximum number of reconnect attempts exceeded). In that case
-you can optionally try manually reconnecting and subscribing. Remember that
+from :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`.
+If you were previously connected and did not close the connection, the
+connection dropped and automatic reconnect failed (maximum number of reconnect
+attempts exceeded). In that case, you can optionally try manually reconnecting
+and subscribing. Remember that
 :py:meth:`eq.events.connect() <energyquantified.api.EventsAPI.connect>` raises
 an exception if it fails to initially connect, so it can be wise to wait a short
 while before trying to reconnect.
