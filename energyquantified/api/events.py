@@ -409,7 +409,7 @@ class EventsAPI:
                 message=str(error),
             )
 
-    def connect(self, last_id_file=None, timeout=10, reconnect_attempts=5):
+    def connect(self, last_id_file=None, timeout=15, reconnect_attempts=5):
         """
         Connect to the curve update events stream.
 
@@ -446,7 +446,7 @@ class EventsAPI:
         :type last_id_file: str, optional
         :param timeout: The time in seconds to wait for a connection to be\
             established. Also used as the minimum wait-time inbetween reconnect\
-                attempts. Defaults to 10.
+                attempts. Defaults to 15.
         :type timeout: int, optional
         :param reconnect_attempts: The number of reconnect attempts after each\
             disconnect. The counter is reset whenever a connection is\
@@ -599,7 +599,7 @@ class EventsAPI:
             self,
             filters,
             last_id="keep",
-            timeout=30,
+            timeout=15,
     ):
         """
         Send a filter or a list of filters to the stream, subscribing to
@@ -629,6 +629,9 @@ class EventsAPI:
             older events. Set to "keep" in order to use the last ID\
                     from memory. Defaults to "keep".
         :type last_id: str, optional
+        :param timeout: The number of seconds to wait for a response,\
+            defaults to 15
+        :type timeout: int, optional
         :return: The filters and (optionally) event ID subscribed with,\
             confirmed by the server.
         :rtype: :py:class:`energyquantified.events.CurvesSubscribeResponse`
@@ -740,7 +743,7 @@ class EventsAPI:
             )
         return response.data
 
-    def get_curve_filters(self, timeout=30):
+    def get_curve_filters(self, timeout=15):
         """
         Request the active curve event filters.
 
@@ -757,7 +760,7 @@ class EventsAPI:
             >>> eq.events.get_curve_filters()
 
         :param timeout: The number of seconds to wait for a response,\
-            defaults to 30
+            defaults to 15
         :type timeout: int, optional
         :return: A list of currently active curve event filters. Is None if\
             not subscribed to curve events.
