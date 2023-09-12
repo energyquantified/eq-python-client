@@ -2,7 +2,7 @@ Push feed
 ===================
 
 This page shows how to load curve events from Energy Quantified's WebSocket API
-streamed in real-time. The examples below expect you to have an initialized instance
+streamed in real-time. The examples below expect you to have an initialized
 instance of the :py:class:`EnergyQuantified <energyquantified.EnergyQuantified>`
 API client called ``eq``.
 
@@ -232,7 +232,7 @@ Method reference: :py:meth:`eq.events.subscribe_curve_events() <energyquantified
 To receive curve events, one must subscribe by providing a list of filters.
 
 Note that the subscribe method temporarily blocks program execution while waiting
-for a response, and raises an exception if anything goes wrong.
+for a response and raises an exception if anything goes wrong.
 :py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`
 is returned from a successful subscribe. The response includes the filters
 and event ID (if provided) subscribed with, confirmed by the server.
@@ -489,7 +489,7 @@ Method reference: :py:meth:`eq.events.get_curve_filters() <energyquantified.api.
 Request the currently active curve event filters from the server.
 
 Note that this method temporarily block program execution while waiting for a
-response, and raises an exception if anything goes wrong. The returned value
+response and raises an exception if anything goes wrong. The returned value
 is None if you are **not** subscribed to curve events, otherwise a list of the
 filters (i.e., :py:class:`~energyquantified.events.CurveNameFilter`,
 :py:class:`~energyquantified.events.CurveAttributeFilter`) you are subscribed
@@ -704,7 +704,7 @@ Restarts and network errors
 
 .. _remember last id:
 
-Remember ``last_id`` between processes runs
+Remember ``last_id`` between process runs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The client can remember the last event received and continue where it left off
@@ -734,19 +734,19 @@ Automatic subscribe after reconnect
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As mentioned previously, the client silently tries to reconnect on network
-errors automatically. After a successful reconnect it subscribes with the same
-filters, and requests all events that occured during downtime.
+errors automatically. After successfully reconnecting, it subscribes with the same
+filters and requests all events that occured during downtime.
 
 If you receive events with the
 :py:class:`EventType.DISCONNECTED <energyquantified.events.EventType>` type
 from :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`, it
 means that you are not connected. If you were previously connected and did not
-close the connection, it means that the connection dropped and the client
-gave up reconnecting after exceeding the maximum number of reconnect attempts.
-In that case you can optionally try to manually reconnect and subscribe. Remember
-that :py:meth:`eq.events.connect() <energyquantified.api.EventsAPI.connect>`
-raises an exception if it fails to initially connect, so it can be wise to wait
-a short while before trying to reconnect:
+close the connection, it means that the connection dropped and automatic
+reconnect failed (maximum number of reconnect attempts exceeded). In that case
+you can optionally try manually reconnecting and subscribing. Remember that
+:py:meth:`eq.events.connect() <energyquantified.api.EventsAPI.connect>` raises
+an exception if it fails to initially connect, so it can be wise to wait a short
+while before trying to reconnect.
 
 .. code-block:: python
 
