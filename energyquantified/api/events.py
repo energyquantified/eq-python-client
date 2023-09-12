@@ -551,7 +551,7 @@ class EventsAPI:
         self._done_trying_to_connect.wait()
         if not self._is_connected.is_set():
             if connect_error is not None:
-                raise WebSocketsError("Failed to connect test") from connect_error
+                raise WebSocketsError("Failed to connect test") from connect_error # type: ignore
             if self._last_connection_event is not None:
                 raise WebSocketsError(
                     "Failed to connect",
