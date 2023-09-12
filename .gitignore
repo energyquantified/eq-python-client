@@ -21,5 +21,5 @@ _build
 .idea/
 
 # Debug files
-debug.py
+debug*.py
 
