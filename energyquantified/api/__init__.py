@@ -16,5 +16,5 @@ __all__ = [
     "PeriodInstancesAPI",
     "OhlcAPI",
     "SrmcAPI",
-    "EventsAPI"
+    "EventsAPI",
 ]
