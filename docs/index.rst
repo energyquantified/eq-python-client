@@ -95,6 +95,7 @@ User guide
    userguide/ohlc
    userguide/srmc
    userguide/pandas
+   userguide/push-feed
 
 
 Reference

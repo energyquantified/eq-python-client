@@ -70,6 +70,11 @@ Here are the different API section classes:
 .. autoclass:: energyquantified.api.SrmcAPI
    :inherited-members:
 
+------
+
+.. autoclass:: energyquantified.api.EventsAPI
+   :inherited-members:
+
 
 Data types
 ----------
@@ -248,6 +253,44 @@ Metadata
    :inherited-members:
 
 
+Events
+------
+
+.. autoclass:: energyquantified.events.EventType
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.events.CurveUpdateEvent
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.events.ConnectionEvent
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.events.TimeoutEvent
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.events.CurveNameFilter
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.events.CurveAttributeFilter
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.events.CurvesSubscribeResponse
+   :show-inheritance:
+   :inherited-members:
+
+
 Date and time
 -------------
 
@@ -339,3 +382,7 @@ in module ``energyquantified.exceptions``.
 **Parser exceptions**
 
 .. autoexception:: energyquantified.exceptions.ParseException
+
+**Push feed exceptions**
+
+.. autoexception:: energyquantified.exceptions.WebSocketsError

@@ -11,6 +11,7 @@ install_requires = [
     "pytz",
     "tzlocal",
     "python-dateutil>=2.8.0,<2.9",
+    "websocket-client==1.5.1",
 ]
 # tests_require = [
 #     "pytest",

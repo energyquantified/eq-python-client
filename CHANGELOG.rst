@@ -8,10 +8,13 @@ dev
 
 - Add timezone conversion.
 - Add ``threshold`` parameter to define how many values are allowed to be missing while performing an aggregation.
+- Implement ``EventsAPI`` for streaming events from Energy Quantified's
+  WebSocket API (push feed)
 
 **Dependencies**
 
 - ``requests``: Upgrade to minimum 2.31 due to security fixes.
+- Add ``websocket-client`` v1.5.1
 
 
 0.10.1

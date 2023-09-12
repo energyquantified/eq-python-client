@@ -167,3 +167,68 @@ All exceptions are defined in this package.
 
  * :py:class:`ParseException <energyquantified.exceptions.ParseException>`:
    Exception for parsing errors on API responses.
+
+
+``energyquantified.events``
+-----------------------------
+
+Implementation of event models and related metadata classes:
+
+Events from the stream are accessed through
+:py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`,
+and there are a few different event models. What is common for all events is
+that they have the ``event_type`` property with an
+:py:class:`energyquantified.events.EventType`. The different
+events and possible event types:
+
+* :py:class:`CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`:
+  The curve event data model. Curve events describe change in data for
+  a :py:class:`Curve <energyquantified.metadata.Curve>`, sometimes also
+  related to an :py:class:`Instance <energyquantified.metadata.Instance>`.
+  How data is changed is described by the ``event_type``:
+
+    * :py:class:`EventType.CURVE_UPDATE <energyquantified.events.EventType>`:
+      Data in a curve is updated
+    * :py:class:`EventType.CURVE_DELETE <energyquantified.events.EventType>`:
+      Some data in a curve (or an entire instance) is removed
+    * :py:class:`EventType.CURVE_TRUNCATE <energyquantified.events.EventType>`:
+      All data in a curve is removed
+
+* :py:class:`ConnectionEvent <energyquantified.events.ConnectionEvent>`:
+  Describes change in the stream connection, such as the cause of a
+  disconnect. Possible event types:
+
+    * :py:class:`EventType.DISCONNECTED <energyquantified.events.EventType>`:
+      Not connected. The cause (e.g., disconnect or never with connected
+      with
+      :py:meth:`eq.events.connect() <energyquantified.api.EventsAPI.connect>`)
+      is described by other attributes in the ``ConnectionEvent``.
+
+* :py:class:`TimeoutEvent <energyquantified.events.TimeoutEvent>`:
+  Filler event that enable users to act in between events during
+  quiet times. Timeout events are only generated if the ``timeout``
+  parameter is set when iterating
+  :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`.
+  The single event type:
+
+    * :py:class:`EventType.TIMEOUT <energyquantified.events.TIMEOUT>`:
+      No new events in the last ``timeout`` seconds
+
+Subscribe to curve events in
+:py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
+with a list of any of the following filters:
+
+  * :py:class:`CurveNameFilter <energyquantified.events.CurveNameFilter>`:
+    Filter by exact curves
+
+  * :py:class:`CurveAttributeFilter <energyquantified.events.CurveAttributeFilter>`:
+    Search filters similar to the curve search (metadata)
+
+A successful subscribe returns a
+:py:class:`energyquantified.events.CurvesSubscribeResponse` object which
+consists of the filters and (optionally) event ID subscribed with, confirmed by
+the server.
+
+
+Request the currently active curve event filters from the server with
+:py:meth:`eq.events.get_curve_filters() <energyquantified.api.EventsAPI.get_curve_filters>`.
