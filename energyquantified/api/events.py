@@ -26,8 +26,6 @@ from energyquantified.events import (
     CurveUpdateEvent,
     EventType,
     TimeoutEvent,
-    CurvesSubscribeResponse,
-    CurvesFiltersResponse,
 )
 from energyquantified.events.messages import (
     RequestCurvesSubscribe,
@@ -125,7 +123,6 @@ class EventsAPI:
         self._message_handler = lambda msg: log.info(
             "Message from server: %s" % msg
         )
-        # TODO what if response.request_id is in callbacks?
         self._error_handler = lambda err: log.error(err)
 
     def set_message_handler(self, func):
@@ -180,6 +177,7 @@ class EventsAPI:
             # Create file
             with open(self._last_id_file_path, "w") as f:
                 json.dump({"last_id": ""}, f)
+                self._last_id = None
 
     def _update_last_id(self, last_id, force_update=False):
         """
@@ -278,10 +276,16 @@ class EventsAPI:
                 "previous filters",
                 self._latest_curves_subscribe_request
             )
-            self.subscribe_curve_events(
-                filters=self._latest_curves_subscribe_request.filters,
-                last_id="keep",
-            )
+            try:
+                self.subscribe_curve_events(
+                    filters=self._latest_curves_subscribe_request.filters,
+                    last_id="keep",
+                )
+            except Exception as e:
+                self._error_handler(
+                    f"Failed resubscribing to curve events after automatic reconnect. "
+                    f"Error: {e}"
+                )
 
     def _on_message(self, _ws, message):
         """
@@ -317,12 +321,18 @@ class EventsAPI:
                     if callback.latest:
                         self._filters_responses.put(msg_obj)
                 elif isinstance(msg_obj, ServerResponseError):
+                    if not callback.latest:
+                        return
                     # Should only really happen if server fails to
                     # parse 'type' (so shouldnt happen)
-                    # TODO what if callback exists for request_id?
-                    self._error_handler(". ".join[
-                        [err.capitalize() for err in msg_obj.errors]
-                    ])
+                    if callback.callback_type == SUBSCRIBE_CURVES:
+                        self._subscribe_responses.put(msg_obj)
+                    elif callback.callback_type == GET_CURVE_FILTERS:
+                        self._filters_responses.put(msg_obj)
+                    else:
+                        self._error_handler(". ".join[
+                            [err.capitalize() for err in msg_obj.errors]
+                        ])
                 else:
                     # Might be a new response type that is not supported in
                     #   this version. Skip.
@@ -407,11 +417,13 @@ class EventsAPI:
 
         To keep track of the last event received in between sesssions, supply
         the ``last_id_file`` parameter with a file path. The file will be
-        created for you if it does not already exist. The id from the last
-        event received will be stored in the file, and the client will
-        automatically request old events (starting from the saved id) the next
-        time you connect. This is useful in the case of disconnects or
-        unexpected terminations.
+        created for you if it does not already exist. The file will be updated
+        at specific intervals, and when the process terminates. If the file
+        exists and contains an ID, that ID will be stored in memory as the last
+        received. The next time you subscribe (assuming ``last_id`` parameter
+        is not changed from the default "keep"), the client will request all
+        events that occured after the event with ID from file. This is useful in
+        the case of disconnects or unexpected terminations.
 
             >>> eq.events.connect(last_id_file="last_id_file.json")
 
@@ -447,14 +459,20 @@ class EventsAPI:
         :rtype: :py:class:`energyquantified.events.EventsAPI`
         """
         # Assert that not already connected
-        assert not self._is_connected.is_set(), (
-            "'connect()' invoked while already connected. Please first close the "
-            "exsting connection with 'close()'"
-        )
-        assert self._should_not_connect.is_set(), (
-            "'connect()' invoked while trying to connect or already connected. "
-            "Please first close the existing connection with 'close()'"
-        )
+        if self._is_connected.is_set():
+            raise WebSocketsError(
+                message=(
+                    "'connect()' invoked while already connected. "
+                    "Please first close the exsting connection with 'close()'"
+                ),
+            )
+        if not self._should_not_connect.is_set():
+            raise WebSocketsError(
+                message=(
+                    "'connect()' invoked while trying to connect or already connected. "
+                    "Please first close the existing connection with 'close()'"
+                )
+            )
         # Wait if shutdown of last connection is still in process
         if self._wst is not None:
             self._wst.join()
@@ -516,6 +534,7 @@ class EventsAPI:
                 with self._remaining_reconnect_attempts_lock:
                     # Stop if no more attempts
                     if self._remaining_reconnect_attempts <= 0:
+                        self._latest_curves_subscribe_request = None
                         self._should_not_connect.set()
                         self._done_trying_to_connect.set()
                         return
@@ -583,7 +602,7 @@ class EventsAPI:
     def subscribe_curve_events(
             self,
             filters,
-            last_id=None,
+            last_id="keep",
             timeout=30,
     ):
         """
@@ -611,9 +630,8 @@ class EventsAPI:
             list[:py:class:`energyquantified.events.CurveAttributeFilter`, \
             :py:class:`energyquantified.events.CurveNameFilter`]
         :param last_id: ID of the latest event received. Used for ex-/including\
-            older events. Takes priority over the id from a potential\
-                last_id file. Set to "keep" in order to use the last id\
-                    from memory.
+            older events. Set to "keep" in order to use the last ID\
+                    from memory. Defaults to "keep".
         :type last_id: str, optional
         :return: The filters and (optionally) event ID subscribed with,\
             confirmed by the server.
@@ -742,8 +760,13 @@ class EventsAPI:
 
             >>> eq.events.get_curve_filters()
 
-        :return: A list of currently active curve event filters
-        :rtype: :py:class:`energyquantified.events.CurvesFiltersResponse`
+        :param timeout: The number of seconds to wait for a response,\
+            defaults to 30
+        :type timeout: int, optional
+        :return: A list of currently active curve event filters. Is None if\
+            not subscribed to curve events.
+        :rtype: List[:py:class:`energyquantified.events.CurveNameFilter`,\
+            :py:class:`energyquantified.events.CurveAttributeFilter`], None
         """
         request_id = uuid.uuid4()
         get_filters_msg = RequestCurvesFilters(request_id).to_message()
@@ -782,13 +805,14 @@ class EventsAPI:
             pass
         if response is None:
             raise WebSocketsError(
-                "Timed out trying to get active curve evnet filters"
+                "Timed out trying to get active curve event filters"
             )
         if not response.success:
             raise WebSocketsError(
-                "Failed to get active curve events filters"
+                message="Failed to get active curve events filters",
+                description=response.errors,
             )
-        return response.data
+        return response.data.filters
 
     def get_next(self, timeout=None):
         """
@@ -821,6 +845,9 @@ class EventsAPI:
         >>>         # Wait a short moment before reconnecting
         >>>         time.sleep(10)
         >>>         eq.events.connect()
+        >>>         # Subscribe
+        >>>         # eq.events.subscribe_curve_events(filters=[...])
+        >>>         # ...
         >>>         continue
         >>>
         >>>     if event.event_type == EventType.TIMEOUT:

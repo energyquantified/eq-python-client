@@ -199,7 +199,7 @@ Note that this temporarily blocks program execution while trying to connect.
 
 The client tries to reconnect on network errors automatically. You can override
 the number of reconnect attempts by providing the ``reconnect_attempts`` parameter.
-The number of attempts reset once if a connection is re-established.
+The number of attempts reset once a connection is re-established.
 
 .. code-block:: python
 
@@ -231,30 +231,32 @@ Method reference: :py:meth:`eq.events.subscribe_curve_events() <energyquantified
 
 To receive curve events, one must subscribe by providing a list of filters.
 
+Note that the subscribe method temporarily blocks program execution while waiting
+for a response, and raises an exception if anything goes wrong.
+:py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`
+is returned from a successful subscribe. The response includes the filters
+and event ID (if provided) subscribed with, confirmed by the server.
+
+.. code-block:: python
+
+    # Subscribe (raises exception on fail)
+    response = eq.events.subscribe_curve_events(filters=[...])
+
+    # Check the response
+    print("Subscribed with filters:", response.filters)
+    if response.last_id is None:
+        print("Subscribed to new events")
+    else:
+        print("Subscribed to events since id:", response.last_id)
+
+You can specify how long to wait for a response by supplying the ``timeout``
+parameter with the maximum number of seconds to wait. The default is 30 seconds.
+
 You can update your filters while already subscribed by calling
 :py:meth:`subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
 with the new filters.
 
-After subscribing, the server responds with a
-:py:class:`CurvesSubscribeResponse <energyquantified.events.CurvesSubscribeResponse>`
-object. By default, the client logs the result (``INFO`` level for a successful
-subcription, ``ERROR`` when it fails). The result from a successful subscription
-includes the filters confirmed by the server and the event ID subscribed from
-(if provided). You can override this behaviour by supplying the ``callback``
-parameter with your function:
 
-.. code-block:: python
-
-    def on_subscribe(response: CurvesSubscribeResponse):
-        if response.success:
-            print("Subscribed")
-        else:
-            print("Failed to subscribe")
-
-    eq.events.subscribe_curve_events(
-        filters=[...],
-        callback=on_subscribe,
-    )
 
 
 Providing filters
@@ -486,24 +488,24 @@ Method reference: :py:meth:`eq.events.get_curve_filters() <energyquantified.api.
 
 Request the currently active curve event filters from the server.
 
-The server responds with a
-:py:class:`CurvesFiltersResponse <energyquantified.events.CurvesFiltersResponse>`
-object. Similarly to
-:py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events()>`
-(see :ref:`Subscribing <subscribe section>`), a default callback function handles
-the response and logs the result (``INFO`` level for a successful request,
-``ERROR`` when it fails). You can override this behaviour by supplying the
-``callback`` parameter with your function:
+Note that this method temporarily block program execution while waiting for a
+response, and raises an exception if anything goes wrong. The returned value
+is None if you are **not** subscribed to curve events, otherwise a list of the
+filters (i.e., :py:class:`~energyquantified.events.CurveNameFilter`,
+:py:class:`~energyquantified.events.CurveAttributeFilter`) you are subscribed
+with:
 
 .. code-block:: python
 
-    def on_get_curve_filters(response: CurvesFiltersResponse):
-        if response.success:
-            print("Active filters:", response.data.filters)
-        else:
-            print("Failed to get filters from server")
+    active_filters = eq.events.get_curve_filters()
 
-    eq.events.get_curve_filters(callback=on_get_curve_filters)
+    if active_filters is None:
+        print("Not subscribed to curve events!")
+    else:
+        print("List of active curve event filters:", active_filters)
+
+You can specify how long to wait for a response by supplying the ``timeout``
+parameter with the maximum number of seconds to wait. The default is 30 seconds.
 
 
 Handling events
@@ -554,7 +556,8 @@ Whenever a data in a curve is updated or deleted, you will receive a
             print("TRUNCATE event:", event)
 
 When ``event_type`` is :py:class:`EventType.CURVE_UPDATE <energyquantified.events.EventType>`,
-you can use the :py:meth:`CurveUpdateEvent.load_data() <energyquantified.events.CurveUpdateEvent.load_data>`
+you can use the
+:py:meth:`CurveUpdateEvent.load_data() <energyquantified.events.CurveUpdateEvent.load_data>`
 method to load the modified data. That will load all values between the first and last
 modified value, even those that have not changed.
 
@@ -571,7 +574,9 @@ modified value, even those that have not changed.
 
 The data loaded can either be a :py:class:`~energyquantified.data.Timeseries`, a
 :py:class:`~energyquantified.data.Periodseries` or an :py:class:`~energyquantified.data.OHLCList`,
-depending on the :py:attr:`CurveUpdateEvent.curve <energyquantified.events.CurveUpdateEvent.curve>`'s curve type.
+depending on the
+:py:attr:`CurveUpdateEvent.curve <energyquantified.events.CurveUpdateEvent.curve>`'s
+curve type.
 
 Note that you cannot load data for ``CURVE_DELETE`` and ``CURVE_TRUNCATE`` events,
 as deleted data no longer exists.
@@ -716,36 +721,51 @@ file path. Make sure that you have read and write access to the file path.
 The client regularly updates the file at a defined interval (~0.5/min), when the
 connection drops, and when execution of the process terminates for any reason.
 
-The next time you connect to the stream, assuming the same file path for
-``last_id_file`` and that you have not altered the file, the client will
-request all events after the last one you received.
-
-Providing the ``last_id`` parameter to
+The next time you connect to the stream and subscribe to curve events (assuming
+the same file path for ``last_id_file`` and that you have not altered the file),
+the client will request all events after the last one you received. Note that
+providing the ``last_id`` parameter to
 :py:meth:`eq.events.subscribe_curve_events() <energyquantified.api.EventsAPI.subscribe_curve_events>`
-will override the ID from the last_id_file feature.
+with an event ID overrides the ID from file, and you will get events created
+after the provided ID.
 
 
 Automatic subscribe after reconnect
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When the client reconnects (automatically or manually – like in the example below),
-it will resubscribe with the previous filters and ask for events that occurred
-during downtime.
+As mentioned previously, the client silently tries to reconnect on network
+errors automatically. After a successful reconnect it subscribes with the same
+filters, and requests all events that occured during downtime.
+
+If you receive events with the
+:py:class:`EventType.DISCONNECTED <energyquantified.events.EventType>` type
+from :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`, it
+means that you are not connected. If you were previously connected and did not
+close the connection, it means that the connection dropped and the client
+gave up reconnecting after exceeding the maximum number of reconnect attempts.
+In that case you can optionally try to manually reconnect and subscribe. Remember
+that :py:meth:`eq.events.connect() <energyquantified.api.EventsAPI.connect>`
+raises an exception if it fails to initially connect, so it can be wise to wait
+a short while before trying to reconnect:
 
 .. code-block:: python
 
     import time
 
+    # The filters subscribed with
+    filters = [...]
+    eq.events.subscribe_curve_events(filters=filters)
+
     for event in eq.events.get_next():
         if event.event_type == EventType.DISCONNECTED:
             # Not connected and event queue is empty
             print("Not connected:", event)
-            # Wait 30 seconds before reconnecting
-            time.sleep(30)
+            # Wait 60 seconds before trying to reconnect
+            time.sleep(60)
             # Try to reconnect
             eq.events.connect()
-            # Resubscribed automatically after
-            # successful connect
+            # Subscribe with same filters
+            eq.events.subscribe_curve_events(filters=filters)
             continue
 
 

@@ -178,7 +178,7 @@ Events from the stream are accessed through
 :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`,
 and there are a few different event models. What is common for all events is
 that they have the ``event_type`` property with an
-:py:class:`EventType <energyquantified.events.EventType>`. The different
+:py:class:`energyquantified.events.EventType`. The different
 events and possible event types:
 
 * :py:class:`CurveUpdateEvent <energyquantified.events.CurveUpdateEvent>`:

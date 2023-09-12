@@ -290,12 +290,6 @@ Events
    :show-inheritance:
    :inherited-members:
 
-------
-
-.. autoclass:: energyquantified.events.CurvesFiltersResponse
-   :show-inheritance:
-   :inherited-members:
-
 
 Date and time
 -------------
