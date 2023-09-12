@@ -733,7 +733,8 @@ class EventsAPI:
         try:
             response = self._subscribe_responses.get(timeout=timeout)
         except queue.Empty:
-            pass
+            with self._messages_lock:
+                self._callbacks.pop(request_id, None)
         if response is None:
             raise WebSocketsError("Timed out trying to subscribe")
         if not response.success:
@@ -801,7 +802,8 @@ class EventsAPI:
         try:
             response = self._filters_responses.get(timeout=timeout)
         except queue.Empty:
-            pass
+            with self._messages_lock:
+                self._callbacks.pop(request_id, None)
         if response is None:
             raise WebSocketsError(
                 "Timed out trying to get active curve event filters"
