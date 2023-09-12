@@ -84,7 +84,6 @@ class ServerResponse(_BaseServerMessage):
             self._set_data(json)
 
     def _set_request_id(self, json):
-        # TODO how to handle if server failed to parse request_id (and how to know)
         request_id = json.get(self.REQUEST_ID_KEY)
         if request_id is None:
             raise ValueError(

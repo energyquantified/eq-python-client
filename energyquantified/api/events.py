@@ -121,7 +121,7 @@ class EventsAPI:
         self._last_id_file_atexit = None
         # Message handlers
         self._message_handler = lambda msg: log.info(
-            "Message from server: %s" % msg
+            "Message from server: %s", msg
         )
         self._error_handler = lambda err: log.error(err)
 
@@ -272,8 +272,8 @@ class EventsAPI:
         # Send the last active filters
         if self._latest_curves_subscribe_request is not None:
             log.info(
-                "Reconnected to the stream, sending %s to subscribe with "
-                "previous filters",
+                "Reconnected to the stream, subscribing with "
+                "previous curve filters: %s",
                 self._latest_curves_subscribe_request
             )
             try:
@@ -363,7 +363,6 @@ class EventsAPI:
 
     def _on_error(self, _ws, error):
         if not isinstance(error, (timeout, ConnectionError, WebSocketException)):
-            # TODO Temprorary failure in name resolution
             self._error_handler(getattr(error, "strerror", str(error)))
             return
         # self._last_connection_event should only be set once for each time
@@ -377,7 +376,6 @@ class EventsAPI:
                 message=str(error)
             )
         elif isinstance(error, ConnectionError):
-            # TODO if Errno111 -> only use message (not status code)
             status_code = error.errno
             error_message = error.strerror
             self._last_connection_event = ConnectionEvent(
@@ -584,8 +582,6 @@ class EventsAPI:
             or not self._done_trying_to_connect.is_set()
             or not self._should_not_connect.is_set()
         ):
-            # TODO unfortunate if this is raised while a user has
-            # unproccessed events
             raise WebSocketsError(
                 "Failed to close the connection"
                 f"self._is_connected: {self._is_connected.is_set()}"
