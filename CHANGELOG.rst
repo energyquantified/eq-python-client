@@ -1,6 +1,13 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
+
 0.11
 ----
 

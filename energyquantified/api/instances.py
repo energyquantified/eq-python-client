@@ -332,6 +332,7 @@ class InstancesAPI(BaseAPI):
             time_of_day=None,
             after_time_of_day=None,
             before_time_of_day=None,
+            modified_at_latest=None,
             time_zone=None,
             frequency=None,
             aggregation=None,
@@ -348,8 +349,10 @@ class InstancesAPI(BaseAPI):
 
         You may control the time of the day the instance is issued by setting
         exactly one of the follow parameters: ``time_of_day``,
-        ``after_time_of_day`` or ``before_time_of_day``. These should be set
-        to a time (HH:MM:SS). You can use the :py:class:`datetime.time`.
+        ``after_time_of_day`` or ``before_time_of_day``. Additionally, you may
+        control the time of the day the instance has been modified (or created
+        if modified is null) by setting ``modified-at-latest``. These should be
+        set to a time (HH:MM:SS). You can use the :py:class:`datetime.time`.
 
         This operation works for curves with ``curve_type = INSTANCE`` only.
 
@@ -375,6 +378,9 @@ class InstancesAPI(BaseAPI):
         :param before_time_of_day:  The instance must be issued before this\
             time of day, defaults to None
         :type before_time_of_day: time, str, optional
+        :param modified-at-latest:  The instance must be modified (or created\
+            if modified is null) before this time of day, defaults to None
+        :type modified-at-latest: time, str, optional
         :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional
         :param frequency: Set the preferred frequency for aggregations,\
@@ -408,6 +414,7 @@ class InstancesAPI(BaseAPI):
         self._add_time(params, "time-of-day", time_of_day)
         self._add_time(params, "after-time-of-day", after_time_of_day)
         self._add_time(params, "before-time-of-day", before_time_of_day)
+        self._add_time(params, "modified-at-latest", modified_at_latest)
         self._add_time_zone(params, "timezone", time_zone, required=False)
         self._add_frequency(params, "frequency", frequency)
         if "frequency" in params:
