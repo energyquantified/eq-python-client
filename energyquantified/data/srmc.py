@@ -116,9 +116,9 @@ class SRMC:
         if self.curve:
             parts.append(f"curve={self.curve}")
         if self.unit:
-            parts.append(f"unit: {self.unit}")
+            parts.append(f"unit={self.unit}")
         if self.denominator:
-            parts.append(f"denominator: {self.denominator}")
+            parts.append(f"denominator={self.denominator}")
         if self.contract:
             parts.append(f"contract={self.contract}")
         if self.options:

@@ -307,6 +307,10 @@ class Timeseries(Series):
     :type resolution: Resolution, optional
     :param instance: The instance, defaults to None
     :type instance: Instance, optional
+    :param unit: The unit, defaults to None
+    :type unit: str, optional
+    :param denominator: The denominator, defaults to None
+    :type denominator: str, optional
     :param data: A list of values (Value, ScenariosValue, or MeanScenariosValue)
     :type data: list[]
     :param scenario_names: A list of scenario names, if any
@@ -324,12 +328,16 @@ class Timeseries(Series):
 
     def __str__(self):
         items = []
-        items.append(f"resolution={self.resolution}")
+        items.append(f"resolution=\"{self.resolution}\"")
         items.append(f"curve=\"{self.curve}\"")
         if self.instance:
-            items.append(f"instance={self.instance}")
+            items.append(f"instance=\"{self.instance}\"")
+        if self.unit:
+            items.append(f"unit=\"{self.unit}\"")
+        if self.denominator:
+            items.append(f"denominator=\"{self.denominator}\"")
         if self.has_scenarios():
-            items.append(f"scenario_names={self.scenario_names}")
+            items.append(f"scenario_names=\"{self.scenario_names}\"")
         if self.has_data():
             items.append(f"begin=\"{self.begin().isoformat(sep=' ')}\"")
             items.append(f"end=\"{self.end().isoformat(sep=' ')}\"")
@@ -483,8 +491,8 @@ class Timeseries(Series):
         if self.scenario_names:
             print(f"  Scenarios: {self.scenario_names}", file=file)
         print(f"  Resolution: {self.resolution}", file=file)
-        print(f"  Unit: {self.unit}, Denominator: {self.denominator}",
-              file=file)
+        print(f"  Unit: {self.unit}", file=file)
+        print(f"  Denominator: {self.denominator}", file=file)
         print(f"", file=file)
         for d in self.data:
             d.print(file=file)

@@ -428,6 +428,8 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
+        self._add_str(params, "unit", unit)
         # Additional validation checks
         if sum(1 if t is not None else 0 for t in
                (time_of_day, after_time_of_day, before_time_of_day)) > 1:

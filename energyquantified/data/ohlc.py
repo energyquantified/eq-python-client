@@ -138,17 +138,14 @@ class OHLCList(list):
     def __str__(self):
         parts = []
         if self.curve:
-            parts.append(f"curve={self.curve}")
+            parts.append(f"curve=\"{self.curve}\"")
         if self.unit:
-            parts.append(f"unit: {self.unit}")
+            parts.append(f"unit=\"{self.unit}\"")
         if self.denominator:
-            parts.append(f"denominator: {self.denominator}")
+            parts.append(f"denominator=\"{self.denominator}\"")
         if len(self) > 0:
-            parts.append(f"items: {super().__str__()}")
-        if not parts:
-            return f"<OHLCList: (no data)>"
-        joined = ',\n '.join(parts)
-        return f"<OHLCList:\n {joined}\n>"
+            parts.append(f"items={super().__str__()}")
+        return f"<OHLCList: {', '.join(parts)}>"
 
     def to_df(self):
         """
