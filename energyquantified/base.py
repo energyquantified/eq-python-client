@@ -9,6 +9,7 @@ from .api import (
     PeriodInstancesAPI,
     OhlcAPI,
     SrmcAPI,
+    EventsAPI,
 )
 from .exceptions import UnauthorizedError, InitializationError
 
@@ -41,6 +42,8 @@ class EnergyQuantified:
     :param http_delay: The minimum number of seconds between the start of\
                        each HTTP request, defaults to 0.0667 seconds (15 req/s)
     :type http_delay: float, optional
+    :param api_url: The root URL for the API
+    :type api_url: string, optional
     :param proxies: Map of proxies, defaults to None (no proxy)
     :type proxies: dict, optional
 
@@ -79,10 +82,16 @@ class EnergyQuantified:
             "http_delay must be 0.05s or slower (20 req/s)"
         )
         assert api_url, "api_url is missing"
+        assert api_url.startswith(("http", "https")), f"api_url must start with 'http' or 'https'"
         assert proxies is None or isinstance(proxies, dict), "proxies must be None or a dict"
         # Attributes
         self._api_key = _find_api_key(api_key, api_key_file)
         self._api_url = api_url
+        # Create websocket url (http -> ws, https -> wss)
+        events_ws_url = "".join([
+          self._api_url.replace('http', 'ws', 1),
+          "/events/"
+        ])
         # HTTP client
         self._session = Session(
             timeout=timeout,
@@ -116,6 +125,9 @@ class EnergyQuantified:
         #: See :py:class:`energyquantified.api.SrmcAPI`. For loading and
         #: calculating short-run marginal costs (SRMC) from OHLC data.
         self.srmc = SrmcAPI(self)
+        #: See :py:class:`energyquantified.api.EventsAPI`. For
+        #: using the curve events stream.
+        self.events = EventsAPI(events_ws_url, self._api_key)
 
     def is_api_key_valid(self):
         """
@@ -143,14 +155,16 @@ class RealtoConnection:
     Wraps a Energy Quantified Time Series API on Realto. Handles validation,
     network errors, rate limiting, and parsing of the API responses.
 
-    You must specify the **api_url**. There are
+    You must specify the **api_url**. There are constants with predefined
+    URLs in this class.
 
     Exactly one of **api_key** and **api_key_file** must be set at
     the same time. **api_key_file** shall be the file path to a file
     that contains just the API key (blank lines a stripped when read).
 
-    :param api_url: The root URL for the API, such as
-    :type api_url: string, optional
+    :param api_url: The root URL for the API, such as\
+        'https://api.realto.io/energyquantified-germany'
+    :type api_url: string
     :param api_key: The API key for your user account
     :type api_key: string, optional
     :param api_key_file: A file path to a file that contains the API key
@@ -174,7 +188,6 @@ class RealtoConnection:
        >>>     api_key="aaaa-bbbb-cccc-dddd"
        >>> )
        >>> eq.metadata.curves(q="de wind power actual")
-
     """
 
     #: The base URL for the German data API on Realto.
