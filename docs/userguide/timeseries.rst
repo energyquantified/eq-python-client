@@ -126,13 +126,15 @@ Add the parameter to the request:
    >>>    unit='GWh/h'
    >>> )
 
-The response data is converted:
+The response data is converted to `GWH/h`:
 
-   >>> timeseries.data
-   [<Value: date=2020-01-01 00:00:00+01:00, value=6.39>,
-    <Value: date=2020-01-01 00:15:00+01:00, value=6.38>,
-    <Value: date=2020-01-01 00:30:00+01:00, value=6.64>
-    ...
+   >>> str(timeseries)
+   <Timeseries: 
+      resolution=<Resolution: frequency=P1D, timezone=CET>, 
+      curve="DE Wind Power Production MWh/h 15min Actual", 
+      begin="2020-01-06 00:00:00+02:00", 
+      end="2020-01-06 00:00:00+02:00",
+      unit="GWh/h">
 
 Aggregation
 ^^^^^^^^^^^

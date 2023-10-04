@@ -106,16 +106,19 @@ Add the unit as parameter:
    >>> periodseries = eq.periods.load(
    >>>    'DE Wind Power Installed MW Capacity',
    >>>    begin=date(2020, 1, 1),  # or begin='2020-01-01'
-   >>>    end=date(2020, 6, 1)     # or end='2020-06-01'
+   >>>    end=date(2020, 6, 1),     # or end='2020-06-01'
    >>>    unit='GW'
    >>> )
 
-The response data is converted:
+The response data is converted to `GW`:
 
-   >>> periodseries.data[:3]
-   [<Period: begin=2020-01-01 00:00:00+01:00, end=2020-01-06 00:00:00+01:00, value=60.65.>,
-    <Period: begin=2020-01-06 00:00:00+01:00, end=2020-01-13 00:00:00+01:00, value=60.69>,
-    <Period: begin=2020-01-13 00:00:00+01:00, end=2020-01-20 00:00:00+01:00, value=60.83>]
+   >>> str(periodseries)
+   <Periodseries:
+      resolution=<Resolution: frequency=NONE, timezone=CET>,
+      curve="DE Wind Power Installed MW Capacity",
+      begin="2020-01-01 00:00:00+02:00",
+      end="2023-06-01 00:00:00+02:00",
+      unit="GW">
 
 Convert periods to a time series
 --------------------------------
