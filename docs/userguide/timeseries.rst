@@ -128,6 +128,12 @@ Add the parameter to the request:
 
 The response data is converted to `GWH/h`:
 
+   >>> timeseries.data
+   [<Value: date=2020-01-01 00:00:00+01:00, value=6.39>,
+    <Value: date=2020-01-01 00:15:00+01:00, value=6.38>,
+    <Value: date=2020-01-01 00:30:00+01:00, value=6.64>
+    ...
+
    >>> str(timeseries)
    <Timeseries: 
       resolution=<Resolution: frequency=P1D, timezone=CET>, 

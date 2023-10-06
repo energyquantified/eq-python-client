@@ -112,6 +112,12 @@ Add the unit as parameter:
 
 The response data is converted to `GW`:
 
+   >>> periodseries.data[:3]
+   [<Period: begin=2020-01-01 00:00:00+01:00, end=2020-01-06 00:00:00+01:00, value=60.65.>,
+    <Period: begin=2020-01-06 00:00:00+01:00, end=2020-01-13 00:00:00+01:00, value=60.69>,
+    <Period: begin=2020-01-13 00:00:00+01:00, end=2020-01-20 00:00:00+01:00, value=60.83>]
+    ...
+
    >>> str(periodseries)
    <Periodseries:
       resolution=<Resolution: frequency=NONE, timezone=CET>,
