@@ -441,8 +441,8 @@ class InstancesAPI(BaseAPI):
             exclude_tags=None,
         ):
         """
-        Load various forecasted values for a speicifc moment in time, to see how
-        forecasts develop over time.
+        Load forecasted values from various instances for a specific point in time,
+        to see how forecasts develop over time.
 
         The point in time is the datetime supplied to the ``delivery`` parameter.
         Choose the frequency of the delivery by providing the ``frequency``

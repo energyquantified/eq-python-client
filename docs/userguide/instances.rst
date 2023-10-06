@@ -259,6 +259,25 @@ day from 1 June to 5 June:
 Aggregations are also supported, as you can see from the examples above.
 
 
+Absolute forecasts queries
+--------------------------------------
+
+Method reference: :py:meth:`eq.instances.absolute() <energyquantified.api.InstancesAPI.absolute>`
+
+Load the forecasted value 
+Load forecasted values from various instances for a specific point in time,
+to see how forecasts develop over time.
+
+The following parameters are required to load absolute forecasts:
+ * ``curve``: The :py:class:`Curve <energyquantified.metadata.Curve>` to load
+ * ``delivery``: The point in time to load forecasted values for
+ * ``begin``: Earliest issued date for instances (inclusive)
+ * ``end``: Latest issued date for instances (exclusive)
+
+Load the forecasted value at ``(2023,10,5)``
+
+
+
 List available instances and tags
 ---------------------------------
 
