@@ -110,7 +110,8 @@ Add the unit as parameter:
    >>>    unit='GW'
    >>> )
 
-The response data is converted to `GW`:
+The response data is converted to `GW`, and the unit is found at the ``unit``
+attribute of the series:
 
    >>> periodseries.data[:3]
    [<Period: begin=2020-01-01 00:00:00+01:00, end=2020-01-06 00:00:00+01:00, value=60.65.>,
