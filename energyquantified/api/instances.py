@@ -449,25 +449,8 @@ class InstancesAPI(BaseAPI):
         parameter. If a frequency is not provided, it defaults to using the Curve's
         frequency.
 
-        Loads forecast values from instances issued between ``begin`` (inclusive)
+        Loads forecasted values from instances issued between ``begin`` (inclusive)
         and ``end`` (exclusive).
-
-
-
-        Load one instance for each day based on some common criteria, stitch
-        them together and return a continuous time series.
-
-        By default, this method selects the day-ahead instances (forecasts),
-        but you can set ``days_ahead`` to 0 or higher. 0 means intraday,
-        1 means the day-ahead (default), 2 means the day after day-ahead,
-        and so on.
-
-        You may control the time of the day the instance is issued by setting
-        exactly one of the follow parameters: ``time_of_day``,
-        ``after_time_of_day`` or ``before_time_of_day``. These should be set
-        to a time (HH:MM:SS). You can use the :py:class:`datetime.time`.
-
-        This operation works for curves with ``curve_type = INSTANCE`` only.
 
         :param curve: The curve or curve name
         :type curve: :py:class:`energyquantified.metadata.Curve`, str
