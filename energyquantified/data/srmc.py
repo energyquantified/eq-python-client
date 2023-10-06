@@ -61,6 +61,10 @@ class SRMC:
     """
     #: The curve used as input to this SRMC calculation
     curve: Curve = None
+    #: The unit of the data
+    unit: str = None
+    #: The denominator of the data
+    denominator: str = None
     #: (optional) The contract when the calculation was done for historical
     #: closing prices – either a front contract (continuous front contract),
     #: or a specific contract such as Year-2020, Year-2021, Q3-2020 etc.
@@ -111,6 +115,10 @@ class SRMC:
         parts = []
         if self.curve:
             parts.append(f"curve={self.curve}")
+        if self.unit:
+            parts.append(f"unit={self.unit}")
+        if self.denominator:
+            parts.append(f"denominator={self.denominator}")
         if self.contract:
             parts.append(f"contract={self.contract}")
         if self.options:

@@ -12,6 +12,9 @@ def parse_srmc_response(json):
     curve = json.get('curve')
     if curve is not None:
         curve = parse_curve(curve)
+    # Parse unit
+    unit = json.get("unit")
+    denominator = json.get("denominator")
     # Get contract
     contract = json.get('contract')
     if contract is not None:
@@ -26,6 +29,8 @@ def parse_srmc_response(json):
         ohlc = parse_ohlc_list(data)
         return SRMC(
             curve=curve,
+            unit=unit,
+            denominator=denominator,
             contract=contract,
             options=options,
             ohlc=OHLCList(ohlc)
@@ -36,6 +41,8 @@ def parse_srmc_response(json):
         timeseries = parse_timeseries(data)
         return SRMC(
             curve=curve,
+            unit=unit,
+            denominator=denominator,
             contract=contract,
             options=options,
             timeseries=timeseries
@@ -46,6 +53,8 @@ def parse_srmc_response(json):
         periodseries = parse_periodseries(data)
         return SRMC(
             curve=curve,
+            unit=unit,
+            denominator=denominator,
             contract=contract,
             options=options,
             periodseries=periodseries

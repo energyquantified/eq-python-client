@@ -1,9 +1,9 @@
 from dateutil import parser
 
+from .metadata import parse_curve
 from ..data import Product, OHLC, OHLCList
 from ..exceptions import ParseException
 from ..metadata import ContractPeriod
-from .metadata import parse_curve, parse_contract
 
 
 def parse_ohlc_response(json):
@@ -11,10 +11,13 @@ def parse_ohlc_response(json):
     curve = json.get("curve")
     if curve:
         curve = parse_curve(curve)
+    # Parse unit
+    unit = json.get("unit")
+    denominator = json.get("denominator")
     # Parse OHLC objects
     data = parse_ohlc_list(json.get("data"))
 
-    return OHLCList(data, curve=curve)
+    return OHLCList(data, curve=curve, unit=unit, denominator=denominator)
 
 
 def parse_ohlc_list(json):
