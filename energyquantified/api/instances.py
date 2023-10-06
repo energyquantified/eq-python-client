@@ -435,7 +435,7 @@ class InstancesAPI(BaseAPI):
             frequency=None,
             time_zone=None,
             hour_filter=None,
-            unit=None, # TODO after unit branch is merged
+            unit=None,
             aggregation=None,
             tags=None,
             exclude_tags=None,
