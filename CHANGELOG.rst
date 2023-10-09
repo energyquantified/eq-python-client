@@ -1,6 +1,13 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Added ``PeriodInstancesAPI.relative()`` for relative queries
+
 0.11
 ----
 
