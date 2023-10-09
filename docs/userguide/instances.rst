@@ -273,9 +273,9 @@ The following parameters are required to load absolute forecasts:
  * ``begin``: Earliest issued date for instances (inclusive)
  * ``end``: Latest issued date for instances (exclusive)
 
-The example below loads the absolute forecast at 2023-10-05 12:00 for the curve
-``DE Wind Power Production MWh/h 15min Forecast``, from instances issued between
-2023-10-01 (inclusive) and 2023-10-02 (exclusive).
+The example below loads the absolute forecast for
+``DE Wind Power Production MWh/h 15min Forecast`` at 2023-10-05 12:00, from
+instances issued between 2023-10-01 (inclusive) and 2023-10-02 (exclusive).
 
    >>> from datetime import datetime
    >>> absolute_result = eq.instances.absolute(
@@ -326,10 +326,14 @@ The example below loads the absolute forecast at 2023-10-05 12:00 for the curve
                tag="ecsr">,
             value=26542.6>>
 
-The resolution of the delivery defaults to being the Curve's resolution. Supply
-the ``frequency`` or ``time_zone`` parameters to change the resolution of the
-delivery. Load absolute with delivery in hourly frequency from instances
-with the ``ec`` tag:
+The resolution of the delivery defaults to the Curve's resolution. Change the
+frequency or time zone of the delivery by supplying the ``frequency`` or
+``time_zone`` parameters, respectively. Note that you cannot use a frequency
+higher than the Curve's original frequency, and time zone conversion is
+supported only for curves with higher than daily frequency (> P1D).
+
+Load the absolute forecast with delivery in hourly frequency from instances with
+the ``ec`` tag:
 
    >>> from datetime import datetime
    >>> from energyquantified.time import Frequency
