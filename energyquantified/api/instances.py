@@ -16,7 +16,7 @@ class InstancesAPI(BaseAPI):
     instance of the :py:class:`energyquantified.EnergyQuantified` class:
 
        >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd")
-       >>> eq.timeseries.load(curve, begin, end)
+       >>> eq.instances.list(curve, tags)
     """
 
     def __init__(self, *args, **kwargs):
