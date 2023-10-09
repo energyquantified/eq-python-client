@@ -1,6 +1,13 @@
 Changelog
 =========
 
+dev
+----
+- Add ``unit`` and ``denominator`` attributes to ``Series`` and ``OHLCList``
+- Add support for unit conversion when loading from the API
+- Implement absolute forecasts for instances ``eq.instances.absolute()``
+
+
 0.11
 ----
 
