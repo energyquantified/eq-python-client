@@ -5,6 +5,10 @@ from ..metadata import Instance
 
 @dataclass(frozen=True)
 class AbsoluteItem:
+    """
+    Data class for an instance-value pair used by
+    :py:class:`energyquantified.data.AbsoluteResult`.
+    """
     #: The instance, see :py:class:`energyquantified.metadata.Instance`
     instance: Instance
     #: The value
