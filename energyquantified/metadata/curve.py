@@ -14,7 +14,7 @@ class Curve:
                  area=None, area_sink=None, place=None,
                  resolution=None, frequency=None, timezone=None,
                  categories=None, unit=None, denominator=None, data_type=None,
-                 source=None, commodity=None):
+                 source=None, commodity=None, subscription=None):
         #: The curve name is the identifier.
         self.name = name
         #: Curve type (the type of data this curve refers to).
@@ -57,6 +57,8 @@ class Curve:
         self.source = source
         #: The curve commodity (Power, Gas, etc.)
         self.commodity = commodity
+        #: The subscription for this curve, :py:class:`Subscription`.
+        self.subscription = subscription
 
     @property
     def resolution(self):
