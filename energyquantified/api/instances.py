@@ -440,3 +440,80 @@ class InstancesAPI(BaseAPI):
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
+
+    def rolling(
+            self,
+            curve,
+            begin,
+            end,
+            hours_ahead=0,
+            tags=None,
+            exclude_tags=None,
+            time_zone=None,
+            frequency=None,
+            aggregation=None,
+            hour_filter=None,
+            threshold=None,
+            unit=None,
+    ):
+        """
+        Load a timeseries from ``begin`` to ``end``, where each value is from
+        the latest instance created at least ``hours_ahead`` before the datetime
+        of the value.
+
+        :param curve: The curve or curve name
+        :type curve: :py:class:`energyquantified.metadata.Curve`, str
+        :param begin: The begin date (inclusive) of the resulting timeseries
+        :type begin: date, datetime, str, required
+        :param end: The end date (exclusive) of the resulting timeseries
+        :type end: date, datetime, str, required
+        :param hours_ahead: The minimum number of hours between the ``created``\
+            datetime of an instance and its values to be considered in the\
+            rolling forecast. Must be 0 at minimum and 24 at maximum.\
+            Defaults to 0
+        :type hours_ahead: int, optional
+        :param tags: Filter by instance tags, defaults to None
+        :type tags: list, str, optional
+        :param exclude_tags: Exclude instance tags, defaults to None
+        :type exclude_tags: list, str, optional
+        :param time_zone: Convert the timezone of the resulting series,\
+            defaults to None
+        :type time_zone: TzInfo, optional
+        :param frequency: Set the preferred frequency for aggregations,\
+            defaults to None
+        :type frequency: Frequency, optional
+        :param aggregation: The aggregation method (i.e. AVERAGE, MIN, MAX).\
+            Has no effect unless *frequency* is provided. Defaults to AVERAGE.
+        :type aggregation: Aggregation, optional
+        :param hour_filter: Filters on hours to include (i.e. BASE, PEAK). Has\
+            no effect unless *frequency* is provided. Defaults to BASE.
+        :type hour_filter: Filter, optional
+        :param threshold: Allow that many values to be missing within one frame\
+            of *frequency*. Has no effect unless *frequency* is provided,\
+            defaults to 0.
+        :type threshold: _type_, optional
+        :param unit: Convert unit of data, defaults to the Curve's unit
+        :type unit: str, optional
+        :return: A time series instance
+        :rtype: :py:class:`energyquantified.data.Timeseries`
+        """
+        # Build URL
+        safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
+        url = f"/instances/{safe_curve}/get/rolling/"
+        # Parameters
+        params = {}
+        self._add_int(params, "hours-ahead", hours_ahead, required=True, min=0, max=24)
+        self._add_datetime(params, "begin", begin, required=True)
+        self._add_datetime(params, "end", end, required=True)
+        self._add_str_list(params, "tags", tags)
+        self._add_str_list(params, "exclude-tags", exclude_tags)
+        self._add_time_zone(params, "timezone", time_zone)
+        self._add_frequency(params, "frequency", frequency)
+        if "frequency" in params:
+            self._add_aggregation(params, "aggregation", aggregation)
+            self._add_filter(params, "hour-filter", hour_filter)
+            self._add_int(params, "threshold", threshold, min=0)
+        self._add_str(params, "unit", unit)
+        # HTTP request
+        response = self._get(url, params=params)
+        return parse_timeseries(response.json())
