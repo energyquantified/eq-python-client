@@ -7,6 +7,7 @@ dev
 **Improvements**
 
 - Added ``PeriodInstancesAPI.relative()`` for relative queries
+- Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
 
 0.11
 ----
