@@ -6,7 +6,12 @@ from ..metadata import (
     Curve, Instance, Area, DataType, CurveType, Place, PlaceType,
     ContractPeriod, ContinuousContract, SpecificContract, OHLCField
 )
-from ..metadata.subscription import SubscriptionAccess, SubscriptionType, Subscription, SubscriptionCollectionPerm
+from ..metadata.subscription import (
+    Subscription,
+    SubscriptionAccess,
+    SubscriptionType,
+    SubscriptionCollectionPerm
+)
 from ..time import Frequency, Resolution, UTC, to_timezone
 from ..time.timezone import LOCAL_TZ
 
@@ -197,15 +202,19 @@ def parse_subscription(json):
     """
     Parse a JSON response from the server into a Subscription object.
     """
-
     access = SubscriptionAccess.by_tag(json.get("access"))
     type = SubscriptionType.by_tag(json.get("type"))
     label = json.get("label")
-    package = json.get("package") if type == SubscriptionType.package or type == SubscriptionType.package_area else None
+    package = json.get(
+        "package") if type == SubscriptionType.package or type == \
+                      SubscriptionType.package_area else None
     area = json.get("area") if type == SubscriptionType.package_area else None
-    collection = json.get("collection") if type == SubscriptionType.collection else None
+    collection = json.get(
+        "collection") if type == SubscriptionType.collection else None
     collection_perms = SubscriptionCollectionPerm.by_tag(
-        json.get("collection_perms")) if type == SubscriptionType.collection else None
+        json.get(
+            "collection_perms")) if type == SubscriptionType.collection else \
+        None
 
     return Subscription(
         access=access,

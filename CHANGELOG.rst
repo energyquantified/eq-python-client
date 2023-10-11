@@ -1,6 +1,13 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Add ``Subscription`` to ``Curve``
+
 0.11
 ----
 

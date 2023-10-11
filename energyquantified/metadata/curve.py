@@ -57,7 +57,7 @@ class Curve:
         self.source = source
         #: The curve commodity (Power, Gas, etc.)
         self.commodity = commodity
-        #: The subscription for this curve, :py:class:`Subscription`.
+        #: The subscription for this curve, see :py:class:`Subscription`.
         self.subscription = subscription
 
     @property
@@ -71,7 +71,8 @@ class Curve:
         return self.name
 
     def __repr__(self):
-        return f"<Curve: \"{self.name}\", curve_type={self.curve_type}>"
+        return f"<Curve: \"{self.name}\", curve_type={self.curve_type}, " \
+               f"subscription={self.subscription}>"
 
 
 _datatype_lookup = {}

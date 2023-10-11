@@ -252,6 +252,26 @@ Metadata
 .. autoclass:: energyquantified.metadata.SpecificContract
    :inherited-members:
 
+------
+
+.. autoclass:: energyquantified.metadata.Subscription
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.SubscriptionAccess
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.SubscriptionType
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.SubscriptionCollectionPerms
+   :inherited-members:
+
 
 Events
 ------

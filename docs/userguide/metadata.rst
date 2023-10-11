@@ -16,6 +16,10 @@ The API allows you to query for :py:class:`Curve <energyquantified.metadata.Curv
 objects in many ways. It is using the same operation as the data search on Energy
 Quantified's web application.
 
+The curve object includes a :py:class:`Subscription
+<energyquantified.metadata.Subscription>` field that describes your access for
+the given curve.
+
 Searching for curves in the API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

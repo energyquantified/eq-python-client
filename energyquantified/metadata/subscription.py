@@ -8,26 +8,32 @@ class Subscription:
 
     def __init__(self, access, type, label, package=None, area=None,
                  collection=None, collection_perms=None):
-        #: The access level for this subscription, :py:class:`SubscriptionAccess`
+        #: The access level for this subscription, see
+        # :py:class:`SubscriptionAccess`
         self.access = access
-        #: The type of subscription, :py:class:`SubscriptionType`
+        #: The type of subscription, see :py:class:`SubscriptionType`
         self.type = type
         #: Human-readable label for this subscription
         self.label = label
-        if self.type == SubscriptionType.package or self.type == SubscriptionType.package_area:
-            #: The unique name of the package, only available if the type equals `package` or `package_area`
+        if self.type == SubscriptionType.package or self.type == \
+                SubscriptionType.package_area:
+            #: The unique name of the package, only available if the type equals
+            # `package` or `package_area`
             self.package = package
         else:
             self.package = None
         if self.type == SubscriptionType.package_area:
-            #: A tag representing the area, only available if the type equals `package_area`
+            #: A tag representing the area, only available if the type equals
+            # `package_area`
             self.area = area
         else:
             self.area = None
         if self.type == SubscriptionType.collection:
-            #: The unique name of the collection, only available if the type equals `collection`
+            #: The unique name of the collection, only available if the type
+            # equals `collection`
             self.collection = collection
-            #: The user's permissions for this collection, only available if the type equals `collection`,
+            #: The user's permissions for this collection, only available if the
+            # type equals `collection`, see
             #: :py:class:`SubscriptionCollectionPerm`
             self.collection_perms = collection_perms
         else:
@@ -38,7 +44,8 @@ class Subscription:
         return self.label
 
     def __repr__(self):
-        return f"<Subscription: \"{self.label}\", access={self.access}, type={self.type}>"
+        return f"<Subscription: \"{self.label}\", access={self.access}, " \
+               f"type={self.type}>"
 
 
 _access_lookup = {}
@@ -49,7 +56,7 @@ class SubscriptionAccess(enum.Enum):
     Access levels for a subscription
     """
 
-    #: Area is included in the freemium tier
+    #: Access is included in the freemium tier
     FREEMIUM = "FREEMIUM"
     #: No access
     BLOCKED = "BLOCKED"
@@ -74,7 +81,7 @@ class SubscriptionAccess(enum.Enum):
         return self.tag
 
     def __repr__(self):
-        return f"<Access: \"{self.tag}\">"
+        return f"<SubscriptionAccess: \"{self.tag}\">"
 
     @staticmethod
     def is_valid_tag(tag):
@@ -130,7 +137,7 @@ class SubscriptionType(enum.Enum):
         return self.tag
 
     def __repr__(self):
-        return f"<Type: \"{self.tag}\">"
+        return f"<SubscriptionType: \"{self.tag}\">"
 
     @staticmethod
     def is_valid_tag(tag):
@@ -178,7 +185,7 @@ class SubscriptionCollectionPerm(enum.Enum):
         return self.tag
 
     def __repr__(self):
-        return f"<CollectionPerm: \"{self.tag}\">"
+        return f"<SubscriptionCollectionPerm: \"{self.tag}\">"
 
     @staticmethod
     def is_valid_tag(tag):
