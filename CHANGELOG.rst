@@ -8,6 +8,10 @@ dev
 
 - Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
 
+**Breaking changes**
+
+- Removed ``Place.area``. Use ``Place.areas`` instead.
+
 0.11
 ----
 

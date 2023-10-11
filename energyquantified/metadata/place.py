@@ -7,27 +7,24 @@ class Place:
     a weather station, a position on a river etc.
     """
 
-    def __init__(self, kind, key, name, unit=None, fuels=None, area=None,
-                 areas=None, location=None, children=None, curves=None):
+    def __init__(self, kind, key, name, unit=None, fuels=None, areas=None,
+                 location=None, children=None, curves=None):
         #: The place type. See :py:class:`PlaceType`.
         self.kind = kind
         #: The identifier
         self.key = key
         #: The name of the place
         self.name = name
-        #: The unit name (if it is a powerplant unit)
+        #: The unit name (if it is a power plant unit)
         self.unit = unit
-        #: The fuel types (if it is a powerplant unit)
+        #: The fuel types (if it is a power plant unit)
         self.fuels = fuels or []
-        #: The area in which this place lies, see :py:class:`Area`. This
-        #: field is deprecated and will be removed in future releases.
-        self.area = area
-        #: The list areas in which this place lies (mulitple when it's on a
+        #: The list areas in which this place lies (multiple when it's on a
         #: border), see :py:class:`Area`.
         self.areas = areas or []
         #: The geolocation of this place: ``(latitude, longitude)``
         self.location = location or None
-        #: A list of children (typically used for a powerplants with sub-units)
+        #: A list of children (typically used for a power plants with subunits)
         self.children = children or []
         #: A list of curves with data for this place. See :py:class:`Curve`.
         self.curves = curves or []
@@ -65,6 +62,7 @@ class Place:
 
 
 _placetypes_lookup = {}
+
 
 class PlaceType(enum.Enum):
     """
