@@ -72,6 +72,11 @@ Here are the different API section classes:
 
 ------
 
+.. autoclass:: energyquantified.api.UserAPI
+   :inherited-members:
+
+------
+
 .. autoclass:: energyquantified.api.EventsAPI
    :inherited-members:
 
@@ -270,6 +275,23 @@ Metadata
 ------
 
 .. autoclass:: energyquantified.metadata.SubscriptionCollectionPerms
+   :inherited-members:
+
+
+User
+----
+
+.. autoclass:: energyquantified.user.User
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.user.Organization
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.user.AccountManager
    :inherited-members:
 
 

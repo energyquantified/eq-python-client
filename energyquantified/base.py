@@ -1,5 +1,3 @@
-from .http import Session
-
 from .api import (
     InstancesAPI,
     MetadataAPI,
@@ -9,10 +7,11 @@ from .api import (
     PeriodInstancesAPI,
     OhlcAPI,
     SrmcAPI,
+    UserAPI,
     EventsAPI,
 )
 from .exceptions import UnauthorizedError, InitializationError
-
+from .http import Session
 
 # Defaults
 
@@ -64,7 +63,7 @@ class EnergyQuantified:
             http_delay=0.0667,
             api_url=BASE_PATH,
             proxies=None,
-        ):
+    ):
         # Simple validations
         assert api_key or api_key_file, "api_key is missing"
         if api_key:
@@ -89,8 +88,8 @@ class EnergyQuantified:
         self._api_url = api_url
         # Create websocket url (http -> ws, https -> wss)
         events_ws_url = "".join([
-          self._api_url.replace('http', 'ws', 1),
-          "/events/"
+            self._api_url.replace('http', 'ws', 1),
+            "/events/"
         ])
         # HTTP client
         self._session = Session(
@@ -125,6 +124,8 @@ class EnergyQuantified:
         #: See :py:class:`energyquantified.api.SrmcAPI`. For loading and
         #: calculating short-run marginal costs (SRMC) from OHLC data.
         self.srmc = SrmcAPI(self)
+        #: See :py:class:`energyquantified.api.UserAPI`. For user details.
+        self.user = UserAPI(self)
         #: See :py:class:`energyquantified.api.EventsAPI`. For
         #: using the curve events stream.
         self.events = EventsAPI(events_ws_url, self._api_key)
@@ -214,7 +215,7 @@ class RealtoConnection:
             timeout=20.0,
             http_delay=0.1,
             proxies=None,
-        ):
+    ):
         # Simple validations
         assert api_url, "api_url is missing"
         assert api_key or api_key_file, "api_key is missing"

@@ -8,6 +8,7 @@ dev
 
 - Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
 - Add ``Subscription`` to ``Curve``
+- Add ``UserAPI`` and ``eq.user.user()`` to get details of the current user
 
 0.11
 ----
