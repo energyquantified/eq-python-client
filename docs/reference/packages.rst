@@ -98,6 +98,16 @@ are quite many classes in ``energyquantified.metadata``:
    Enumerator of contract periods for OHLC data objects. Typically week, month,
    quarter, year.
 
+ * :py:class:`Subscription <energyquantified.metadata.Subscription>`: A class
+    describing your subscription for a given curve.
+ * :py:class:`SubscriptionAccess <energyquantified.metadata.SubscriptionAccess>`:
+   Enumerator of access levels for subscriptions.
+ * :py:class:`SubscriptionType <energyquantified.metadata.SubscriptionType>`:
+   Enumerator of subscription types.
+ * :py:class:`SubscriptionCollectionPerms
+    <energyquantified.metadata.SubscriptionCollectionPerms>`: Enumerator of
+    user's permission for a collection.
+
 ``energyquantified.time``
 -------------------------
 

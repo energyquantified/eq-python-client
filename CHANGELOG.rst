@@ -7,6 +7,7 @@ dev
 **Improvements**
 
 - Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
+- Add ``Subscription`` to ``Curve``
 
 0.11
 ----
