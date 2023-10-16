@@ -147,10 +147,9 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param threshold: Allow that many values to be missing within one
-        frame of \
-            *frequency*. Has no effect unless *frequency* is provided, \
-            defaults to 0.
+        :param threshold: Allow that many values to be missing within one \
+            frame of *frequency*. Has no effect unless *frequency* is \
+            provided, defaults to 0.
         :type threshold: int, optional
         :param ensembles: Whether to include ensembles where available,\
             defaults to False
@@ -226,9 +225,8 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param threshold: Allow that many values to be missing within one
-        frame of \
-            *frequency*. Has no effect unless *frequency* is provided, \
+        :param threshold: Allow that many values to be missing within one \
+            frame of *frequency*. Has no effect unless *frequency* is provided,\
             defaults to 0.
         :type threshold: int, optional
         :param ensembles: Whether to include ensembles where available,\
@@ -300,9 +298,8 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param threshold: Allow that many values to be missing within one
-        frame of \
-            *frequency*. Has no effect unless *frequency* is provided, \
+        :param threshold: Allow that many values to be missing within one \
+            frame of *frequency*. Has no effect unless *frequency* is provided,\
             defaults to 0.
         :type threshold: int, optional
         :param ensembles: Whether to include ensembles where available,\
@@ -407,9 +404,8 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param threshold: Allow that many values to be missing within one
-        frame of \
-            *frequency*. Has no effect unless *frequency* is provided, \
+        :param threshold: Allow that many values to be missing within one \
+            frame of *frequency*. Has no effect unless *frequency* is provided, \
             defaults to 0.
         :type threshold: int, optional
         :param unit: Convert unit of data, defaults to curves unit

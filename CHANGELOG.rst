@@ -8,6 +8,11 @@ dev
 
 - Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
 
+**Bugfixes**
+
+- Remove unnecessary limitation from ``eq.instances.relative()`` for parameters
+  ``time_of_day``, ``after_time_of_day`` and ``before_time_of_day``
+
 0.11
 ----
 
