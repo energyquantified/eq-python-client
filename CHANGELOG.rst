@@ -7,6 +7,7 @@ dev
 **Improvements**
 
 - Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
+- Add ``curve-type`` parameter for ``eq.metadata.curves()``
 
 0.11
 ----

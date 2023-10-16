@@ -14,6 +14,7 @@ curve_name = "DE Wind Power Production MWh/h 15min Actual"
 curves = eq.metadata.curves(
     area='DE',
     exact_category='wind power production',
+    curve_type='timeseries',
     data_type='actual'
 )
 # Get the first curve (there should only be one result)
@@ -28,7 +29,7 @@ de_wind_actuals_daily = eq.timeseries.load(
     curve,  # or you can use curve_name
     begin=resolution.shift(today(), -15),
     end=resolution.shift(today(), +1),
-    frequency=Frequency.P1D # Daily frequency
+    frequency=Frequency.P1D  # Daily frequency
 )
 
 # Print the time series

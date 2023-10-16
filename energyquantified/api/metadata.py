@@ -1,7 +1,6 @@
-from ..utils import Page, dict_to_str
 from .base import BaseAPI
-
 from ..parser.metadata import parse_curve, parse_place
+from ..utils import Page, dict_to_str
 
 
 class _MetadataAPI(BaseAPI):
@@ -17,6 +16,7 @@ class _MetadataAPI(BaseAPI):
             self,
             q=None,
             area=None,
+            curve_type=None,
             data_type=None,
             category=None,
             exact_category=None,
@@ -32,6 +32,8 @@ class _MetadataAPI(BaseAPI):
         :type q: str, optional
         :param area: Filter on an area, defaults to None
         :type area: Area, str, optional
+        :param curve_type: Filter on a CurveType, defaults to None
+        :type curve_type: CurveType, str, optional
         :param data_type: Filter on a DataType, defaults to None
         :type data_type: DataType, str, optional
         :param category: List of one or more categories that the curves\
@@ -58,6 +60,7 @@ class _MetadataAPI(BaseAPI):
         params = {}
         self._add_str(params, "q", q)
         self._add_area(params, "area", area)
+        self._add_curve_type(params, "curve-type", curve_type)
         self._add_data_type(params, "data-type", data_type)
         self._add_str_list(params, "category", category)
         self._add_str(params, "exact-category", exact_category)
