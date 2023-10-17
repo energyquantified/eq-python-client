@@ -71,8 +71,14 @@ class Curve:
         return self.name
 
     def __repr__(self):
-        return f"<Curve: \"{self.name}\", curve_type={self.curve_type}, " \
-               f"subscription={self.subscription}>"
+        if self.subscription:
+            return (
+                f"<Curve: \"{self.name}\", curve_type={self.curve_type}, "
+                f"subscription={self.subscription.access}>"
+            )
+        return (
+            f"<Curve: \"{self.name}\", curve_type={self.curve_type}>"
+        )
 
 
 _datatype_lookup = {}

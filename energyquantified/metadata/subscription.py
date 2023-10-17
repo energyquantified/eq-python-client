@@ -44,7 +44,7 @@ class Subscription:
 
     def __repr__(self):
         return f"<Subscription: \"{self.label}\", access={self.access}, " \
-               f"type={self.type}>"
+               f"type=\"{self.type}\">"
 
 
 _access_lookup = {}
@@ -116,17 +116,17 @@ class SubscriptionType(enum.Enum):
     """
 
     #: A subscription related to collections
-    COLLECTION = "collection"
+    COLLECTION = "COLLECTION"
     #: No subscription required for provided content
-    FREE = "free"
+    FREE = "FREE"
     #: Limited access due to no subscription defined for provided content
-    FREEMIUM = "freemium"
+    FREEMIUM = "FREEMIUM"
     #: A subscription associated with a package of services
-    PACKAGE = "package"
+    PACKAGE = "PACKAGE"
     #: A subscription tied to a combination of a specific package and area
-    PACKAGE_AREA = "package_area"
+    PACKAGE_AREA = "PACKAGE_AREA"
     #: A private subscription with restricted access
-    PRIVATE = "private"
+    PRIVATE = "PRIVATE"
 
     def __init__(self, tag):
         self.tag = tag
@@ -172,9 +172,9 @@ class SubscriptionCollectionPerm(enum.Enum):
     """
 
     #: Read-only access
-    R = "r"
+    R = "R"
     #: Read-write access
-    RW = "rw"
+    RW = "RW"
 
     def __init__(self, tag):
         self.tag = tag
