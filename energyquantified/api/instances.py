@@ -1,6 +1,5 @@
 from .base import BaseAPI
 
-from ..exceptions import ValidationError
 from ..metadata import CurveType
 from ..parser.metadata import parse_instance_list
 from ..parser.timeseries import parse_timeseries, parse_timeseries_list
@@ -148,9 +147,9 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param threshold: Allow that many values to be missing within one frame of \
-            *frequency*. Has no effect unless *frequency* is provided, \
-            defaults to 0.
+        :param threshold: Allow that many values to be missing within one \
+            frame of *frequency*. Has no effect unless *frequency* is \
+            provided, defaults to 0.
         :type threshold: int, optional
         :param ensembles: Whether to include ensembles where available,\
             defaults to False
@@ -226,8 +225,8 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param threshold: Allow that many values to be missing within one frame of \
-            *frequency*. Has no effect unless *frequency* is provided, \
+        :param threshold: Allow that many values to be missing within one \
+            frame of *frequency*. Has no effect unless *frequency* is provided,\
             defaults to 0.
         :type threshold: int, optional
         :param ensembles: Whether to include ensembles where available,\
@@ -299,8 +298,8 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param threshold: Allow that many values to be missing within one frame of \
-            *frequency*. Has no effect unless *frequency* is provided, \
+        :param threshold: Allow that many values to be missing within one \
+            frame of *frequency*. Has no effect unless *frequency* is provided,\
             defaults to 0.
         :type threshold: int, optional
         :param ensembles: Whether to include ensembles where available,\
@@ -405,8 +404,8 @@ class InstancesAPI(BaseAPI):
         :param hour_filter: Filters on hours to include (i.e. BASE, PEAK),\
             has no effect unless *frequency* is provided, defaults to BASE
         :type hour_filter: Filter, optional
-        :param threshold: Allow that many values to be missing within one frame of \
-            *frequency*. Has no effect unless *frequency* is provided, \
+        :param threshold: Allow that many values to be missing within one \
+            frame of *frequency*. Has no effect unless *frequency* is provided, \
             defaults to 0.
         :type threshold: int, optional
         :param unit: Convert unit of data, defaults to curves unit
@@ -437,13 +436,6 @@ class InstancesAPI(BaseAPI):
             self._add_filter(params, "hour-filter", hour_filter)
             self._add_int(params, "threshold", threshold, min=0)
         self._add_str(params, "unit", unit)
-        # Additional validation checks
-        if sum(1 if t is not None else 0 for t in
-               (time_of_day, after_time_of_day, before_time_of_day)) > 1:
-            raise ValidationError(reason=(
-                "At most one of the following fields must be set: "
-                "time_of_day, after_time_of_day, before_time_of_day"
-            ))
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())

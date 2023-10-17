@@ -9,9 +9,15 @@ dev
 - Added ``PeriodInstancesAPI.relative()`` for relative queries
 - Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
 
+**Bugfixes**
+
+- Remove unnecessary limitation from ``eq.instances.relative()`` for parameters
+  ``time_of_day``, ``after_time_of_day`` and ``before_time_of_day``
+
 **Breaking changes**
 
 - Removed ``Place.area``. Use ``Place.areas`` instead.
+
 
 0.11
 ----
