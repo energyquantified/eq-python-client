@@ -31,20 +31,20 @@ search:
 
    >>> curves = eq.metadata.curves(q='wind power germany actual')
    >>> curves
-   [<Curve: "DE Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES>,
-    <Curve: "DE Wind Power Production Offshore MWh/h 15min Actual", curve_type=TIMESERIES>,
-    <Curve: "DE Wind Power Production Onshore MWh/h 15min Actual", curve_type=TIMESERIES>,
-    <Curve: "DE-50Hertz Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES>,
-    <Curve: "DE-Amprion Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES>,
+   [<Curve: "DE Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>,
+    <Curve: "DE Wind Power Production Offshore MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>,
+    <Curve: "DE Wind Power Production Onshore MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>,
+    <Curve: "DE-50Hertz Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>,
+    <Curve: "DE-Amprion Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>,
     ...
 
 Or by filtering on specific terms:
 
    >>> curves = eq.metadata.curves(area='de', data_type='actual', category=['Wind', 'Power'])
    >>> curves
-   [<Curve: "DE Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES>,
-    <Curve: "DE Wind Power Production Offshore MWh/h 15min Actual", curve_type=TIMESERIES>,
-    <Curve: "DE Wind Power Production Onshore MWh/h 15min Actual", curve_type=TIMESERIES>]
+   [<Curve: "DE Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>,
+    <Curve: "DE Wind Power Production Offshore MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>,
+    <Curve: "DE Wind Power Production Onshore MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>]
 
 **Load data**
 
@@ -66,7 +66,7 @@ The result will be a Timeseries with all the attributes parsed into
 Python-objects.
 
    >>> timeseries.curve
-   <Curve: "DE Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES>
+   <Curve: "DE Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>
    >>> timeseries.resolution
    <Resolution: frequency=PT15M, timezone=CET>
    >>> timeseries.data[:4]
@@ -119,8 +119,8 @@ First, let's import all we need and load the data:
    >>> curve_wind = eq.metadata.curves(q="de wind prod actual")[0]
    >>> curve_solar = eq.metadata.curves(q="de solar photovoltaic prod actual")[0]
    >>> curve_wind, curve_solar
-   (<Curve: "DE Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES>,
-    <Curve: "DE Solar Photovoltaic Production MWh/h 15min Actual", curve_type=TIMESERIES>)
+   (<Curve: "DE Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>,
+    <Curve: "DE Solar Photovoltaic Production MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>)
    <BLANKLINE>
    >>> # Load data
    >>> wind = eq.timeseries.load(curve_wind, begin='2020-03-25', end='2020-04-01')

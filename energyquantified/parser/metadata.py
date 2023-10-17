@@ -4,7 +4,8 @@ from dateutil import parser
 from ..exceptions import ParseException
 from ..metadata import (
     Curve, Instance, Area, DataType, CurveType, Place, PlaceType,
-    ContractPeriod, ContinuousContract, SpecificContract, OHLCField
+    ContractPeriod, ContinuousContract, SpecificContract, OHLCField,
+    Subscription, SubscriptionAccess, SubscriptionType, SubscriptionCollectionPerm
 )
 from ..time import Frequency, Resolution, UTC, to_timezone
 from ..time.timezone import LOCAL_TZ
@@ -48,6 +49,10 @@ def parse_curve(json):
     if instance_issued_timezone:
         instance_issued_timezone = pytz.timezone(instance_issued_timezone)
 
+    subscription = json.get("subscription")
+    if subscription:
+        subscription = parse_subscription(subscription)
+
     return Curve(
         name,
         curve_type=curve_type,
@@ -62,13 +67,14 @@ def parse_curve(json):
         denominator=denominator,
         data_type=data_type,
         source=source,
-        commodity=commodity
+        commodity=commodity,
+        subscription=subscription
     )
 
 
 def parse_instance_list(json, curve=None):
     """
-    Parse a JSON list-resonse from the server into a list of Instance objects.
+    Parse a JSON list-response from the server into a list of Instance objects.
     """
     if not isinstance(json, list):
         raise ParseException(
@@ -79,7 +85,7 @@ def parse_instance_list(json, curve=None):
 
 def parse_instance(json, curve=None):
     """
-    Parse a JSON resonse from the server into an Instance object.
+    Parse a JSON response from the server into an Instance object.
     """
     # Find timezone
     if curve and curve.instance_issued_timezone:
@@ -117,7 +123,7 @@ def parse_instance(json, curve=None):
 
 def parse_place(json):
     """
-    Parse a JSON resonse from the server into a Place object.
+    Parse a JSON response from the server into a Place object.
     """
     kind = PlaceType.by_tag(json.get("type"))
     key = json.get("key")
@@ -179,4 +185,43 @@ def parse_contract(json):
 
     raise ParseException(
         f"Unknown contract.type in JSON: {contract_type}"
+    )
+
+
+def parse_subscription(json):
+    """
+    Parse a JSON response from the server into a Subscription object.
+    """
+    access = SubscriptionAccess.by_tag(json.get("access"))
+    stype = SubscriptionType.by_tag(json.get("type"))
+    label = json.get("label")
+    package = (
+        json.get("package")
+        if stype in (SubscriptionType.PACKAGE, SubscriptionType.PACKAGE_AREA)
+        else None
+    )
+    area = (
+        json.get("area")
+        if stype == SubscriptionType.PACKAGE_AREA
+        else None
+    )
+    collection = (
+        json.get("collection")
+        if stype == SubscriptionType.COLLECTION
+        else None
+    )
+    collection_perms = (
+        SubscriptionCollectionPerm.by_tag(json.get("collection_perms"))
+        if stype == SubscriptionType.COLLECTION
+        else None
+    )
+
+    return Subscription(
+        access=access,
+        subscription_type=stype,
+        label=label,
+        package=package,
+        area=area,
+        collection=collection,
+        collection_perms=collection_perms
     )

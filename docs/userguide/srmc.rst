@@ -123,7 +123,7 @@ The result is also very similar, except that the **contract** is now a
 You can extract any of these attributes:
 
    >>> srmc_coal.curve
-   <Curve: "Futures Coal API-2 USD/t ICE OHLC", curve_type=OHLC>
+   <Curve: "Futures Coal API-2 USD/t ICE OHLC", curve_type=OHLC, subscription=FREEMIUM>
    >>> srmc_coal.contract
    <SpecificContract: period=MONTH, delivery=2021-03-01, field=>
    >>> srmc_coal.options
