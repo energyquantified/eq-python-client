@@ -259,6 +259,37 @@ day from 1 June to 5 June:
 Aggregations are also supported, as you can see from the examples above.
 
 
+Rolling forecasts (hours-ahead forecasts)
+--------------------------------------
+
+Method reference: :py:meth:`eq.instances.rolling() <energyquantified.api.InstancesAPI.rolling>`
+
+Rolling forecasts are time series where each value is from the latest instance
+created **at least** ``hours_ahead`` hours before the datetime of the value.
+
+To further elaborate; if the resulting time series from loading a rolling
+forecast with ``hours_ahead=2`` contains a value for ``2023-10-01 05:15:00``,
+then the value is from the latest forecast (instance) created at or before
+``2023-10-01 03:15:00``.
+
+The example below illustrates how to load a rolling forecast for wind power in
+Germany from ``2023-10-01`` to ``2023-10-02``, aggregated from quarter-hourly to
+hourly frequency by using the mean, and with values from ``ec`` forecasts only:
+
+   >>> from datetime import datetime, time
+   >>> rolling_forecast = eq.instances.rolling(
+   >>>    'DE Wind Power Production MWh/h 15min Forecast',
+   >>>    begin=datetime(2023, 10, 1),
+   >>>    end=datetime(2023, 10, 2),
+   >>>    hours_ahead=1,
+   >>>    tags=['ec'],
+   >>>    frequency=Frequency.PT1H,
+   >>> )
+
+   >>> rolling_forecast.data
+   # TODO
+
+
 List available instances and tags
 ---------------------------------
 
