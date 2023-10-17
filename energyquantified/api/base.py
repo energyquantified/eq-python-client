@@ -16,6 +16,7 @@ from ..exceptions import (
 from ..metadata import (
     Area,
     Curve,
+    CurveType,
     DataType,
     Aggregation,
     Filter,
@@ -301,6 +302,25 @@ class BaseAPI:
         else:
             raise ValidationError(
                 reason=f"Not a valid Area: '{var}'",
+                parameter=name
+            )
+
+    @staticmethod
+    def _add_curve_type(self, params, name, var, required=False):
+        if var is None and not required:
+            return
+        if isinstance(var, str):
+            if not CurveType.is_valid_tag(var):
+                raise ValidationError(
+                    reason=f"Not a valid CurveType: '{var}'",
+                    parameter=name
+                )
+            params[name] = var
+        elif isinstance(var, CurveType):
+            params[name] = var.tag
+        else:
+            raise ValidationError(
+                reason=f"Not a valid CurveType: '{var}'",
                 parameter=name
             )
 

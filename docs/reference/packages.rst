@@ -58,6 +58,15 @@ implemented:
     * :py:class:`SRMCOptions <energyquantified.data.SRMCOptions>`: A data
       class holding all factors used in an SRMC calculation.
 
+ * :py:class:`AbsoluteResult <energyquantified.data.AbsoluteResult>`: The
+   absolute forecast data model. It has multiple attributes, most of which are
+   defined and used elsewhere, but the ``items`` attribute is a list of
+   AbsoluteItem's exclusively used in AbsoluteResult:
+
+    * :py:class:`AbsoluteItem <energyquantified.data.AbsoluteItem>`: A data
+      class consisting of an instance and a value. The value is the instance's
+      forecasted value for the delivery of the AbsoluteResult.
+
 ``energyquantified.metadata``
 -----------------------------
 

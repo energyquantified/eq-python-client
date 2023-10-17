@@ -33,15 +33,17 @@ You may filter on attributes:
    >>> from energyquantified.metadata import Area, DataType
    >>> eq.metadata.curves(
    >>>    area=Area.DE,
+   >>>    curve_type=CurveType.INSTANCE,
    >>>    data_type=DataType.FORECAST,
    >>>    category=['nuclear', 'production']
    >>> )
    [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE>]
 
-Or you can specify ``area`` and ``data_type`` as strings:
+Or you can specify ``area``, ``curve_type`` and ``data_type`` as strings:
 
    >>> eq.metadata.curves(
    >>>    area='DE',
+   >>>    curve_type='INSTANCE',
    >>>    data_type='FORECAST',
    >>>    category=['nuclear', 'production']
    >>> )
