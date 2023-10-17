@@ -1,11 +1,12 @@
+from .events import EventsAPI
 from .instances import InstancesAPI
 from .metadata import MetadataAPI, RealtoMetadataAPI
-from .timeseries import TimeseriesAPI
-from .periods import PeriodsAPI
-from .period_instances import PeriodInstancesAPI
 from .ohlc import OhlcAPI
+from .period_instances import PeriodInstancesAPI
+from .periods import PeriodsAPI
 from .srmc import SrmcAPI
-from .events import EventsAPI
+from .timeseries import TimeseriesAPI
+from .user import UserAPI
 
 __all__ = [
     "InstancesAPI",
@@ -16,5 +17,6 @@ __all__ = [
     "PeriodInstancesAPI",
     "OhlcAPI",
     "SrmcAPI",
+    "UserAPI",
     "EventsAPI",
 ]

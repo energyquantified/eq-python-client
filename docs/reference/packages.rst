@@ -120,6 +120,17 @@ are quite many classes in ``energyquantified.metadata``:
     * :py:class:`SubscriptionCollectionPerm <energyquantified.metadata.SubscriptionCollectionPerm>`:
       Enumerator of user's permission for a collection.
 
+``energyquantified.user``
+-------------------------
+
+User classes provide details for the user account:
+
+ * :py:class:`User <energyquantified.user.User>`: The user account details.
+ * :py:class:`Organization <energyquantified.user.Organization>`: The
+   organization details.
+ * :py:class:`AccountManager <energyquantified.user.AccountManager>`: The
+   account manager details.
+
 ``energyquantified.time``
 -------------------------
 
