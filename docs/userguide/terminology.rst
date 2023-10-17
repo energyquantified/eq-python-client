@@ -78,6 +78,7 @@ The user's permissions for a collection.
 - ``r`` – Read-only access
 - ``rw`` – Read-write access
 
+
 Instance
 --------
 
