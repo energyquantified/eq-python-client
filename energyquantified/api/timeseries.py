@@ -28,7 +28,8 @@ class TimeseriesAPI(BaseAPI):
             frequency=None,
             aggregation=None,
             hour_filter=None,
-            threshold=None):
+            threshold=None,
+            unit=None):
         """
         Load time series data for a :py:class:`energyquantified.metadata.Curve`.
 
@@ -55,6 +56,8 @@ class TimeseriesAPI(BaseAPI):
             *frequency*. Has no effect unless *frequency* is provided, \
             defaults to 0.
         :type threshold: int, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A time series
         :rtype: :py:class:`energyquantified.data.Timeseries`
         """
@@ -71,6 +74,7 @@ class TimeseriesAPI(BaseAPI):
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
             self._add_int(params, "threshold", threshold, min=0)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())

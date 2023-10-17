@@ -46,7 +46,8 @@ class SrmcAPI(BaseAPI):
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
             efficiency=None,
-            carbon_tax_area=None):
+            carbon_tax_area=None,
+            unit=None):
         """
         Calculate historical short-run margincal costs (SRMC) for a
         continuous front contract.
@@ -89,6 +90,8 @@ class SrmcAPI(BaseAPI):
         :type efficiency: float, optional
         :param carbon_tax_area: Set an area to apply tax rules for.
         :type carbon_tax_area: Area, str, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: An SRMC object with a list of OHLC objects
         :rtype: :py:class:`energyquantified.data.SRMC`
         """
@@ -108,6 +111,7 @@ class SrmcAPI(BaseAPI):
                          max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_srmc_response(response.json())
@@ -123,7 +127,8 @@ class SrmcAPI(BaseAPI):
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
             efficiency=None,
-            carbon_tax_area=None):
+            carbon_tax_area=None,
+            unit=None):
         """
         Calculate historical short-run margincal costs (SRMC) for a specific
         contract, such as the year 2021, the month Jan 2021, etc.
@@ -167,6 +172,8 @@ class SrmcAPI(BaseAPI):
         :type efficiency: float, optional
         :param carbon_tax_area: Set an area to apply tax rules for.
         :type carbon_tax_area: Area, str, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: An SRMC object with a list of OHLC objects
         :rtype: :py:class:`energyquantified.data.SRMC`
         """
@@ -186,6 +193,7 @@ class SrmcAPI(BaseAPI):
                          max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_srmc_response(response.json())
@@ -203,7 +211,8 @@ class SrmcAPI(BaseAPI):
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
             efficiency=None,
-            carbon_tax_area=None):
+            carbon_tax_area=None,
+            unit=None):
         """
         Calculate historical short-run margincal costs (SRMC) for a continuous
         front contract and convert the result to a daily time series.
@@ -252,6 +261,8 @@ class SrmcAPI(BaseAPI):
         :type efficiency: float, optional
         :param carbon_tax_area: Set an area to apply tax rules for.
         :type carbon_tax_area: Area, str, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: An SRMC object with a ``timeseries`` object
         :rtype: :py:class:`energyquantified.data.SRMC`
         """
@@ -272,6 +283,7 @@ class SrmcAPI(BaseAPI):
                          max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_srmc_response(response.json())
@@ -288,7 +300,8 @@ class SrmcAPI(BaseAPI):
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
             efficiency=None,
-            carbon_tax_area=None):
+            carbon_tax_area=None,
+            unit=None):
         """
         Calculate historical short-run margincal costs (SRMC) for a specific
         contract and convert it to a daily time series.
@@ -340,6 +353,8 @@ class SrmcAPI(BaseAPI):
         :type efficiency: float, optional
         :param carbon_tax_area: Set an area to apply tax rules for.
         :type carbon_tax_area: Area, str, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: An SRMC object with a ``timeseries`` object
         :rtype: :py:class:`energyquantified.data.SRMC`
         """
@@ -360,6 +375,7 @@ class SrmcAPI(BaseAPI):
                          max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_srmc_response(response.json())
@@ -372,7 +388,8 @@ class SrmcAPI(BaseAPI):
             api2_tonne_to_mwh=None,
             carbon_emissions=None,
             efficiency=None,
-            carbon_tax_area=None):
+            carbon_tax_area=None,
+            unit=None):
         """
         Calculate short-run margincal costs (SRMC) for all settlement prices
         from a trading day. Defaults to using OHLC data from the latest
@@ -413,6 +430,8 @@ class SrmcAPI(BaseAPI):
         :type efficiency: float, optional
         :param carbon_tax_area: Set an area to apply tax rules for.
         :type carbon_tax_area: Area, str, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: An SRMC object with a list of OHLC objects
         :rtype: :py:class:`energyquantified.data.SRMC`
         """
@@ -429,6 +448,7 @@ class SrmcAPI(BaseAPI):
                          max=1.0)
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_srmc_response(response.json())
@@ -442,7 +462,8 @@ class SrmcAPI(BaseAPI):
             carbon_emissions=None,
             efficiency=None,
             carbon_tax_area=None,
-            time_zone=None):
+            time_zone=None,
+            unit=None):
         """
         Calculate short-run margincal costs (SRMC) for all settlement prices
         from a trading day, sort them, and merge/convert them to a continuous
@@ -488,6 +509,8 @@ class SrmcAPI(BaseAPI):
         :type carbon_tax_area: Area, str, optional
         :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: An SRMC object with a period-based series
         :rtype: :py:class:`energyquantified.data.SRMC`
         """
@@ -505,6 +528,7 @@ class SrmcAPI(BaseAPI):
         self._add_number(params, "efficiency", efficiency, min=0.01, max=1.0)
         self._add_area(params, "carbon-tax-area", carbon_tax_area)
         self._add_time_zone(params, "timezone", time_zone)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_srmc_response(response.json())

@@ -35,6 +35,9 @@ def parse_periodseries(json):
     instance = json.get("instance")
     if instance:
         instance = parse_instance(instance, curve=curve)
+    # Parse unit and denominator
+    unit = json.get("unit")
+    denominator = json.get("denominator")
     # Parse data
     data = _parse_data(json.get("data"), resolution=resolution)
 
@@ -42,6 +45,8 @@ def parse_periodseries(json):
         curve=curve,
         resolution=resolution,
         instance=instance,
+        unit=unit,
+        denominator=denominator,
         data=data
     )
 

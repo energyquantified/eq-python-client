@@ -81,11 +81,20 @@ class OHLCList(list):
     (yearly, monthly, weekly etc.) for a specific market.
     """
 
-    def __init__(self, elements, curve=None, contract=None):
+    def __init__(self,
+                 elements,
+                 curve=None,
+                 contract=None,
+                 unit=None,
+                 denominator=None):
         super().__init__(elements)
         # --- Public members ---
         #: The curve holding these OHLC objects
         self.curve = curve
+        #: The unit of the data
+        self.unit = unit
+        #: The denominator of the data
+        self.denominator = denominator
 
     def append(self, value):
         raise NotImplementedError("OHLCList does not support append")
@@ -127,10 +136,16 @@ class OHLCList(list):
         raise NotImplementedError("OHLCList does not support multiply")
 
     def __str__(self):
+        parts = []
         if self.curve:
-            return f"<OHLCList: curve=\"{self.curve}\", items={super().__str__()}>"
-        else:
-            return f"<OHLCList: items={super().__str__()}>"
+            parts.append(f"curve=\"{self.curve}\"")
+        if self.unit:
+            parts.append(f"unit=\"{self.unit}\"")
+        if self.denominator:
+            parts.append(f"denominator=\"{self.denominator}\"")
+        if len(self) > 0:
+            parts.append(f"items={super().__str__()}")
+        return f"<OHLCList: {', '.join(parts)}>"
 
     def to_df(self):
         """

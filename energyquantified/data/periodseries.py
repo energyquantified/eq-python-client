@@ -219,6 +219,10 @@ class Periodseries(Series):
     :type resolution: Resolution, optional
     :param instance: The instance, defaults to None
     :type instance: Instance, optional
+    :param unit: The unit, defaults to None
+    :type unit: str, optional
+    :param denominator: The denominator, defaults to None
+    :type denominator: str, optional
     :param data: A list of periods (Period or CapacityPeriod)
     :type data: list[]
     """
@@ -236,6 +240,10 @@ class Periodseries(Series):
         items.append(f"curve=\"{self.curve}\"")
         if self.instance:
             items.append(f"instance={self.instance}")
+        if self.unit:
+            items.append(f"unit=\"{self.unit}\"")
+        if self.denominator:
+            items.append(f"denominator=\"{self.denominator}\"")
         if self.has_data():
             items.append(f"begin=\"{self.begin().isoformat(sep=' ')}\"")
             items.append(f"end=\"{self.end().isoformat(sep=' ')}\"")
@@ -288,6 +296,8 @@ class Periodseries(Series):
                 curve=self.curve,
                 resolution=resolution,
                 instance=self.instance,
+                unit=self.unit,
+                denominator=self.denominator,
                 data=[]
             )
         begin = resolution.floor(self.begin())
@@ -305,6 +315,8 @@ class Periodseries(Series):
             curve=self.curve,
             resolution=resolution,
             instance=self.instance,
+            unit=self.unit,
+            denominator=self.denominator,
             data=data
         )
         timeseries.set_name(self._name)
@@ -394,6 +406,8 @@ class Periodseries(Series):
         if self.instance:
             print(f"  Instance: {self.instance}", file=file)
         print(f"  Resolution: {self.resolution}", file=file)
+        print(f"  Unit: {self.unit}", file=file)
+        print(f"  Denominator: {self.denominator}", file=file)
         print(f"", file=file)
         for d in self.data:
             d.print(file=file)
@@ -404,7 +418,11 @@ class _PeriodsToTimeseriesIterator:
     A period-based series iterator used for conversions to Timeseries objects.
     """
 
-    def __init__(self, periods=None, resolution=None, begin=None, end=None,
+    def __init__(self,
+                 periods=None,
+                 resolution=None,
+                 begin=None,
+                 end=None,
                  field="value"):
         self.periods = [p for p in periods if p.end > begin and p.begin < end]
         self.resolution = resolution

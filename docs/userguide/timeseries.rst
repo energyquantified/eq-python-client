@@ -90,6 +90,59 @@ standardization and market coupling.
 
 We use the `pytz <https://pypi.org/project/pytz/>`_ library for timezones.
 
+Unit conversion
+^^^^^^^^^^^^^^^
+
+You can convert data to another unit. Add the desired unit as parameter to the
+request and the date will be converted to the given unit before it's sent back to you.
+
+Supported units at this moment:
+
+- `°C` for temperatures in celsius degrees
+- `Degrees` for angles in degrees
+- `hPa` for pressure in hectopascal
+- `m` for length in meters
+- `m^2` for area in square meters
+- `m^3` for volume in cubic meters
+- `s` for time in seconds
+- `t` for weight in tons
+- `TW`, `GW`, `MW`, `kW`, `W` for power in watt
+- `TWh`, `GWh`, `MWh`, `kWh`, `Wh` for energy in watt-hours
+- `TWh/h`, `GWh/h`, `MWh/h`, `kWh/h`, `Wh/h` for average energy in watt-hours per hour
+- `therm` for heat energy in therms
+- `bbl` for volume in barrels
+- `%` as percent
+- `EUR`, `USD`, `GBP`, `NOK`, `SEK`, `DKK`, `CHF`, `CZK`, `HUF`, `PLN`, `BGN`, `HRK`, `RUB`, `RON`, `TRY`, `pence` for currencies
+
+**Note:** Currency conversions are not supported for timeseries with a frequency higher than P1D.
+
+Add the parameter to the request:
+
+   >>> timeseries = eq.timeseries.load(
+   >>>    'DE Wind Power Production MWh/h 15min Actual',
+   >>>    begin='2020-01-01',
+   >>>    end='2020-01-06',
+   >>>    frequency='P1D',
+   >>>    unit='GWh/h'
+   >>> )
+
+The response data is converted to `GWh/h`, and the unit is found at the ``unit``
+attribute of the series:
+
+   >>> timeseries.data
+   [<Value: date=2020-01-01 00:00:00+01:00, value=6.39>,
+    <Value: date=2020-01-01 00:15:00+01:00, value=6.38>,
+    <Value: date=2020-01-01 00:30:00+01:00, value=6.64>
+    ...
+
+   >>> str(timeseries)
+   <Timeseries:
+      resolution=<Resolution: frequency=P1D, timezone=CET>,
+      curve="DE Wind Power Production MWh/h 15min Actual",
+      begin="2020-01-06 00:00:00+02:00",
+      end="2020-01-06 00:00:00+02:00",
+      unit="GWh/h">
+
 Aggregation
 ^^^^^^^^^^^
 

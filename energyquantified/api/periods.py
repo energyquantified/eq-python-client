@@ -24,7 +24,8 @@ class PeriodsAPI(BaseAPI):
             curve,
             begin=None,
             end=None,
-            time_zone=None):
+            time_zone=None,
+            unit=None):
         """
         Load period-based series data for a curve.
 
@@ -38,6 +39,8 @@ class PeriodsAPI(BaseAPI):
         :type end: date, datetime, str, required
         :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
         :return: A period-based series
         :rtype: :py:class:`energyquantified.data.Periodseries`
         """
@@ -49,6 +52,7 @@ class PeriodsAPI(BaseAPI):
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
         self._add_time_zone(params, "timezone", time_zone, required=False)
+        self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
         return parse_periodseries(response.json())

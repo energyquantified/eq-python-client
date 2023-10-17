@@ -194,6 +194,44 @@ instead of loading the period-based series with data:
     <Instance: issued="2019-12-01 09:43:58+00:00", tag="Ah-SewfIguFLydohq0efvQ">]
 
 
+Relative queries (day-ahead forecasts)
+--------------------------------------
+
+Method reference: :py:meth:`eq.period_instances.relative() <energyquantified.api.PeriodInstancesAPI.relative>`
+
+When benchmarking models (forecasts), one often would like to know what a
+forecast was for the day ahead. And you would like to do this over a date
+interval. For example, we would like to know Monday's forecast for Tuesday,
+and Tuesday's forecast for Wednesday, and so on.
+
+Energy Quantified's API has solved this by via an operation we call *relative
+forecasts*.
+
+The relative forecasts work for **0 or more days ahead**:
+
+   - ``days_ahead=0`` means forecasts for intraday
+   - ``days_ahead=1`` means forecasts for day ahead
+   - ``days_ahead=2`` means forecasts for day after day ahead
+   - `... and so on`
+
+You *can* filter on the **before-time-of-day** the forecast was issued. When
+there isn't any forecast issued for a specific day, then that day will have no
+values.
+
+   >>> from datetime import datetime, time
+   >>> day_ahead_capacity = eq.period_instances.relative(
+   >>>    'PT Natural Gas Power Capacity Available MW REMIT',
+   >>>    begin=datetime(2020, 6, 1, 0, 0, 0),
+   >>>    end=datetime(2020, 6, 1, 0, 0, 0),
+   >>>    days_ahead=1,  # The day-ahead forecast (0 or higher allowed)
+   >>>    before_time_of_day=time(12, 0),  # Issued before 12:00
+   >>> )
+
+   >>> day_ahead_capacity.data
+   [<Period: begin=2020-06-01 00:00:00+02:00, end=2020-06-06 02:00:00+02:00, value=3828, installed=3828>,
+    <Period: begin=2020-06-06 02:00:00+02:00, end=2020-06-07 21:00:00+02:00, value=2652, installed=3828>,
+    <Period: begin=2020-06-07 21:00:00+02:00, end=2020-07-01 00:00:00+02:00, value=3828, installed=3828>]
+
 -----
 
 Next steps
