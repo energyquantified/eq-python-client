@@ -217,8 +217,8 @@ def parse_subscription(json):
     )
     collection_perms = (
         SubscriptionCollectionPerm.by_tag(json.get("collection_perms"))
-        if type == SubscriptionType.COLLECTION
-        else stype
+        if stype == SubscriptionType.COLLECTION
+        else None
     )
 
     return Subscription(

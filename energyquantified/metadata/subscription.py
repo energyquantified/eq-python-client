@@ -43,9 +43,15 @@ class Subscription:
         return self.label
 
     def __repr__(self):
-        return f"<Subscription: \"{self.label}\", access={self.access}, " \
-               f"type=\"{self.type}\">"
-
+        if self.collection_perms:
+            return (
+                f"<Subscription: \"{self.label}\", access={self.access}, "
+                f"type={self.type}, perms=\"{self.collection_perms}\">"
+            )
+        return (
+            f"<Subscription: \"{self.label}\", access={self.access}, "
+            f"type={self.type}>"
+        )
 
 _access_lookup = {}
 
@@ -136,7 +142,7 @@ class SubscriptionType(enum.Enum):
         return self.tag
 
     def __repr__(self):
-        return f"<SubscriptionType: \"{self.tag}\">"
+        return self.tag
 
     @staticmethod
     def is_valid_tag(tag):
@@ -172,9 +178,9 @@ class SubscriptionCollectionPerm(enum.Enum):
     """
 
     #: Read-only access
-    R = "R"
+    R = "r"
     #: Read-write access
-    RW = "RW"
+    RW = "rw"
 
     def __init__(self, tag):
         self.tag = tag
