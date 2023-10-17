@@ -3,6 +3,7 @@ from .base import BaseAPI
 from ..metadata import CurveType
 from ..parser.metadata import parse_instance_list
 from ..parser.timeseries import parse_timeseries, parse_timeseries_list
+from ..parser.absolute import parse_absolute
 
 # Tuple of supported values for Curve.curve_type in the instances API
 CURVE_TYPES = (CurveType.INSTANCE,)
@@ -14,7 +15,7 @@ class InstancesAPI(BaseAPI):
     instance of the :py:class:`energyquantified.EnergyQuantified` class:
 
        >>> eq = EnergyQuantified(api_key="aaaa-bbbb-cccc-dddd")
-       >>> eq.timeseries.load(curve, begin, end)
+       >>> eq.instances.list(curve, tags)
     """
 
     def __init__(self, *args, **kwargs):
@@ -439,3 +440,84 @@ class InstancesAPI(BaseAPI):
         # HTTP request
         response = self._get(url, params=params)
         return parse_timeseries(response.json())
+
+    def absolute(
+            self,
+            curve,
+            delivery,
+            begin,
+            end,
+            frequency=None,
+            time_zone=None,
+            hour_filter=None,
+            unit=None,
+            aggregation=None,
+            tags=None,
+            exclude_tags=None,
+        ):
+        """
+        Load forecasted values from various instances for a specific point in time,
+        to see how forecasts develop over time.
+
+        The point in time is the datetime supplied to the ``delivery`` parameter.
+        Choose the frequency of the delivery by providing the ``frequency``
+        parameter. If a frequency is not provided, it defaults to using the Curve's
+        frequency.
+
+        Loads forecasted values from instances issued between ``begin`` (inclusive)
+        and ``end`` (exclusive).
+
+        :param curve: The curve or curve name
+        :type curve: :py:class:`energyquantified.metadata.Curve`, str
+        :param delivery: The datetime to load forecasted values for. The\
+            frequency and time zone of the delivery defaults to the Curve's\
+            frequency and instance zone, respectively, but can be changed by the\
+            ``frequency`` and ``time_zone`` parameters.
+        :type delivery: date, datetime, str, required
+        :param begin: Earliest instance issued date-time (inclusive)
+        :type begin: date, datetime, str, required
+        :param end: Latest instance issued date-time (exclusive)
+        :type end: date, datetime, str, required
+        :param frequency: Aggregate the delivery to a lower frequency than the\
+            Curve's frequency. Defaults to None, which keeps the result in the\
+            Curve's frequency.
+        :type frequency: Frequency, optional
+        :param time_zone: Timezone of the delivery. Defaults to the Curve's\
+            instance zone.
+        :type time_zone: TzInfo, optional
+        :param hour_filter: Filter on hours to include (i.e. BASE, PEAK),\
+            has no effect unless *frequency* is provided. Defaults to BASE.
+        :type hour_filter: Filter, optional
+        :param unit: Convert unit of the data. Defaults to using the Curve's unit.
+        :type unit: str, optional
+        :param aggregation: The aggregation method (i.e. AVERAGE, MIN, MAX),\
+            has no effect unless *frequency* is provided. Defaults to AVERAGE.
+        :type aggregation: Aggregation, optional
+        :param tags: Filter instances by tags, excluding instances not matching\
+            any of the tags. Defaults to None, which does not filter.
+        :type tags: list, str, optional
+        :param exclude_tags: Filter instances by tags, excluding instances\
+            matching any of the tags.
+        :type exclude_tags: list, str, optional
+        :return: An absolute result
+        :rtype: :py:class:`energyquantified.data.AbsoluteResult`
+        """
+        # Build URL
+        safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
+        url = f"/instances/{safe_curve}/get/absolute/"
+        # Parameters
+        params = {}
+        self._add_datetime(params, "delivery", delivery, required=True)
+        self._add_datetime(params, "begin", begin, required=True)
+        self._add_datetime(params, "end", end, required=True)
+        self._add_frequency(params, "frequency", frequency, required=False)
+        self._add_time_zone(params, "timezone", time_zone, required=False)
+        self._add_str(params, "unit", unit, required=False)
+        self._add_str_list(params, "tags", tags, required=False)
+        self._add_str_list(params, "exclude-tags", exclude_tags, required=False)
+        if "frequency" in params:
+            self._add_aggregation(params, "aggregation", aggregation, required=False)
+            self._add_filter(params, "hour-filter", hour_filter, required=False)
+        # HTTP request
+        response = self._get(url, params=params)
+        return parse_absolute(response.json())
