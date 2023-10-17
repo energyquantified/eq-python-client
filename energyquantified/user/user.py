@@ -17,8 +17,8 @@ class User:
         return self.__str__()
 
     def __str__(self):
-        return f"<User: name=\"{self.name}\", email=\"{self.email}\", organization=\"{self.organization}\", " \
-               f"subscriptions=\"{self.subscriptions}\">"
+        return f"<User: name=\"{self.name}\", email=\"{self.email}\", organization={self.organization}, " \
+               f"subscriptions={self.subscriptions}>"
 
 
 class Organization:
@@ -36,7 +36,7 @@ class Organization:
         return self.__str__()
 
     def __str__(self):
-        return f"<Organization: name=\"{self.name}\", account_manager=\"{self.account_manager}\">"
+        return f"<Organization: name=\"{self.name}\", account_manager={self.account_manager}>"
 
 
 class AccountManager:

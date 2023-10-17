@@ -152,18 +152,15 @@ you can do so like this:
    <User:
         name="John Doe",
         email="john@acme.org",
-        organization="<Organization:
+        organization=<Organization:
             name="ACME Inc.",
-            account_manager="<AccountManager:
-                name="Huguette",
-                email="huguette@energyquantified.com
-            ">
-        ">",
-        subscriptions="[
-            <Subscription: "Power – Germany", access=PAYING, type=package_area>,
-            <Subscription: "Power – France", access=PAYING, type=package_area>,
+            account_manager=<AccountManager: name="Jane Doe", email="jane.doe@example.com">
+        >,
+        subscriptions=[
+            <Subscription: "Power – Germany", access=PAYING, type=PACKAGE_AREA>,
+            <Subscription: "Power – France", access=PAYING, type=PACKAGE_AREA>
         ]
-    ">
+   >
 
 -----
 
