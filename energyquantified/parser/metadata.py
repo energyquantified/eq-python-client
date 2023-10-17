@@ -4,13 +4,8 @@ from dateutil import parser
 from ..exceptions import ParseException
 from ..metadata import (
     Curve, Instance, Area, DataType, CurveType, Place, PlaceType,
-    ContractPeriod, ContinuousContract, SpecificContract, OHLCField
-)
-from ..metadata.subscription import (
-    Subscription,
-    SubscriptionAccess,
-    SubscriptionType,
-    SubscriptionCollectionPerm
+    ContractPeriod, ContinuousContract, SpecificContract, OHLCField,
+    Subscription, SubscriptionAccess, SubscriptionType, SubscriptionCollectionPerm
 )
 from ..time import Frequency, Resolution, UTC, to_timezone
 from ..time.timezone import LOCAL_TZ
