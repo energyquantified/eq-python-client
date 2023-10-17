@@ -11,6 +11,7 @@ dev
 - Implement absolute forecasts for instances ``eq.instances.absolute()``
 - Add ``unit`` and ``denominator`` attributes to ``Series`` and ``OHLCList``
 - Add support for unit conversion when loading from the API
+- Add ``curve-type`` parameter for ``eq.metadata.curves()``
 
 **Bugfixes**
 
@@ -20,7 +21,6 @@ dev
 **Breaking changes**
 
 - Removed ``Place.area``. Use ``Place.areas`` instead.
-
 
 0.11
 ----
