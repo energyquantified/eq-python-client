@@ -126,10 +126,6 @@ def parse_place(json):
     fuels = json.get("fuels") or []
     location = json.get("location") or None
 
-    area = json.get("area")
-    if area:
-        area = Area.by_tag(area)
-
     areas = json.get("areas")
     if areas:
         areas = [Area.by_tag(a) for a in areas]
@@ -150,7 +146,6 @@ def parse_place(json):
         name,
         unit=unit,
         fuels=fuels,
-        area=area,
         areas=areas,
         location=location,
         children=children,
