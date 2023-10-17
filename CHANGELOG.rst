@@ -10,12 +10,12 @@ dev
 - Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
 - Implement absolute forecasts for instances ``eq.instances.absolute()``
 - Add ``unit`` and ``denominator`` attributes to ``Series`` and ``OHLCList``
-- Add support for unit conversion when loading from the API
-- Add ``curve-type`` parameter for ``eq.metadata.curves()``
+- Add support for unit conversion when loading data from the API
+- Add ``curve_type`` parameter for ``eq.metadata.curves()``
 - Add ``Subscription``, ``SubscriptionAccess``, ``SubscriptionType`` and
   ``SubscriptionCollectionPerm`` models
 - Add ``Curve.subscription`` field, providing the user with subscription
-  information for a curve
+  information for curves
 - Add ``User``, ``Organization`` and ``AccountManager`` models
 - Add ``UserAPI`` and ``eq.user.user()`` to get details of the current user
 
