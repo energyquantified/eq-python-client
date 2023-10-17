@@ -58,6 +58,15 @@ implemented:
     * :py:class:`SRMCOptions <energyquantified.data.SRMCOptions>`: A data
       class holding all factors used in an SRMC calculation.
 
+ * :py:class:`AbsoluteResult <energyquantified.data.AbsoluteResult>`: The
+   absolute forecast data model. It has multiple attributes, most of which are
+   defined and used elsewhere, but the ``items`` attribute is a list of
+   AbsoluteItem's exclusively used in AbsoluteResult:
+
+    * :py:class:`AbsoluteItem <energyquantified.data.AbsoluteItem>`: A data
+      class consisting of an instance and a value. The value is the instance's
+      forecasted value for the delivery of the AbsoluteResult.
+
 ``energyquantified.metadata``
 -----------------------------
 
@@ -91,12 +100,25 @@ are quite many classes in ``energyquantified.metadata``:
    consumer, a location on a river. See
    :py:class:`PlaceType <energyquantified.metadata.PlaceType>` for all types.
 
- * :py:class:`OHLCField <energyquantified.metadata.OHLCField>`: Enumerator of
-   fields in OHLC data objects.
+ * For :py:class:`OHLC <energyquantified.data.OHLC>` data, these metadata classes
+   are used:
 
- * :py:class:`ContractPeriod <energyquantified.metadata.ContractPeriod>`:
-   Enumerator of contract periods for OHLC data objects. Typically week, month,
-   quarter, year.
+    * :py:class:`OHLCField <energyquantified.metadata.OHLCField>`: Enumerator of
+      fields in OHLC data objects.
+    * :py:class:`ContractPeriod <energyquantified.metadata.ContractPeriod>`:
+      Enumerator of contract periods for OHLC data objects. Typically week, month,
+      quarter, year.
+
+ * These classes are used for subscription information:
+
+    * :py:class:`Subscription <energyquantified.metadata.Subscription>`: A class
+      describing your subscription for a given curve.
+    * :py:class:`SubscriptionAccess <energyquantified.metadata.SubscriptionAccess>`:
+      Enumerator of access levels for subscriptions.
+    * :py:class:`SubscriptionType <energyquantified.metadata.SubscriptionType>`:
+      Enumerator of subscription types.
+    * :py:class:`SubscriptionCollectionPerm <energyquantified.metadata.SubscriptionCollectionPerm>`:
+      Enumerator of user's permission for a collection.
 
  * :py:class:`Subscription <energyquantified.metadata.Subscription>`: A class
     describing your subscription for a given curve.

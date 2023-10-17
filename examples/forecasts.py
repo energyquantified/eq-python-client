@@ -7,7 +7,6 @@ from energyquantified.time import Frequency
 # Initialize client (replace with your API key)
 eq = EnergyQuantified(api_key="aaaaaa-bbbbbb-cccccc-ddddddd")
 
-
 # Curve alternative #1: The curve name for the German wind
 # production actuals
 curve_name = "DE Wind Power Production MWh/h 15min Forecast"
@@ -17,11 +16,11 @@ curve_name = "DE Wind Power Production MWh/h 15min Forecast"
 curves = eq.metadata.curves(
     area='DE',
     exact_category='wind power production',
+    curve_type='instance',
     data_type='forecast'
 )
 # Get the first curve (there should only be one result)
 curve = curves[0]
-
 
 # --- Load forecast #1 ---
 
@@ -33,7 +32,6 @@ forecasts = eq.instances.load(
     limit=4,
     frequency=Frequency.PT1H  # Optionally aggregate to HOURLY resolution
 )
-
 
 # --- Load forecast #2 ---
 
@@ -53,7 +51,6 @@ forecasts = eq.instances.load(
     issued_at_latest=latest,
     frequency=Frequency.PT1H  # Optionally aggregate to HOURLY resolution
 )
-
 
 # The result is a list of time series objects. When loading
 # instances (forecasts), each time series object has an 'instance'-

@@ -74,7 +74,7 @@ However, the list has a ``curve`` attribute that standard Python
 ``list``-objects do not:
 
    >>> ohlc_list.curve
-   <Curve: "NP Futures Power Base EUR/MWh Nasdaq OHLC", curve_type=OHLC>
+   <Curve: "NP Futures Power Base EUR/MWh Nasdaq OHLC", curve_type=OHLC, subscription=FREEMIUM>
 
    >>> ohlc_list
    [<OHLC: <Product: traded=2020-01-02, period=DAY, front=1, delivery=2020-01-03>, open=, high=, low=, close=, settlement=26.56, volume=, open_interest=>,
@@ -174,7 +174,7 @@ The response is an list :class:`energyquantified.data.OHLCList` of
 :class:`energyquantified.data.OHLC` objects:
 
    >>> latest_list.curve
-   <Curve: "NP Futures Power Base EUR/MWh Nasdaq OHLC", curve_type=OHLC>
+   <Curve: "NP Futures Power Base EUR/MWh Nasdaq OHLC", curve_type=OHLC, subscription=FREEMIUM>
 
    >>> latest_list
    [<OHLC: <Product: traded=2020-10-15, period=DAY, front=1, delivery=2020-10-16>, open=, high=, low=, close=, settlement=23.24, volume=, open_interest=>,
@@ -307,7 +307,7 @@ Notice that there is an additional ``contract`` field on the time series
 object, describing the query used to load this data:
 
    >>> timeseries.curve
-   <Curve: "NP Futures Power Base EUR/MWh Nasdaq OHLC", curve_type=OHLC>
+   <Curve: "NP Futures Power Base EUR/MWh Nasdaq OHLC", curve_type=OHLC, subscription=FREEMIUM>
 
    >>> timeseries.contract
    <ContinuousContract: period=MONTH, front=1, field=CLOSE>
@@ -348,7 +348,7 @@ Notice that there is an additional ``contract`` field on the time series
 object, describing the query used to load this data:
 
    >>> timeseries.curve
-   <Curve: "NP Futures Power Base EUR/MWh Nasdaq OHLC", curve_type=OHLC>
+   <Curve: "NP Futures Power Base EUR/MWh Nasdaq OHLC", curve_type=OHLC, subscription=FREEMIUM>
 
    >>> timeseries.contract
    <SpecificContract: period=MONTH, delivery=2020-06-01, field=CLOSE>

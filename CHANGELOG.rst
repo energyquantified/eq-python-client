@@ -6,9 +6,27 @@ dev
 
 **Improvements**
 
+- Add ``PeriodInstancesAPI.relative()`` for relative queries
 - Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
-- Add ``Subscription`` to ``Curve``
+- Implement absolute forecasts for instances ``eq.instances.absolute()``
+- Add ``unit`` and ``denominator`` attributes to ``Series`` and ``OHLCList``
+- Add support for unit conversion when loading from the API
+- Add ``curve-type`` parameter for ``eq.metadata.curves()``
+- Add ``Subscription``, ``SubscriptionAccess``, ``SubscriptionType`` and
+  ``SubscriptionCollectionPerm`` models
+- Add ``Curve.subscription`` field, providing the user with subscription
+  information for a curve
 - Add ``UserAPI`` and ``eq.user.user()`` to get details of the current user
+
+**Bugfixes**
+
+- Remove unnecessary limitation from ``eq.instances.relative()`` for parameters
+  ``time_of_day``, ``after_time_of_day`` and ``before_time_of_day``
+
+**Breaking changes**
+
+- Removed ``Place.area``. Use ``Place.areas`` instead.
+
 
 0.11
 ----
@@ -25,7 +43,6 @@ dev
 
 - Add ``websocket-client`` v1.5.1
 - Upgrade ``requests`` to minimum 2.31 due to security fixes
-
 
 
 0.10.1

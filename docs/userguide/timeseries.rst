@@ -42,7 +42,7 @@ you should adjust the begin and end dates accordingly.)
 The response is an :class:`energyquantified.data.Timeseries` instance:
 
    >>> timeseries.curve
-   <Curve: "DE Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES>
+   <Curve: "DE Wind Power Production MWh/h 15min Actual", curve_type=TIMESERIES, subscription=FREEMIUM>
 
    >>> timeseries.resolution
    <Resolution: frequency=PT15M, timezone=CET>

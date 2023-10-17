@@ -180,6 +180,18 @@ SRMC data classes
    :inherited-members:
 
 
+Absolute forecast data classes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: energyquantified.data.AbsoluteResult
+   :show-inheritance:
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.data.AbsoluteItem
+   :inherited-members:
+
 Metadata
 --------
 
@@ -274,7 +286,7 @@ Metadata
 
 ------
 
-.. autoclass:: energyquantified.metadata.SubscriptionCollectionPerms
+.. autoclass:: energyquantified.metadata.SubscriptionCollectionPerm
    :inherited-members:
 
 
@@ -292,7 +304,7 @@ User
 ------
 
 .. autoclass:: energyquantified.user.AccountManager
-   :inherited-members:
+
 
 
 Events

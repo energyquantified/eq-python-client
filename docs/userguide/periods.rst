@@ -150,7 +150,7 @@ a weighted average of those.
 
     >>> timeseries.print()
     Timeseries:
-      Curve: <Curve: "DE Wind Power Installed MW Capacity", curve_type=PERIOD>
+      Curve: <Curve: "DE Wind Power Installed MW Capacity", curve_type=PERIOD, subscription=FREEMIUM>
       Resolution: <Resolution: frequency=P1M, timezone=CET>
     <BLANKLINE>
     2020-01-01 00:00:00+01:00            60784.71

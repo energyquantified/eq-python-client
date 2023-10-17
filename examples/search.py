@@ -1,9 +1,9 @@
 from energyquantified import EnergyQuantified
-from energyquantified.metadata import Area, DataType
+from energyquantified.metadata import Area, CurveType, DataType
+
 
 # Initialize client
 eq = EnergyQuantified(api_key="aaaaaa-bbbbbb-cccccc-ddddddd")
-
 
 # Search #1: Freetext search
 print("Search #1: Freetext search")
@@ -11,32 +11,32 @@ curves = eq.metadata.curves(q="de wind production actual")
 for curve in curves:
     print(curve)
 
-
 # Search #2: Search by exact attributes on the curves
 print("Search #2: Search by exact attributes")
 curves = eq.metadata.curves(
     category=["Wind", "Production"],
     area=Area.DE,
+    curve_type=CurveType.INSTANCE,
     data_type=DataType.ACTUAL
 )
 for curve in curves:
     print(curve)
-
 
 # Search #3: Search actual exchange curves
 print("Search #3: Search actual exchange")
 curves = eq.metadata.curves(
     q="de pl",
+    curve_type=CurveType.TIMESERIES,
     data_type=DataType.ACTUAL
 )
 for curve in curves:
     print(curve)
 
-
 # Search #4: Pagination
 print("Search #4: Pagination")
 page1 = eq.metadata.curves(
     area=Area.DE,
+    curve_type=CurveType.TIMESERIES,
     data_type=DataType.ACTUAL,
     page_size=10,  # Set page size  (defaults to 50)
     page=1  # Optionally set page number (defaults to 1)

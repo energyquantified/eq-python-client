@@ -17,7 +17,7 @@ An important attribute on the curve model is :ref:`resolution <resolution>`
 (more on resolutions below). It tells you the time step (hourly, 15-minute,
 daily, etc.) and timezone for data in the curve.
 
-The attribute :ref:`subscription <subscription>` tells you what kind of
+The :ref:`subscription <subscription>` attribute tells you what kind of
 subscription gives you access to the curve.
 
 **Curve types**
@@ -36,13 +36,15 @@ The ``curve_type`` tells you which operations you shall use to load data
 from the curve in the API.
 
 
+.. _subscription:
+
 Subscription
 ~~~~~~~~~~~~
 
 A :py:class:`Subscription <energyquantified.metadata.Subscription>` describes
-your access to a curve. It contains information like the level of `access`,
-`type` of subscription, a human-readable `label` and more information such as
-the `package`, the `area` and the `collection` depending on the type of
+your access to a curve. It contains information like the level of ``access``,
+``type`` of subscription, a human-readable ``label`` and more information such as
+the ``package``, the ``area`` and the ``collection`` depending on the type of
 subscription.
 
 **Subscription access levels**
@@ -62,12 +64,12 @@ Access levels for a subscription.
 
 The type of subscription.
 
-- ``collection`` – A subscription related to collections
-- ``free`` – No subscription required for provided content
-- ``freemium`` – Limited access due to no subscription defined for provided content
-- ``package`` – A subscription associated with a package of services
-- ``package_area`` – A subscription tied to a combination of a specific package and area
-- ``private`` – A private subscription with restricted access
+- ``COLLECTION`` – A subscription related to collections
+- ``FREE`` – No subscription required for provided content
+- ``FREEMIUM`` – Limited access due to no subscription defined for provided content
+- ``PACKAGE`` – A subscription associated with a package of services
+- ``PACKAGE_AREA`` – A subscription tied to a combination of a specific package and area
+- ``PRIVATE`` – A private subscription with restricted access
 
 **Subscription collection permissions**
 
@@ -75,6 +77,7 @@ The user's permissions for a collection.
 
 - ``r`` – Read-only access
 - ``rw`` – Read-write access
+
 
 Instance
 --------
