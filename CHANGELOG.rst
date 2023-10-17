@@ -16,6 +16,7 @@ dev
   ``SubscriptionCollectionPerm`` models
 - Add ``Curve.subscription`` field, providing the user with subscription
   information for a curve
+- Add ``User``, ``Organization`` and ``AccountManager`` models
 - Add ``UserAPI`` and ``eq.user.user()`` to get details of the current user
 
 **Bugfixes**
