@@ -49,10 +49,9 @@ at Read the Docs.
 - Full-text search and keyword search for curves and powerplants
 - Forecasts- and time series data
 - Period-based data
-- OHLC data
-- SRMC calculations on OHLC data
-- Shows your subscription for each series
-- Support for timezones, resolutions and aggregations
+- OHLC data with SRMC calculations
+- Shows your subscription for each data series
+- Support for timezones, resolutions, aggregations and unit conversions
 - Easy-to-use filters for issue dates and forecast types
 - Push feed for live updates on data modifications
 - Integrates with pandas
