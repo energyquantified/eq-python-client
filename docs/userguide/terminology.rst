@@ -64,12 +64,12 @@ Access levels for a subscription.
 
 The type of subscription.
 
-- ``collection`` – A subscription related to collections
-- ``free`` – No subscription required for provided content
-- ``freemium`` – Limited access due to no subscription defined for provided content
-- ``package`` – A subscription associated with a package of services
-- ``package_area`` – A subscription tied to a combination of a specific package and area
-- ``private`` – A private subscription with restricted access
+- ``COLLECTION`` – A subscription related to collections
+- ``FREE`` – No subscription required for provided content
+- ``FREEMIUM`` – Limited access due to no subscription defined for provided content
+- ``PACKAGE`` – A subscription associated with a package of services
+- ``PACKAGE_AREA`` – A subscription tied to a combination of a specific package and area
+- ``PRIVATE`` – A private subscription with restricted access
 
 **Subscription collection permissions**
 
