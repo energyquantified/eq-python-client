@@ -17,7 +17,7 @@ An important attribute on the curve model is :ref:`resolution <resolution>`
 (more on resolutions below). It tells you the time step (hourly, 15-minute,
 daily, etc.) and timezone for data in the curve.
 
-The attribute :ref:`subscription <subscription>` tells you what kind of
+The :ref:`subscription <subscription>` attribute tells you what kind of
 subscription gives you access to the curve.
 
 **Curve types**
@@ -36,13 +36,15 @@ The ``curve_type`` tells you which operations you shall use to load data
 from the curve in the API.
 
 
+.. _subscription:
+
 Subscription
 ~~~~~~~~~~~~
 
 A :py:class:`Subscription <energyquantified.metadata.Subscription>` describes
-your access to a curve. It contains information like the level of `access`,
-`type` of subscription, a human-readable `label` and more information such as
-the `package`, the `area` and the `collection` depending on the type of
+your access to a curve. It contains information like the level of ``access``,
+``type`` of subscription, a human-readable ``label`` and more information such as
+the ``package``, the ``area`` and the ``collection`` depending on the type of
 subscription.
 
 **Subscription access levels**

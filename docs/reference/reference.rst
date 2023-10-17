@@ -269,7 +269,7 @@ Metadata
 
 ------
 
-.. autoclass:: energyquantified.metadata.SubscriptionCollectionPerms
+.. autoclass:: energyquantified.metadata.SubscriptionCollectionPerm
    :inherited-members:
 
 

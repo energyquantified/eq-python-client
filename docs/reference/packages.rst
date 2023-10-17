@@ -91,22 +91,25 @@ are quite many classes in ``energyquantified.metadata``:
    consumer, a location on a river. See
    :py:class:`PlaceType <energyquantified.metadata.PlaceType>` for all types.
 
- * :py:class:`OHLCField <energyquantified.metadata.OHLCField>`: Enumerator of
-   fields in OHLC data objects.
+ * For :py:class:`OHLC <energyquantified.data.OHLC>` data, these metadata classes
+   are used:
 
- * :py:class:`ContractPeriod <energyquantified.metadata.ContractPeriod>`:
-   Enumerator of contract periods for OHLC data objects. Typically week, month,
-   quarter, year.
+    * :py:class:`OHLCField <energyquantified.metadata.OHLCField>`: Enumerator of
+      fields in OHLC data objects.
+    * :py:class:`ContractPeriod <energyquantified.metadata.ContractPeriod>`:
+      Enumerator of contract periods for OHLC data objects. Typically week, month,
+      quarter, year.
 
- * :py:class:`Subscription <energyquantified.metadata.Subscription>`: A class
-    describing your subscription for a given curve.
- * :py:class:`SubscriptionAccess <energyquantified.metadata.SubscriptionAccess>`:
-   Enumerator of access levels for subscriptions.
- * :py:class:`SubscriptionType <energyquantified.metadata.SubscriptionType>`:
-   Enumerator of subscription types.
- * :py:class:`SubscriptionCollectionPerms
-    <energyquantified.metadata.SubscriptionCollectionPerms>`: Enumerator of
-    user's permission for a collection.
+ * These classes are used for subscription information:
+
+    * :py:class:`Subscription <energyquantified.metadata.Subscription>`: A class
+      describing your subscription for a given curve.
+    * :py:class:`SubscriptionAccess <energyquantified.metadata.SubscriptionAccess>`:
+      Enumerator of access levels for subscriptions.
+    * :py:class:`SubscriptionType <energyquantified.metadata.SubscriptionType>`:
+      Enumerator of subscription types.
+    * :py:class:`SubscriptionCollectionPerm <energyquantified.metadata.SubscriptionCollectionPerm>`:
+      Enumerator of user's permission for a collection.
 
 ``energyquantified.time``
 -------------------------
