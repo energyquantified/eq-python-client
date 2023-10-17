@@ -203,22 +203,32 @@ def parse_subscription(json):
     Parse a JSON response from the server into a Subscription object.
     """
     access = SubscriptionAccess.by_tag(json.get("access"))
-    type = SubscriptionType.by_tag(json.get("type"))
+    stype = SubscriptionType.by_tag(json.get("type"))
     label = json.get("label")
-    package = json.get(
-        "package") if type == SubscriptionType.package or type == \
-                      SubscriptionType.package_area else None
-    area = json.get("area") if type == SubscriptionType.package_area else None
-    collection = json.get(
-        "collection") if type == SubscriptionType.collection else None
-    collection_perms = SubscriptionCollectionPerm.by_tag(
-        json.get(
-            "collection_perms")) if type == SubscriptionType.collection else \
-        None
+    package = (
+        json.get("package")
+        if stype in (SubscriptionType.PACKAGE, SubscriptionType.PACKAGE_AREA)
+        else None
+    )
+    area = (
+        json.get("area")
+        if stype == SubscriptionType.PACKAGE_AREA
+        else None
+    )
+    collection = (
+        json.get("collection")
+        if stype == SubscriptionType.COLLECTION
+        else None
+    )
+    collection_perms = (
+        SubscriptionCollectionPerm.by_tag(json.get("collection_perms"))
+        if type == SubscriptionType.COLLECTION
+        else stype
+    )
 
     return Subscription(
         access=access,
-        type=type,
+        type=stype,
         label=label,
         package=package,
         area=area,

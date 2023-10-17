@@ -6,29 +6,28 @@ class Subscription:
     A subscription describing the access to a curve
     """
 
-    def __init__(self, access, type, label, package=None, area=None,
+    def __init__(self, access, subscription_type, label, package=None, area=None,
                  collection=None, collection_perms=None):
         #: The access level for this subscription, see
         # :py:class:`SubscriptionAccess`
         self.access = access
         #: The type of subscription, see :py:class:`SubscriptionType`
-        self.type = type
+        self.type = subscription_type
         #: Human-readable label for this subscription
         self.label = label
-        if self.type == SubscriptionType.package or self.type == \
-                SubscriptionType.package_area:
+        if self.type in (SubscriptionType.PACKAGE, SubscriptionType.PACKAGE_AREA):
             #: The unique name of the package, only available if the type equals
             # `package` or `package_area`
             self.package = package
         else:
             self.package = None
-        if self.type == SubscriptionType.package_area:
+        if self.type == SubscriptionType.PACKAGE_AREA:
             #: A tag representing the area, only available if the type equals
             # `package_area`
             self.area = area
         else:
             self.area = None
-        if self.type == SubscriptionType.collection:
+        if self.type == SubscriptionType.COLLECTION:
             #: The unique name of the collection, only available if the type
             # equals `collection`
             self.collection = collection
@@ -53,14 +52,14 @@ _access_lookup = {}
 
 class SubscriptionAccess(enum.Enum):
     """
-    Access levels for a subscription
+    Access levels for a subscription.
     """
 
-    #: Access is included in the freemium tier
+    #: Your access is freemium
     FREEMIUM = "FREEMIUM"
     #: No access
     BLOCKED = "BLOCKED"
-    #: Access is granted during a trial period
+    #: Access is granted as a trial
     TRIAL = "TRIAL"
     #: Access is provided through a paid subscription
     PAYING = "PAYING"
@@ -75,13 +74,13 @@ class SubscriptionAccess(enum.Enum):
 
     def __init__(self, tag):
         self.tag = tag
-        _access_lookup[tag.upper()] = self
+        _access_lookup[tag.lower()] = self
 
     def __str__(self):
         return self.tag
 
     def __repr__(self):
-        return f"<SubscriptionAccess: \"{self.tag}\">"
+        return self.tag
 
     @staticmethod
     def is_valid_tag(tag):
@@ -93,7 +92,7 @@ class SubscriptionAccess(enum.Enum):
         :return: True if it exists, otherwise False
         :rtype: bool
         """
-        return tag.lower() in _access_lookup[tag.upper()]
+        return tag.lower() in _access_lookup
 
     @staticmethod
     def by_tag(tag):
@@ -105,7 +104,7 @@ class SubscriptionAccess(enum.Enum):
         :return: The access for the given tag
         :rtype: SubscriptionAccess
         """
-        return _access_lookup[tag.upper()]
+        return _access_lookup[tag.lower()]
 
 
 _type_lookup = {}
@@ -113,21 +112,21 @@ _type_lookup = {}
 
 class SubscriptionType(enum.Enum):
     """
-    The type of subscription
+    The type of subscription.
     """
 
     #: A subscription related to collections
-    collection = "collection"
+    COLLECTION = "collection"
     #: No subscription required for provided content
-    free = "free"
+    FREE = "free"
     #: Limited access due to no subscription defined for provided content
-    freemium = "freemium"
+    FREEMIUM = "freemium"
     #: A subscription associated with a package of services
-    package = "package"
+    PACKAGE = "package"
     #: A subscription tied to a combination of a specific package and area
-    package_area = "package_area"
+    PACKAGE_AREA = "package_area"
     #: A private subscription with restricted access
-    private = "private"
+    PRIVATE = "private"
 
     def __init__(self, tag):
         self.tag = tag
@@ -169,13 +168,13 @@ _collection_perm_lookup = {}
 
 class SubscriptionCollectionPerm(enum.Enum):
     """
-    The user's permissions for this collection
+    The user's permissions for a collection.
     """
 
     #: Read-only access
-    r = "r"
+    R = "r"
     #: Read-write access
-    rw = "rw"
+    RW = "rw"
 
     def __init__(self, tag):
         self.tag = tag
