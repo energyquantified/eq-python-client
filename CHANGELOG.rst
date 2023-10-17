@@ -6,8 +6,21 @@ dev
 
 **Improvements**
 
+- Add ``PeriodInstancesAPI.relative()`` for relative queries
 - Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
+- Implement absolute forecasts for instances ``eq.instances.absolute()``
+- Add ``unit`` and ``denominator`` attributes to ``Series`` and ``OHLCList``
+- Add support for unit conversion when loading from the API
 - Add ``curve-type`` parameter for ``eq.metadata.curves()``
+
+**Bugfixes**
+
+- Remove unnecessary limitation from ``eq.instances.relative()`` for parameters
+  ``time_of_day``, ``after_time_of_day`` and ``before_time_of_day``
+
+**Breaking changes**
+
+- Removed ``Place.area``. Use ``Place.areas`` instead.
 
 0.11
 ----

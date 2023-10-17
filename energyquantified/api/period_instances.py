@@ -224,3 +224,50 @@ class PeriodInstancesAPI(BaseAPI):
         # HTTP request
         response = self._get(url, params=params)
         return parse_periodseries(response.json())
+
+    def relative(
+            self,
+            curve,
+            begin=None,
+            end=None,
+            days_ahead=None,
+            before_time_of_day=None,
+            time_zone=None,
+            unit=None):
+        """
+        Loads period-based series instances n days-ahead and stitches them together to a single, continuous period series.
+
+        This operation is useful for loading historical day-ahead forecasts.
+
+        :param curve: The curve or curve name
+        :type curve: :py:class:`energyquantified.metadata.Curve`, str
+        :param begin: The begin date-time
+        :type begin: date, datetime, str, required
+        :param end: The end date-time
+        :type end: date, datetime, str, required
+        :param days_ahead: The n days ahead of the instance's issue date. days-head = 0 means intraday forecasts, days-ahead = 1 means day-ahead, days-ahead = 2 means the day after day-ahead, and so on.
+        :type days_ahead: int, required
+        :param before_time_of_day: The time of day to load the instance, defaults to None
+        :type before_time_of_day: time, str, optional
+        :param time_zone: Set the timezone for the date-times
+        :type time_zone: TzInfo, optional
+        :param unit: Convert unit of data, defaults to curves unit
+        :type unit: str, optional
+        :return: A period-based series
+        :rtype: :py:class:`energyquantified.data.Periodseries`
+        """
+
+        # Build URL
+        safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
+        url = f"/period-instances/{safe_curve}/get/relative/"
+        # Parameters
+        params = {}
+        self._add_datetime(params, "begin", begin, required=True)
+        self._add_datetime(params, "end", end, required=True)
+        self._add_int(params, "days-ahead", days_ahead, required=True, min=0)
+        self._add_time(params, "before-time-of-day", before_time_of_day)
+        self._add_time_zone(params, "timezone", time_zone)
+        self._add_str(params, "unit", unit)
+        # HTTP request
+        response = self._get(url, params=params)
+        return parse_periodseries(response.json())

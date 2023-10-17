@@ -259,6 +259,204 @@ day from 1 June to 5 June:
 Aggregations are also supported, as you can see from the examples above.
 
 
+Absolute forecasts queries
+--------------------------
+
+Method reference: :py:meth:`eq.instances.absolute() <energyquantified.api.InstancesAPI.absolute>`
+
+Load forecasted values from various instances for a specific point in time,
+to see how forecasts develop over time.
+
+The following parameters are required to load absolute forecasts:
+ * ``curve``: The :py:class:`Curve <energyquantified.metadata.Curve>` to load
+ * ``delivery``: The point in time to load forecasted values for
+ * ``begin``: Earliest issued date for instances (inclusive)
+ * ``end``: Latest issued date for instances (exclusive)
+
+The example below loads the absolute forecast for
+``DE Wind Power Production MWh/h 15min Forecast`` at 2023-10-05 12:00, from
+instances issued between 2023-10-01 (inclusive) and 2023-10-02 (exclusive).
+
+   >>> from datetime import datetime
+   >>> absolute_result = eq.instances.absolute(
+   >>>   "DE Wind Power Production MWh/h 15min Forecast",
+   >>>   datetime(2023, 10, 5, 12), # Delivery 2023-10-05 12:00
+   >>>   begin=datetime(2023, 10, 1), # Earliest issued (inclusive)
+   >>>   end=datetime(2023, 10, 2), # Latest issued (exclusive)
+   >>> )
+
+   >>> print(absolute_result)
+   <AbsoluteResult:
+      curve="DE Wind Power Production MWh/h 15min Forecast",
+      resolution=<Resolution: frequency=PT15M, timezone=CET>,
+      delivery=2023-10-05 12:00:00+02:00,
+      filters=BASE,
+      aggregation=MEAN,
+      unit=MWh/h,
+      items=
+         <AbsoluteItem:
+            instance=<Instance:
+               issued="2023-10-01 00:00:00+00:00",
+               tag="icon">,
+            value=33493.8>,
+         <AbsoluteItem:
+            instance=<Instance:
+               issued="2023-10-01 00:00:00+00:00",
+               tag="gfs">,
+            value=35230.1>,
+         <AbsoluteItem:
+            instance=<Instance:
+               issued="2023-10-01 00:00:00+00:00",
+               tag="ec">,
+            value=24395>,
+         ...,
+         <AbsoluteItem:
+            instance=<Instance:
+               issued="2023-10-01 18:00:00+00:00",
+               tag="gfs-en
+            ">, value=24648.8>,
+         <AbsoluteItem:
+            instance=<Instance:
+               issued="2023-10-01 18:00:00+00:00",
+               tag="gfs">,
+            value=29499.2>,
+         <AbsoluteItem:
+            instance=<Instance:
+               issued="2023-10-01 18:00:00+00:00",
+               tag="ecsr">,
+            value=26542.6>>
+
+The resolution of the delivery defaults to the Curve's resolution. Change the
+frequency or time zone of the delivery by supplying the ``frequency`` or
+``time_zone`` parameters, respectively. Note that you cannot use a frequency
+higher than the Curve's original frequency, and time zone conversion is
+supported only for curves with higher than daily frequency (> P1D).
+
+Load the absolute forecast with delivery in hourly frequency from instances with
+the ``ec`` tag:
+
+   >>> from datetime import datetime
+   >>> from energyquantified.time import Frequency
+   >>> absolute_result = eq.instances.absolute(
+   >>>   "DE Wind Power Production MWh/h 15min Forecast",
+   >>>   datetime(2023, 10, 5, 12), # Delivery 2023-10-05 12:00
+   >>>   begin=datetime(2023, 10, 1), # Earliest issued (inclusive)
+   >>>   end=datetime(2023, 10, 2), # Latest issued (exclusive)
+   >>>   frequency=Frequency.PT1H,
+   >>>   tags=["ec"]
+   >>> )
+
+   >>> print(absolute_result)
+   <AbsoluteResult:
+      curve="DE Wind Power Production MWh/h 15min Forecast",
+     resolution=<Resolution: frequency=PT1H, timezone=CET>,
+     delivery=2023-10-05 12:00:00+02:00,
+     filters=BASE,
+     aggregation=MEAN,
+     unit=MWh/h,
+     items=
+        <AbsoluteItem:
+         instance=<Instance:
+            issued="2023-10-01 00:00:00+00:00",
+            tag="ec">,
+         value=23897.75>,
+        <AbsoluteItem:
+         instance=<Instance:
+            issued="2023-10-01 12:00:00+00:00",
+            tag="ec">,
+         value=31124.48>>
+
+Set zone of the delivery with the ``time_zone`` parameter:
+
+   >>> from datetime import datetime
+   >>> from energyquantified.time import Frequency, UTC
+   >>> absolute_result = eq.instances.absolute(
+   >>>   "DE Wind Power Production MWh/h 15min Forecast",
+   >>>   datetime(2023, 10, 5, 12), # Delivery 2023-10-05 12:00
+   >>>   begin=datetime(2023, 10, 1), # Earliest issued (inclusive)
+   >>>   end=datetime(2023, 10, 2), # Latest issued (exclusive)
+   >>>   frequency=Frequency.PT1H,
+   >>>   time_zone=UTC,
+   >>>   tags=["ec"]
+   >>> )
+
+   >>> print(absolute_result)
+   <AbsoluteResult:
+      curve="DE Wind Power Production MWh/h 15min Forecast",
+     resolution=<Resolution: frequency=PT1H, timezone=UTC>,
+     delivery=2023-10-05 12:00:00+00:00,
+     filters=BASE,
+     aggregation=MEAN,
+     unit=MWh/h,
+     items=
+        <AbsoluteItem:
+         instance=<Instance:
+            issued="2023-10-01 00:00:00+00:00",
+            tag="ec">,
+         value=20479.78>,
+        <AbsoluteItem:
+         instance=<Instance:
+            issued="2023-10-01 12:00:00+00:00",
+            tag="ec">,
+         value=29158.65>>
+
+The :py:meth:`absolute() <energyquantified.api.InstancesAPI.absolute>` method
+also supports filtering on specific hours (e.g., BASE/PEAK), unit conversion,
+choosinghow to aggregate data when delivery frequency is lower than the Curve's,
+and options to filter or exclude instances by tags.
+
+The final example below illustrates and explains usage of all parameters
+simultaneously:
+
+   >>> from datetime import datetime
+   >>> from energyquantified.metadata import Aggregation, Filter
+   >>> from energyquantified.time import Frequency, UTC
+   >>> absolute_result = eq.instances.absolute(
+   >>>   "DE Wind Power Production MWh/h 15min Forecast",
+   >>>   # Delivery 2023-10-05
+   >>>   datetime(2023, 10, 5),
+   >>>   # Earliest issued (inclusive) for instances to use
+   >>>   begin=datetime(2023, 10, 1),
+   >>>   # Latest issued (exclusive) for instances to use
+   >>>   end=datetime(2023, 10, 2),
+   >>>   # Frequency of the delivery
+   >>>   frequency=Frequency.P1D,
+   >>>   # Timezone of the delivery
+   >>>   time_zone=UTC,
+   >>>   # Exclude values not in PEAK when aggregating
+   >>>   hour_filter=Filter.PEAK,
+   >>>   # Convert the unit from 'MWh/h' to 'GWh/h'
+   >>>   unit="GWh/h,
+   >>>   # We load with a lower frequency (P1D < Curve's original
+   >>>   # PT15M), so all of the PT15M values must be aggregated
+   >>>   # into a single value representing the delivery. Aggregate
+   >>>   # to AVERAGE (or MEAN).
+   >>>   aggregation=Aggregation.AVERAGE,
+   >>>   tags=["ec"], # Only include instances with tag 'ec'
+   >>>   exclude_tags=["gfs"], # Exclude instance with tag 'gfs'
+   >>> )
+
+   >>> print(absolute_result)
+   <AbsoluteResult:
+      curve="DE Wind Power Production MWh/h 15min Forecast",
+      resolution=<Resolution: frequency=P1D, timezone=UTC>,
+      delivery=2023-10-05 00:00:00+00:00,
+      filters=PEAK,
+      aggregation=AVERAGE,
+      unit=GWh/h,
+      items=
+         <AbsoluteItem:
+            instance=<Instance:
+               issued="2023-10-01 00:00:00+00:00",
+               tag="ec">,
+            value=16.81>,
+         <AbsoluteItem:
+            instance=<Instance:
+               issued="2023-10-01 12:00:00+00:00",
+               tag="ec">,
+            value=23.1>>
+
+
 List available instances and tags
 ---------------------------------
 

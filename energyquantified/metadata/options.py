@@ -14,6 +14,8 @@ class Aggregation(enum.Enum):
 
     #: Calculate the mean value
     AVERAGE = (lambda items: sum(items) / len(items),)
+    #: Calculate the mean value (same as AVERAGE)
+    MEAN = (lambda items: sum(items) / len(items),)
     #: Calculate the sum of all values
     SUM = (sum,)
     #: Find the minimum value

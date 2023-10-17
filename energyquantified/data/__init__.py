@@ -14,7 +14,7 @@ from .periodseries import (
 )
 from .ohlc import Product, OHLC, OHLCList
 from .srmc import SRMC, SRMCOptions
-
+from .absolute import AbsoluteItem, AbsoluteResult
 
 __all__ = [
     # Time series
@@ -36,4 +36,7 @@ __all__ = [
     # SRMC
     "SRMCOptions",
     "SRMC",
+    # Absolute
+    "AbsoluteItem",
+    "AbsoluteResult",
 ]
