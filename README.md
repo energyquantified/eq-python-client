@@ -51,9 +51,10 @@ at Read the Docs.
 - Period-based data
 - OHLC data
 - SRMC calculations on OHLC data
-- *(TODO!)* Shows your subscription for each series
+- Shows your subscription for each series
 - Support for timezones, resolutions and aggregations
 - Easy-to-use filters for issue dates and forecast types
+- Push feed for live updates on data modifications
 - Integrates with pandas
 
 **Note:** A user account with an API key is required to use this library.
