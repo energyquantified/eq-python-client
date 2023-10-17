@@ -9,6 +9,8 @@ dev
 - Add ``PeriodInstancesAPI.relative()`` for relative queries
 - Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
 - Implement absolute forecasts for instances ``eq.instances.absolute()``
+- Add ``unit`` and ``denominator`` attributes to ``Series`` and ``OHLCList``
+- Add support for unit conversion when loading from the API
 
 **Bugfixes**
 
