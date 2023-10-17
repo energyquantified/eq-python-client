@@ -7,12 +7,6 @@ from ..metadata import (
     ContractPeriod, ContinuousContract, SpecificContract, OHLCField,
     Subscription, SubscriptionAccess, SubscriptionType, SubscriptionCollectionPerm
 )
-from ..metadata.subscription import (
-    Subscription,
-    SubscriptionAccess,
-    SubscriptionType,
-    SubscriptionCollectionPerm
-)
 from ..time import Frequency, Resolution, UTC, to_timezone
 from ..time.timezone import LOCAL_TZ
 

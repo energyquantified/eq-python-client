@@ -1,5 +1,5 @@
 from .metadata import parse_subscription
-from ..user import (AccountManager, Organization, User)
+from ..user import AccountManager, Organization, User
 
 
 def parse_user(json):
