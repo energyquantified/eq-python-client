@@ -20,9 +20,6 @@ def parse_absolute(json):
     Parse a JSON response from the API into an AbsoluteResult object with
     Curve, Resolution, delivery, Filter, Aggregation, unit and AbsoluteItem's.
     """
-    print(f"json: {json}")
-    import json as json2
-    print(json2.dumps(json, indent=1))
     # Parse the Curve
     curve = json.get("curve")
     if curve:
@@ -35,7 +32,7 @@ def parse_absolute(json):
     delivery = to_timezone(
             parser.isoparse(json.get("delivery")),
             tz=resolution.timezone,
-        )
+    )
     # Parse the Filter
     filters = json.get("filter")
     if filters is not None:
