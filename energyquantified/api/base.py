@@ -306,7 +306,7 @@ class BaseAPI:
             )
 
     @staticmethod
-    def _add_curve_type(self, params, name, var, required=False):
+    def _add_curve_type(params, name, var, required=False):
         if var is None and not required:
             return
         if isinstance(var, str):

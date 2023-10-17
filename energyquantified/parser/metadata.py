@@ -223,7 +223,7 @@ def parse_subscription(json):
 
     return Subscription(
         access=access,
-        type=stype,
+        subscription_type=stype,
         label=label,
         package=package,
         area=area,
