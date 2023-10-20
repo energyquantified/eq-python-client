@@ -87,30 +87,35 @@ def parse_instance(json, curve=None):
     """
     Parse a JSON response from the server into an Instance object.
     """
-    # Find timezone
+    # Find timezone for issued
     if curve and curve.instance_issued_timezone:
-        timezone = curve.instance_issued_timezone
+        issued_timezone = curve.instance_issued_timezone
     else:
-        timezone = UTC
+        issued_timezone = UTC
     # Parse the issue date
     issued = to_timezone(
         parser.isoparse(json.get("issued")),
-        tz=timezone
+        tz=issued_timezone
     )
     tag = json.get("tag") or ""
     scenarios = json.get("scenarios") or None
+    # Find timezone for created and modified
+    if curve and curve.timezone:
+        curve_timezone = curve.timezone
+    else:
+        curve_timezone = LOCAL_TZ
     # Created and modified
     created = json.get("created") or None
     if created:
         created = to_timezone(
             parser.isoparse(created),
-            tz=LOCAL_TZ
+            tz=curve_timezone
         )
     modified = json.get("modified") or None
     if modified:
         modified = to_timezone(
             parser.isoparse(modified),
-            tz=LOCAL_TZ
+            tz=curve_timezone
         )
     return Instance(
         issued,
