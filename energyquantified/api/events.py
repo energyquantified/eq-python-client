@@ -47,6 +47,7 @@ from energyquantified.events.callback import (
 from energyquantified.events.connection_event import TIMEOUT
 
 
+logging.basicConfig(stream=sys.stderr)
 log = logging.getLogger(__name__)
 
 
