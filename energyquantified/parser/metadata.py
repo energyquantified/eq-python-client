@@ -192,8 +192,12 @@ def parse_subscription(json):
     """
     Parse a JSON response from the server into a Subscription object.
     """
-    access = SubscriptionAccess.by_tag(json.get("access"))
-    stype = SubscriptionType.by_tag(json.get("type"))
+    access = json.get("access")
+    if access is not None:
+        access = SubscriptionAccess.by_tag(access)
+    stype = json.get("type")
+    if stype is not None:
+        stype = SubscriptionType.by_tag(stype)
     label = json.get("label")
     package = (
         json.get("package")
