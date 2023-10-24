@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Bugfixes**
+
+- Remove code setting log level to ``DEBUG``
+
+
 0.12
 ----
 
