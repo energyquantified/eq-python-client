@@ -1,8 +1,8 @@
 Changelog
 =========
 
-dev
----
+0.12.1
+------
 
 **Bugfixes**
 
