@@ -6,7 +6,8 @@ dev
 
 **Bugfixes**
 
-- Remove code setting log level to ``DEBUG``
+- Remove code setting default log level to ``DEBUG``
+- Fix a bug introduced in v0.12 that caused parsing of curve events to fail
 
 
 0.12
