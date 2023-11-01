@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Parse Instance's ``created`` and ``modified`` in the Curve's time zone.
+
+
 0.12.1
 ------
 
