@@ -265,29 +265,72 @@ Rolling forecasts (hours-ahead forecasts)
 Method reference: :py:meth:`eq.instances.rolling() <energyquantified.api.InstancesAPI.rolling>`
 
 Rolling forecasts are time series where each value is from the latest instance
-created **at least** ``hours_ahead`` hours before the datetime of the value.
+(forecast) created at least ``hours_ahead`` hours before.
 
-To further elaborate; if the resulting time series from loading a rolling
-forecast with ``hours_ahead=2`` contains a value for ``2023-10-01 05:15:00``,
-then the value is from the latest forecast (instance) created at or before
-``2023-10-01 03:15:00``.
+If the timeseries from a rolling forecast with ``hours_ahead=2`` contains the
+dates ``2023-10-01 05:15:00`` and ``2023-10-01 05:30:00``, then the values are
+from the latest instance (forecast) created at or before ``2023-10-01 03:15:00``
+and ``2023-10-01 03:30:00``, respectively.
 
 The example below illustrates how to load a rolling forecast for wind power in
-Germany from ``2023-10-01`` to ``2023-10-02``, aggregated from quarter-hourly to
-hourly frequency by using the mean, and with values from ``ec`` forecasts only:
+Germany from ``2023-10-01`` (inclusive) to ``2023-10-02`` (exclusive):
 
-   >>> from datetime import datetime, time
+   >>> from datetime import datetime
    >>> rolling_forecast = eq.instances.rolling(
    >>>    'DE Wind Power Production MWh/h 15min Forecast',
    >>>    begin=datetime(2023, 10, 1),
    >>>    end=datetime(2023, 10, 2),
-   >>>    hours_ahead=1,
-   >>>    tags=['ec'],
-   >>>    frequency=Frequency.PT1H,
+   >>>    hours_ahead=2,
    >>> )
 
    >>> rolling_forecast.data
-   # TODO
+   [<Value: date=2023-10-01 00:00:00+02:00, value=7973.2>,
+    <Value: date=2023-10-01 00:15:00+02:00, value=8049.1>,
+    <Value: date=2023-10-01 00:30:00+02:00, value=8076.5>,
+    ...,
+    <Value: date=2023-10-01 23:15:00+02:00, value=9892>,
+    <Value: date=2023-10-01 23:30:00+02:00, value=9878>,
+    <Value: date=2023-10-01 23:45:00+02:00, value=9867.4>]
+
+Specify the ``tags`` parameter to create a rolling forecast with values from
+instances with a matching tag only. Similarly, filter out specific instances
+with the ``exclude_tags`` parameter.
+
+The following code snippet shows how to load the rolling forecast for
+``DE Wind Power Production MWh/h 15min Forecast`` from ``2023-10-01``
+(inclusive) to ``2023-10-02``, using values from instances with the ``ec`` or
+``gfs`` tag. The result is filtered for ``PEAK``, aggregated from quarter-hourly
+to hourly frequency, and unit converted from ``MWh/h`` to ``GWh/h``.
+
+   >>> from datetime import datetime
+   >>> from energyquantified.metadata import Filter
+   >>> rolling_forecast = eq.instances.rolling(
+   >>>    'DE Wind Power Production MWh/h 15min Forecast',
+   >>>    begin=datetime(2023, 10, 1),
+   >>>    end=datetime(2023, 10, 2),
+   >>>    hours_ahead=2,
+   >>>    tags=['ec', 'gfs'],
+   >>>    frequency=Frequency.PT1H,
+   >>>    hour_filter=Filter.PEAK,
+   >>>    unit="GWh/h",
+   >>> )
+
+   >>> rolling_forecast.data
+   [<Value: date=2023-10-01 08:00:00+02:00, value=9.61>
+    <Value: date=2023-10-01 09:00:00+02:00, value=10.6>
+    <Value: date=2023-10-01 10:00:00+02:00, value=8.58>
+    <Value: date=2023-10-01 11:00:00+02:00, value=9.47>
+    <Value: date=2023-10-01 12:00:00+02:00, value=10.84>
+    <Value: date=2023-10-01 13:00:00+02:00, value=12.65>
+    <Value: date=2023-10-01 14:00:00+02:00, value=15.51>
+    <Value: date=2023-10-01 15:00:00+02:00, value=14.49>
+    <Value: date=2023-10-01 16:00:00+02:00, value=13.02>
+    <Value: date=2023-10-01 17:00:00+02:00, value=11.84>
+    <Value: date=2023-10-01 18:00:00+02:00, value=10.7>
+    <Value: date=2023-10-01 19:00:00+02:00, value=10.24>]
+
+Please see the full method reference for additional load options and further
+information.
 
 
 List available instances and tags
