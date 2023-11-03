@@ -267,7 +267,7 @@ Method reference: :py:meth:`eq.instances.rolling() <energyquantified.api.Instanc
 Rolling forecasts are time series where each value is from the latest instance
 (forecast) created at least ``hours_ahead`` hours before.
 
-If the timeseries from a rolling forecast with ``hours_ahead=2`` contains the
+If the time series from a rolling forecast with ``hours_ahead=2`` contains the
 dates ``2023-10-01 05:15:00`` and ``2023-10-01 05:30:00``, then the values are
 from the latest instance (forecast) created at or before ``2023-10-01 03:15:00``
 and ``2023-10-01 03:30:00``, respectively.

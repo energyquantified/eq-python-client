@@ -7,6 +7,7 @@ dev
 **Improvements**
 
 - Parse Instance's ``created`` and ``modified`` in the Curve's time zone.
+- Add ``eq.instances.rolling()`` for rolling forecasts
 
 
 0.12.1
