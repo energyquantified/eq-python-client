@@ -72,6 +72,11 @@ Here are the different API section classes:
 
 ------
 
+.. autoclass:: energyquantified.api.UserAPI
+   :inherited-members:
+
+------
+
 .. autoclass:: energyquantified.api.EventsAPI
    :inherited-members:
 
@@ -175,6 +180,18 @@ SRMC data classes
    :inherited-members:
 
 
+Absolute forecast data classes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: energyquantified.data.AbsoluteResult
+   :show-inheritance:
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.data.AbsoluteItem
+   :inherited-members:
+
 Metadata
 --------
 
@@ -251,6 +268,43 @@ Metadata
 
 .. autoclass:: energyquantified.metadata.SpecificContract
    :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.Subscription
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.SubscriptionAccess
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.SubscriptionType
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.SubscriptionCollectionPerm
+   :inherited-members:
+
+
+User
+----
+
+.. autoclass:: energyquantified.user.User
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.user.Organization
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.user.AccountManager
+
 
 
 Events

@@ -4,7 +4,8 @@ from dateutil import parser
 from ..exceptions import ParseException
 from ..metadata import (
     Curve, Instance, Area, DataType, CurveType, Place, PlaceType,
-    ContractPeriod, ContinuousContract, SpecificContract, OHLCField
+    ContractPeriod, ContinuousContract, SpecificContract, OHLCField,
+    Subscription, SubscriptionAccess, SubscriptionType, SubscriptionCollectionPerm
 )
 from ..time import Frequency, Resolution, UTC, to_timezone
 from ..time.timezone import LOCAL_TZ
@@ -48,6 +49,10 @@ def parse_curve(json):
     if instance_issued_timezone:
         instance_issued_timezone = pytz.timezone(instance_issued_timezone)
 
+    subscription = json.get("subscription")
+    if subscription:
+        subscription = parse_subscription(subscription)
+
     return Curve(
         name,
         curve_type=curve_type,
@@ -62,13 +67,14 @@ def parse_curve(json):
         denominator=denominator,
         data_type=data_type,
         source=source,
-        commodity=commodity
+        commodity=commodity,
+        subscription=subscription
     )
 
 
 def parse_instance_list(json, curve=None):
     """
-    Parse a JSON list-resonse from the server into a list of Instance objects.
+    Parse a JSON list-response from the server into a list of Instance objects.
     """
     if not isinstance(json, list):
         raise ParseException(
@@ -79,32 +85,37 @@ def parse_instance_list(json, curve=None):
 
 def parse_instance(json, curve=None):
     """
-    Parse a JSON resonse from the server into an Instance object.
+    Parse a JSON response from the server into an Instance object.
     """
-    # Find timezone
+    # Find timezone for issued
     if curve and curve.instance_issued_timezone:
-        timezone = curve.instance_issued_timezone
+        issued_timezone = curve.instance_issued_timezone
     else:
-        timezone = UTC
+        issued_timezone = UTC
     # Parse the issue date
     issued = to_timezone(
         parser.isoparse(json.get("issued")),
-        tz=timezone
+        tz=issued_timezone
     )
     tag = json.get("tag") or ""
     scenarios = json.get("scenarios") or None
+    # Find timezone for created and modified
+    if curve and curve.timezone:
+        curve_timezone = curve.timezone
+    else:
+        curve_timezone = LOCAL_TZ
     # Created and modified
     created = json.get("created") or None
     if created:
         created = to_timezone(
             parser.isoparse(created),
-            tz=LOCAL_TZ
+            tz=curve_timezone
         )
     modified = json.get("modified") or None
     if modified:
         modified = to_timezone(
             parser.isoparse(modified),
-            tz=LOCAL_TZ
+            tz=curve_timezone
         )
     return Instance(
         issued,
@@ -117,7 +128,7 @@ def parse_instance(json, curve=None):
 
 def parse_place(json):
     """
-    Parse a JSON resonse from the server into a Place object.
+    Parse a JSON response from the server into a Place object.
     """
     kind = PlaceType.by_tag(json.get("type"))
     key = json.get("key")
@@ -125,10 +136,6 @@ def parse_place(json):
     unit = json.get("unit")
     fuels = json.get("fuels") or []
     location = json.get("location") or None
-
-    area = json.get("area")
-    if area:
-        area = Area.by_tag(area)
 
     areas = json.get("areas")
     if areas:
@@ -150,7 +157,6 @@ def parse_place(json):
         name,
         unit=unit,
         fuels=fuels,
-        area=area,
         areas=areas,
         location=location,
         children=children,
@@ -184,4 +190,47 @@ def parse_contract(json):
 
     raise ParseException(
         f"Unknown contract.type in JSON: {contract_type}"
+    )
+
+
+def parse_subscription(json):
+    """
+    Parse a JSON response from the server into a Subscription object.
+    """
+    access = json.get("access")
+    if access is not None:
+        access = SubscriptionAccess.by_tag(access)
+    stype = json.get("type")
+    if stype is not None:
+        stype = SubscriptionType.by_tag(stype)
+    label = json.get("label")
+    package = (
+        json.get("package")
+        if stype in (SubscriptionType.PACKAGE, SubscriptionType.PACKAGE_AREA)
+        else None
+    )
+    area = (
+        json.get("area")
+        if stype == SubscriptionType.PACKAGE_AREA
+        else None
+    )
+    collection = (
+        json.get("collection")
+        if stype == SubscriptionType.COLLECTION
+        else None
+    )
+    collection_perms = (
+        SubscriptionCollectionPerm.by_tag(json.get("collection_perms"))
+        if stype == SubscriptionType.COLLECTION
+        else None
+    )
+
+    return Subscription(
+        access=access,
+        subscription_type=stype,
+        label=label,
+        package=package,
+        area=area,
+        collection=collection,
+        collection_perms=collection_perms
     )

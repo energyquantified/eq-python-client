@@ -142,6 +142,29 @@ in their documentation.
 
 -----
 
+Get user details
+----------------
+
+If you want to get the details of the user associated with the API key,
+you can do so like this:
+
+   >>> eq.user.user()
+   <User:
+        name="John Doe",
+        email="john@acme.org",
+        organization=<Organization:
+            name="ACME Inc.",
+            account_manager=<AccountManager: name="Jane Doe", email="jane.doe@example.com">
+        >,
+        subscriptions=[
+            <Subscription: "Power – Germany", access=PAYING, type=PACKAGE_AREA>,
+            <Subscription: "Power – France", access=PAYING, type=PACKAGE_AREA>
+        ]
+   >
+
+-----
+
+
 Next step
 ---------
 

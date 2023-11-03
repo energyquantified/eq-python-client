@@ -1,6 +1,51 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Parse Instance's ``created`` and ``modified`` in the Curve's time zone.
+
+
+0.12.1
+------
+
+**Bugfixes**
+
+- Remove code setting default log level to ``DEBUG``
+- Fix a bug introduced in v0.12 that caused parsing of curve events to fail
+
+
+0.12
+----
+
+**Improvements**
+
+- Add ``PeriodInstancesAPI.relative()`` for relative queries
+- Add ``modified-at-latest`` parameter for ``eq.instances.relative()``
+- Implement absolute forecasts for instances ``eq.instances.absolute()``
+- Add ``unit`` and ``denominator`` attributes to ``Series`` and ``OHLCList``
+- Add support for unit conversion when loading data from the API
+- Add ``curve_type`` parameter for ``eq.metadata.curves()``
+- Add ``Subscription``, ``SubscriptionAccess``, ``SubscriptionType`` and
+  ``SubscriptionCollectionPerm`` models
+- Add ``Curve.subscription`` field, providing the user with subscription
+  information for curves
+- Add ``User``, ``Organization`` and ``AccountManager`` models
+- Add ``UserAPI`` and ``eq.user.user()`` to get details of the current user
+
+**Bugfixes**
+
+- Remove unnecessary limitation from ``eq.instances.relative()`` for parameters
+  ``time_of_day``, ``after_time_of_day`` and ``before_time_of_day``
+
+**Breaking changes**
+
+- Removed ``Place.area``. Use ``Place.areas`` instead.
+
+
 0.11
 ----
 
@@ -16,7 +61,6 @@ Changelog
 
 - Add ``websocket-client`` v1.5.1
 - Upgrade ``requests`` to minimum 2.31 due to security fixes
-
 
 
 0.10.1

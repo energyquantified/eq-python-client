@@ -16,32 +16,38 @@ The API allows you to query for :py:class:`Curve <energyquantified.metadata.Curv
 objects in many ways. It is using the same operation as the data search on Energy
 Quantified's web application.
 
+The curve object includes a :py:class:`Subscription
+<energyquantified.metadata.Subscription>` field that describes your access for
+the given curve.
+
 Searching for curves in the API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When looking for curves, specify ``q`` to do a free-text search:
 
    >>> eq.metadata.curves(q='nuclear germany forecast')
-   [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE>]
+   [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE, subscription=FREEMIUM>]
 
 You may filter on attributes:
 
    >>> from energyquantified.metadata import Area, DataType
    >>> eq.metadata.curves(
    >>>    area=Area.DE,
+   >>>    curve_type=CurveType.INSTANCE,
    >>>    data_type=DataType.FORECAST,
    >>>    category=['nuclear', 'production']
    >>> )
-   [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE>]
+   [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE, subscription=FREEMIUM>]
 
-Or you can specify ``area`` and ``data_type`` as strings:
+Or you can specify ``area``, ``curve_type`` and ``data_type`` as strings:
 
    >>> eq.metadata.curves(
    >>>    area='DE',
+   >>>    curve_type='INSTANCE',
    >>>    data_type='FORECAST',
    >>>    category=['nuclear', 'production']
    >>> )
-   [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE>]
+   [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE, subscription=FREEMIUM>]
 
 See :meth:`energyquantified.api.MetadataAPI.curves` for a full reference.
 
@@ -71,13 +77,13 @@ You can, of course, also return a specific page directly when searching:
 
     >>> page61 = eq.metadata.curves(area=Area.DE, page_size=10, page=61)
     >>> page61
-    [<Curve: "CZ>DE Exchange Net Transfer Capacity MW 15min REMIT", curve_type=TIMESERIES>,
-     <Curve: "DE @Goldisthal Hydro Pumped-storage Capacity Available MW REMIT", curve_type=INSTANCE_PERIOD>,
-     <Curve: "DE @Mainz-3 Natural Gas Power Capacity Available MW REMIT", curve_type=INSTANCE_PERIOD>,
-     <Curve: "DE @Weisweiler-F Lignite Power Production MWh/h H Actual", curve_type=TIMESERIES>,
-     <Curve: "DE @Weser-Porta River Temperature °C H Actual", curve_type=TIMESERIES>,
-     <Curve: "DE Hydro Snow-and-Groundwater MWh D Normal", curve_type=TIMESERIES>,
-     <Curve: "DE Nuclear Capacity Available MW REMIT", curve_type=INSTANCE_PERIOD>]
+    [<Curve: "CZ>DE Exchange Net Transfer Capacity MW 15min REMIT", curve_type=TIMESERIES, subscription=FREEMIUM>,
+     <Curve: "DE @Goldisthal Hydro Pumped-storage Capacity Available MW REMIT", curve_type=INSTANCE_PERIOD, subscription=FREEMIUM>,
+     <Curve: "DE @Mainz-3 Natural Gas Power Capacity Available MW REMIT", curve_type=INSTANCE_PERIOD, subscription=FREEMIUM>,
+     <Curve: "DE @Weisweiler-F Lignite Power Production MWh/h H Actual", curve_type=TIMESERIES, subscription=FREEMIUM>,
+     <Curve: "DE @Weser-Porta River Temperature °C H Actual", curve_type=TIMESERIES, subscription=FREEMIUM>,
+     <Curve: "DE Hydro Snow-and-Groundwater MWh D Normal", curve_type=TIMESERIES, subscription=FREEMIUM>,
+     <Curve: "DE Nuclear Capacity Available MW REMIT", curve_type=INSTANCE_PERIOD, subscription=FREEMIUM>]
 
 Metadata is cached. So, if you try to load the same page twice, it is fetched
 from the cache, and thus not hitting the server.
@@ -94,7 +100,7 @@ When you know the name of a curve and want to load the corresponding
 
     >>> curve = eq.metadata.curve("CZ>DE Exchange Net Transfer Capacity MW 15min REMIT")
     >>> curve
-    <Curve: "CZ>DE Exchange Net Transfer Capacity MW 15min REMIT", curve_type=TIMESERIES>
+    <Curve: "CZ>DE Exchange Net Transfer Capacity MW 15min REMIT", curve_type=TIMESERIES, subscription=FREEMIUM>
 
 When you provide a name that does not exist, this method will throw a
 :py:class:`NotFoundError <energyquantified.exceptions.NotFoundError>`. Below we try
@@ -134,8 +140,8 @@ REMIT capacity curve for the German nuclear powerplant Brokdorf:
 
    >>> brokdorf = nuclear_powerplants[0]
    >>> brokdorf.curves
-   [<Curve: "DE @Brokdorf Nuclear Capacity Available MW REMIT", curve_type=INSTANCE_PERIOD>,
-    <Curve: "DE @Brokdorf Nuclear Production MWh/h H Actual", curve_type=TIMESERIES>]
+   [<Curve: "DE @Brokdorf Nuclear Capacity Available MW REMIT", curve_type=INSTANCE_PERIOD, subscription=FREEMIUM>,
+    <Curve: "DE @Brokdorf Nuclear Production MWh/h H Actual", curve_type=TIMESERIES, subscription=FREEMIUM>]
 
 See :meth:`energyquantified.api.MetadataAPI.places` for a full reference.
 

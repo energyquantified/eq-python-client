@@ -17,6 +17,9 @@ An important attribute on the curve model is :ref:`resolution <resolution>`
 (more on resolutions below). It tells you the time step (hourly, 15-minute,
 daily, etc.) and timezone for data in the curve.
 
+The :ref:`subscription <subscription>` attribute tells you what kind of
+subscription gives you access to the curve.
+
 **Curve types**
 
 Another essential detail is the ``curve_type`` attribute. This attribute
@@ -31,6 +34,49 @@ describes what kind of data the curve stores. There different types are:
 
 The ``curve_type`` tells you which operations you shall use to load data
 from the curve in the API.
+
+
+.. _subscription:
+
+Subscription
+~~~~~~~~~~~~
+
+A :py:class:`Subscription <energyquantified.metadata.Subscription>` describes
+your access to a curve. It contains information like the level of ``access``,
+``type`` of subscription, a human-readable ``label`` and more information such as
+the ``package``, the ``area`` and the ``collection`` depending on the type of
+subscription.
+
+**Subscription access levels**
+
+Access levels for a subscription.
+
+- ``FREEMIUM`` – Access is included in the freemium tier
+- ``BLOCKED`` – No access
+- ``TRIAL`` – Access is granted during a trial period
+- ``PAYING`` – Access is provided through a paid subscription
+- ``REALTO`` – Access is provided with a www.realto.io subscription
+- ``INTERNAL`` – Access is provided through partner agreements
+- ``FREE`` – Access is available at no cost
+- ``NONE`` – Missing access information
+
+**Subscription types**
+
+The type of subscription.
+
+- ``COLLECTION`` – A subscription related to collections
+- ``FREE`` – No subscription required for provided content
+- ``FREEMIUM`` – Limited access due to no subscription defined for provided content
+- ``PACKAGE`` – A subscription associated with a package of services
+- ``PACKAGE_AREA`` – A subscription tied to a combination of a specific package and area
+- ``PRIVATE`` – A private subscription with restricted access
+
+**Subscription collection permissions**
+
+The user's permissions for a collection.
+
+- ``r`` – Read-only access
+- ``rw`` – Read-write access
 
 
 Instance
