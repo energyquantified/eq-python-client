@@ -619,7 +619,7 @@ SE2._add_borders((NO3, "I"), (NO4, "I"), (SE1, "I"), (SE3, "I"))
 SE3._add_borders((DK1, "I"), (FI, "I"), (NO1, "I"), (SE2, "I"), (SE4, "I"))
 SE4._add_borders((DE, "I"), (DK2, "I"), (LT, "I"), (PL, "I"), (SE3, "I"))
 
-DK1._add_borders((DE, "I"), (DK2, "I"), (NL, "I"), (NO2, "I"), (SE3, "I"))
+DK1._add_borders((DE, "I"), (DK2, "I"), (GB, "E"), (NL, "I"), (NO2, "I"), (SE3, "I"))
 DK2._add_borders((DE, "I"), (DK1, "I"), (SE4, "I"))
 
 FI._add_borders((EE, "I"), (NO4, "N"), (RU, "N"), (SE1, "I"), (SE3, "I"))
@@ -657,7 +657,7 @@ CH._add_borders((AT, "E"), (DE, "E"), (FR, "E"), (IT_NORD, "E"))
 
 ## United Kingdom/Ireland
 
-GB._add_borders((BE, "E"), (FR, "E"), (NL, "E"), (NIE, "I"), (IE, "I"), (NO2, "I"))
+GB._add_borders((BE, "E"), (DK1, "E"), (FR, "E"), (NL, "E"), (NIE, "I"), (IE, "I"), (NO2, "I"))
 NIE._add_borders((IE, "I"), (GB, "I"))
 IE._add_borders((NIE, "I"), (GB, "I"))
 
