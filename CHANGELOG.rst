@@ -4,6 +4,11 @@ Changelog
 dev
 ---
 
+**Improvements**
+
+- Add new border:
+   - ``DK1 – GB`` Explicit
+
 **Bugfixes**
 
 - Remove call to ``logging.basicConfig()`` in ``energyquantified/api/events.py``
