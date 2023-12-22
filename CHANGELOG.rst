@@ -1,6 +1,16 @@
 Changelog
 =========
 
+dev
+---
+
+**Bugfixes**
+
+- Remove call to ``logging.basicConfig()`` in ``energyquantified/api/events.py``
+  as it was causing issues with the logging configuration in the client's
+  parent application
+
+
 0.13
 ----
 
