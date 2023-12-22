@@ -47,9 +47,26 @@ from energyquantified.events.callback import (
 from energyquantified.events.connection_event import TIMEOUT
 
 
-logging.basicConfig(stream=sys.stderr)
 log = logging.getLogger(__name__)
 
+# Set default log level to INFO for this module
+log.setLevel(logging.INFO)
+
+# Add stdout handler for level <= INFO
+stdout_handler = logging.StreamHandler(stream=sys.stdout)
+stdout_handler.setLevel(logging.DEBUG)
+stdout_handler.addFilter(lambda record: record.levelno <= logging.INFO)
+stdout_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(name)s - %(levelname)-8s - %(message)s")
+)
+log.addHandler(stdout_handler)
+# Add stderr handler for level > INFO
+stderr_handler = logging.StreamHandler(stream=sys.stderr)
+stderr_handler.addFilter(lambda record: record.levelno > logging.INFO)
+stderr_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(name)s - %(levelname)-8s - %(message)s")
+)
+log.addHandler(stderr_handler)
 
 class EventsAPI:
     """
