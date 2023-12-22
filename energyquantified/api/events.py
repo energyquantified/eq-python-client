@@ -68,6 +68,7 @@ stderr_handler.setFormatter(
 )
 log.addHandler(stderr_handler)
 
+
 class EventsAPI:
     """
     The curve events API client.
