@@ -289,7 +289,8 @@ class EventsAPI:
             self._remaining_reconnect_attempts = self._max_reconnect_attempts
         # Check if user was previously subscribed
         is_previously_subscribed = self._latest_curves_subscribe_request is not None
-        # Set resubscribe flags if reconnected and user was previously subscribed
+        # Set resubscribe flags if reconnected and user was previously
+        #  subscribed. **These flags must be set before the connection flags.**
         if is_previously_subscribed:
             self._done_resubscribing.clear()
             self._is_resubscribing.set()
@@ -547,7 +548,6 @@ class EventsAPI:
             self._ws_url,
             header={
                 "X-API-KEY": self._api_key,
-                "User-Agent": "eq-python-client",
             },
             on_open=self._on_open,
             on_message=self._on_message,
@@ -861,19 +861,6 @@ class EventsAPI:
                 description=response.errors,
             )
         return response.data.filters
-
-    def test(self, a):
-        """_summary_
-
-        :param a: _description_
-        :type a: _type_
-        :raises ValidationError: _description_
-        :return: _description_
-        :rtype: _type_
-        """
-        if a is None:
-            raise ValidationError("Test error")
-        return 1
 
     def get_next(self, timeout=None):
         """
