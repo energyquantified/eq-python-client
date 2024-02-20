@@ -25,7 +25,6 @@ class EventType(Enum):
     """
 
     CURVE_UPDATE = ("CURVE_UPDATE", "Curve Update", True, False, False)
-    UPDATE = ("UPDATE", "Update", True, False, False)
     CURVE_DELETE = ("CURVE_DELETE", "Curve Delete", True, False, False)
     CURVE_TRUNCATE = ("CURVE_TRUNCATE", "Curve Truncate", True, False, False)
     DISCONNECTED = ("DISCONNECTED", "Disconnected", False, True, False)
