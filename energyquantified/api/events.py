@@ -98,7 +98,6 @@ class EventsAPI:
         >>> # Loop over events as they come
         >>> for event in events.get_next():
         >>>     # Handle events
-
     """
 
     def __init__(self, ws_url, api_key):
@@ -126,6 +125,8 @@ class EventsAPI:
         self._is_subscribed_curves = threading.Event()
         self._messages_lock = threading.Lock()
         self._latest_curves_subscribe_request = None
+        self._is_resubscribing = threading.Event()
+        self._done_resubscribing = threading.Event()
         # Response queues
         self._subscribe_responses = queue.Queue()
         self._filters_responses = queue.Queue()
@@ -142,6 +143,8 @@ class EventsAPI:
             "Message from server: %s", msg
         )
         self._error_handler = lambda err: log.error(err)
+        # Exceptions from threads - for re-raising in main thread
+        self._exc_info = None
 
     def set_message_handler(self, func):
         self._message_handler = func
@@ -284,26 +287,51 @@ class EventsAPI:
         # Reset reconnect counter on successfull connection
         with self._remaining_reconnect_attempts_lock:
             self._remaining_reconnect_attempts = self._max_reconnect_attempts
-        # Flag events
+        # Check if user was previously subscribed
+        is_previously_subscribed = self._latest_curves_subscribe_request is not None
+        # Set resubscribe flags if reconnected and user was previously
+        #  subscribed. **These flags must be set before the connection flags.**
+        if is_previously_subscribed:
+            self._done_resubscribing.clear()
+            self._is_resubscribing.set()
+        # Set connection flags
         self._is_connected.set()
         self._done_trying_to_connect.set()
-        # Send the last active filters
-        if self._latest_curves_subscribe_request is not None:
+        # Resubscribe with previous filters if user was previously subscribed
+        if is_previously_subscribed:
             log.info(
                 "Reconnected to the stream, subscribing with "
-                "previous curve filters: %s",
-                self._latest_curves_subscribe_request
+                "previous curve filters: %s from id: %s",
+                self._latest_curves_subscribe_request.filters,
+                self._last_id,
             )
-            try:
-                self.subscribe_curve_events(
-                    filters=self._latest_curves_subscribe_request.filters,
-                    last_id="keep",
-                )
-            except Exception as e:
-                self._error_handler(
-                    f"Failed resubscribing to curve events after automatic reconnect. "
-                    f"Error: {e}"
-                )
+
+            def resubscribe():
+                try:
+                    self.subscribe_curve_events(
+                        filters=self._latest_curves_subscribe_request.filters,
+                        last_id="keep",
+                    )
+                except Exception as e:
+                    self._error_handler(
+                        f"Failed resubscribing to curve events after automatic reconnect. "
+                        f"Error: {e}"
+                    )
+                    exc_info = sys.exc_info()
+                    self._exc_info = (
+                        exc_info[0],
+                        exc_info[0](
+                            f"Failed to subscribe after reconnecting, "
+                            f"error: {exc_info[1]}"
+                        ),
+                        exc_info[2],
+                    )
+                finally:
+                    self._is_resubscribing.clear()
+                    self._done_resubscribing.set()
+
+            t = threading.Thread(target=resubscribe, daemon=True)
+            t.start()
 
     def _on_message(self, _ws, message):
         """
@@ -750,6 +778,7 @@ class EventsAPI:
         response = None
         try:
             response = self._subscribe_responses.get(timeout=timeout)
+            self._subscribe_responses.task_done()
         except queue.Empty:
             with self._messages_lock:
                 self._callbacks.pop(request_id, None)
@@ -878,6 +907,8 @@ class EventsAPI:
             new message, yielding a ``TimeoutEvent`` if no new event occurs.\
                 Waits indefinetly if timeout is None. Defaults to None.
         :type timeout: int, optional
+        :raises WebSocketsError: If failed to resubscribe after automatic\
+            reconnect in the case of a disconnect
         :yield: A generator of events. Blocks while waiting for a new event.
         :rtype: :py:class:`energyquantified.events.CurveUpdateEvent`,\
             :py:class:`energyquantified.events.ConnectionEvent`,\
@@ -885,6 +916,10 @@ class EventsAPI:
         """
         last_event_timestamp = None
         while True:
+            # Raise exception from threads if any
+            if self._exc_info is not None:
+                raise self._exc_info[1].with_traceback(self._exc_info[2])
+            # Get next event from queue
             with self._messages_lock:
                 try:
                     event = self._messages.get_nowait()
@@ -903,6 +938,10 @@ class EventsAPI:
             # Empty event queue
             # Check if connected (TimeoutEvent) or not (wait)
             if self._is_connected.is_set():
+                # Wait if currently trying to resubscribe
+                if self._is_resubscribing.is_set():
+                    self._done_resubscribing.wait()
+                    continue
                 if timeout is not None:
                     if last_event_timestamp is None:
                         last_event_timestamp = time.time()
