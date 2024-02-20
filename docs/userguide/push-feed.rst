@@ -735,11 +735,13 @@ Automatic subscribe after reconnect
 
 As mentioned, the client silently tries to reconnect on network
 errors automatically. After successfully reconnecting, it subscribes with the same
-filters and requests all events that occurred during downtime. **Note that**
+filters and requests all events that occurred during downtime.
+
+**Note that**
 :py:meth:`eq.events.get_next() <energyquantified.api.EventsAPI.get_next>`
 **raises a**
 :py:class:`WebSocketsError <energyquantified.exceptions.WebSocketsError>`
-**if the client fails to subscribe after an automatic reconnect.**
+**if the client fails to automatically resubscribe after a reconnect.**
 
 When you are not connected, you will receive events with the
 :py:class:`EventType.DISCONNECTED <energyquantified.events.EventType>` type
