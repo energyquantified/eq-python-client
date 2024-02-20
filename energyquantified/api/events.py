@@ -547,7 +547,7 @@ class EventsAPI:
         self._ws = websocket.WebSocketApp(
             self._ws_url,
             header={
-                "X-API-KEY": self._api_key,
+                "X-API-KEY": self._api_key
             },
             on_open=self._on_open,
             on_message=self._on_message,
