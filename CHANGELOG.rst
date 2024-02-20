@@ -1,6 +1,15 @@
 Changelog
 =========
 
+dev
+---
+
+**Bugfixes**
+
+- Fix deadlock in push feed preventing the client to resubscribe after recovery
+  from a connection loss
+
+
 0.13.1
 ------
 
