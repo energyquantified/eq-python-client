@@ -98,7 +98,6 @@ class EventsAPI:
         >>> # Loop over events as they come
         >>> for event in events.get_next():
         >>>     # Handle events
-
     """
 
     def __init__(self, ws_url, api_key):
@@ -126,6 +125,8 @@ class EventsAPI:
         self._is_subscribed_curves = threading.Event()
         self._messages_lock = threading.Lock()
         self._latest_curves_subscribe_request = None
+        self._is_resubscribing = threading.Event()
+        self._done_resubscribing = threading.Event()
         # Response queues
         self._subscribe_responses = queue.Queue()
         self._filters_responses = queue.Queue()
@@ -142,6 +143,8 @@ class EventsAPI:
             "Message from server: %s", msg
         )
         self._error_handler = lambda err: log.error(err)
+        # Exceptions from threads - for re-raising in main thread
+        self._exc_info = None
 
     def set_message_handler(self, func):
         self._message_handler = func
@@ -280,37 +283,117 @@ class EventsAPI:
         Callback function that is called whenever a new websocket connection
         is established.
         """
+        print(f"on_open")
         self._last_connection_event = None
         # Reset reconnect counter on successfull connection
         with self._remaining_reconnect_attempts_lock:
             self._remaining_reconnect_attempts = self._max_reconnect_attempts
-        # Flag events
+        # Check if user was previously subscribed
+        is_previously_subscribed = self._latest_curves_subscribe_request is not None
+        # Set resubscribe flags if reconnected and user was previously subscribed
+        if is_previously_subscribed:
+            self._done_resubscribing.clear()
+            self._is_resubscribing.set()
+        # Set connection flags
         self._is_connected.set()
         self._done_trying_to_connect.set()
-        # Send the last active filters
-        if self._latest_curves_subscribe_request is not None:
+        # Resubscribe with previous filters if user was previously subscribed
+        if is_previously_subscribed:
             log.info(
                 "Reconnected to the stream, subscribing with "
-                "previous curve filters: %s",
-                self._latest_curves_subscribe_request
+                "previous curve filters: %s from id: %s",
+                self._latest_curves_subscribe_request.filters,
+                self._last_id,
             )
-            try:
-                self.subscribe_curve_events(
-                    filters=self._latest_curves_subscribe_request.filters,
-                    last_id="keep",
-                )
-            except Exception as e:
-                self._error_handler(
-                    f"Failed resubscribing to curve events after automatic reconnect. "
-                    f"Error: {e}"
-                )
+            ########## 1
+            def resub():
+                print(f"start resub")
+                try:
+                    new_filters = CurveAttributeFilter(
+                        event_types=[
+                            EventType.CURVE_UPDATE,
+                            EventType.UPDATE,
+                        ],
+                    )
+                    self.subscribe_curve_events(
+                        #filters=new_filters,
+                        filters=self._latest_curves_subscribe_request.filters,
+                        last_id="keep",
+                    )
+                except Exception as e:
+                    self._error_handler(
+                        f"Failed resubscribing to curve events after automatic reconnect. "
+                        f"Error: {e}"
+                    )
+                    exc_info = sys.exc_info()
+                    print(f"exc_info: {exc_info}")
+                    trace = exc_info[2]
+                    self._exc_info = (
+                        exc_info[0],
+                        exc_info[0](
+                            f"Failed to subscribe after reconnecting, "
+                            f"error: {exc_info[1]}"
+                        ),
+                        trace,
+                    )
+                    print(f"self._exc_info: {self._exc_info}")
+                    #os._exit(1)
+                    #import _thread
+                    #_thread.interrupt_main()
+                finally:
+                    print(f"on_open, subscribe_curve_events DONE")
+                    print(f"resub DONE")
+                    self._is_resubscribing.clear()
+                    self._done_resubscribing.set()
+
+            t = threading.Thread(target=resub, daemon=True)
+            print(f"starting resub thread")
+            t.start()
+            ########## 1
+            ########## 2
+            # try:
+            #     new_filters = CurveAttributeFilter(
+            #             event_types=[
+            #                 EventType.CURVE_UPDATE,
+            #                 EventType.UPDATE,
+            #             ],
+            #         )
+            #     self.subscribe_curve_events(
+            #         #filters=self._latest_curves_subscribe_request.filters,
+            #         filters=new_filters,
+            #         last_id="keep",
+            #     )
+            # except Exception as e:
+            #     self._error_handler(
+            #         f"Failed resubscribing to curve events after automatic reconnect. "
+            #         f"Error: {e}"
+            #     )
+            # finally:
+            #     print(f"on_open, subscribe_curve_events DONE")
+            ########## 2
+            ########## 0
+            # try:
+            #     self.subscribe_curve_events(
+            #         filters=self._latest_curves_subscribe_request.filters,
+            #         last_id="keep",
+            #     )
+            # except Exception as e:
+            #     self._error_handler(
+            #         f"Failed resubscribing to curve events after automatic reconnect. "
+            #         f"Error: {e}"
+            #     )
+            # finally:
+            #     print(f"on_open, subscribe_curve_events DONE")
+            ########## 0
 
     def _on_message(self, _ws, message):
         """
         Callback func that is called whenever there is a new message on the ws.
         """
+        print(f"on_message")
         with self._messages_lock:
             message_json = json.loads(message)
+            print(f"on_message, message_json: {message_json}")
             msg_type_tag = ServerMessageType.tag_from_json(message_json)
             if not ServerMessageType.is_valid_tag(msg_type_tag):
                 # Unkown type, skip. Might be a new type that is not supported
@@ -519,7 +602,8 @@ class EventsAPI:
         self._ws = websocket.WebSocketApp(
             self._ws_url,
             header={
-                "X-API-KEY": self._api_key
+                "X-API-KEY": self._api_key,
+                "User-Agent": "eq-python-client",
             },
             on_open=self._on_open,
             on_message=self._on_message,
@@ -654,6 +738,7 @@ class EventsAPI:
             confirmed by the server.
         :rtype: :py:class:`energyquantified.events.CurvesSubscribeResponse`
         """
+        print(f"subscribe_curve_events")
         if self._should_not_connect.is_set():
             raise WebSocketsError("Please connect before subscribing")
         # Validate filters
@@ -706,6 +791,7 @@ class EventsAPI:
             filters=filters,
         )
         subscribe_message = json.dumps(subscribe_request.to_message())
+        print(f"subscribe_message: {subscribe_message}")
         with self._messages_lock:
             # Stop handling incoming events
             self._is_subscribed_curves.clear()
@@ -740,6 +826,7 @@ class EventsAPI:
             except queue.Empty:
                 break
         # Send subscribe message
+        print(f"sending subscribe_message: {subscribe_message}")
         try:
             self._ws.send(subscribe_message)
         except WebSocketConnectionClosedException as e:
@@ -748,11 +835,14 @@ class EventsAPI:
             raise WebSocketsError("Failed to subscribe") from e
         # Wait for subscribe response
         response = None
+        print(f"waiting for subscribe response")
         try:
             response = self._subscribe_responses.get(timeout=timeout)
+            self._subscribe_responses.task_done()
         except queue.Empty:
             with self._messages_lock:
                 self._callbacks.pop(request_id, None)
+        print(f"response: {response}")
         if response is None:
             raise WebSocketsError("Timed out trying to subscribe")
         if not response.success:
@@ -885,12 +975,21 @@ class EventsAPI:
         """
         last_event_timestamp = None
         while True:
+            if self._exc_info is not None:
+                print(f"self._exc_info: {self._exc_info}")
+                print(f"self._exc_info[0]: {self._exc_info[0]}")
+                print(f"self._exc_info[1]: {self._exc_info[1]}")
+                print(f"self._exc_info[2]: {self._exc_info[2]}")
+
+                raise self._exc_info[1].with_traceback(self._exc_info[2])
+            print(f"get_next iteration START")
             with self._messages_lock:
                 try:
                     event = self._messages.get_nowait()
                     self._messages.task_done()
                 except queue.Empty:
                     event = None
+            print(f"get_next, event: {event}")
             # Yield event from queue
             if event is not None:
                 last_event_timestamp = time.time()
@@ -903,6 +1002,13 @@ class EventsAPI:
             # Empty event queue
             # Check if connected (TimeoutEvent) or not (wait)
             if self._is_connected.is_set():
+                print(f"get_next, is_connected")
+                # Wait if currently trying to resubscribe
+                if self._is_resubscribing.is_set():
+                    print(f"get_next, is_resubscribing")
+                    self._done_resubscribing.wait()
+                    print(f"get_next, done_resubscribing")
+                    continue
                 if timeout is not None:
                     if last_event_timestamp is None:
                         last_event_timestamp = time.time()
@@ -914,11 +1020,13 @@ class EventsAPI:
                 time.sleep(0.1)
             # Not connected
             else:
+                print(f"get_next, not connected")
                 # Reset last_event_timestamp
                 if timeout is not None:
                     last_event_timestamp = None
                 # Wait if currently trying to connect
                 self._done_trying_to_connect.wait()
+                print(f"get_next, done_trying_to_connect")
                 # If stopped trying to connect (or never started), yield
                 # ConnectionEvent
                 if self._should_not_connect.is_set():
