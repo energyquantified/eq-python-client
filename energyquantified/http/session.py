@@ -10,7 +10,7 @@ from .retry import Retry
 
 
 # Identify the API client
-USER_AGENT = f"Python/EQ-API-Client {__version__}"
+USER_AGENT = f"eq-python-client/{__version__}"
 
 # Suppress SSL certificate warnings
 # TODO This should probably not be handled here

@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Modify the ``User-Agent`` header to comply with standard conventions
+
+
 0.13.2
 ------
 
