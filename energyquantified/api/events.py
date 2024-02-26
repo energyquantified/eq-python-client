@@ -18,6 +18,7 @@ from websocket import (
     WebSocketBadStatusException,
     WebSocketPayloadException,
 )
+from energyquantified.__version__ import __version__
 from energyquantified.exceptions import ValidationError
 from energyquantified.events import (
     CurveNameFilter,
@@ -547,7 +548,8 @@ class EventsAPI:
         self._ws = websocket.WebSocketApp(
             self._ws_url,
             header={
-                "X-API-KEY": self._api_key
+                "X-API-KEY": self._api_key,
+                "User-Agent": f"eq-python-client/{__version__}",
             },
             on_open=self._on_open,
             on_message=self._on_message,
