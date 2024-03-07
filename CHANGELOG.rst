@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Bugfixes**
+
+- The ``kind`` parameter on ``eq.metadata.places()`` did nothing. It is now fixed.
+
+
 0.13.3
 ------
 

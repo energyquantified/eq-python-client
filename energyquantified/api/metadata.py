@@ -189,7 +189,7 @@ class MetadataAPI(_MetadataAPI):
         self._add_str(params, "q", q)
         self._add_area(params, "area", area)
         self._add_str_list(params, "fuel", fuel)
-        self._add_str_list(params, "kind", kind)
+        self._add_str_list(params, "type", kind)
         self._add_bool(params, "tree", tree)
         self._add_int(params, "page", page)
         self._add_int(params, "page-size", page_size)
