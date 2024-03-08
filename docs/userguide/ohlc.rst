@@ -16,7 +16,7 @@ OHLC objects
 
 We group all products for a market into a single curve. For instance, we have
 a curve called ``NP Futures Power Base EUR/MWh Nasdaq OHLC``, which contains
-all power futures contracts for the Nord Pool system price.
+all power futures contracts for the system price in the Nord Pool area.
 
 When loading OHLC data, the response is a list of OHLC objects. An OHLC object
 consists of **open**, **high**, **low**, **close**, **settlement**, **volume**

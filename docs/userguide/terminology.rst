@@ -403,7 +403,8 @@ market regions in Europe, as well as prices for gas markets, carbon emissions
 .. image:: ../_static/ohlc_chart.png
    :alt: OHLC chart
 
-**Example:** Nord Pool future contract for a front quarter contract (Q1).
+**Example:** The Nasdaq Nordic Power Future contract for a front quarter
+contract (Q1).
 
 
 SRMC
