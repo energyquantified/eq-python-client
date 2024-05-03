@@ -26,7 +26,6 @@ def _get_ohlc_list_class():
         _ohlc_list_class = OHLCList
     return _ohlc_list_class
 
-
 _value_type_class = None
 def _get_value_type_class():
     """
@@ -54,20 +53,6 @@ def _get_absolute_result_class():
         from energyquantified.data import AbsoluteResult
         _absolute_result_class = AbsoluteResult
     return _absolute_result_class
-
-_absolute_item_class = None
-def _get_absolute_item_class():
-    """
-    Private utility function for lazy-loading the AbsoluteItem class.
-
-    :return: The AbsoluteItem class
-    :rtype: class
-    """
-    global _absolute_item_class
-    if not _absolute_item_class:
-        from energyquantified.data import AbsoluteItem
-        _absolute_item_class = AbsoluteItem
-    return _absolute_item_class
 
 pd = None
 _is_pandas_installed = None
