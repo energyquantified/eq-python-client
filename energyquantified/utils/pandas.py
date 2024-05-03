@@ -26,7 +26,6 @@ def _get_ohlc_list_class():
         _ohlc_list_class = OHLCList
     return _ohlc_list_class
 
-
 _value_type_class = None
 def _get_value_type_class():
     """
@@ -41,6 +40,19 @@ def _get_value_type_class():
         _value_type_class = ValueType
     return _value_type_class
 
+_absolute_result_class = None
+def _get_absolute_result_class():
+    """
+    Private utility function for lazy-loading the AbsoluteResult class.
+
+    :return: The AbsoluteResult class
+    :rtype: class
+    """
+    global _absolute_result_class
+    if not _absolute_result_class:
+        from energyquantified.data import AbsoluteResult
+        _absolute_result_class = AbsoluteResult
+    return _absolute_result_class
 
 pd = None
 _is_pandas_installed = None
@@ -420,3 +432,79 @@ def ohlc_list_to_dataframe(ohlc_list):
             "open_interest": ohlc.open_interest,
         } for ohlc in ohlc_list
     ))
+
+
+def absolute_result_to_dataframe(absolute_result, name=None, single_level_index=False):
+    """
+    Convert an :py:class:`energyquantified.data.AbsoluteResult` to a
+    ``pandas.DataFrame``.
+
+    :param absolute_result: The absolute result
+    :type absolute_result: AbsoluteResult
+    :param name: Set a name for the value column, defaults to None. Uses\
+    the curve name if not set. The delivery date is appended to the name.
+    :type name: str | None, optional
+    :param single_level_index: Set to True to use single-level index in the\
+    DataFrame, defaults to False
+    :type single_level_index: bool, optional
+    :return: A DataFrame
+    :rtype: pandas.DataFrame
+    :raises ImportError: When pandas is not installed on the system
+    """
+    assert_pandas_installed()
+    assert isinstance(absolute_result, _get_absolute_result_class()), (
+        "absolute_result must be an instance of energyquantified.data.AbsoluteResult"
+    )
+    assert isinstance(name, (type(None), str)), (
+        f"parameter name must be string or None, was {type(name)}"
+    )
+    if name is None:
+        name = absolute_result.curve.name
+    if single_level_index:
+        return _absolute_result_to_dataframe_single_index(
+            absolute_result,
+            name
+        )
+    else:
+        return _absolute_result_to_dataframe(
+            absolute_result,
+            name
+        )
+
+
+def _absolute_result_to_dataframe(absolute_result, name):
+    # Column headers
+    columns = [
+        f"{name} {absolute_result.delivery:%Y-%m-%d %H:%M}".strip()
+    ]
+    # Create dataframe
+    df = pd.DataFrame.from_records(
+        ((item.value,) for item in absolute_result.items),
+        columns=columns,
+        index=pd.MultiIndex.from_arrays(
+            [
+                [item.instance.issued for item in absolute_result.items],
+                [item.instance.tag for item in absolute_result.items]
+            ],
+            names=['issued', 'tag']
+        )
+    )
+    return df
+
+
+def _absolute_result_to_dataframe_single_index(absolute_result, name):
+    # Column headers
+    columns = [
+        f"{name} {absolute_result.delivery:%Y-%m-%d %H:%M}".strip()
+    ]
+    # Create dataframe
+    df = pd.DataFrame.from_records(
+        ((item.value,) for item in absolute_result.items),
+        columns=columns,
+        index=[
+            item.instance.as_dataframe_column_header()
+            for item in absolute_result.items
+        ],
+    )
+    df.index.name = 'instance'
+    return df

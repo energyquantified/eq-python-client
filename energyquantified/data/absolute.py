@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from ..metadata import Instance
+from ..utils.pandas import absolute_result_to_dataframe
 
 
 @dataclass(frozen=True)
@@ -135,3 +136,42 @@ class AbsoluteResult:
 
     def __repr__(self):
         return self.__str__()
+
+    def to_df(self, name=None, single_level_index=False):
+        """
+        Convert the result to a ``pandas.DataFrame``.
+
+        :param name: Set a name for the value column, defaults to using the\
+            curve name. The delivery date is appended to the name.
+        :type name: str, optional
+        :param single_level_index: Set to True to use single-level index\
+            in the DataFarme, defaults to False
+        :type single_level_index: bool, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: If pandas is not installed
+        """
+        return self.to_dataframe(
+            name=name,
+            single_level_index=single_level_index,
+        )
+
+    def to_dataframe(self, name=None, single_level_index=False):
+        """
+        Convert the result to a ``pandas.DataFrame``.
+
+        :param name: Set a name for the value column, defaults to using the\
+            curve name. The delivery date is appended to the name.
+        :type name: str, optional
+        :param single_level_index: Set to True to use single-level index\
+            in the DataFarme, defaults to False
+        :type single_level_index: bool, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: If pandas is not installed
+        """
+        return absolute_result_to_dataframe(
+            self,
+            name=name,
+            single_level_index=single_level_index,
+        )
