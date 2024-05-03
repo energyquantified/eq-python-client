@@ -1,6 +1,15 @@
 Changelog
 =========
 
+dev
+---
+
+**Bugfixes**
+
+- Adjust date formatting in ``AbsoluteResult.to_df()`` to be consistent with
+  the rest of the client
+
+
 0.13.4
 ------
 

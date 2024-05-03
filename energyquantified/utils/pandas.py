@@ -483,7 +483,7 @@ def _absolute_result_to_dataframe(absolute_result, name):
         columns=columns,
         index=pd.MultiIndex.from_arrays(
             [
-                [item.instance.issued for item in absolute_result.items],
+                [f"{item.instance.issued:%Y-%m-%d %H:%M}" for item in absolute_result.items],
                 [item.instance.tag for item in absolute_result.items]
             ],
             names=['issued', 'tag']
