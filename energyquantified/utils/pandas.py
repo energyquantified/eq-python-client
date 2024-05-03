@@ -485,7 +485,6 @@ def absolute_result_to_dataframe(absolute_result, name=None, single_level_index=
             name
         )
 
-
 def _absolute_result_to_dataframe(absolute_result, name):
     # Column headers
     columns = [
@@ -521,8 +520,3 @@ def _absolute_result_to_dataframe_single_index(absolute_result, name):
     )
     df.index.name = 'instance'
     return df
-
-
-
-# Instance.as_dataframe_column_header: f"{self.issued:%Y-%m-%d %H:%M} {self.tag}"
-# Use as row?

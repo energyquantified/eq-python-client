@@ -141,7 +141,8 @@ class AbsoluteResult:
         """
         Convert the result to a ``pandas.DataFrame``.
 
-        :param name: Set a name for the value column, defaults to ``value``
+        :param name: Set a name for the value column, defaults to using the\
+            curve name. The delivery date is appended to the name.
         :type name: str, optional
         :param single_level_index: Set to True to use single-level index\
             in the DataFarme, defaults to False
@@ -159,7 +160,8 @@ class AbsoluteResult:
         """
         Convert the result to a ``pandas.DataFrame``.
 
-        :param name: Set a name for the value column, defaults to ``value``
+        :param name: Set a name for the value column, defaults to using the\
+            curve name. The delivery date is appended to the name.
         :type name: str, optional
         :param single_level_index: Set to True to use single-level index\
             in the DataFarme, defaults to False
