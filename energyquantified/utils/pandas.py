@@ -448,6 +448,7 @@ def ohlc_list_to_dataframe(ohlc_list):
         } for ohlc in ohlc_list
     ))
 
+
 def absolute_result_to_dataframe(absolute_result, name=None, single_level_index=False):
     """
     Convert an :py:class:`energyquantified.data.AbsoluteResult` to a
@@ -485,6 +486,7 @@ def absolute_result_to_dataframe(absolute_result, name=None, single_level_index=
             name
         )
 
+
 def _absolute_result_to_dataframe(absolute_result, name):
     # Column headers
     columns = [
@@ -503,6 +505,7 @@ def _absolute_result_to_dataframe(absolute_result, name):
         )
     )
     return df
+
 
 def _absolute_result_to_dataframe_single_index(absolute_result, name):
     # Column headers
