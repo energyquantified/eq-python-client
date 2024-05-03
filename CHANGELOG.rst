@@ -4,6 +4,10 @@ Changelog
 dev
 ---
 
+**Improvements**
+
+- Add ``AbsoluteResult.to_df()`` and ``AbsoluteResult.to_dataframe()``
+
 **Bugfixes**
 
 - The ``kind`` parameter on ``eq.metadata.places()`` did nothing. It is now fixed.
