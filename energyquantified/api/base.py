@@ -200,6 +200,24 @@ class BaseAPI:
             raise ValidationError(reason="Provide a time", parameter=name)
 
     @staticmethod
+    def _add_time_list(params, name, var, required=False):
+        if (var is None or var == []) and not required:
+            return
+        if not isinstance(var, (list, tuple)):
+            var = [var]
+        for i in range(len(var)):
+            if isinstance(var[i], str):
+                continue
+            elif isinstance(var[i], time):
+                var[i] = var[i].isoformat(timespec='milliseconds')
+            else:
+                raise ValidationError(
+                    reason="Provide a time or a list of times",
+                    parameter=name,
+                )
+        params[name] = list(var)
+
+    @staticmethod
     def _add_str(params, name, var, allowed_values=None, required=False):
         if var is None and not required:
             return

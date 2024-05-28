@@ -50,7 +50,9 @@ class InstancesAPI(BaseAPI):
             exlude_tags=None,
             limit=25,
             issued_at_latest=None,
-            issued_at_earliest=None):
+            issued_at_earliest=None,
+            issued_time_of_day=None,
+        ):
         """
         List instances for the curve. Does not load any time series data.
 
@@ -75,6 +77,8 @@ class InstancesAPI(BaseAPI):
         :type issued_at_latest: datetime, date, str, optional
         :param issued_at_earliest: Filter by issue date, defaults to None
         :type issued_at_earliest: datetime, date, str, optional
+        :param issued_time_of_day: Filter by issued time of day, defaults to None
+        :type issued_time_of_day: list, time, str, optional
         :return: A list of :py:class:`energyquantified.metadata.Instance`
         :rtype: list
         """
@@ -88,6 +92,7 @@ class InstancesAPI(BaseAPI):
         self._add_int(params, "limit", limit, min=1, max=25, required=True)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
         self._add_datetime(params, "issued-at-earliest", issued_at_earliest)
+        self._add_time_list(params, "issued-time-of-day", issued_time_of_day)
         # HTTP request
         response = self._get(url, params=params)
         return parse_instance_list(response.json())
@@ -100,6 +105,7 @@ class InstancesAPI(BaseAPI):
             limit=5,
             issued_at_latest=None,
             issued_at_earliest=None,
+            issued_time_of_day=None,
             time_zone=None,
             frequency=None,
             aggregation=None,
@@ -133,10 +139,12 @@ class InstancesAPI(BaseAPI):
         :type exlude_tags: list, str, optional
         :param limit: Maximum number of instances returned, defaults to 5
         :type limit: int, optional
-        :param issued_at_latest: [description], defaults to None
-        :type issued_at_latest: [type], optional
-        :param issued_at_earliest: [description], defaults to None
-        :type issued_at_earliest: [type], optional
+        :param issued_at_latest: Filter by issue date, defaults to None
+        :type issued_at_latest: datetime, date, str, optional
+        :param issued_at_earliest: Filter by issue date, defaults to None
+        :type issued_at_earliest: datetime, date, str, optional
+        :param issued_time_of_day: Filter by issued time of day, defaults to None
+        :type issued_time_of_day: list, str, time, optional
         :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional
         :param frequency: Set the preferred frequency for aggregations,\
@@ -176,6 +184,7 @@ class InstancesAPI(BaseAPI):
             self._add_int(params, "limit", limit, min=1, max=10, required=True)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
         self._add_datetime(params, "issued-at-earliest", issued_at_earliest)
+        self._add_time_list(params, "issued-time-of-day", issued_time_of_day)
         self._add_time_zone(params, "timezone", time_zone, required=False)
         self._add_frequency(params, "frequency", frequency)
         if "frequency" in params:
@@ -192,6 +201,7 @@ class InstancesAPI(BaseAPI):
             curve,
             tags=None,
             issued_at_latest=None,
+            issued_time_of_day=None,
             time_zone=None,
             frequency=None,
             aggregation=None,
@@ -213,8 +223,10 @@ class InstancesAPI(BaseAPI):
         :type curve: :py:class:`energyquantified.metadata.Curve`, str
         :param tags: Filter by instance tags, defaults to None
         :type tags: list, str, optional
-        :param issued_at_latest: [description], defaults to None
-        :type issued_at_latest: [type], optional
+        :param issued_at_latest: Filter by issue date, defaults to None
+        :type issued_at_latest: datetime, date, str, optional
+        :param issued_time_of_day: Filter by issued time of day, defaults to None
+        :type issued_time_of_day: list, str, time, optional
         :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional
         :param frequency: Set the preferred frequency for aggregations,\
@@ -249,6 +261,7 @@ class InstancesAPI(BaseAPI):
         params = {}
         self._add_str_list(params, "tags", tags)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
+        self._add_time_list(params, "issued-time-of-day", issued_time_of_day)
         self._add_time_zone(params, "timezone", time_zone, required=False)
         self._add_frequency(params, "frequency", frequency)
         if "frequency" in params:
