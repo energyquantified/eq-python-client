@@ -69,10 +69,10 @@ instances issued in 2018:
 Load only instances issued at a specific time of day by using the
 ``issued-time-of-day`` parameter. You can provide one or more time-values.
 
-   >>> from datetime import time as dtime
+   >>> from datetime import time
    >>> forecasts = eq.instances.load(
    >>>    'DE Wind Power Production MWh/h 15min Forecast',
-   >>>    issued_time_of_day=["12:00", dtime(3,0)] # Issued at 12:00 or 03:00
+   >>>    issued_time_of_day=["12:00", time(3,0)] # Issued at 12:00 or 03:00
    >>> )
 
 You can also filter by the instance's **tags** you would like to load. It is
