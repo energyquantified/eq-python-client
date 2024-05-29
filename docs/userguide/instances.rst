@@ -66,6 +66,15 @@ instances issued in 2018:
    >>>    issued_at_latest=datetime(2018, 12, 31, 23, 59, 59) # Last second of 2018!
    >>> )
 
+Load only instances issued at a specific time of day by using the
+``issued-time-of-day`` parameter. You can provide one or more time-values.
+
+   >>> from datetime import time
+   >>> forecasts = eq.instances.load(
+   >>>    'DE Wind Power Production MWh/h 15min Forecast',
+   >>>    issued_time_of_day=["12:00", time(3,0)] # Issued at 12:00 or 03:00
+   >>> )
+
 You can also filter by the instance's **tags** you would like to load. It is
 possible to list more than one tag. Let's download data for ``ec`` and ``gfs``:
 
@@ -260,7 +269,7 @@ Aggregations are also supported, as you can see from the examples above.
 
 
 Rolling forecasts (hours-ahead forecasts)
---------------------------------------
+-----------------------------------------
 
 Method reference: :py:meth:`eq.instances.rolling() <energyquantified.api.InstancesAPI.rolling>`
 

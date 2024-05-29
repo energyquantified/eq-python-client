@@ -1,6 +1,16 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Add ``issued_time_of_day`` parameter to ``eq.instances.list()``,
+  ``eq.instances.load()`` and ``eq.instances.latest()`` for filtering instances
+  based on issued time
+
+
 0.13.5
 ------
 
