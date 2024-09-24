@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Dependencies**
+
+- Upgrade ``dateutil`` latest from 2.8 to 2.9
+
+
 0.13.6
 ------
 
