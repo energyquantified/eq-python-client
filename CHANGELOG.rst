@@ -1,8 +1,8 @@
 Changelog
 =========
 
-dev
----
+0.13.7
+------
 
 **Dependencies**
 
