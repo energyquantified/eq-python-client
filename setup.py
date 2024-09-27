@@ -10,7 +10,7 @@ install_requires = [
     "requests>=2.31,<3",
     "pytz",
     "tzlocal",
-    "python-dateutil>=2.8.0,<=2.9",
+    "python-dateutil>=2.8.0,<2.10",
     "websocket-client==1.5.1",
 ]
 # tests_require = [

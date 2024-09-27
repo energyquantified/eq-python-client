@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+** Dependencies**
+
+- Upgrade ``python-dateutil`` latest from ``<=2.9`` to ``<2.10``
+
+
 0.13.7
 ------
 
