@@ -4,7 +4,7 @@ Changelog
 0.13.8
 ------
 
-** Dependencies**
+**Dependencies**
 
 - Upgrade ``python-dateutil`` latest from ``<=2.9`` to ``<2.10``
 
