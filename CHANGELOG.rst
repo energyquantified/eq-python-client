@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Bugfixes**
+
+- Fix a bug in ``TimeseriesList.to_df()`` sorting in the wrong order
+
+
 0.13.8
 ------
 
