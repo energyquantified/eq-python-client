@@ -396,7 +396,8 @@ def timeseries_list_to_dataframe(timeseries_list, single_level_header=False):
             ts.to_dataframe(single_level_header=single_level_header)
             for ts in timeseries_list
         ],
-        axis=1
+        axis=1,
+        sort=True,
     )
 
 
