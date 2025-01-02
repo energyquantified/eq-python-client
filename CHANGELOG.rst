@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Update border definitions
+
+
 0.13.9
 ------
 

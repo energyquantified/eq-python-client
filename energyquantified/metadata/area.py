@@ -608,28 +608,28 @@ DZ = Area(tag="DZ", name="Algeria", country=True, external=True)
 
 ## Nordic borders
 
-NO1._add_borders((NO2, "I"), (NO3, "I"), (NO5, "I"), (SE3, "I"))
-NO2._add_borders((DE, "I"), (DK1, "I"), (GB, "I"), (NL, "I"), (NO1, "I"), (NO5, "I"))
-NO3._add_borders((NO1, "I"), (NO4, "I"), (NO5, "I"), (SE2, "I"))
-NO4._add_borders((FI, "N"), (NO3, "I"), (SE1, "I"), (SE2, "I"))
-NO5._add_borders((NO1, "I"), (NO2, "I"), (NO3, "I"))
+NO1._add_borders((NO2, "F"), (NO3, "F"), (NO5, "F"), (SE3, "F"))
+NO2._add_borders((DE, "F"), (DK1, "F"), (GB, "I"), (NL, "F"), (NO1, "F"), (NO5, "F"))
+NO3._add_borders((NO1, "F"), (NO4, "F"), (NO5, "F"), (SE2, "F"))
+NO4._add_borders((FI, "N"), (NO3, "F"), (SE1, "F"), (SE2, "F"))
+NO5._add_borders((NO1, "F"), (NO2, "F"), (NO3, "F"))
 
-SE1._add_borders((FI, "I"), (NO4, "I"), (SE2, "I"))
-SE2._add_borders((NO3, "I"), (NO4, "I"), (SE1, "I"), (SE3, "I"))
-SE3._add_borders((DK1, "I"), (FI, "I"), (NO1, "I"), (SE2, "I"), (SE4, "I"))
-SE4._add_borders((DE, "I"), (DK2, "I"), (LT, "I"), (PL, "I"), (SE3, "I"))
+SE1._add_borders((FI, "F"), (NO4, "F"), (SE2, "F"))
+SE2._add_borders((NO3, "F"), (NO4, "F"), (SE1, "F"), (SE3, "F"))
+SE3._add_borders((DK1, "F"), (FI, "F"), (NO1, "F"), (SE2, "F"), (SE4, "F"))
+SE4._add_borders((DE, "I"), (DK2, "F"), (LT, "F"), (PL, "F"), (SE3, "F"))
 
-DK1._add_borders((DE, "I"), (DK2, "I"), (GB, "E"), (NL, "I"), (NO2, "I"), (SE3, "I"))
-DK2._add_borders((DE, "I"), (DK1, "I"), (SE4, "I"))
+DK1._add_borders((DE, "F"), (DK2, "F"), (GB, "E"), (NL, "F"), (NO2, "F"), (SE3, "F"))
+DK2._add_borders((DE, "F"), (DK1, "F"), (SE4, "F"))
 
-FI._add_borders((EE, "I"), (NO4, "N"), (RU, "N"), (SE1, "I"), (SE3, "I"))
+FI._add_borders((EE, "F"), (NO4, "N"), (RU, "N"), (SE1, "F"), (SE3, "F"))
 
 
 ## Baltic borders
 
-EE._add_borders((FI, "I"), (LV, "I"), (RU, "N"))
+EE._add_borders((FI, "F"), (LV, "I"), (RU, "N"))
 LV._add_borders((EE, "I"), (LT, "I"), (RU, "N"))
-LT._add_borders((BY, "N"), (LV, "I"), (PL, "I"), (RU_KGD, "N"), (SE4, "I"))
+LT._add_borders((BY, "N"), (LV, "I"), (PL, "I"), (RU_KGD, "N"), (SE4, "F"))
 
 
 ## Central Western Europe
@@ -639,13 +639,13 @@ DE._add_borders(
     (BE, "F"),
     (CH, "E"),
     (CZ, "F"),
-    (DK1, "I"),
-    (DK2, "I"),
+    (DK1, "F"),
+    (DK2, "F"),
     (FR, "F"),
     (NL, "F"),
-    (NO2, "I"),
+    (NO2, "F"),
     (PL, "F"),
-    (SE4, "I"),
+    (SE4, "F"),
 )
 AT._add_borders((CH, "E"), (CZ, "F"), (DE, "F"), (HU, "F"), (IT_NORD, "EI"), (SI, "F"))
 FR._add_borders((BE, "F"), (CH, "E"), (DE, "F"), (ES, "EI"), (GB, "E"), (IT_NORD, "EI"))
@@ -688,7 +688,7 @@ IT_SARD._add_borders((FR_COR, "I"), (IT_CNOR, "I"), (IT_CSUD, "I"))
 
 
 SI._add_borders((AT, "F"), (HR, "EF"), (HU, "F"), (IT_NORD, "EI"))
-RO._add_borders((BG, "E"), (HU, "F"), (RS, "E"), (UA, "E"))
+RO._add_borders((BG, "E"), (HU, "F"), (RS, "E"), (UA, "E"), (MD, "E"))
 HR._add_borders((BA, "E"), (HU, "F"), (RS, "E"), (SI, "EF"))
 BA._add_borders((HR, "E"), (ME, "E"), (RS, "E"))
 RS._add_borders(
@@ -719,6 +719,7 @@ TR._add_borders((BG, "E"), (GE, "E"), (GR, "E"))
 RU._add_borders((EE, "N"), (FI, "N"), (LV, "N"))
 RU_KGD._add_borders((LT, "N"))
 BY._add_borders((LT, "N"))
-UA._add_borders((HU, "E"), (PL, "E"), (RO, "E"), (SK, "E"))
+MD._add_borders((RO, "E"), (UA, "E"))
+UA._add_borders((HU, "E"), (PL, "E"), (RO, "E"), (SK, "E"), (MD, "E"))
 MT._add_borders((IT_SICI, "I"))
 GE._add_borders((TR, "E"))
