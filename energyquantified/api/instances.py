@@ -179,9 +179,9 @@ class InstancesAPI(BaseAPI):
         self._add_str_list(params, "tags", tags)
         self._add_str_list(params, "exclude-tags", exlude_tags)
         if ensembles:
-            self._add_int(params, "limit", limit, min=1, max=25, required=True)
-        else:
             self._add_int(params, "limit", limit, min=1, max=10, required=True)
+        else:
+            self._add_int(params, "limit", limit, min=1, max=25, required=True)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
         self._add_datetime(params, "issued-at-earliest", issued_at_earliest)
         self._add_time_list(params, "issued-time-of-day", issued_time_of_day)
