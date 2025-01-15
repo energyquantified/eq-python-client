@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.13.11
+-------
+
+**Bugfixes**
+
+- Fix typo in ``InstancesAPI.load()``
+
+
 0.13.10
 -------
 
