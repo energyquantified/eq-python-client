@@ -35,7 +35,9 @@ You may filter on attributes:
    >>>    area=Area.DE,
    >>>    curve_type=CurveType.INSTANCE,
    >>>    data_type=DataType.FORECAST,
-   >>>    category=['nuclear', 'production']
+   >>>    category=['nuclear', 'production'],
+   >>>    source=["null"], # string 'null' matches curves without a source
+   >>>    only_subscribed=False, # Get curves in your subscription only
    >>> )
    [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE, subscription=FREEMIUM>]
 
