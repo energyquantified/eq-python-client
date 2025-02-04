@@ -22,6 +22,8 @@ class _MetadataAPI(BaseAPI):
             exact_category=None,
             frequency=None,
             commodity=None,
+            source=None,
+            only_subscribed=None,
             has_place=None,
             page=1,
             page_size=50):
@@ -46,6 +48,13 @@ class _MetadataAPI(BaseAPI):
         :type frequency: Frequency, str, optional
         :param commodity: Filter by commodity, defaults to None
         :type commodity: str, optional
+        :param source: Filter by one or more sources, defaults to None. The\
+            string "null" matches curves without a source.
+        :type source: str, list[str], optional
+        :param only_subscribed: Filter on curves in your subscription only,\
+            defaults to False. If set to True, only subscribed curves are\
+            returned. If set to False or not provided, all curves are returned.
+        :type only_subscribed: bool, optional
         :param has_place: True – only curves for places, False – only curves\
             without places, defaults to None
         :type has_place: bool, optional
@@ -65,6 +74,8 @@ class _MetadataAPI(BaseAPI):
         self._add_str_list(params, "category", category)
         self._add_str(params, "exact-category", exact_category)
         self._add_str(params, "commodity", commodity)
+        self._add_str_list(params, "source", source)
+        self._add_bool(params, "only-subscribed", only_subscribed)
         self._add_frequency(params, "frequency", frequency)
         self._add_bool(params, "has-place", has_place)
         self._add_int(params, "page", page)
