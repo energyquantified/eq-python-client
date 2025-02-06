@@ -52,12 +52,15 @@ Or you can specify ``area``, ``curve_type`` and ``data_type`` as strings:
 
 Filter by source:
 
-   >>> eq.metadata.curves(
-   >>>      source=None, # No filter (default)
-   >>>      source=[None] # Curves without a source
-   >>>      source='EEX', # Curves with source EEX
-   >>>      source=['EEX', 'EPEX', None] # Curves with source EEX, EPEX, or without a source
-   >>> )
+   >>> # No filter (default)
+   >>> eq.metadata.curves(source=None)
+   >>> eq.metadata.curves(source=[])
+   >>> # Curves without a source (None in a list)
+   >>> eq.metadata.curves(source=[None])
+   >>> # Curves with source = EEX
+   >>> eq.metadata.curves(source="EEX")
+   >>> # Curves with source EEX, EPEX, or without a source
+   >>> eq.metadata.curves(source=["EEX", "EPEX", None])
 
 See :meth:`energyquantified.api.MetadataAPI.curves` for a full reference.
 
