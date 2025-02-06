@@ -1,6 +1,17 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Add parameters ``source`` and ``only_subscribed`` to ``eq.metadata.curves()``
+  for filtering by source and subscribed curves, respectively.
+- Update curve search documentation with examples on how to filter by source
+  and subscribed curves.
+
+
 0.13.11
 -------
 

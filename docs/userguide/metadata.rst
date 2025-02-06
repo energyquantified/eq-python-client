@@ -35,7 +35,8 @@ You may filter on attributes:
    >>>    area=Area.DE,
    >>>    curve_type=CurveType.INSTANCE,
    >>>    data_type=DataType.FORECAST,
-   >>>    category=['nuclear', 'production']
+   >>>    category=['nuclear', 'production'],
+   >>>    only_subscribed=True, # Get curves in your subscription only
    >>> )
    [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE, subscription=FREEMIUM>]
 
@@ -46,6 +47,16 @@ Or you can specify ``area``, ``curve_type`` and ``data_type`` as strings:
    >>>    curve_type='INSTANCE',
    >>>    data_type='FORECAST',
    >>>    category=['nuclear', 'production']
+   >>> )
+   [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE, subscription=FREEMIUM>]
+
+Filter by source:
+
+   >>> eq.metadata.curves(
+   >>>      source=None, # No filter (default)
+   >>>      source=[None] # Curves without a source
+   >>>      source='EEX', # Curves with source EEX
+   >>>      source=['EEX', 'EPEX', None] # Curves with source EEX, EPEX, or without a source
    >>> )
    [<Curve: "DE Nuclear Production MWh/h 15min Forecast", curve_type=INSTANCE, subscription=FREEMIUM>]
 
