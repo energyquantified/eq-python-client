@@ -48,9 +48,10 @@ class _MetadataAPI(BaseAPI):
         :type frequency: Frequency, str, optional
         :param commodity: Filter by commodity, defaults to None
         :type commodity: str, optional
-        :param source: Filter by one or more sources, defaults to None. The\
-            string "null" matches curves without a source.
-        :type source: str, list[str], optional
+        :param source: Filter by one or more sources, defaults to None (no\
+            filtering). Filter for curves without a source with [None]. Filter\
+            for curves without a source or source=EEX with [None, "EEX"].
+        :type source: str, list[str, None], optional
         :param only_subscribed: Filter on curves in your subscription only,\
             defaults to False. If set to True, only subscribed curves are\
             returned. If set to False or not provided, all curves are returned.
@@ -74,6 +75,8 @@ class _MetadataAPI(BaseAPI):
         self._add_str_list(params, "category", category)
         self._add_str(params, "exact-category", exact_category)
         self._add_str(params, "commodity", commodity)
+        if isinstance(source, (list, tuple)):
+            source = [s if s is not None else "null" for s in source]
         self._add_str_list(params, "source", source)
         self._add_bool(params, "only-subscribed", only_subscribed)
         self._add_frequency(params, "frequency", frequency)
