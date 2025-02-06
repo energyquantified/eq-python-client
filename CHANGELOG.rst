@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Minor documentation improvements
+
+
 0.13.12
 -------
 
