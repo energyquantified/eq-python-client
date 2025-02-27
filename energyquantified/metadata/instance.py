@@ -1,5 +1,3 @@
-
-
 class Instance:
     """
     An instance identifies a forecast or any other time series that
@@ -11,8 +9,7 @@ class Instance:
     An instance is identified by the combination of ``(issued, tag)``.
     """
 
-    def __init__(self, issued, tag='', scenarios=None,
-                 created=None, modified=None):
+    def __init__(self, issued, tag="", scenarios=None, created=None, modified=None):
         assert issued, "issued cannot be None"
         assert tag is not None, "tag cannot be None"
         #: The issue date of this instance
@@ -29,7 +26,7 @@ class Instance:
     def as_dataframe_column_header(self):
         """
         Create a string fitting for a column header in the a
-        ``pandas.DataFrame``.
+        ``pandas.DataFrame`` or a ``polars.DataFrame``.
 
         :return: A DataFrame column header text for an instance
         :rtype: str
@@ -42,8 +39,8 @@ class Instance:
     def __str__(self):
         if self.scenarios:
             return (
-                f"<Instance: issued=\"{self.issued}\", tag=\"{self.tag}\", "
+                f'<Instance: issued="{self.issued}", tag="{self.tag}", '
                 f"scenarios={self.scenarios}>"
             )
         else:
-            return f"<Instance: issued=\"{self.issued}\", tag=\"{self.tag}\">"
+            return f'<Instance: issued="{self.issued}", tag="{self.tag}">'

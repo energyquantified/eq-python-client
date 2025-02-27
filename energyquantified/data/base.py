@@ -4,14 +4,14 @@ class Series:
     """
 
     def __init__(
-            self,
-            curve=None,
-            name=None,
-            resolution=None,
-            instance=None,
-            contract=None,
-            unit=None,
-            denominator=None,
+        self,
+        curve=None,
+        name=None,
+        resolution=None,
+        instance=None,
+        contract=None,
+        unit=None,
+        denominator=None,
     ):
         # --- Members ---
         #: The curve
@@ -52,14 +52,13 @@ class Series:
         :param name: An user-defined name
         :type name: str
         """
-        assert name is None or isinstance(name, str), \
-            "name must be None or a string"
+        assert name is None or isinstance(name, str), "name must be None or a string"
         self._name = name
 
     def instance_or_contract_dataframe_column_header(self):
         """
         Get the instance or contract for this time series, in a format
-        fitting for a ``pandas.DataFrame`` column header.
+        fitting for a ``pandas.DataFrame`` or a ``polars.DataFrame`` column header.
 
         :return: An instance or contract column header for a data frame
         :rtype: str, NoneType
@@ -68,7 +67,7 @@ class Series:
             return self.instance.as_dataframe_column_header()
         if self.contract:
             return self.contract.as_dataframe_column_header()
-        return ''
+        return ""
 
     def has_data(self):
         """
