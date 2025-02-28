@@ -134,7 +134,26 @@ class AbsoluteResult:
     def __repr__(self):
         return self.__str__()
 
-    @deprecated(alt="to_pd_df")
+    def to_pd_df(self, name=None, single_level_index=False):
+        """
+        Convert the result to a ``pandas.DataFrame``.
+
+        :param name: Set a name for the value column, defaults to using the\
+            curve name. The delivery date is appended to the name.
+        :type name: str, optional
+        :param single_level_index: Set to True to use single-level index\
+            in the DataFarme, defaults to False
+        :type single_level_index: bool, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: If pandas is not installed
+        """
+        return self.to_pandas_dataframe(
+            name=name,
+            single_level_index=single_level_index,
+        )
+
+    @deprecated(alt=to_pd_df)
     def to_df(self, name=None, single_level_index=False):
         """
         DEPRECATED: Use ``to_pd_df`` instead.
@@ -156,7 +175,7 @@ class AbsoluteResult:
             single_level_index=single_level_index,
         )
 
-    def to_pd_df(self, name=None, single_level_index=False):
+    def to_pandas_dataframe(self, name=None, single_level_index=False):
         """
         Convert the result to a ``pandas.DataFrame``.
 
@@ -170,12 +189,13 @@ class AbsoluteResult:
         :rtype: pandas.DataFrame
         :raises ImportError: If pandas is not installed
         """
-        return self.to_pandas_dataframe(
+        return absolute_result_to_pandas_dataframe(
+            self,
             name=name,
             single_level_index=single_level_index,
         )
 
-    @deprecated(alt="to_pandas_dataframe")
+    @deprecated(alt=to_pandas_dataframe)
     def to_dataframe(self, name=None, single_level_index=False):
         """
         DEPRECATED: Use ``to_pandas_dataframe`` instead.
@@ -193,26 +213,6 @@ class AbsoluteResult:
         :raises ImportError: If pandas is not installed
         """
         return self.to_pandas_dataframe(
-            name=name,
-            single_level_index=single_level_index,
-        )
-
-    def to_pandas_dataframe(self, name=None, single_level_index=False):
-        """
-        Convert the result to a ``pandas.DataFrame``.
-
-        :param name: Set a name for the value column, defaults to using the\
-            curve name. The delivery date is appended to the name.
-        :type name: str, optional
-        :param single_level_index: Set to True to use single-level index\
-            in the DataFarme, defaults to False
-        :type single_level_index: bool, optional
-        :return: A DataFrame
-        :rtype: pandas.DataFrame
-        :raises ImportError: If pandas is not installed
-        """
-        return absolute_result_to_pandas_dataframe(
-            self,
             name=name,
             single_level_index=single_level_index,
         )

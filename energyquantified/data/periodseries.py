@@ -321,46 +321,6 @@ class Periodseries(Series):
         timeseries.set_name(self._name)
         return timeseries
 
-    @deprecated("to_pd_df")
-    def to_df(
-        self, frequency=None, name=None, single_level_header=False, field="value"
-    ):
-        """
-        DEPRECATED: Use ``to_pd_df`` instead.
-
-        Alias for :meth:`Periodseries.to_dataframe`.
-
-        Convert this period-based to a ``pandas.DataFrame`` as a time series
-        in the given frequency.
-
-        Using :py:meth:`Periodseries.to_timeseries` to convert this
-        period-based series to a regular time series first. When periods
-        overlap the same step in the resulting time series, a weighted
-        average is calculated down to second-precision.
-
-        :param frequency: The frequency of the resulting ``pandas.DataFrame``\
-            time series
-        :type frequency: Frequency, required
-        :param name: Set a name for the column in the ``pandas.DataFrame``,\
-            defaults to ``value``
-        :type name: str, optional
-        :param single_level_header: Set to True to use single-level header\
-            in the DataFrame, defaults to False
-        :type single_level_header: boolean, optional
-        :param field: Which period attribute to use when converting to timeseries.\
-            Options: 'value' or 'installed'. Defaults to 'value'.
-        :type field: str, optional
-        :return: A DataFrame
-        :rtype: pandas.DataFrame
-        :raises ImportError: When pandas is not installed on the system
-        """
-        return self.to_dataframe(
-            frequency=frequency,
-            name=name,
-            single_level_header=single_level_header,
-            field=field,
-        )
-
     def to_pd_df(
         self, frequency=None, name=None, single_level_header=False, field="value"
     ):
@@ -398,12 +358,14 @@ class Periodseries(Series):
             field=field,
         )
 
-    @deprecated("to_polars_dataframe")
-    def to_dataframe(
+    @deprecated(alt=to_pd_df)
+    def to_df(
         self, frequency=None, name=None, single_level_header=False, field="value"
     ):
         """
-        DEPRECATED: Use ``to_polars_dataframe`` instead.
+        DEPRECATED: Use ``to_pd_df`` instead.
+
+        Alias for :meth:`Periodseries.to_dataframe`.
 
         Convert this period-based to a ``pandas.DataFrame`` as a time series
         in the given frequency.
@@ -419,7 +381,7 @@ class Periodseries(Series):
         :param name: Set a name for the column in the ``pandas.DataFrame``,\
             defaults to ``value``
         :type name: str, optional
-        :param single_level_header: Set to True to use single-level header \
+        :param single_level_header: Set to True to use single-level header\
             in the DataFrame, defaults to False
         :type single_level_header: boolean, optional
         :param field: Which period attribute to use when converting to timeseries.\
@@ -429,7 +391,7 @@ class Periodseries(Series):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_pandas_dataframe(
+        return self.to_dataframe(
             frequency=frequency,
             name=name,
             single_level_header=single_level_header,
@@ -472,6 +434,44 @@ class Periodseries(Series):
             name=name, single_level_header=single_level_header
         )
         return df
+
+    @deprecated(alt=to_pandas_dataframe)
+    def to_dataframe(
+        self, frequency=None, name=None, single_level_header=False, field="value"
+    ):
+        """
+        DEPRECATED: Use ``to_polars_dataframe`` instead.
+
+        Convert this period-based to a ``pandas.DataFrame`` as a time series
+        in the given frequency.
+
+        Using :py:meth:`Periodseries.to_timeseries` to convert this
+        period-based series to a regular time series first. When periods
+        overlap the same step in the resulting time series, a weighted
+        average is calculated down to second-precision.
+
+        :param frequency: The frequency of the resulting ``pandas.DataFrame``\
+            time series
+        :type frequency: Frequency, required
+        :param name: Set a name for the column in the ``pandas.DataFrame``,\
+            defaults to ``value``
+        :type name: str, optional
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
+        :type field: str, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(
+            frequency=frequency,
+            name=name,
+            single_level_header=single_level_header,
+            field=field,
+        )
 
     def to_pl_df(self, frequency=None, name=None, field="value"):
         """
@@ -700,35 +700,6 @@ class PeriodseriesList(list):
             for periodseries in self
         )
 
-    @deprecated("to_pd_df")
-    def to_df(self, frequency=None, single_level_header=False, field="value"):
-        """
-        DEPRECATED: Use ``to_pd_df`` instead.
-
-        Alias for :meth:`Timeseries.to_dataframe`.
-
-        Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
-        series are placed in its own column and are lined up with the date-time
-        as index.
-
-        :param frequency: The frequency of the resulting time series'
-        :type frequency: Frequency, required
-        :param single_level_header: Set to True to use single-level header \
-            in the DataFrame, defaults to False
-        :type single_level_header: boolean, optional
-        :param field: Which period attribute to use when converting to timeseries.\
-            Options: 'value' or 'installed'. Defaults to 'value'.
-        :type field: str, optional
-        :return: A DataFrame
-        :rtype: pandas.DataFrame
-        :raises ImportError: When pandas is not installed on the system
-        """
-        return self.to_dataframe(
-            frequency=frequency,
-            single_level_header=single_level_header,
-            field=field,
-        )
-
     def to_pd_df(self, frequency=None, single_level_header=False, field="value"):
         """
         Alias for :meth:`Timeseries.to_dataframe`.
@@ -755,11 +726,13 @@ class PeriodseriesList(list):
             field=field,
         )
 
-    @deprecated("to_pandas_dataframe")
-    def to_dataframe(self, frequency=None, single_level_header=False, field="value"):
+    @deprecated(alt=to_pd_df)
+    def to_df(self, frequency=None, single_level_header=False, field="value"):
         """
-        DEPRECATED: Use ``to_pandas_dataframe`` instead.
-        
+        DEPRECATED: Use ``to_pd_df`` instead.
+
+        Alias for :meth:`Timeseries.to_dataframe`.
+
         Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
         series are placed in its own column and are lined up with the date-time
         as index.
@@ -776,7 +749,7 @@ class PeriodseriesList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_pandas_dataframe(
+        return self.to_dataframe(
             frequency=frequency,
             single_level_header=single_level_header,
             field=field,
@@ -808,6 +781,33 @@ class PeriodseriesList(list):
         timeseries_list = self.to_timeseries(frequency=frequency, field=field)
         return timeseries_list.to_pandas_dataframe(
             single_level_header=single_level_header
+        )
+
+    @deprecated(alt=to_pandas_dataframe)
+    def to_dataframe(self, frequency=None, single_level_header=False, field="value"):
+        """
+        DEPRECATED: Use ``to_pandas_dataframe`` instead.
+        
+        Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param frequency: The frequency of the resulting time series'
+        :type frequency: Frequency, required
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
+        :type field: str, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(
+            frequency=frequency,
+            single_level_header=single_level_header,
+            field=field,
         )
 
     def to_pl_df(self, frequency=None, field="value"):

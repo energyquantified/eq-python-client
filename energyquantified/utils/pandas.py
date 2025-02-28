@@ -44,28 +44,6 @@ def assert_pandas_installed():
             )
 
 
-@deprecated(alt="timeseries_to_pandas_dataframe")
-def timeseries_to_dataframe(timeseries, name=None, single_level_header=False):
-    """
-    DEPRECATED: Use ``timeseries_to_pandas_dataframe`` instead.
-
-    Convert a time series to a ``pandas.DataFrame``.
-
-    :param timeseries: The time series
-    :type timeseries: energyquantified.data.Timeseries, required
-    :param name: Set a custom name in the column header, Timeseries.curve.name \
-        is used when this parameter is not set, defaults to None
-    :type name: str, optional
-    :param single_level_header: Set to True to use single-level header \
-        in the DataFrame, defaults to False
-    :type single_level_header: boolean, optional
-    :return: A DataFrame
-    :rtype: pandas.DataFrame
-    :raises ImportError: When pandas is not installed on the system
-    """
-    return timeseries_to_pandas_dataframe(timeseries, name, single_level_header)
-
-
 def timeseries_to_pandas_dataframe(timeseries, name=None, single_level_header=False):
     """
     Convert a time series to a ``pandas.DataFrame``.
@@ -125,6 +103,28 @@ def timeseries_to_pandas_dataframe(timeseries, name=None, single_level_header=Fa
     raise ValueError(
         "Unknown ValueType: timeseries.value_type = " f"{timeseries.value_type()}"
     )
+
+
+@deprecated(alt=timeseries_to_pandas_dataframe)
+def timeseries_to_dataframe(timeseries, name=None, single_level_header=False):
+    """
+    DEPRECATED: Use ``timeseries_to_pandas_dataframe`` instead.
+
+    Convert a time series to a ``pandas.DataFrame``.
+
+    :param timeseries: The time series
+    :type timeseries: energyquantified.data.Timeseries, required
+    :param name: Set a custom name in the column header, Timeseries.curve.name \
+        is used when this parameter is not set, defaults to None
+    :type name: str, optional
+    :param single_level_header: Set to True to use single-level header \
+        in the DataFrame, defaults to False
+    :type single_level_header: boolean, optional
+    :return: A DataFrame
+    :rtype: pandas.DataFrame
+    :raises ImportError: When pandas is not installed on the system
+    """
+    return timeseries_to_pandas_dataframe(timeseries, name, single_level_header)
 
 
 def _timeseries_to_dataframe_value(timeseries, name):
@@ -331,24 +331,6 @@ def _timeseries_to_dataframe_mean_and_scenarios_single_header(
     return df
 
 
-@deprecated(alt="timeseries_list_to_pandas_dataframe")
-def timeseries_list_to_dataframe(timeseries_list, single_level_header=False):
-    """
-    DEPRECATED: Use ``timeseries_list_to_pandas_dataframe`` instead.
-    
-    Convert a list of time series to a ``pandas.DataFrame``.
-
-    :param timeseries_list: [description]
-    :type timeseries_list: [type]
-    :param single_level_header: Set to True to use single-level header \
-        in the DataFrame, defaults to False
-    :type single_level_header: boolean, optional
-    :return: A pandas DataFrame
-    :rtype: pandas.DataFrame
-    """
-    return timeseries_list_to_pandas_dataframe(timeseries_list, single_level_header)
-
-
 def timeseries_list_to_pandas_dataframe(timeseries_list, single_level_header=False):
     """
     Convert a list of time series to a ``pandas.DataFrame``.
@@ -380,20 +362,22 @@ def timeseries_list_to_pandas_dataframe(timeseries_list, single_level_header=Fal
     )
 
 
-@deprecated(alt="ohlc_list_to_pandas_dataframe")
-def ohlc_list_to_dataframe(ohlc_list):
+@deprecated(alt=timeseries_list_to_pandas_dataframe)
+def timeseries_list_to_dataframe(timeseries_list, single_level_header=False):
     """
-    DEPRECATED: Use ``ohlc_list_to_pandas_dataframe`` instead.
+    DEPRECATED: Use ``timeseries_list_to_pandas_dataframe`` instead.
+    
+    Convert a list of time series to a ``pandas.DataFrame``.
 
-    Convert an :py:class:`energyquantified.data.OHLCList` to a ``pandas.DataFrame``.
-
-    :param ohlc_list: A list of OHLC objects
-    :type ohlc_list: OHLCList
-    :return: A DataFrame
+    :param timeseries_list: [description]
+    :type timeseries_list: [type]
+    :param single_level_header: Set to True to use single-level header \
+        in the DataFrame, defaults to False
+    :type single_level_header: boolean, optional
+    :return: A pandas DataFrame
     :rtype: pandas.DataFrame
-    :raises ImportError: When pandas is not installed on the system
     """
-    return ohlc_list_to_pandas_dataframe(ohlc_list)
+    return timeseries_list_to_pandas_dataframe(timeseries_list, single_level_header)
 
 
 def ohlc_list_to_pandas_dataframe(ohlc_list):
@@ -433,29 +417,20 @@ def ohlc_list_to_pandas_dataframe(ohlc_list):
     )
 
 
-@deprecated(alt="absolute_result_to_pandas_dataframe")
-def absolute_result_to_dataframe(absolute_result, name=None, single_level_index=False):
+@deprecated(alt=ohlc_list_to_pandas_dataframe)
+def ohlc_list_to_dataframe(ohlc_list):
     """
-    DEPRECATED: Use ``absolute_result_to_pandas_dataframe`` instead.
+    DEPRECATED: Use ``ohlc_list_to_pandas_dataframe`` instead.
 
-    Convert an :py:class:`energyquantified.data.AbsoluteResult` to a
-    ``pandas.DataFrame``.
+    Convert an :py:class:`energyquantified.data.OHLCList` to a ``pandas.DataFrame``.
 
-    :param absolute_result: The absolute result
-    :type absolute_result: AbsoluteResult
-    :param name: Set a name for the value column, defaults to None. Uses\
-    the curve name if not set. The delivery date is appended to the name.
-    :type name: str | None, optional
-    :param single_level_index: Set to True to use single-level index in the\
-    DataFrame, defaults to False
-    :type single_level_index: bool, optional
+    :param ohlc_list: A list of OHLC objects
+    :type ohlc_list: OHLCList
     :return: A DataFrame
     :rtype: pandas.DataFrame
     :raises ImportError: When pandas is not installed on the system
     """
-    return absolute_result_to_pandas_dataframe(
-        absolute_result, name, single_level_index
-    )
+    return ohlc_list_to_pandas_dataframe(ohlc_list)
 
 
 def absolute_result_to_pandas_dataframe(
@@ -490,6 +465,31 @@ def absolute_result_to_pandas_dataframe(
         return _absolute_result_to_dataframe_single_index(absolute_result, name)
     else:
         return _absolute_result_to_dataframe(absolute_result, name)
+
+
+@deprecated(alt=absolute_result_to_pandas_dataframe)
+def absolute_result_to_dataframe(absolute_result, name=None, single_level_index=False):
+    """
+    DEPRECATED: Use ``absolute_result_to_pandas_dataframe`` instead.
+
+    Convert an :py:class:`energyquantified.data.AbsoluteResult` to a
+    ``pandas.DataFrame``.
+
+    :param absolute_result: The absolute result
+    :type absolute_result: AbsoluteResult
+    :param name: Set a name for the value column, defaults to None. Uses\
+    the curve name if not set. The delivery date is appended to the name.
+    :type name: str | None, optional
+    :param single_level_index: Set to True to use single-level index in the\
+    DataFrame, defaults to False
+    :type single_level_index: bool, optional
+    :return: A DataFrame
+    :rtype: pandas.DataFrame
+    :raises ImportError: When pandas is not installed on the system
+    """
+    return absolute_result_to_pandas_dataframe(
+        absolute_result, name, single_level_index
+    )
 
 
 def _absolute_result_to_dataframe(absolute_result, name):

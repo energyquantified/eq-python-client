@@ -403,25 +403,6 @@ class Timeseries(Series):
         else:
             raise ValueError("Timeseries has no values")
 
-    @deprecated(alt="to_pd_df")
-    def to_df(self, name=None, single_level_header=False):
-        """
-        DEPRECTAED: Use ``to_pd_df`` instead.
-
-        Alias for :meth:`Timeseries.to_dataframe`. Convert this timeseries
-        to a ``pandas.DataFrame``.
-
-        :param name: Set a name for the value column, defaults to ``value``
-        :type name: str, optional
-        :param single_level_header: Set to True to use single-level header \
-            in the DataFrame, defaults to False
-        :type single_level_header: boolean, optional
-        :return: A DataFrame
-        :rtype: pandas.DataFrame
-        :raises ImportError: When pandas is not installed on the system
-        """
-        return self.to_dataframe(name=name, single_level_header=single_level_header)
-
     def to_pd_df(self, name=None, single_level_header=False):
         """
         Alias for :meth:`Timeseries.to_dataframe`. Convert this timeseries
@@ -440,7 +421,43 @@ class Timeseries(Series):
             name=name, single_level_header=single_level_header
         )
 
-    @deprecated(alt="to_pandas_dataframe")
+    @deprecated(alt=to_pd_df)
+    def to_df(self, name=None, single_level_header=False):
+        """
+        DEPRECTAED: Use ``to_pd_df`` instead.
+
+        Alias for :meth:`Timeseries.to_dataframe`. Convert this timeseries
+        to a ``pandas.DataFrame``.
+
+        :param name: Set a name for the value column, defaults to ``value``
+        :type name: str, optional
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_dataframe(name=name, single_level_header=single_level_header)
+
+    def to_pandas_dataframe(self, name=None, single_level_header=False):
+        """
+        Convert this timeseries to a ``pandas.DataFrame``.
+
+        :param name: Set a name for the value column, defaults to ``value``
+        :type name: str, optional
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return timeseries_to_pandas_dataframe(
+            self, name=name, single_level_header=single_level_header
+        )
+
+    @deprecated(alt=to_pandas_dataframe)
     def to_dataframe(self, name=None, single_level_header=False):
         """
         DEPRECATED: Use ``to_pandas_dataframe`` instead.
@@ -458,23 +475,6 @@ class Timeseries(Series):
         """
         return self.to_pandas_dataframe(
             name=name, single_level_header=single_level_header
-        )
-
-    def to_pandas_dataframe(self, name=None, single_level_header=False):
-        """
-        Convert this timeseries to a ``pandas.DataFrame``.
-
-        :param name: Set a name for the value column, defaults to ``value``
-        :type name: str, optional
-        :param single_level_header: Set to True to use single-level header \
-            in the DataFrame, defaults to False
-        :type single_level_header: boolean, optional
-        :return: A DataFrame
-        :rtype: pandas.DataFrame
-        :raises ImportError: When pandas is not installed on the system
-        """
-        return timeseries_to_pandas_dataframe(
-            self, name=name, single_level_header=single_level_header
         )
 
     def to_pl_df(self, name=None):
@@ -573,7 +573,24 @@ class TimeseriesList(list):
     def frequency(self):
         return self._frequency
 
-    @deprecated(alt="to_pd_df")
+    def to_pd_df(self, single_level_header=False):
+        """
+        Alias for :meth:`Timeseries.to_pandas_dataframe`.
+
+        Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(single_level_header=single_level_header)
+
+    @deprecated(alt=to_pd_df)
     def to_df(self, single_level_header=False):
         """
         DEPRECATED: Use ``to_pd_df`` instead.
@@ -593,41 +610,6 @@ class TimeseriesList(list):
         """
         return self.to_dataframe(single_level_header=single_level_header)
 
-    def to_pd_df(self, single_level_header=False):
-        """
-        Alias for :meth:`Timeseries.to_pandas_dataframe`.
-
-        Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
-        series are placed in its own column and are lined up with the date-time
-        as index.
-
-        :param single_level_header: Set to True to use single-level header \
-            in the DataFrame, defaults to False
-        :type single_level_header: boolean, optional
-        :return: A DataFrame
-        :rtype: pandas.DataFrame
-        :raises ImportError: When pandas is not installed on the system
-        """
-        return self.to_pandas_dataframe(single_level_header=single_level_header)
-
-    @deprecated(alt="to_pandas_dataframe")
-    def to_dataframe(self, single_level_header=False):
-        """
-        DEPRECATED: Use ``to_pandas_dataframe`` instead.
-
-        Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
-        series are placed in its own column and are lined up with the date-time
-        as index.
-
-        :param single_level_header: Set to True to use single-level header \
-            in the DataFrame, defaults to False
-        :type single_level_header: boolean, optional
-        :return: A DataFrame
-        :rtype: pandas.DataFrame
-        :raises ImportError: When pandas is not installed on the system
-        """
-        return self.to_pandas_dataframe(single_level_header=single_level_header)
-
     def to_pandas_dataframe(self, single_level_header=False):
         """
         Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
@@ -644,6 +626,24 @@ class TimeseriesList(list):
         return timeseries_list_to_pandas_dataframe(
             self, single_level_header=single_level_header
         )
+
+    @deprecated(alt=to_pandas_dataframe)
+    def to_dataframe(self, single_level_header=False):
+        """
+        DEPRECATED: Use ``to_pandas_dataframe`` instead.
+
+        Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(single_level_header=single_level_header)
 
     def to_pl_df(self):
         """
