@@ -130,11 +130,9 @@ def _timeseries_to_dataframe_value(timeseries, name, include_instance=True):
             INDEX_NAME: [value.date for value in timeseries],
             name: [value.value for value in timeseries],
         },
+        schema={INDEX_NAME: pl.Datetime, name: pl.Float64},
     ).with_columns(
-        pl.col(INDEX_NAME)
-        .cast(pl.Datetime)
-        .dt.convert_time_zone(timeseries.resolution.timezone.zone),
-        pl.col(name).cast(pl.Float64),
+        pl.col(INDEX_NAME).dt.convert_time_zone(timeseries.resolution.timezone.zone)
     )
 
 
@@ -173,12 +171,13 @@ def _timeseries_to_dataframe_scenarios(timeseries, name, include_instance=True):
                     [list(row) for row in zip(*[ts.scenarios for ts in timeseries])],
                 )
             ),
-        }
+        },
+        schema={
+            INDEX_NAME: pl.Datetime,
+            **{col: pl.Float64 for col in columns},
+        },
     ).with_columns(
-        pl.col(INDEX_NAME)
-        .cast(pl.Datetime)
-        .dt.convert_time_zone(timeseries.resolution.timezone.zone),
-        pl.all().exclude(INDEX_NAME).cast(pl.Float64),
+        pl.col(INDEX_NAME).dt.convert_time_zone(timeseries.resolution.timezone.zone)
     )
 
 
@@ -222,13 +221,14 @@ def _timeseries_to_dataframe_mean_and_scenarios(
                     [list(row) for row in zip(*[ts.scenarios for ts in timeseries])],
                 )
             ),
-        }
+        },
+        schema={
+            INDEX_NAME: pl.Datetime,
+            mean_name: pl.Float64,
+            **{col: pl.Float64 for col in columns},
+        },
     ).with_columns(
-        pl.col(INDEX_NAME)
-        .cast(pl.Datetime)
-        .dt.convert_time_zone(timeseries.resolution.timezone.zone),
-        pl.col(mean_name).cast(pl.Float64),
-        pl.all().exclude(INDEX_NAME, mean_name).cast(pl.Float64),
+        pl.col(INDEX_NAME).dt.convert_time_zone(timeseries.resolution.timezone.zone)
     )
 
 
@@ -256,6 +256,7 @@ def timeseries_list_to_polars_dataframe(timeseries_list):
             timeseries_to_polars_dataframe(ts),
             on=INDEX_NAME,
             how="outer",
+            coalesce=True,
         )
     return df
 
