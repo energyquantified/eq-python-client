@@ -10,6 +10,8 @@ documentation on **pandas**, refer to their
 Pandas is **not required** to use the ``energyquantified`` package. You must
 therefore **install pandas** separately to use the following operations.
 
+We also support `polars <https://docs.pola.rs/>`_ for data frames. See the
+:ref:`polars integration page <polars>` for more information.
 
 Convert data series to data frames
 ----------------------------------
@@ -20,18 +22,22 @@ You can convert any of these types to a ``pandas.DataFrame``:
  * :py:class:`~energyquantified.data.Periodseries`
  * :py:class:`~energyquantified.data.OHLCList`
 
-They all have a method called ``to_dataframe()``. ``Periodseries`` differs from
+They all have a method called ``to_pandas_dataframe()``. ``Periodseries`` differs from
 the two others in which you must supply a **frequency** parameter.
 
-There also exists an alias of ``to_dataframe()`` called ``to_df()``. The term
+There also exists an alias of ``to_pandas_dataframe()`` called ``to_pd_df()``. The term
 ``df`` is a commonly used shorthand and variable name for ``DataFrame``'s.
+
+Note: There also exist a method called ``to_polars_dataframe()`` and ``to_pl_df()`` for
+converting to `polars <https://docs.pola.rs/>`_ data frames. See the
+:ref:`polars integration page <polars>` for more information.
 
 Convert time series
 ^^^^^^^^^^^^^^^^^^^
 
 Converting a time series is simple:
 
-   >>> df = timeseries.to_dataframe()
+   >>> df = timeseries.to_pandas_dataframe()
    >>> df
                              DE Wind Power Production MWh/h 15min Actual
    <BLANKLINE>
@@ -46,7 +52,7 @@ Converting a time series is simple:
 You can also set a custom name if you think the default one is a little
 too verbose:
 
-   >>> df = timeseries.to_dataframe(name='de wind')
+   >>> df = timeseries.to_pandas_dataframe(name='de wind')
    >>> df
                                de wind
    <BLANKLINE>
@@ -70,7 +76,7 @@ details.
 
    >>> forecast.instance
    <Instance: issued="2020-10-26 00:00:00+00:00", tag="ec-ens", scenarios=51>
-   >>> df = forecast.to_dataframe(name='wind forecast')
+   >>> df = forecast.to_pandas_dataframe(name='wind forecast')
    >>> df
                                        wind forecast                                ...
                              2020-10-26 00:00 ec-ens                                ...
@@ -103,7 +109,7 @@ Convert period-based series
 
 Period-based series are converted almost the same as time series. The only
 difference is that you must supply a **frequency** parameter to the
-``to_dataframe(frequency)`` method. You should read the above section before
+``to_pandas_dataframe(frequency)`` method. You should read the above section before
 continuing.
 
 Here we convert a REMIT series for German nuclear available capacity to a daily
@@ -112,7 +118,7 @@ average capacity ``pandas.DataFrame``:
    >>> from energyquantified.time import Frequency
    >>> periodseries.instance
    <Instance: issued="2020-10-24 14:10:40+00:00", tag="a-PvMRn_EpOJtngkh4D06Q">
-   >>> df = periodseries.to_dataframe(
+   >>> df = periodseries.to_pandas_dataframe(
    >>>    frequency=Frequency.P1D,
    >>>    name='de nuclear remit'
    >>> )
@@ -140,7 +146,7 @@ Convert OHLC data
 When you have an :py:class:`~energyquantified.data.OHLCList`, which is the
 response type from ``eq.ohlc.load()``, you can do this:
 
-   >>> df = ohlc_list.to_dataframe()
+   >>> df = ohlc_list.to_pandas_dataframe()
    >>> df
            traded   period  front    delivery   open   high    low  close  settlement  volume  open_interest
    0   2020-10-15      day      1  2020-10-16    NaN    NaN    NaN    NaN       23.24     0.0            0.0
@@ -189,7 +195,7 @@ Say that you have loaded three wind power forecasts in daily resolution
 using ``eq.instances.load()``, then you can convert them to a
 single ``pandas.DataFrame`` like this:
 
-   >>> df = timeseries_list.to_dataframe()
+   >>> df = timeseries_list.to_pandas_dataframe()
    >>> df
                              DE Wind Power Production MWh/h 15min Forecast
                                                       2020-10-25 00:00 gfs 2020-10-25 00:00 ec 2020-10-24 18:00 gfs
@@ -207,7 +213,7 @@ list methods. There is only one requirement: They **must** have the **same frequ
 
    >>> timeseries_list.insert(0, wind_actual)  # Add actual first
    >>> timeseries_list.insert(1, wind_normal)  # Add normal second
-   >>> df = timeseries_list.to_dataframe()
+   >>> df = timeseries_list.to_pandas_dataframe()
    >>> df
                              DE Wind Power Production MWh/h 15min Actual DE Wind Power Production MWh/h 15min Normal  ... DE Wind Power Production MWh/h 15min Forecast
                                                                                                                       ...                           2020-10-25 00:00 ec 2020-10-24 18:00 gfs
@@ -254,7 +260,7 @@ capacity example as before, we can see how the available nuclear capacity was
 at different times:
 
    >>> from energyquantified.time import Frequency
-   >>> df = periodseries_list.to_dataframe(frequency=Frequency.P1D)
+   >>> df = periodseries_list.to_pandas_dataframe(frequency=Frequency.P1D)
    >>> df
                               DE Nuclear Capacity Available MW REMIT
                              2020-10-24 14:10 a-PvMRn_EpOJtngkh4D06Q 2020-10-23 22:53 a-PvMRn_EpOJtngkh4D06Q 2020-10-23 22:32 foawy0rsE5VaMvg-JLbVbQ 2020-10-23 07:45 5mkc_POSQXzDGnTVSzsQiQ
@@ -284,9 +290,9 @@ no curve attribute on the :py:class:`~energyquantified.data.Timeseries` object,
 it defaults to be blank. The user can override this name by setting a custom
 name (see below).
 
-**Instance or contract** is set (defaults to blank) when the time series has
-is an instance (forecast) or when the response is an OHLC series converted
-to a time series:
+**Instance or contract** is set (defaults to blank) when the time series is an
+instance (forecast) or when the response is an OHLC series converted to a time
+series:
 
  * For *instances*, this column header is set to ``<issued> <tag>``, like so:
    ``2020-10-16 00:00 ec``.
@@ -311,13 +317,13 @@ While the default behaviour is to create three levels of column headers,
 as seen above, you can tell the client to merge all the levels into one.
 
 Do this by setting the parameter ``single_level_header=True`` when
-you invoke ``to_dataframe()``.
+you invoke ``to_pandas_dataframe()``.
 
 Using the wind forecast example from earlier on this page:
 
 >>> forecast.instance
 <Instance: issued="2020-10-26 00:00:00+00:00", tag="ec-ens", scenarios=51>
->>> df = forecast.to_dataframe(name='wind forecast')
+>>> df = forecast.to_pandas_dataframe(name='wind forecast')
 >>> df
                                     wind forecast                                ...
                           2020-10-26 00:00 ec-ens                                ...
@@ -334,7 +340,7 @@ We can add the ``single_level_header`` parameter. Notice that the headers,
 which previously were three levels (curve name, instance and scenario), are
 now merged into one row:
 
->>> df = forecast.to_dataframe(
+>>> df = forecast.to_pandas_dataframe(
 >>>     name='wind forecast',
 >>>     single_level_header=True  # Merge column headers
 >>> )
@@ -370,7 +376,7 @@ Use it to set your own custom name before converting to a ``pandas.DataFrame``:
 
 The custom name is reflected in the ``pandas.DataFrame`` column header:
 
-   >>> timeseries.to_dataframe()
+   >>> timeseries.to_pandas_dataframe()
                              de wind actual
    <BLANKLINE>
    <BLANKLINE>
@@ -381,10 +387,10 @@ The custom name is reflected in the ``pandas.DataFrame`` column header:
    2020-01-04 00:00:00+01:00       33299.36
    2020-01-05 00:00:00+01:00       13151.01
 
-You can also specify a name when invoking the ``to_dataframe()`` method on
+You can also specify a name when invoking the ``to_pandas_dataframe()`` method on
 time series objects:
 
-   >>> timeseries.to_dataframe(name='my awesome name')
+   >>> timeseries.to_pandas_dataframe(name='my awesome name')
                              my awesome name
    <BLANKLINE>
    <BLANKLINE>

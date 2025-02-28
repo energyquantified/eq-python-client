@@ -39,9 +39,12 @@ The return type from ``load()`` is a
 :py:class:`~energyquantified.data.TimeseriesList`. This is a subclass of Python's
 built-in list. It has extra validations so that all time series in the list have
 the same frequency (hourly, daily, etc.), and it has a method called
-:py:meth:`~energyquantified.data.TimeseriesList.to_dataframe` which converts the
+:py:meth:`~energyquantified.data.TimeseriesList.to_pandas_dataframe` which converts the
 list of time series to a ``pandas.DataFrame``. See the chapter on
-:doc:`Pandas integration <pandas>` for more details.
+:doc:`Pandas integration <pandas>` for more details. It also has a method
+called :py:meth:`~energyquantified.data.TimeseriesList.to_polars_dataframe`
+which converts the list of time series to a ``polars.DataFrame``. See the
+chapter on :doc:`Polars integration <polars>` for more details.
 
 Notice that each time series in the list has an ``instance`` attribute (with
 ``issued`` (issue date) and ``tag``). This is what identifies the instances

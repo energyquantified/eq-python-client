@@ -304,7 +304,7 @@ calling on :py:meth:`~energyquantified.data.Timeseries.to_dataframe`:
    >>>    end=date(2020, 1, 6)      # or end='2020-01-06'
    >>> )
 
-   >>> timeseries.to_dataframe()
+   >>> timeseries.to_pandas_dataframe()
    <BLANKLINE>
                              DE Wind Power Production MWh/h 15min Actual
    <BLANKLINE>
@@ -336,7 +336,7 @@ the same way. Notice that the data frame is quite wide (one column for each of t
    >>>    frequency=Frequency.P1D,
    >>> )
 
-   >>> timeseries.to_dataframe()
+   >>> timeseries.to_pandas_dataframe()
                              DE Wind Power Production MWh/h 15min Climate                                                              ...
                                                                                                                                        ...
                                                                     y1980     y1981     y1982     y1983     y1984     y1985     y1986  ...     y2013     y2014     y2015     y2016     y2017     y2018     y2019
@@ -351,6 +351,70 @@ the same way. Notice that the data frame is quite wide (one column for each of t
 
 -----
 
+Convert to polars
+-----------------
+
+(This section contains a short description on how to convert a time series to a
+``polars.DataFrame``. See the chapter on :doc:`Polars integration <polars>`
+for a detailed explanation.)
+
+Convert :py:class:`~energyquantified.data.Timeseries` objects to polars by
+calling on :py:meth:`~energyquantified.data.Timeseries.to_dataframe`:
+
+   >>> from datetime import date
+   >>> timeseries = eq.timeseries.load(
+   >>>    'DE Wind Power Production MWh/h 15min Actual',
+   >>>    begin=date(2020, 1, 1),   # or begin='2020-01-01'
+   >>>    end=date(2020, 1, 6)      # or end='2020-01-06'
+   >>> )
+
+   >>> timeseries.to_polars_dataframe()
+   shape: (480, 2)
+   ┌─────────────────────────┬─────────────────────────────────┐
+   │ date                    ┆ DE Wind Power Production MWh/h… │
+   │ ---                     ┆ ---                             │
+   │ datetime[μs, CET]       ┆ f64                             │
+   ╞═════════════════════════╪═════════════════════════════════╡
+   │ 2020-01-01 00:00:00 CET ┆ 6405.0                          │
+   │ 2020-01-01 00:15:00 CET ┆ 6388.0                          │
+   │ 2020-01-01 00:30:00 CET ┆ 6650.0                          │
+   │ 2020-01-01 00:45:00 CET ┆ 6893.0                          │
+   │ 2020-01-01 01:00:00 CET ┆ 6975.0                          │
+   │ …                       ┆ …                               │
+   │ 2020-01-05 22:45:00 CET ┆ 17932.0                         │
+   │ 2020-01-05 23:00:00 CET ┆ 17956.0                         │
+   │ 2020-01-05 23:15:00 CET ┆ 18022.0                         │
+   │ 2020-01-05 23:30:00 CET ┆ 18151.0                         │
+   │ 2020-01-05 23:45:00 CET ┆ 18242.0                         │
+   └─────────────────────────┴─────────────────────────────────┘
+
+You can also convert a scenario-based :py:class:`~energyquantified.data.Timeseries`
+the same way. Notice that the data frame is quite wide (one column for each of the
+40 weather years).
+
+   >>> from energyquantified.time import Frequency
+   >>> timeseries = eq.timeseries.load(
+   >>>    'DE Wind Power Production MWh/h 15min Climate',
+   >>>    begin=date(2020, 1, 1),
+   >>>    end=date(2020, 1, 6),
+   >>>    frequency=Frequency.P1D,
+   >>> )
+
+   >>> timeseries.to_polars_dataframe()
+   shape: (5, 44)
+   ┌─────────────────────────┬─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┬───┬─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┐
+   │ date                    ┆ DE Wind Power Production MWh/h… ┆ DE Wind Power Production MWh/h… ┆ DE Wind Power Production MWh/h… ┆ DE Wind Power Production MWh/h… ┆ … ┆ DE Wind Power Production MWh/h… ┆ DE Wind Power Production MWh/h… ┆ DE Wind Power Production MWh/h… ┆ DE Wind Power Production MWh/h… ┆ DE Wind Power Production MWh/h… │
+   │ ---                     ┆ ---                             ┆ ---                             ┆ ---                             ┆ ---                             ┆   ┆ ---                             ┆ ---                             ┆ ---                             ┆ ---                             ┆ ---                             │
+   │ datetime[μs, CET]       ┆ f64                             ┆ f64                             ┆ f64                             ┆ f64                             ┆   ┆ f64                             ┆ f64                             ┆ f64                             ┆ f64                             ┆ f64                             │
+   ╞═════════════════════════╪═════════════════════════════════╪═════════════════════════════════╪═════════════════════════════════╪═════════════════════════════════╪═══╪═════════════════════════════════╪═════════════════════════════════╪═════════════════════════════════╪═════════════════════════════════╪═════════════════════════════════╡
+   │ 2020-01-01 00:00:00 CET ┆ 18763.54                        ┆ 41635.41                        ┆ 7651.06                         ┆ 20933.31                        ┆ … ┆ 32166.31                        ┆ 35334.11                        ┆ 8861.22                         ┆ 5088.18                         ┆ 21734.41                        │
+   │ 2020-01-02 00:00:00 CET ┆ 13824.77                        ┆ 35776.02                        ┆ 11905.44                        ┆ 22453.31                        ┆ … ┆ 21243.44                        ┆ 29933.17                        ┆ 16896.38                        ┆ 4401.37                         ┆ 31294.74                        │
+   │ 2020-01-03 00:00:00 CET ┆ 7753.99                         ┆ 42782.59                        ┆ 31318.04                        ┆ 26778.79                        ┆ … ┆ 40220.4                         ┆ 12510.87                        ┆ 30389.19                        ┆ 18298.51                        ┆ 35974.64                        │
+   │ 2020-01-04 00:00:00 CET ┆ 21111.55                        ┆ 28818.16                        ┆ 36881.77                        ┆ 37262.01                        ┆ … ┆ 27839.29                        ┆ 22585.39                        ┆ 31717.51                        ┆ 17143.52                        ┆ 18283.89                        │
+   │ 2020-01-05 00:00:00 CET ┆ 11293.56                        ┆ 24998.32                        ┆ 27897.89                        ┆ 26509.41                        ┆ … ┆ 24188.58                        ┆ 25978.41                        ┆ 13044.52                        ┆ 16191.28                        ┆ 32471.81                        │
+   └─────────────────────────┴─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┴───┴─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┘
+-----
+
 Next steps
 ----------
 
@@ -359,4 +423,5 @@ Learn how to load
 :doc:`period-based series <../userguide/periods>`, and
 :doc:`period-based series instances <../userguide/period-instances>`.
 
-Also see the chapter on :doc:`pandas integration <../userguide/pandas>`.
+Also see the chapter on :doc:`pandas integration <../userguide/pandas>` and on
+:doc:`polars integration <../userguide/polars>`.

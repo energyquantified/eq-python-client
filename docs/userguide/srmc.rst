@@ -138,13 +138,35 @@ You can extract any of these attributes:
 And, of course, you can convert the OHLC data to a ``pandas.DataFrame`` like
 this:
 
-   >>> srmc_coal.ohlc.to_dataframe()
+   >>> srmc_coal.ohlc.to_pandas_dataframe()
            traded period  front    delivery  open  high   low close  settlement volume open_interest
    0   2020-12-01  month      3  2021-03-01  None  None  None  None       40.96   None          None
    1   2020-12-02  month      3  2021-03-01  None  None  None  None       41.63   None          None
    2   2020-12-03  month      3  2021-03-01  None  None  None  None       41.06   None          None
    3   2020-12-04  month      3  2021-03-01  None  None  None  None       42.34   None          None
    ...
+
+   You can also convert the OHLC data to a ``polars.DataFrame`` like this:
+
+   >>> srmc_coal.ohlc.to_polars_dataframe()
+   shape: (20, 11)
+   ┌────────────┬────────┬───────┬────────────┬──────┬──────┬──────┬───────┬────────────┬────────┬───────────────┐
+   │ traded     ┆ period ┆ front ┆ delivery   ┆ open ┆ high ┆ low  ┆ close ┆ settlement ┆ volume ┆ open_interest │
+   │ ---        ┆ ---    ┆ ---   ┆ ---        ┆ ---  ┆ ---  ┆ ---  ┆ ---   ┆ ---        ┆ ---    ┆ ---           │
+   │ date       ┆ str    ┆ i32   ┆ date       ┆ f64  ┆ f64  ┆ f64  ┆ f64   ┆ f64        ┆ f64    ┆ f64           │
+   ╞════════════╪════════╪═══════╪════════════╪══════╪══════╪══════╪═══════╪════════════╪════════╪═══════════════╡
+   │ 2020-12-01 ┆ month  ┆ 3     ┆ 2021-03-01 ┆ null ┆ null ┆ null ┆ null  ┆ 40.96      ┆ null   ┆ null          │
+   │ 2020-12-02 ┆ month  ┆ 3     ┆ 2021-03-01 ┆ null ┆ null ┆ null ┆ null  ┆ 41.63      ┆ null   ┆ null          │
+   │ 2020-12-03 ┆ month  ┆ 3     ┆ 2021-03-01 ┆ null ┆ null ┆ null ┆ null  ┆ 41.06      ┆ null   ┆ null          │
+   │ 2020-12-04 ┆ month  ┆ 3     ┆ 2021-03-01 ┆ null ┆ null ┆ null ┆ null  ┆ 42.34      ┆ null   ┆ null          │
+   │ 2020-12-07 ┆ month  ┆ 3     ┆ 2021-03-01 ┆ null ┆ null ┆ null ┆ null  ┆ 41.83      ┆ null   ┆ null          │
+   │ …          ┆ …      ┆ …     ┆ …          ┆ …    ┆ …    ┆ …    ┆ …     ┆ …          ┆ …      ┆ …             │
+   │ 2020-12-22 ┆ month  ┆ 3     ┆ 2021-03-01 ┆ null ┆ null ┆ null ┆ null  ┆ 44.61      ┆ null   ┆ null          │
+   │ 2020-12-23 ┆ month  ┆ 3     ┆ 2021-03-01 ┆ null ┆ null ┆ null ┆ null  ┆ 45.26      ┆ null   ┆ null          │
+   │ 2020-12-24 ┆ month  ┆ 3     ┆ 2021-03-01 ┆ null ┆ null ┆ null ┆ null  ┆ 45.47      ┆ null   ┆ null          │
+   │ 2020-12-28 ┆ month  ┆ 3     ┆ 2021-03-01 ┆ null ┆ null ┆ null ┆ null  ┆ 47.07      ┆ null   ┆ null          │
+   │ 2020-12-29 ┆ month  ┆ 3     ┆ 2021-03-01 ┆ null ┆ null ┆ null ┆ null  ┆ 46.22      ┆ null   ┆ null          │
+   └────────────┴────────┴───────┴────────────┴──────┴──────┴──────┴───────┴────────────┴────────┴───────────────┘
 
 Load as a time series
 ---------------------
@@ -238,7 +260,7 @@ has a curve, a contract (specifying that it is the March 2021-contract), an
 
 You can convert the time series to a ``pandas.DataFrame`` easily:
 
-   >>> srmc_coal.timeseries.to_dataframe()
+   >>> srmc_coal.timeseries.to_pandas_dataframe()
                              Futures Coal API-2 USD/t ICE OHLC
                                    month 2021-03-01 settlement
    <BLANKLINE>
@@ -253,6 +275,27 @@ You can convert the time series to a ``pandas.DataFrame`` easily:
    2020-12-08 00:00:00+01:00                             41.90
    ...
 
+You can also convert the time series to a ``polars.DataFrame`` easily:
+
+   >>> srmc_coal.timeseries.to_polars_dataframe()
+   shape: (29, 2)
+   ┌─────────────────────────┬─────────────────────────────────┐
+   │ date                    ┆ Futures Coal API-2 USD/t ICE O… │
+   │ ---                     ┆ ---                             │
+   │ datetime[μs, CET]       ┆ f64                             │
+   ╞═════════════════════════╪═════════════════════════════════╡
+   │ 2020-12-01 00:00:00 CET ┆ 40.96                           │
+   │ 2020-12-02 00:00:00 CET ┆ 41.63                           │
+   │ 2020-12-03 00:00:00 CET ┆ 41.06                           │
+   │ 2020-12-04 00:00:00 CET ┆ 42.34                           │
+   │ 2020-12-05 00:00:00 CET ┆ null                            │
+   │ …                       ┆ …                               │
+   │ 2020-12-25 00:00:00 CET ┆ null                            │
+   │ 2020-12-26 00:00:00 CET ┆ null                            │
+   │ 2020-12-27 00:00:00 CET ┆ null                            │
+   │ 2020-12-28 00:00:00 CET ┆ 47.07                           │
+   │ 2020-12-29 00:00:00 CET ┆ 46.22                           │
+   └─────────────────────────┴─────────────────────────────────┘
 
 Load for a trading day
 ----------------------
@@ -327,16 +370,18 @@ The response is an SRMC object with a period-based series set:
     periodseries=<Periodseries: resolution=<Resolution: frequency=NONE, timezone=CET>, curve="Futures Coal API-2 USD/t ICE OHLC", begin="2021-01-01 00:00:00+01:00", end="2027-01-01 00:00:00+01:00">
    >
 
-You can convert the period-based series to a time series or to a
-``pandas.DataFrame`` in your preferred resolution:
+You can convert the period-based series to a time series, to a
+``pandas.DataFrame``, or to a ``polars.DataFrame`` in your preferred resolution:
 
-   >>> # Convert to a daily time series
+Convert to a daily time series:
+
    >>> from energyquantified.time import Frequency
    >>> srmc_coal.periodseries.to_timeseries(frequency=Frequency.P1D)
    <Timeseries: resolution=<Resolution: frequency=P1D, timezone=CET>, curve="Futures Coal API-2 USD/t ICE OHLC", begin="2021-01-01 00:00:00+01:00", end="2027-01-01 00:00:00+01:00">
 
-   >>> # Convert to a pandas.DataFrame in daily resolution
-   >>> srmc_coal.periodseries.to_dataframe(frequency=Frequency.P1D)
+Convert to a ``pandas.DataFrame`` in daily resolution:
+
+   >>> srmc_coal.periodseries.to_pandas_dataframe(frequency=Frequency.P1D)
                              Futures Coal API-2 USD/t ICE OHLC
    <BLANKLINE>
    <BLANKLINE>
@@ -355,6 +400,27 @@ You can convert the period-based series to a time series or to a
    <BLANKLINE>
    [2191 rows x 1 columns]
 
+Convert to a ``polars.DataFrame`` in daily resolution:
+
+   >>> srmc_coal.periodseries.to_polars_dataframe(frequency=Frequency.P1D)
+   shape: (2_133, 2)
+   ┌─────────────────────────┬─────────────────────────────────┐
+   │ date                    ┆ Futures Coal API-2 USD/t ICE O… │
+   │ ---                     ┆ ---                             │
+   │ datetime[μs, UTC]       ┆ f64                             │
+   ╞═════════════════════════╪═════════════════════════════════╡
+   │ 2021-01-01 00:00:00 UTC ┆ 44.15                           │
+   │ 2021-01-02 00:00:00 UTC ┆ 44.15                           │
+   │ 2021-01-03 00:00:00 UTC ┆ 44.15                           │
+   │ 2021-01-04 00:00:00 UTC ┆ 44.15                           │
+   │ 2021-01-05 00:00:00 UTC ┆ 44.15                           │
+   │ …                       ┆ …                               │
+   │ 2026-12-27 00:00:00 UTC ┆ 47.16                           │
+   │ 2026-12-28 00:00:00 UTC ┆ 47.16                           │
+   │ 2026-12-29 00:00:00 UTC ┆ 47.16                           │
+   │ 2026-12-30 00:00:00 UTC ┆ 47.16                           │
+   │ 2026-12-31 00:00:00 UTC ┆ 47.16                           │
+   └─────────────────────────┴─────────────────────────────────┘
 
 Override SRMC factors
 ---------------------

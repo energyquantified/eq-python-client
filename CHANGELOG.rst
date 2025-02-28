@@ -7,6 +7,11 @@ dev
 **Improvements**
 
 - Minor documentation improvements
+- Added support for Polars data frames conversion
+  - Introduced new methods: ``to_pl_df()`` and ``to_polars_dataframe()``
+- Renamed Pandas data frame conversion methods for clarity and consistency
+  - ``to_df()`` → ``to_pd_df()`` (old method deprecated)
+  - ``to_dataframe()`` → ``to_pandas_dataframe()`` (old method deprecated)
 
 
 0.13.12
