@@ -327,8 +327,6 @@ at different times:
     └──────────────────────────┴─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┘
 
 
-.. _column-headers:
-
 Column headers for time series data
 -----------------------------------
 
@@ -357,9 +355,6 @@ forecasts, for example, have 51 scenarios, named from ``e00``, ``e01``, ...,
 ``e49``, ``e50``. Climate series uses underlying weather years. These column
 headers are named after the weather year they are based on: ``y1980``,
 ``y1981``, ..., ``y2018``, ``y2019``.
-
-
-.. _single-column-headers:
 
 
 Set custom time series name

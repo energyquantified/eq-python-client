@@ -58,7 +58,7 @@ Features
 - Support for timezones, resolutions, aggregations and unit conversions
 - Easy-to-use filters for issue dates and forecast types
 - Push feed for live updates on data modifications
-- Integrates with pandas and polars
+- Integrates with Pandas and Polars
 
 **Note:** A user account is required to use this client. You can create
 one on Energy Quantified's `home page <https://www.energyquantified.com>`_.
@@ -98,6 +98,7 @@ User guide
    userguide/ohlc
    userguide/srmc
    userguide/pandas
+   userguide/polars
    userguide/push-feed
 
 
