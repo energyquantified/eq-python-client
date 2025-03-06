@@ -92,7 +92,7 @@ your own database, or perhaps start doing some data analysis.
 (You need to install ``pandas`` separately to do this.) Convert any time series
 to a ``pandas.DataFrame`` like so:
 
-   >>> df = timeseries.to_dataframe(name='series')
+   >>> df = timeseries.to_pandas_dataframe(name='series')
    >>> df
                               series
    <BLANKLINE>
@@ -103,6 +103,32 @@ to a ``pandas.DataFrame`` like so:
    2020-01-01 00:30:00+01:00    6640
    2020-01-01 00:45:00+01:00    6882
    ...                           ...
+
+**Use polars for data analysis**
+
+(You need to install ``polars`` separately to do this.) Convert any time series
+to a ``polars.DataFrame`` like so:
+
+   >>> df = timeseries.to_polars_dataframe(name='series')
+   >>> df
+   shape: (96, 2)
+   ┌─────────────────────────┬─────────┐
+   │ date                    ┆ series  │
+   │ ---                     ┆ ---     │
+   │ datetime[μs, CET]       ┆ f64     │
+   ╞═════════════════════════╪═════════╡
+   │ 2020-01-01 00:00:00 CET ┆ 6405.0  │
+   │ 2020-01-01 00:15:00 CET ┆ 6388.0  │
+   │ 2020-01-01 00:30:00 CET ┆ 6650.0  │
+   │ 2020-01-01 00:45:00 CET ┆ 6893.0  │
+   │ 2020-01-01 01:00:00 CET ┆ 6975.0  │
+   │ …                       ┆ …       │
+   │ 2020-01-01 22:45:00 CET ┆ 12414.0 │
+   │ 2020-01-01 23:00:00 CET ┆ 12382.0 │
+   │ 2020-01-01 23:15:00 CET ┆ 12528.0 │
+   │ 2020-01-01 23:30:00 CET ┆ 12390.0 │
+   │ 2020-01-01 23:45:00 CET ┆ 12392.0 │
+   └─────────────────────────┴─────────┘
 
 
 Mini-guide to pandas and matplotlib
@@ -230,31 +256,6 @@ Look at the `pandas <https://pandas.pydata.org/docs/>`_ and
 `matplotlib <https://matplotlib.org/contents.html>`_ documentation for a
 more in-depth explanation of concepts and features.
 
-**Use polars for data analysis**
-
-(You need to install ``polars`` separately to do this.) Convert any time series
-to a ``polars.DataFrame`` like so:
-
-   >>> df = timeseries.to_polars_dataframe(name='series')
-   >>> df
-   shape: (96, 2)
-   ┌─────────────────────────┬─────────┐
-   │ date                    ┆ series  │
-   │ ---                     ┆ ---     │
-   │ datetime[μs, CET]       ┆ f64     │
-   ╞═════════════════════════╪═════════╡
-   │ 2020-01-01 00:00:00 CET ┆ 6405.0  │
-   │ 2020-01-01 00:15:00 CET ┆ 6388.0  │
-   │ 2020-01-01 00:30:00 CET ┆ 6650.0  │
-   │ 2020-01-01 00:45:00 CET ┆ 6893.0  │
-   │ 2020-01-01 01:00:00 CET ┆ 6975.0  │
-   │ …                       ┆ …       │
-   │ 2020-01-01 22:45:00 CET ┆ 12414.0 │
-   │ 2020-01-01 23:00:00 CET ┆ 12382.0 │
-   │ 2020-01-01 23:15:00 CET ┆ 12528.0 │
-   │ 2020-01-01 23:30:00 CET ┆ 12390.0 │
-   │ 2020-01-01 23:45:00 CET ┆ 12392.0 │
-   └─────────────────────────┴─────────┘
 
 Mini-guide to polars
 ^^^^^^^^^^^^^^^^^^^^

@@ -157,7 +157,7 @@ class OHLCList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe()
+        return self.to_pandas_dataframe()
 
     @deprecated(alt=to_pd_df)
     def to_df(self):
@@ -171,7 +171,7 @@ class OHLCList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe()
+        return self.to_pandas_dataframe()
 
     def to_pandas_dataframe(self):
         """

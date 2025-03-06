@@ -391,7 +391,7 @@ class Periodseries(Series):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(
+        return self.to_pandas_dataframe(
             frequency=frequency,
             name=name,
             single_level_header=single_level_header,
@@ -702,7 +702,7 @@ class PeriodseriesList(list):
 
     def to_pd_df(self, frequency=None, single_level_header=False, field="value"):
         """
-        Alias for :meth:`Timeseries.to_dataframe`.
+        Alias for :meth:`Timeseries.to_pandas_dataframe`.
 
         Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
         series are placed in its own column and are lined up with the date-time
@@ -749,7 +749,7 @@ class PeriodseriesList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(
+        return self.to_pandas_dataframe(
             frequency=frequency,
             single_level_header=single_level_header,
             field=field,
@@ -812,7 +812,7 @@ class PeriodseriesList(list):
 
     def to_pl_df(self, frequency=None, field="value"):
         """
-        Alias for :meth:`Timeseries.to_dataframe`.
+        Alias for :meth:`Timeseries.to_polars_dataframe`.
 
         Convert this PeriodseriesList to a ``polars.DataFrame`` where all time
         series are placed in its own column and are lined up with the date-time

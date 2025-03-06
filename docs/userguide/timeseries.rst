@@ -295,7 +295,7 @@ Convert to pandas
 for a detailed explanation.)
 
 Convert :py:class:`~energyquantified.data.Timeseries` objects to pandas by
-calling on :py:meth:`~energyquantified.data.Timeseries.to_dataframe`:
+calling on :py:meth:`~energyquantified.data.Timeseries.to_pandas_dataframe`:
 
    >>> from datetime import date
    >>> timeseries = eq.timeseries.load(
@@ -359,7 +359,7 @@ Convert to polars
 for a detailed explanation.)
 
 Convert :py:class:`~energyquantified.data.Timeseries` objects to polars by
-calling on :py:meth:`~energyquantified.data.Timeseries.to_dataframe`:
+calling on :py:meth:`~energyquantified.data.Timeseries.to_pandas_dataframe`:
 
    >>> from datetime import date
    >>> timeseries = eq.timeseries.load(

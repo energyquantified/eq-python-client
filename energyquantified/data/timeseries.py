@@ -405,7 +405,7 @@ class Timeseries(Series):
 
     def to_pd_df(self, name=None, single_level_header=False):
         """
-        Alias for :meth:`Timeseries.to_dataframe`. Convert this timeseries
+        Alias for :meth:`Timeseries.to_pandas_dataframe`. Convert this timeseries
         to a ``pandas.DataFrame``.
 
         :param name: Set a name for the value column, defaults to ``value``
@@ -438,7 +438,9 @@ class Timeseries(Series):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(name=name, single_level_header=single_level_header)
+        return self.to_pandas_dataframe(
+            name=name, single_level_header=single_level_header
+        )
 
     def to_pandas_dataframe(self, name=None, single_level_header=False):
         """
@@ -608,7 +610,7 @@ class TimeseriesList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(single_level_header=single_level_header)
+        return self.to_pandas_dataframe(single_level_header=single_level_header)
 
     def to_pandas_dataframe(self, single_level_header=False):
         """

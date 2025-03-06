@@ -170,7 +170,7 @@ class AbsoluteResult:
         :rtype: pandas.DataFrame
         :raises ImportError: If pandas is not installed
         """
-        return self.to_dataframe(
+        return self.to_pandas_dataframe(
             name=name,
             single_level_index=single_level_index,
         )
