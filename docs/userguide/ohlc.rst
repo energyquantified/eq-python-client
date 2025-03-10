@@ -260,7 +260,7 @@ Convert an OHLC list to a data frame
 Convert a :class:`OHLCList <energyquantified.data.OHLCList>` to a
 ``pandas.DataFrame`` like this:
 
-   >>> latest_list.to_dataframe()
+   >>> latest_list.to_pandas_dataframe()
            traded   period  front    delivery   open   high    low  close  settlement  volume  open_interest
    0   2020-10-15      day      1  2020-10-16    NaN    NaN    NaN    NaN       23.24     0.0            0.0
    1   2020-10-15      day      2  2020-10-17    NaN    NaN    NaN    NaN       19.00     0.0            0.0
@@ -269,6 +269,29 @@ Convert a :class:`OHLCList <energyquantified.data.OHLCList>` to a
    4   2020-10-15    month      2  2020-12-01  25.65  25.65  24.40  24.40       24.40    68.0         9772.0
    5   2020-10-15    month      3  2021-01-01    NaN    NaN    NaN    NaN       28.65     0.0          192.0
    ...
+
+Convert a :class:`OHLCList <energyquantified.data.OHLCList>` to a
+``polars.DataFrame`` like this:
+
+   >>> latest_list.to_polars_dataframe()
+   shape: (37, 11)
+   ┌────────────┬────────┬───────┬────────────┬──────┬──────┬──────┬───────┬────────────┬────────┬───────────────┐
+   │ traded     ┆ period ┆ front ┆ delivery   ┆ open ┆ high ┆ low  ┆ close ┆ settlement ┆ volume ┆ open_interest │
+   │ ---        ┆ ---    ┆ ---   ┆ ---        ┆ ---  ┆ ---  ┆ ---  ┆ ---   ┆ ---        ┆ ---    ┆ ---           │
+   │ date       ┆ str    ┆ i32   ┆ date       ┆ f64  ┆ f64  ┆ f64  ┆ f64   ┆ f64        ┆ f64    ┆ f64           │
+   ╞════════════╪════════╪═══════╪════════════╪══════╪══════╪══════╪═══════╪════════════╪════════╪═══════════════╡
+   │ 2020-10-15 ┆ day    ┆ 1     ┆ 2020-10-16 ┆ null ┆ null ┆ null ┆ null  ┆ 23.24      ┆ 0.0    ┆ 0.0           │
+   │ 2020-10-15 ┆ day    ┆ 2     ┆ 2020-10-17 ┆ null ┆ null ┆ null ┆ null  ┆ 19.0       ┆ 0.0    ┆ 0.0           │
+   │ 2020-10-15 ┆ day    ┆ 3     ┆ 2020-10-18 ┆ null ┆ null ┆ null ┆ null  ┆ 16.0       ┆ 0.0    ┆ 0.0           │
+   │ 2020-10-15 ┆ day    ┆ 4     ┆ 2020-10-19 ┆ null ┆ null ┆ null ┆ null  ┆ 20.0       ┆ 0.0    ┆ 0.0           │
+   │ 2020-10-15 ┆ day    ┆ 5     ┆ 2020-10-20 ┆ null ┆ null ┆ null ┆ null  ┆ 20.0       ┆ 0.0    ┆ 0.0           │
+   │ …          ┆ …      ┆ …     ┆ …          ┆ …    ┆ …    ┆ …    ┆ …     ┆ …          ┆ …      ┆ …             │
+   │ 2020-10-15 ┆ year   ┆ 6     ┆ 2026-01-01 ┆ null ┆ null ┆ null ┆ null  ┆ 27.78      ┆ 0.0    ┆ 92.0          │
+   │ 2020-10-15 ┆ year   ┆ 7     ┆ 2027-01-01 ┆ null ┆ null ┆ null ┆ null  ┆ 28.49      ┆ 0.0    ┆ 111.0         │
+   │ 2020-10-15 ┆ year   ┆ 8     ┆ 2028-01-01 ┆ null ┆ null ┆ null ┆ null  ┆ 28.75      ┆ 0.0    ┆ 75.0          │
+   │ 2020-10-15 ┆ year   ┆ 9     ┆ 2029-01-01 ┆ null ┆ null ┆ null ┆ null  ┆ 30.15      ┆ 0.0    ┆ 10.0          │
+   │ 2020-10-15 ┆ year   ┆ 10    ┆ 2030-01-01 ┆ null ┆ null ┆ null ┆ null  ┆ 30.3       ┆ 0.0    ┆ 10.0          │
+   └────────────┴────────┴───────┴────────────┴──────┴──────┴──────┴───────┴────────────┴────────┴───────────────┘
 
 Load an OHLC field as a time series
 -----------------------------------

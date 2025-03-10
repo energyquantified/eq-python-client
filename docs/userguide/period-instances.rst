@@ -134,8 +134,14 @@ built-in list with two helpful methods:
    :py:class:`~energyquantified.data.Timeseries`. It requires you to specify a
    **frequency** for the output time series.
 
- * :py:meth:`~energyquantified.data.PeriodseriesList.to_dataframe` converts the
-   list of period-bsed series to a ``pandas.DataFrame``. Like the
+ * :py:meth:`~energyquantified.data.PeriodseriesList.to_pandas_dataframe` converts the
+   list of period-based series to a ``pandas.DataFrame``. Like the
+   :py:meth:`~energyquantified.data.PeriodseriesList.to_timeseries` method
+   above, it also requires you to specify a **frequency** for the time series in
+   the output data frame.
+
+ * :py:meth:`~energyquantified.data.PeriodseriesList.to_polars_dataframe` converts the
+   list of period-based series to a ``polars.DataFrame``. Like the
    :py:meth:`~energyquantified.data.PeriodseriesList.to_timeseries` method
    above, it also requires you to specify a **frequency** for the time series in
    the output data frame.

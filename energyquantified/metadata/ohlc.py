@@ -7,6 +7,7 @@ from ..time import Frequency
 
 _periods_lookup = {}
 
+
 class ContractPeriod(enum.Enum):
     """
     Enumerator of contract periods available in for OHLC contracts
@@ -69,6 +70,7 @@ class ContractPeriod(enum.Enum):
 
 
 _ohlcfield_lookup = {}
+
 
 class OHLCField(enum.Enum):
     """
@@ -166,6 +168,7 @@ class ContinuousContract:
         The front number (1 is the closest contract, 2 is the second closest,
         and so on)
     """
+
     period: ContractPeriod
     front: int
     field: OHLCField = None
@@ -191,7 +194,7 @@ class ContinuousContract:
     def as_dataframe_column_header(self):
         """
         Create a string fitting for a column header in the a
-        ``pandas.DataFrame``.
+        ``pandas.DataFrame`` or a ``polars.DataFrame``.
 
         :return: A DataFrame column header text for this contract
         :rtype: str
@@ -234,6 +237,7 @@ class SpecificContract:
 
         The delivery date of the contract
     """
+
     period: ContractPeriod
     delivery: date
     field: OHLCField = None

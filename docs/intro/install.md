@@ -19,11 +19,11 @@ The `energyquantified` package does not automatically pull in `pandas` or
 any other data analysis libraries, because they are **not** required to use
 this package.
 
-If you would like to use `pandas`, `matplotlib`, `seaborn` or other
+If you would like to use `pandas`, `polars`, `matplotlib`, `seaborn` or other
 similar libraries you must install them separately:
 
 ```bash
-pip install pandas matplotlib seaborn
+pip install pandas polars matplotlib seaborn
 ```
 
 ## Verify installation

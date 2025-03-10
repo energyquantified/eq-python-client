@@ -13,8 +13,8 @@ Release |version| (:doc:`Installation <intro/install>`)
 The official Python library for `Energy Quantified <https://www.energyquantified.com>`_'s
 Time Series API. It allows you to access thousands of data series directly from
 Energy Quantified's time series database. It integrates with the popular
-`pandas <https://pandas.pydata.org/docs/>`_ library for high-performance data
-analysis and manipulation.
+`pandas <https://pandas.pydata.org/docs/>`_ library and the `polars <https://docs.pola.rs/>`_ 
+library for high-performance data analysis and manipulation.
 
 Developed for **Python 3.7+**.
 
@@ -38,7 +38,10 @@ Developed for **Python 3.7+**.
    )
 
    # Convert to Pandas data frame
-   df = timeseries.to_dataframe()
+   pd_df = timeseries.to_pandas_dataframe()
+
+   # Convert to Polars data frame
+   pl_df = timeseries.to_polars_dataframe()
 
 
 Features
@@ -55,7 +58,7 @@ Features
 - Support for timezones, resolutions, aggregations and unit conversions
 - Easy-to-use filters for issue dates and forecast types
 - Push feed for live updates on data modifications
-- Integrates with pandas
+- Integrates with Pandas and Polars
 
 **Note:** A user account is required to use this client. You can create
 one on Energy Quantified's `home page <https://www.energyquantified.com>`_.
@@ -95,6 +98,7 @@ User guide
    userguide/ohlc
    userguide/srmc
    userguide/pandas
+   userguide/polars
    userguide/push-feed
 
 

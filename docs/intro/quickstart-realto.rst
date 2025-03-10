@@ -84,8 +84,8 @@ Operations for the following data types are enabled in the Realto integration:
 
 The `Curve search <../userguide/metadata.html#curve-search>`__
 is also enabled, so that you can search for and discover data series. All
-functions for converting API responses to ``pandas.DataFrame`` objects are
-also working.
+functions for converting API responses to ``pandas.DataFrame``  or 
+``polars.DataFrame`` objects are also working.
 
 The API operations for OHLC data and SRMC calculations are unfortunately not
 available to Realto users.

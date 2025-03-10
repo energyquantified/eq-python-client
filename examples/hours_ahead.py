@@ -44,11 +44,17 @@ eq = EnergyQuantified(api_key="aaaaaa-bbbbbb-cccccc-ddddddd")
 
 # Set options
 curve_name = "DE Wind Power Production MWh/h 15min Forecast"
-tags = ['ec', 'ecsr']  # Extract ec deterministic forecasts (4 per day)
-begin = datetime(2022, 8, 1, tzinfo=UTC)  # TODO REPLACE (freemium only have 30 days' history)
-end = datetime(2022, 8, 5, tzinfo=UTC)  # TODO REPLACE (freemium only have 30 days' history)
+tags = ["ec", "ecsr"]  # Extract ec deterministic forecasts (4 per day)
+begin = datetime(
+    2022, 8, 1, tzinfo=UTC
+)  # TODO REPLACE (freemium only have 30 days' history)
+end = datetime(
+    2022, 8, 5, tzinfo=UTC
+)  # TODO REPLACE (freemium only have 30 days' history)
 frequency = Frequency.PT15M  # PT1H = Hourly, PT15M = 15-minute
-time_ahead = timedelta(hours=1)  # How far ahead you want at minimum (default: at least one after)
+time_ahead = timedelta(
+    hours=1
+)  # How far ahead you want at minimum (default: at least one after)
 name = "wind"  # Shorter name for columns
 
 
@@ -64,7 +70,7 @@ while d < end:
         tags=tags,
         issued_at_earliest=earliest,
         issued_at_latest=latest,
-        frequency=frequency
+        frequency=frequency,
     )
     forecasts += instances
     d += load_step
@@ -81,18 +87,18 @@ for f in forecasts:
 # Data is sorted from oldest (in the first column) to most recent (in the last
 # column). Therefore, we can use pandas' fillna with backfill (see below).
 timeseries_list = TimeseriesList(forecasts)
-df = timeseries_list.to_df(single_level_header=True)
+df = timeseries_list.to_pd_df(single_level_header=True)
 
 # Get first avail non-NaN value per row
 # https://datascientyst.com/get-first-non-null-value-per-row-pandas/
 
 # Get the data
-df_data = df.fillna(method='bfill', axis=1).iloc[:, 0].to_frame()
-df_data.columns = ['data']
+df_data = df.fillna(method="bfill", axis=1).iloc[:, 0].to_frame()
+df_data.columns = ["data"]
 
 # Get the forecast used for each value
 df_instances = df.apply(lambda s: pd.Series.first_valid_index(s)[0], axis=1).to_frame()
-df_instances.columns = ['instance']
+df_instances.columns = ["instance"]
 
 print("Most recent data, up to one hour before delivery:")
 print(df_data)

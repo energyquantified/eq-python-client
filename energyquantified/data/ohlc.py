@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from datetime import date
 
 from ..metadata import ContractPeriod, OHLCField
-from ..utils.pandas import ohlc_list_to_dataframe
+from ..utils.deprecation import deprecated
+from ..utils.pandas import ohlc_list_to_pandas_dataframe
+from ..utils.polars import ohlc_list_to_polars_dataframe
 
 
 @dataclass(frozen=True)
@@ -11,6 +13,7 @@ class Product:
     An energy product description with a trading date and the
     contract in detail.
     """
+
     traded: date
     period: ContractPeriod
     front: int
@@ -33,6 +36,7 @@ class OHLC:
     """
     A summary for a trading day on a contract.
     """
+
     product: Product
     open: float
     high: float
@@ -57,7 +61,7 @@ class OHLC:
         elif isinstance(field, OHLCField):
             return getattr(self, field.tag, default=None)
         else:
-            raise ValueError(f'Unknown field: {field}')
+            raise ValueError(f"Unknown field: {field}")
 
     def __str__(self):
         return (
@@ -81,12 +85,9 @@ class OHLCList(list):
     (yearly, monthly, weekly etc.) for a specific market.
     """
 
-    def __init__(self,
-                 elements,
-                 curve=None,
-                 contract=None,
-                 unit=None,
-                 denominator=None):
+    def __init__(
+        self, elements, curve=None, contract=None, unit=None, denominator=None
+    ):
         super().__init__(elements)
         # --- Public members ---
         #: The curve holding these OHLC objects
@@ -138,17 +139,31 @@ class OHLCList(list):
     def __str__(self):
         parts = []
         if self.curve:
-            parts.append(f"curve=\"{self.curve}\"")
+            parts.append(f'curve="{self.curve}"')
         if self.unit:
-            parts.append(f"unit=\"{self.unit}\"")
+            parts.append(f'unit="{self.unit}"')
         if self.denominator:
-            parts.append(f"denominator=\"{self.denominator}\"")
+            parts.append(f'denominator="{self.denominator}"')
         if len(self) > 0:
             parts.append(f"items={super().__str__()}")
         return f"<OHLCList: {', '.join(parts)}>"
 
+    def to_pd_df(self):
+        """
+        Convert this OHLCList to a ``pandas.DataFrame`` with a column for
+        open, high, low, close, settlement, volume and open interest.
+
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe()
+
+    @deprecated(alt=to_pd_df)
     def to_df(self):
         """
+        DEPRECATED: Use `to_pd_df` instead.
+
         Convert this OHLCList to a ``pandas.DataFrame`` with a column for
         open, high, low, close, settlement, volume and open interest.
 
@@ -156,10 +171,24 @@ class OHLCList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe()
+        return self.to_pandas_dataframe()
 
+    def to_pandas_dataframe(self):
+        """
+        Convert this OHLCList to a ``pandas.DataFrame`` with a column for
+        open, high, low, close, settlement, volume and open interest.
+
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return ohlc_list_to_pandas_dataframe(self)
+
+    @deprecated(alt=to_pandas_dataframe)
     def to_dataframe(self):
         """
+        DEPRECATED: Use `to_pandas_dataframe` instead.
+
         Convert this OHLCList to a ``pandas.DataFrame`` with a column for
         open, high, low, close, settlement, volume and open interest.
 
@@ -167,4 +196,26 @@ class OHLCList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return ohlc_list_to_dataframe(self)
+        return self.to_pandas_dataframe()
+
+    def to_pl_df(self):
+        """
+        Convert this OHLCList to a ``polars.DataFrame`` with a column for
+        open, high, low, close, settlement, volume and open interest.
+
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return self.to_polars_dataframe()
+
+    def to_polars_dataframe(self):
+        """
+        Convert this OHLCList to a ``polars.DataFrame`` with a column for
+        open, high, low, close, settlement, volume and open interest.
+
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return ohlc_list_to_polars_dataframe(self)

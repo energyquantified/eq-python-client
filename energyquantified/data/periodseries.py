@@ -6,6 +6,7 @@ from datetime import datetime
 from .base import Series
 from .timeseries import TimeseriesList, Timeseries, Value
 from ..time import Resolution, Frequency
+from ..utils.deprecation import deprecated
 
 
 class Period(namedtuple("Period", ("begin", "end", "value"))):
@@ -44,8 +45,8 @@ class Period(namedtuple("Period", ("begin", "end", "value"))):
         """
         Print this period-based series value.
         """
-        d0 = self.begin.isoformat(sep=' ')
-        d1 = self.end.isoformat(sep=' ')
+        d0 = self.begin.isoformat(sep=" ")
+        d1 = self.end.isoformat(sep=" ")
         v = self.value
         print(f"{d0}–{d1}\t{v:13.2f}", file=file)
 
@@ -58,14 +59,14 @@ class Period(namedtuple("Period", ("begin", "end", "value"))):
         :rtype: dict
         """
         return {
-            "begin": self.begin.isoformat(sep=' '),
-            "end": self.end.isoformat(sep=' '),
-            "v": self.value
+            "begin": self.begin.isoformat(sep=" "),
+            "end": self.end.isoformat(sep=" "),
+            "v": self.value,
         }
 
     def __str__(self):
-        d0 = self.begin.isoformat(sep=' ')
-        d1 = self.end.isoformat(sep=' ')
+        d0 = self.begin.isoformat(sep=" ")
+        d1 = self.end.isoformat(sep=" ")
         v = self.value
         return f"<Period: begin={d0}, end={d1}, value={v}>"
 
@@ -102,8 +103,7 @@ class Period(namedtuple("Period", ("begin", "end", "value"))):
         return (d1 - d0).total_seconds()
 
 
-class CapacityPeriod(
-    namedtuple("Period", ("begin", "end", "value", "installed"))):
+class CapacityPeriod(namedtuple("Period", ("begin", "end", "value", "installed"))):
     """
     A period for a period-based series. Includes the installed capacity for
     the period (which may differ from the currently available capacity given in
@@ -140,16 +140,15 @@ class CapacityPeriod(
             raise ValueError("Period.end is not a datetime")
         if not (self.value is None or isinstance(self.value, (numbers.Number))):
             raise ValueError("Period.value must either be a number or None")
-        if not (self.installed is None or isinstance(self.installed,
-                                                     (numbers.Number))):
+        if not (self.installed is None or isinstance(self.installed, (numbers.Number))):
             raise ValueError("Period.installed must either be a number or None")
 
     def print(self, file=sys.stdout):
         """
         Print this period-based series value.
         """
-        d0 = self.begin.isoformat(sep=' ')
-        d1 = self.end.isoformat(sep=' ')
+        d0 = self.begin.isoformat(sep=" ")
+        d1 = self.end.isoformat(sep=" ")
         v = self.value
         c = self.installed
         print(f"{d0}–{d1}\t{v:13.2f}\t{c:13.2f}", file=file)
@@ -163,15 +162,15 @@ class CapacityPeriod(
         :rtype: dict
         """
         return {
-            "begin": self.begin.isoformat(sep=' '),
-            "end": self.end.isoformat(sep=' '),
+            "begin": self.begin.isoformat(sep=" "),
+            "end": self.end.isoformat(sep=" "),
             "v": self.value,
             "c": self.installed,
         }
 
     def __str__(self):
-        d0 = self.begin.isoformat(sep=' ')
-        d1 = self.end.isoformat(sep=' ')
+        d0 = self.begin.isoformat(sep=" ")
+        d1 = self.end.isoformat(sep=" ")
         v = self.value
         c = self.installed
         return f"<Period: begin={d0}, end={d1}, value={v}, installed={c}>"
@@ -229,21 +228,21 @@ class Periodseries(Series):
 
     def __init__(self, data=None, **kwargs):
         super().__init__(**kwargs)
-        assert isinstance(self.resolution, Resolution), (
-            "Periodseries.resolution is required"
-        )
+        assert isinstance(
+            self.resolution, Resolution
+        ), "Periodseries.resolution is required"
         self.data = data or []
 
     def __str__(self):
         items = []
         items.append(f"resolution={self.resolution}")
-        items.append(f"curve=\"{self.curve}\"")
+        items.append(f'curve="{self.curve}"')
         if self.instance:
             items.append(f"instance={self.instance}")
         if self.unit:
-            items.append(f"unit=\"{self.unit}\"")
+            items.append(f'unit="{self.unit}"')
         if self.denominator:
-            items.append(f"denominator=\"{self.denominator}\"")
+            items.append(f'denominator="{self.denominator}"')
         if self.has_data():
             items.append(f"begin=\"{self.begin().isoformat(sep=' ')}\"")
             items.append(f"end=\"{self.end().isoformat(sep=' ')}\"")
@@ -284,11 +283,11 @@ class Periodseries(Series):
         # Verify parameters
         assert isinstance(frequency, Frequency), "Must be a frequency"
         assert isinstance(field, str), "Must be a str"
-        assert field in (
-            "value", "installed"), "field must be 'value' or 'installed'"
+        assert field in ("value", "installed"), "field must be 'value' or 'installed'"
         if field == "installed":
-            assert all(isinstance(p, CapacityPeriod) for p in
-                       self.data), "field='installed' requires a series of CapacityPeriods"
+            assert all(
+                isinstance(p, CapacityPeriod) for p in self.data
+            ), "field='installed' requires a series of CapacityPeriods"
         # Prepare conversion
         resolution = Resolution(frequency, self.resolution.timezone)
         if not self.has_data():
@@ -298,7 +297,7 @@ class Periodseries(Series):
                 instance=self.instance,
                 unit=self.unit,
                 denominator=self.denominator,
-                data=[]
+                data=[],
             )
         begin = resolution.floor(self.begin())
         end = self.end()
@@ -317,14 +316,55 @@ class Periodseries(Series):
             instance=self.instance,
             unit=self.unit,
             denominator=self.denominator,
-            data=data
+            data=data,
         )
         timeseries.set_name(self._name)
         return timeseries
 
-    def to_df(self, frequency=None, name=None, single_level_header=False,
-              field="value"):
+    def to_pd_df(
+        self, frequency=None, name=None, single_level_header=False, field="value"
+    ):
         """
+        Alias for :meth:`Periodseries.to_pandas_dataframe`.
+
+        Convert this period-based to a ``pandas.DataFrame`` as a time series
+        in the given frequency.
+
+        Using :py:meth:`Periodseries.to_timeseries` to convert this
+        period-based series to a regular time series first. When periods
+        overlap the same step in the resulting time series, a weighted
+        average is calculated down to second-precision.
+
+        :param frequency: The frequency of the resulting ``pandas.DataFrame``\
+            time series
+        :type frequency: Frequency, required
+        :param name: Set a name for the column in the ``pandas.DataFrame``,\
+            defaults to ``value``
+        :type name: str, optional
+        :param single_level_header: Set to True to use single-level header\
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
+        :type field: str, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(
+            frequency=frequency,
+            name=name,
+            single_level_header=single_level_header,
+            field=field,
+        )
+
+    @deprecated(alt=to_pd_df)
+    def to_df(
+        self, frequency=None, name=None, single_level_header=False, field="value"
+    ):
+        """
+        DEPRECATED: Use ``to_pd_df`` instead.
+
         Alias for :meth:`Periodseries.to_dataframe`.
 
         Convert this period-based to a ``pandas.DataFrame`` as a time series
@@ -351,15 +391,16 @@ class Periodseries(Series):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(
+        return self.to_pandas_dataframe(
             frequency=frequency,
             name=name,
             single_level_header=single_level_header,
             field=field,
         )
 
-    def to_dataframe(self, frequency=None, name=None,
-                     single_level_header=False, field="value"):
+    def to_pandas_dataframe(
+        self, frequency=None, name=None, single_level_header=False, field="value"
+    ):
         """
         Convert this period-based to a ``pandas.DataFrame`` as a time series
         in the given frequency.
@@ -389,10 +430,108 @@ class Periodseries(Series):
         assert isinstance(frequency, Frequency), "Must be a frequency"
         # Conversion
         timeseries = self.to_timeseries(frequency=frequency, field=field)
-        df = timeseries.to_dataframe(
-            name=name,
-            single_level_header=single_level_header
+        df = timeseries.to_pandas_dataframe(
+            name=name, single_level_header=single_level_header
         )
+        return df
+
+    @deprecated(alt=to_pandas_dataframe)
+    def to_dataframe(
+        self, frequency=None, name=None, single_level_header=False, field="value"
+    ):
+        """
+        DEPRECATED: Use ``to_polars_dataframe`` instead.
+
+        Convert this period-based to a ``pandas.DataFrame`` as a time series
+        in the given frequency.
+
+        Using :py:meth:`Periodseries.to_timeseries` to convert this
+        period-based series to a regular time series first. When periods
+        overlap the same step in the resulting time series, a weighted
+        average is calculated down to second-precision.
+
+        :param frequency: The frequency of the resulting ``pandas.DataFrame``\
+            time series
+        :type frequency: Frequency, required
+        :param name: Set a name for the column in the ``pandas.DataFrame``,\
+            defaults to ``value``
+        :type name: str, optional
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
+        :type field: str, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(
+            frequency=frequency,
+            name=name,
+            single_level_header=single_level_header,
+            field=field,
+        )
+
+    def to_pl_df(self, frequency=None, name=None, field="value"):
+        """
+        Alias for :meth:`Periodseries.to_polars_dataframe`.
+
+        Convert this period-based to a ``polars.DataFrame`` as a time series
+        in the given frequency.
+
+        Using :py:meth:`Periodseries.to_timeseries` to convert this
+        period-based series to a regular time series first. When periods
+        overlap the same step in the resulting time series, a weighted
+        average is calculated down to second-precision.
+
+        :param frequency: The frequency of the resulting ``polars.DataFrame``\
+            time series
+        :type frequency: Frequency, required
+        :param name: Set a name for the column in the ``polars.DataFrame``,\
+            defaults to ``value``
+        :type name: str, optional
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
+        :type field: str, optional
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return self.to_polars_dataframe(
+            frequency=frequency,
+            name=name,
+            field=field,
+        )
+
+    def to_polars_dataframe(self, frequency=None, name=None, field="value"):
+        """
+        Convert this period-based to a ``polars.DataFrame`` as a time series
+        in the given frequency.
+
+        Using :py:meth:`Periodseries.to_timeseries` to convert this
+        period-based series to a regular time series first. When periods
+        overlap the same step in the resulting time series, a weighted
+        average is calculated down to second-precision.
+
+        :param frequency: The frequency of the resulting ``polars.DataFrame``\
+            time series
+        :type frequency: Frequency, required
+        :param name: Set a name for the column in the ``polars.DataFrame``,\
+            defaults to ``value``
+        :type name: str, optional
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
+        :type field: str, optional
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        # Verify parameters
+        assert isinstance(frequency, Frequency), "Must be a frequency"
+        # Conversion
+        timeseries = self.to_timeseries(frequency=frequency, field=field)
+        df = timeseries.to_polars_dataframe(name=name)
         return df
 
     def print(self, file=sys.stdout):
@@ -418,12 +557,9 @@ class _PeriodsToTimeseriesIterator:
     A period-based series iterator used for conversions to Timeseries objects.
     """
 
-    def __init__(self,
-                 periods=None,
-                 resolution=None,
-                 begin=None,
-                 end=None,
-                 field="value"):
+    def __init__(
+        self, periods=None, resolution=None, begin=None, end=None, field="value"
+    ):
         self.periods = [p for p in periods if p.end > begin and p.begin < end]
         self.resolution = resolution
         self.begin = begin
@@ -520,10 +656,7 @@ class _PeriodsToTimeseriesIterator:
         # Get sum of weight
         sum_weights = 1.0 * sum(weight for avail, weight in available_weights)
         # Get the mean value
-        return (
-                sum(avail * weight for avail, weight in available_weights)
-                / sum_weights
-        )
+        return sum(avail * weight for avail, weight in available_weights) / sum_weights
 
 
 # Period-based series list with helpers
@@ -567,8 +700,37 @@ class PeriodseriesList(list):
             for periodseries in self
         )
 
+    def to_pd_df(self, frequency=None, single_level_header=False, field="value"):
+        """
+        Alias for :meth:`Timeseries.to_pandas_dataframe`.
+
+        Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param frequency: The frequency of the resulting time series'
+        :type frequency: Frequency, required
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
+        :type field: str, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(
+            frequency=frequency,
+            single_level_header=single_level_header,
+            field=field,
+        )
+
+    @deprecated(alt=to_pd_df)
     def to_df(self, frequency=None, single_level_header=False, field="value"):
         """
+        DEPRECATED: Use ``to_pd_df`` instead.
+
         Alias for :meth:`Timeseries.to_dataframe`.
 
         Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
@@ -587,14 +749,15 @@ class PeriodseriesList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(
+        return self.to_pandas_dataframe(
             frequency=frequency,
             single_level_header=single_level_header,
             field=field,
         )
 
-    def to_dataframe(self, frequency=None, single_level_header=False,
-                     field="value"):
+    def to_pandas_dataframe(
+        self, frequency=None, single_level_header=False, field="value"
+    ):
         """
         Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
         series are placed in its own column and are lined up with the date-time
@@ -616,9 +779,80 @@ class PeriodseriesList(list):
         assert isinstance(frequency, Frequency), "Must be a frequency"
         # Convert to time series then to data frame
         timeseries_list = self.to_timeseries(frequency=frequency, field=field)
-        return timeseries_list.to_dataframe(
+        return timeseries_list.to_pandas_dataframe(
             single_level_header=single_level_header
         )
+
+    @deprecated(alt=to_pandas_dataframe)
+    def to_dataframe(self, frequency=None, single_level_header=False, field="value"):
+        """
+        DEPRECATED: Use ``to_pandas_dataframe`` instead.
+        
+        Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param frequency: The frequency of the resulting time series'
+        :type frequency: Frequency, required
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
+        :type field: str, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(
+            frequency=frequency,
+            single_level_header=single_level_header,
+            field=field,
+        )
+
+    def to_pl_df(self, frequency=None, field="value"):
+        """
+        Alias for :meth:`Timeseries.to_polars_dataframe`.
+
+        Convert this PeriodseriesList to a ``polars.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param frequency: The frequency of the resulting time series'
+        :type frequency: Frequency, required
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
+        :type field: str, optional
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return self.to_polars_dataframe(
+            frequency=frequency,
+            field=field,
+        )
+
+    def to_polars_dataframe(self, frequency=None, field="value"):
+        """
+        Convert this PeriodseriesList to a ``polars.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param frequency: The frequency of the resulting time series'
+        :type frequency: Frequency, required
+        :param field: Which period attribute to use when converting to timeseries.\
+            Options: 'value' or 'installed'. Defaults to 'value'.
+        :type field: str, optional
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        # Verify parameters
+        assert isinstance(frequency, Frequency), "Must be a frequency"
+        # Convert to time series then to data frame
+        return self.to_timeseries(
+            frequency=frequency, field=field
+        ).to_polars_dataframe()
 
     def append(self, periodseries):
         _validate_periodseries(periodseries)

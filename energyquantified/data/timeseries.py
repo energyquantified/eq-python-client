@@ -6,13 +6,22 @@ from datetime import datetime
 
 from .base import Series
 from ..time import Resolution
-from ..utils.pandas import timeseries_to_dataframe, timeseries_list_to_dataframe
+from ..utils.deprecation import deprecated
+from ..utils.pandas import (
+    timeseries_list_to_pandas_dataframe,
+    timeseries_to_pandas_dataframe,
+)
+from ..utils.polars import (
+    timeseries_list_to_polars_dataframe,
+    timeseries_to_polars_dataframe,
+)
 
 
 class ValueType(enum.Enum):
     """
     Enumerator of supported value types for ``timeseries.data[]``.
     """
+
     #: Single value. See :py:class:`energyquantified.data.Value`.
     VALUE = "VALUE"
     #: Only scenarios. See :py:class:`energyquantified.data.ScenariosValue`.
@@ -79,7 +88,7 @@ class Value(namedtuple("Value", ("date", "value"))):
         """
         Print this time series value.
         """
-        dt = self.date.isoformat(sep=' ')
+        dt = self.date.isoformat(sep=" ")
         v = self.value
         print(f"{dt}\t{v:13.2f}", file=file)
 
@@ -91,13 +100,10 @@ class Value(namedtuple("Value", ("date", "value"))):
         :return: A dict of this value in the same format as the API response
         :rtype: dict
         """
-        return {
-            "d": self.date.isoformat(sep=' '),
-            "v": self.value
-        }
+        return {"d": self.date.isoformat(sep=" "), "v": self.value}
 
     def __str__(self):
-        dt = self.date.isoformat(sep=' ')
+        dt = self.date.isoformat(sep=" ")
         v = self.value
         return f"<Value: date={dt}, value={v}>"
 
@@ -140,12 +146,9 @@ class ScenariosValue(namedtuple("Value", ("date", "scenarios"))):
         if not (self.scenarios is tuple):
             raise ValueError("ScenariosValue.scenarios is not a tuple")
         if not all(
-                (s is None or isinstance(s, (numbers.Number)))
-                for s in self.scenarios
+            (s is None or isinstance(s, (numbers.Number))) for s in self.scenarios
         ):
-            raise ValueError(
-                "ScenariosValue.scenarios has members that aren't numbers"
-            )
+            raise ValueError("ScenariosValue.scenarios has members that aren't numbers")
 
     def num_scenarios(self):
         """
@@ -169,7 +172,7 @@ class ScenariosValue(namedtuple("Value", ("date", "scenarios"))):
         """
         Print this time series value.
         """
-        dt = self.date.isoformat(sep=' ')
+        dt = self.date.isoformat(sep=" ")
         s = self.scenarios
         print(f"{dt}\t{s}", file=file)
 
@@ -181,13 +184,10 @@ class ScenariosValue(namedtuple("Value", ("date", "scenarios"))):
         :return: A dict of this value in the same format as the API response
         :rtype: dict
         """
-        return {
-            "d": self.date.isoformat(sep=' '),
-            "s": self.scenarios
-        }
+        return {"d": self.date.isoformat(sep=" "), "s": self.scenarios}
 
     def __str__(self):
-        dt = self.date.isoformat(sep=' ')
+        dt = self.date.isoformat(sep=" ")
         s = self.scenarios
         return f"<ScenariosValue: date={dt}, scenarios={s}>"
 
@@ -236,8 +236,7 @@ class MeanScenariosValue(namedtuple("Value", ("date", "value", "scenarios"))):
         if not (self.scenarios is tuple):
             raise ValueError("ScenariosValue.scenarios is not a tuple")
         if not all(
-                (s is None or isinstance(s, (numbers.Number)))
-                for s in self.scenarios
+            (s is None or isinstance(s, (numbers.Number))) for s in self.scenarios
         ):
             raise ValueError(
                 "MeanScenariosValue.scenarios has members that aren't numbers"
@@ -265,7 +264,7 @@ class MeanScenariosValue(namedtuple("Value", ("date", "value", "scenarios"))):
         """
         Print this time series value.
         """
-        dt = self.date.isoformat(sep=' ')
+        dt = self.date.isoformat(sep=" ")
         v = self.value
         s = self.scenarios
         print(f"{dt}\t{v:13.2f}\t{s}", file=file)
@@ -278,14 +277,10 @@ class MeanScenariosValue(namedtuple("Value", ("date", "value", "scenarios"))):
         :return: A dict of this value in the same format as the API response
         :rtype: dict
         """
-        return {
-            "d": self.date.isoformat(sep=' '),
-            "v": self.value,
-            "s": self.scenarios
-        }
+        return {"d": self.date.isoformat(sep=" "), "v": self.value, "s": self.scenarios}
 
     def __str__(self):
-        dt = self.date.isoformat(sep=' ')
+        dt = self.date.isoformat(sep=" ")
         v = self.value
         s = self.scenarios
         return f"<MeanScenariosValue: date={dt}, value={v}, scenarios={s}>"
@@ -319,25 +314,25 @@ class Timeseries(Series):
 
     def __init__(self, data=None, scenario_names=None, **kwargs):
         super().__init__(**kwargs)
-        assert isinstance(self.resolution, Resolution), (
-            "Timeseries.resolution is required"
-        )
+        assert isinstance(
+            self.resolution, Resolution
+        ), "Timeseries.resolution is required"
         self.data = data or []
         self.scenario_names = scenario_names or []
         self._fix_scenario_names()
 
     def __str__(self):
         items = []
-        items.append(f"resolution=\"{self.resolution}\"")
-        items.append(f"curve=\"{self.curve}\"")
+        items.append(f'resolution="{self.resolution}"')
+        items.append(f'curve="{self.curve}"')
         if self.instance:
-            items.append(f"instance=\"{self.instance}\"")
+            items.append(f'instance="{self.instance}"')
         if self.unit:
-            items.append(f"unit=\"{self.unit}\"")
+            items.append(f'unit="{self.unit}"')
         if self.denominator:
-            items.append(f"denominator=\"{self.denominator}\"")
+            items.append(f'denominator="{self.denominator}"')
         if self.has_scenarios():
-            items.append(f"scenario_names=\"{self.scenario_names}\"")
+            items.append(f'scenario_names="{self.scenario_names}"')
         if self.has_data():
             items.append(f"begin=\"{self.begin().isoformat(sep=' ')}\"")
             items.append(f"end=\"{self.end().isoformat(sep=' ')}\"")
@@ -349,10 +344,9 @@ class Timeseries(Series):
         return str(self)
 
     def _fix_scenario_names(self):
-        if self.data and self.data[0].has_scenarios() \
-                and not self.scenario_names:
+        if self.data and self.data[0].has_scenarios() and not self.scenario_names:
             num_scenarios = self.data[0].num_scenarios()
-            self.scenario_names = [f'e{i:02}' for i in range(num_scenarios)]
+            self.scenario_names = [f"e{i:02}" for i in range(num_scenarios)]
 
     def has_scenarios(self):
         """
@@ -361,9 +355,8 @@ class Timeseries(Series):
         :return: True when this time series has scenarios, otherwise False
         :rtype: bool
         """
-        return (
-                len(self.scenario_names) > 0 or
-                (self.data and self.data[0].has_scenarios())
+        return len(self.scenario_names) > 0 or (
+            self.data and self.data[0].has_scenarios()
         )
 
     def total_values_per_item(self):
@@ -384,9 +377,7 @@ class Timeseries(Series):
             return len(self.scenario_names)
         if value_type == ValueType.MEAN_AND_SCENARIOS:
             return 1 + len(self.scenario_names)
-        raise ValueError(
-            f"Timeseries has unknown value type: {value_type}"
-        )
+        raise ValueError(f"Timeseries has unknown value type: {value_type}")
 
     def value_type(self):
         """
@@ -412,8 +403,29 @@ class Timeseries(Series):
         else:
             raise ValueError("Timeseries has no values")
 
+    def to_pd_df(self, name=None, single_level_header=False):
+        """
+        Alias for :meth:`Timeseries.to_pandas_dataframe`. Convert this timeseries
+        to a ``pandas.DataFrame``.
+
+        :param name: Set a name for the value column, defaults to ``value``
+        :type name: str, optional
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(
+            name=name, single_level_header=single_level_header
+        )
+
+    @deprecated(alt=to_pd_df)
     def to_df(self, name=None, single_level_header=False):
         """
+        DEPRECTAED: Use ``to_pd_df`` instead.
+
         Alias for :meth:`Timeseries.to_dataframe`. Convert this timeseries
         to a ``pandas.DataFrame``.
 
@@ -426,12 +438,11 @@ class Timeseries(Series):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(
-            name=name,
-            single_level_header=single_level_header
+        return self.to_pandas_dataframe(
+            name=name, single_level_header=single_level_header
         )
 
-    def to_dataframe(self, name=None, single_level_header=False):
+    def to_pandas_dataframe(self, name=None, single_level_header=False):
         """
         Convert this timeseries to a ``pandas.DataFrame``.
 
@@ -444,11 +455,54 @@ class Timeseries(Series):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return timeseries_to_dataframe(
-            self,
-            name=name,
-            single_level_header=single_level_header
+        return timeseries_to_pandas_dataframe(
+            self, name=name, single_level_header=single_level_header
         )
+
+    @deprecated(alt=to_pandas_dataframe)
+    def to_dataframe(self, name=None, single_level_header=False):
+        """
+        DEPRECATED: Use ``to_pandas_dataframe`` instead.
+
+        Convert this timeseries to a ``pandas.DataFrame``.
+
+        :param name: Set a name for the value column, defaults to ``value``
+        :type name: str, optional
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(
+            name=name, single_level_header=single_level_header
+        )
+
+    def to_pl_df(self, name=None):
+        """
+        Alias for :meth:`Timeseries.to_pandas_dataframe`. Convert this timeseries
+        to a ``polars.DataFrame``.
+
+        :param name: Set a name for the value column, defaults to ``value``
+        :type name: str, optional
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return self.to_polars_dataframe(name=name)
+
+    def to_polars_dataframe(self, name=None):
+        """
+        Convert this timeseries to a ``polars.DataFrame``.
+
+        :param name: Set a name for the value column, defaults to ``value``
+        :type name: str, optional
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return timeseries_to_polars_dataframe(self, name=name)
 
     def validate(self):
         """
@@ -473,9 +527,7 @@ class Timeseries(Series):
                 )
             # Check if the current date
             if not d == item.date:
-                raise ValueError(
-                    f"Expected {d}, but got {item.date} at index {index}"
-                )
+                raise ValueError(f"Expected {d}, but got {item.date} at index {index}")
             d = r >> d
 
     def print(self, file=sys.stdout):
@@ -523,8 +575,28 @@ class TimeseriesList(list):
     def frequency(self):
         return self._frequency
 
+    def to_pd_df(self, single_level_header=False):
+        """
+        Alias for :meth:`Timeseries.to_pandas_dataframe`.
+
+        Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(single_level_header=single_level_header)
+
+    @deprecated(alt=to_pd_df)
     def to_df(self, single_level_header=False):
         """
+        DEPRECATED: Use ``to_pd_df`` instead.
+
         Alias for :meth:`Timeseries.to_dataframe`.
 
         Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
@@ -538,9 +610,9 @@ class TimeseriesList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return self.to_dataframe(single_level_header=single_level_header)
+        return self.to_pandas_dataframe(single_level_header=single_level_header)
 
-    def to_dataframe(self, single_level_header=False):
+    def to_pandas_dataframe(self, single_level_header=False):
         """
         Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
         series are placed in its own column and are lined up with the date-time
@@ -553,10 +625,53 @@ class TimeseriesList(list):
         :rtype: pandas.DataFrame
         :raises ImportError: When pandas is not installed on the system
         """
-        return timeseries_list_to_dataframe(
-            self,
-            single_level_header=single_level_header
+        return timeseries_list_to_pandas_dataframe(
+            self, single_level_header=single_level_header
         )
+
+    @deprecated(alt=to_pandas_dataframe)
+    def to_dataframe(self, single_level_header=False):
+        """
+        DEPRECATED: Use ``to_pandas_dataframe`` instead.
+
+        Convert this TimeseriesList to a ``pandas.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :param single_level_header: Set to True to use single-level header \
+            in the DataFrame, defaults to False
+        :type single_level_header: boolean, optional
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe(single_level_header=single_level_header)
+
+    def to_pl_df(self):
+        """
+        Alias for :meth:`Timeseries.to_polars_dataframe`.
+
+        Convert this TimeseriesList to a ``polars.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return self.to_polars_dataframe()
+
+    def to_polars_dataframe(self):
+        """
+        Convert this TimeseriesList to a ``polars.DataFrame`` where all time
+        series are placed in its own column and are lined up with the date-time
+        as index.
+
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return timeseries_list_to_polars_dataframe(self)
 
     def append(self, timeseries):
         # Asserts
@@ -568,8 +683,7 @@ class TimeseriesList(list):
     def extend(self, iterable):
         # Asserts
         _validate_timeseries_list(iterable)
-        self._frequency = _check_and_get_frequency_list(iterable,
-                                                        self._frequency)
+        self._frequency = _check_and_get_frequency_list(iterable, self._frequency)
         # Perform operation
         return super().extend(iterable)
 
@@ -585,16 +699,14 @@ class TimeseriesList(list):
         _validate_timeseries_list(rhs)
         self._frequency = _check_and_get_frequency_list(rhs, self._frequency)
         # Perform operation
-        return TimeseriesList(list.__add__(self, rhs),
-                              frequency=self._frequency)
+        return TimeseriesList(list.__add__(self, rhs), frequency=self._frequency)
 
     def __iadd__(self, rhs):
         # Asserts
         _validate_timeseries_list(rhs)
         self._frequency = _check_and_get_frequency_list(rhs, self._frequency)
         # Perform operation
-        return TimeseriesList(list.__iadd__(self, rhs),
-                              frequency=self._frequency)
+        return TimeseriesList(list.__iadd__(self, rhs), frequency=self._frequency)
 
     def __setitem__(self, key, timeseries):
         # Asserts
