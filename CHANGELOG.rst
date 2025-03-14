@@ -13,6 +13,13 @@ dev
   - ``to_df()`` → ``to_pd_df()`` (old method deprecated)
   - ``to_dataframe()`` → ``to_pandas_dataframe()`` (old method deprecated)
 
+**Bugfixes**
+
+- Instances from ``eq.instances.list()`` previously had their ``issued`` time
+  parsed in the UTC timezone. This has been fixed to be parsed in the curve's
+  ``instance_issued_timezone`` if a curve *object* is provided to the method,
+  otherwise (curve *name*) it will be parsed as a datetime with offset.
+
 
 0.13.12
 -------
