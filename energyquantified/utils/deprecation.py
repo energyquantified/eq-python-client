@@ -1,8 +1,14 @@
 import functools
 import warnings
+from typing import Optional
 
 
-def deprecated(_func=None, *, alt: str | None = None, msg: str | None = None):
+def deprecated(
+        _func=None,
+        *,
+        alt: Optional[str] = None,
+        msg: Optional[str] = None,
+    ):
     """
     Decorator to mark a function or method as deprecated.
     To use this decorator, simply add ``@deprecated`` above the
