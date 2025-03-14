@@ -88,15 +88,13 @@ def parse_instance(json, curve=None):
     Parse a JSON response from the server into an Instance object.
     """
     # Find timezone for issued
+    issued = parser.isoparse(json.get("issued"))
+    # Localize to issued zone if we have it (from curve)
     if curve and curve.instance_issued_timezone:
-        issued_timezone = curve.instance_issued_timezone
-    else:
-        issued_timezone = UTC
-    # Parse the issue date
-    issued = to_timezone(
-        parser.isoparse(json.get("issued")),
-        tz=issued_timezone
-    )
+        issued = to_timezone(
+            issued,
+            tz=curve.instance_issued_timezone,
+        )
     tag = json.get("tag") or ""
     scenarios = json.get("scenarios") or None
     # Find timezone for created and modified
