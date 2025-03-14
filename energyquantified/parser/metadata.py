@@ -80,7 +80,7 @@ def parse_instance_list(json, curve=None):
         raise ParseException(
             f"Expected list of Instance JSON objects, found: {type(json)}"
         )
-    return [parse_instance(json_obj) for json_obj in json]
+    return [parse_instance(json_obj, curve=curve) for json_obj in json]
 
 
 def parse_instance(json, curve=None):
