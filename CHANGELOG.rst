@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Dependencies**
+
+- Unpin ``websocket-client`` to allow for the latest version
+  (until next major release)
+
 0.14
 ----
 
