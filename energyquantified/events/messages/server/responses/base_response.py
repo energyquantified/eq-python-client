@@ -177,4 +177,12 @@ def _parse_shared_options(json, options):
     end = json.get("end")
     if end is not None:
         options.set_end(end)
+    # Tags
+    tags = json.get("tags")
+    if tags is not None:
+        options.set_tags(tags)
+    # Exclude tags
+    exclude_tags = json.get("exclude_tags")
+    if exclude_tags is not None:
+        options.set_exclude_tags(exclude_tags)
     return options
