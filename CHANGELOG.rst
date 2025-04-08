@@ -1,6 +1,15 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Add ``tags`` and ``exclude_tags`` to curve event filters, for filtering
+  events by instance tags
+
+
 0.14.1
 ------
 
@@ -8,6 +17,7 @@ Changelog
 
 - Unpin ``websocket-client`` to allow for the latest version
   (until next major release)
+
 
 0.14
 ----
