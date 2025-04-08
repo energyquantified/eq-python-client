@@ -374,6 +374,13 @@ objects or curve names.
     * ``curves``: Filter by :py:class:`Curve <energyquantified.metadata.Curve>`
       objects or curve names.
 
+    * ``tags``: Filter by instance tags (e.g., "ec", "ec-ens", "gfs"). Curves
+      without an instance are not affected by this filter.
+
+    * ``exclude_tags``: Exclude events for instances with one of the specified
+      instance tags (e.g., "ec", "ec-ens", "gfs"). Curves without an instance are
+      not affected by this filter.
+
     * ``begin``: The earliest date to look for changed values (inclusive).
 
     * ``end``: The last date to look for changed values (exclusive).
@@ -413,6 +420,13 @@ attributes.
 
     * ``event_types``: Filter by
       :py:class:`EventType <energyquantified.events.EventType>`.
+
+    * ``tags``: Filter by instance tags (e.g., "ec", "ec-ens", "gfs"). Curves
+      without an instance are not affected by this filter.
+
+    * ``exclude_tags``: Exclude events for instances with one of the specified
+      instance tags (e.g., "ec", "ec-ens", "gfs"). Curves without an instance are
+      not affected by this filter.
 
     * ``areas``: Filter by :py:class:`Area <energyquantified.metadata.Area>`.
 
