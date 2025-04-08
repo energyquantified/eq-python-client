@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.14.3
+------
+
+**Improvements**
+
+- Update the documentation with instance tag filtering in the push feed
+
+
 0.14.2
 ------
 
