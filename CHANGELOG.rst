@@ -6,7 +6,7 @@ dev
 
 **Improvements**
 
-- Lower the ``front`` restriction when loading OHLC from ``1`` to ``0``
+- Lower the minimum supported ``front`` value for OHLC data from ``1`` to ``0``
 
 
 0.14.3
