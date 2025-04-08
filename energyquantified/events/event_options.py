@@ -12,16 +12,29 @@ class _BaseCurveFilter:
     CurveNameFilter, CurveAttributeFilter).
     """
 
-    def __init__(self, begin=None, end=None, event_types=None):
+    def __init__(
+            self,
+            begin=None,
+            end=None,
+            event_types=None,
+            tags=None,
+            exclude_tags=None,
+        ):
         self._begin = None
         self._end = None
         self._event_types = None
+        self._tags = None
+        self._exclude_tags = None
         if begin:
             self.set_begin(begin)
         if end:
             self.set_end(end)
         if event_types:
             self.set_event_types(event_types)
+        if tags:
+            self.set_tags(tags)
+        if exclude_tags:
+            self.set_exclude_tags(exclude_tags)
 
     def has_begin(self):
         return self._begin is not None
@@ -116,6 +129,62 @@ class _BaseCurveFilter:
         self._event_types = list(new_event_types)
         return self
 
+    def has_tags(self):
+        if not isinstance(self._tags, list):
+            return False
+        return len(self._tags) > 0
+
+    def set_tags(self, tags):
+        """
+        Set one or more tags in this filter. Filter events by instances with a
+        tag matching one of the tags. NOTE: Does not filter out curves without
+        an instance.
+
+        :param tags: Filter events by tags
+        :type tags: str, list[str]
+        :raises ValueError: Invalid arg type
+        :return: The instance this method was invoked upon
+        :rtype: :py:class:`energyquantified.events.CurveNameFilter`,\
+            :py:class:`energyquantified.events.CurveAttributeFilter`
+        """
+        new_tags = set()
+        if not isinstance(tags, (list, tuple, set)):
+            tags = [tags]
+        for tag in tags:
+            if not isinstance(tag, str):
+                raise ValueError(f"'{tag}' is not type 'str'")
+            new_tags.add(tag)
+        self._tags = list(new_tags)
+        return self
+
+    def has_exclude_tags(self):
+        if not isinstance(self._exclude_tags, list):
+            return False
+        return len(self._exclude_tags) > 0
+
+    def set_exclude_tags(self, exclude_tags):
+        """
+        Set one or more tags in this filter. Filter out events with an instance
+        with a tag matching one of the tags. NOTE: Does not filter out curves
+        without an instance.
+
+        :param exclude_tags: Filter events by tags
+        :type exclude_tags: str, list[str]
+        :raises ValueError: Invalid arg type
+        :return: The instance this method was invoked upon
+        :rtype: :py:class:`energyquantified.events.CurveNameFilter`,\
+            :py:class:`energyquantified.events.CurveAttributeFilter`
+        """
+        new_exclude_tags = set()
+        if not isinstance(exclude_tags, (list, tuple, set)):
+            exclude_tags = [exclude_tags]
+        for tag in exclude_tags:
+            if not isinstance(tag, str):
+                raise ValueError(f"'{tag}' is not type 'str'")
+            new_exclude_tags.add(tag)
+        self._exclude_tags = list(new_exclude_tags)
+        return self
+
     def to_json(self):
         raise NotImplementedError
 
@@ -141,6 +210,16 @@ class _BaseCurveFilter:
             filters["end"] = self._end.isoformat(sep=" ")
         elif include_not_set:
             filters["end"] = None
+        # Tags
+        if self.has_tags():
+            filters["tags"] = self._tags
+        elif include_not_set:
+            filters["tags"] = None
+        # Exclude tags
+        if self.has_exclude_tags():
+            filters["exclude_tags"] = self._exclude_tags
+        elif include_not_set:
+            filters["exclude_tags"] = None
         return filters
 
     def validate(self):
@@ -162,6 +241,16 @@ class _BaseCurveFilter:
                 errors.append(
                     "All objects in 'event_types' must be type EventType"
                 )
+        if self.has_tags():
+            if not isinstance(self._tags, list) and all(
+                isinstance(tag, str) for tag in self._tags
+            ):
+                errors.append("'tags' must be a list of str")
+        if self.has_exclude_tags():
+            if not isinstance(self._exclude_tags, list) and all(
+                isinstance(tag, str) for tag in self._exclude_tags
+            ):
+                errors.append("'exclude_tags' must be a list of str")
         return len(errors) == 0, errors
 
 
@@ -186,9 +275,17 @@ class CurveNameFilter(_BaseCurveFilter):
             begin=None,
             end=None,
             event_types=None,
+            tags=None,
+            exclude_tags=None,
             curves=None,
     ):
-        super().__init__(begin=begin, end=end, event_types=event_types)
+        super().__init__(
+            begin=begin,
+            end=end,
+            event_types=event_types,
+            tags=tags,
+            exclude_tags=exclude_tags,
+        )
         self._curves = None
         if curves:
             self.set_curves(curves)
@@ -209,6 +306,10 @@ class CurveNameFilter(_BaseCurveFilter):
             str_list.append(f"begin={self._begin.isoformat(sep=' ')}")
         if self.has_end():
             str_list.append(f"end={self._end.isoformat(sep=' ')}")
+        if self.has_tags():
+            str_list.append(f"tags={self._tags}")
+        if self.has_exclude_tags():
+            str_list.append(f"exclude_tags={self._exclude_tags}")
         return (
             f"<CurveNameFilter: "
             f"{', '.join(str_list)}"
@@ -325,13 +426,21 @@ class CurveAttributeFilter(_BaseCurveFilter):
             begin=None,
             end=None,
             event_types=None,
+            tags=None,
+            exclude_tags=None,
             areas=None,
             data_types=None,
             commodities=None,
             categories=None,
             exact_categories=None,
     ):
-        super().__init__(begin=begin, end=end, event_types=event_types)
+        super().__init__(
+            begin=begin,
+            end=end,
+            event_types=event_types,
+            tags=tags,
+            exclude_tags=exclude_tags,
+        )
         self._areas = None
         self._data_types = None
         self._commodities = None
@@ -362,6 +471,10 @@ class CurveAttributeFilter(_BaseCurveFilter):
             str_list.append(f"begin={self._begin.isoformat(sep=' ')}")
         if self.has_end():
             str_list.append(f"end={self._end.isoformat(sep=' ')}")
+        if self.has_tags():
+            str_list.append(f"tags={self._tags}")
+        if self.has_exclude_tags():
+            str_list.append(f"exclude_tags={self._exclude_tags}")
         if self.has_areas():
             str_list.append(f"areas={self._areas}")
         if self.has_data_types():
