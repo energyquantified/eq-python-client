@@ -266,6 +266,10 @@ class CurveNameFilter(_BaseCurveFilter):
     :param event_types: The event types to filter. Ignored if None, defaults\
         to None.
     :type event_types: EventType, str, list[EventType, str], optional
+    :param tags: Filter by tags. Ignored if None, defaults to None.
+    :type tags: str, list[str], optional
+    :param exclude_tags: Filter by tags. Ignored if None, defaults to None.
+    :type exclude_tags: str, list[str], optional
     :param curves: Filter by curves. Ignored if None, defaults to None.
     :type curves: Curve, str, list[Curve, str], optional
     """
@@ -405,6 +409,10 @@ class CurveAttributeFilter(_BaseCurveFilter):
     :param event_types: The event types to filter. Ignored if None, defaults\
         to None.
     :type event_types: EventType, str, list[EventType, str], optional
+    :param tags: Filter by tags. Ignored if None, defaults to None.
+    :type tags: str, list[str], optional
+    :param exclude_tags: Filter by tags. Ignored if None, defaults to None.
+    :type exclude_tags: str, list[str], optional
     :param areas: Filter curves by area. Ignored if None, defaults to None.
     :type areas: Area, str, list[Area, str], optional
     :param data_types: Filter curves by data types. Ignored if None, defaults\
