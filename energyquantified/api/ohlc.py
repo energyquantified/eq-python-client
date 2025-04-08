@@ -61,7 +61,7 @@ class OhlcAPI(BaseAPI):
         self._add_date(params, "begin", begin, required=True)
         self._add_date(params, "end", end, required=True)
         self._add_contract_period(params, "period", period)
-        self._add_int(params, "front", front, min=1)
+        self._add_int(params, "front", front, min=0)
         self._add_date(params, "delivery", delivery)
         # Additional checks
         has_period = "period" in params
@@ -232,7 +232,7 @@ class OhlcAPI(BaseAPI):
         self._add_date(params, "begin", begin, required=True)
         self._add_date(params, "end", end, required=True)
         self._add_contract_period(params, "period", period, required=True)
-        self._add_int(params, "front", front, min=1, required=True)
+        self._add_int(params, "front", front, min=0, required=True)
         self._add_fill(params, "fill", fill)
         self._add_str(params, "unit", unit)
         # Build URL
