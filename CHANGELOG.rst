@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Lower the minimum supported ``front`` value for OHLC data from ``1`` to ``0``
+
+
 0.14.3
 ------
 
