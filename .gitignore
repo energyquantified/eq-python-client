@@ -20,6 +20,7 @@ _build
 # PyCharm
 .idea/
 
-# Debug files
+# Debug
 debug*.py
+/output/
 
