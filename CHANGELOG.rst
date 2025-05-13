@@ -1,6 +1,20 @@
 Changelog
 =========
 
+dev
+---
+
+**Deprecations**
+
+- Deprecate method parameter ``exlude_tags`` and add ``exclude_tags`` as method parameter
+  - Deprecated parameter will be removed in the next major release
+  - Affected methods:
+    - ``eq.instances.list()``
+    - ``eq.instances.load()``
+    - ``eq.period_instances.list()``
+    - ``eq.period_instances.load()``
+
+
 0.14.4
 ------
 

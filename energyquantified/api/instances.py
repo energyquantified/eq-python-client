@@ -1,3 +1,4 @@
+import warnings
 from .base import BaseAPI
 
 from ..metadata import CurveType
@@ -44,15 +45,16 @@ class InstancesAPI(BaseAPI):
         return self._cache[url]
 
     def list(
-            self,
-            curve,
-            tags=None,
-            exlude_tags=None,
-            limit=25,
-            issued_at_latest=None,
-            issued_at_earliest=None,
-            issued_time_of_day=None,
-        ):
+        self,
+        curve,
+        tags=None,
+        exclude_tags=None,
+        exlude_tags=None,
+        limit=25,
+        issued_at_latest=None,
+        issued_at_earliest=None,
+        issued_time_of_day=None,
+    ):
         """
         List instances for the curve. Does not load any time series data.
 
@@ -69,7 +71,9 @@ class InstancesAPI(BaseAPI):
         :type curve: :py:class:`energyquantified.metadata.Curve`, str
         :param tags: Filter by instance tags, defaults to None
         :type tags: list, str, optional
-        :param exlude_tags: Exclude instance tags, defaults to None
+        :param exclude_tags: Exclude instance tags, defaults to None
+        :type exclude_tags: list, str, optional
+        :param exlude_tags: **Deprecated**. Use `exclude_tags` instead.
         :type exlude_tags: list, str, optional
         :param limit: Number of instances returned, defaults to 25
         :type limit: int, optional
@@ -82,13 +86,23 @@ class InstancesAPI(BaseAPI):
         :return: A list of :py:class:`energyquantified.metadata.Instance`
         :rtype: list
         """
+        # Check for deprecated parameter
+        if exlude_tags is not None:
+            warnings.warn(
+                "eq.instances.list(exlude_tags=…) is deprecated and will be removed in v1.0; "
+                "use eq.instances.list(exclude_tags=…) instead",
+                category=DeprecationWarning,
+                stacklevel=2,
+            )
+            if exclude_tags is None:
+                exclude_tags = exlude_tags
         # Build URL
         safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
         url = f"/instances/{safe_curve}/list/"
         # Parameters
         params = {}
         self._add_str_list(params, "tags", tags)
-        self._add_str_list(params, "exclude-tags", exlude_tags)
+        self._add_str_list(params, "exclude-tags", exclude_tags)
         self._add_int(params, "limit", limit, min=1, max=25, required=True)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
         self._add_datetime(params, "issued-at-earliest", issued_at_earliest)
@@ -98,21 +112,23 @@ class InstancesAPI(BaseAPI):
         return parse_instance_list(response.json())
 
     def load(
-            self,
-            curve,
-            tags=None,
-            exlude_tags=None,
-            limit=5,
-            issued_at_latest=None,
-            issued_at_earliest=None,
-            issued_time_of_day=None,
-            time_zone=None,
-            frequency=None,
-            aggregation=None,
-            hour_filter=None,
-            threshold=None,
-            ensembles=False,
-            unit=None):
+        self,
+        curve,
+        tags=None,
+        exclude_tags=None,
+        exlude_tags=None,
+        limit=5,
+        issued_at_latest=None,
+        issued_at_earliest=None,
+        issued_time_of_day=None,
+        time_zone=None,
+        frequency=None,
+        aggregation=None,
+        hour_filter=None,
+        threshold=None,
+        ensembles=False,
+        unit=None,
+    ):
         """
         Load time series instances.
 
@@ -135,7 +151,9 @@ class InstancesAPI(BaseAPI):
         :type curve: :py:class:`energyquantified.metadata.Curve`, str
         :param tags: Filter by instance tags, defaults to None
         :type tags: list, str, optional
-        :param exlude_tags: Exclude instance tags, defaults to None
+        :param exclude_tags: Exclude instance tags, defaults to None
+        :type exclude_tags: list, str, optional
+        :param exlude_tags: **Deprecated**. Use `exclude_tags` instead.
         :type exlude_tags: list, str, optional
         :param limit: Maximum number of instances returned, defaults to 5
         :type limit: int, optional
@@ -168,6 +186,16 @@ class InstancesAPI(BaseAPI):
         :return: A list :py:class:`energyquantified.data.Timeseries` instances
         :rtype: list
         """
+        # Check for deprecated parameter
+        if exlude_tags is not None:
+            warnings.warn(
+                "eq.instances.load(exlude_tags=…) is deprecated and will be removed in v1.0; "
+                "use eq.instances.load(exclude_tags=…) instead",
+                category=DeprecationWarning,
+                stacklevel=2,
+            )
+            if exclude_tags is None:
+                exclude_tags = exlude_tags
         # Build URL
         safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
         if ensembles:
@@ -177,7 +205,7 @@ class InstancesAPI(BaseAPI):
         # Parameters
         params = {}
         self._add_str_list(params, "tags", tags)
-        self._add_str_list(params, "exclude-tags", exlude_tags)
+        self._add_str_list(params, "exclude-tags", exclude_tags)
         if ensembles:
             self._add_int(params, "limit", limit, min=1, max=10, required=True)
         else:
@@ -197,18 +225,19 @@ class InstancesAPI(BaseAPI):
         return parse_timeseries_list(response.json())
 
     def latest(
-            self,
-            curve,
-            tags=None,
-            issued_at_latest=None,
-            issued_time_of_day=None,
-            time_zone=None,
-            frequency=None,
-            aggregation=None,
-            hour_filter=None,
-            threshold=None,
-            ensembles=False,
-            unit=None):
+        self,
+        curve,
+        tags=None,
+        issued_at_latest=None,
+        issued_time_of_day=None,
+        time_zone=None,
+        frequency=None,
+        aggregation=None,
+        hour_filter=None,
+        threshold=None,
+        ensembles=False,
+        unit=None,
+    ):
         """
         Get the latest time series instance with filtering on `tags` and
         `issued_at_latest`.
@@ -274,17 +303,18 @@ class InstancesAPI(BaseAPI):
         return parse_timeseries(response.json())
 
     def get(
-            self,
-            curve,
-            issued=None,
-            tag="",
-            time_zone=None,
-            frequency=None,
-            aggregation=None,
-            hour_filter=None,
-            threshold=None,
-            ensembles=False,
-            unit=None):
+        self,
+        curve,
+        issued=None,
+        tag="",
+        time_zone=None,
+        frequency=None,
+        aggregation=None,
+        hour_filter=None,
+        threshold=None,
+        ensembles=False,
+        unit=None,
+    ):
         """
         Get an instance specified by a `issued` (issue date) and `tag`. The
         default tag is blank and tags are case-insensitive.
@@ -347,23 +377,24 @@ class InstancesAPI(BaseAPI):
         return parse_timeseries(response.json())
 
     def relative(
-            self,
-            curve,
-            begin=None,
-            end=None,
-            tag=None,
-            days_ahead=1,
-            issued="latest",
-            time_of_day=None,
-            after_time_of_day=None,
-            before_time_of_day=None,
-            modified_at_latest=None,
-            time_zone=None,
-            frequency=None,
-            aggregation=None,
-            hour_filter=None,
-            threshold=None,
-            unit=None):
+        self,
+        curve,
+        begin=None,
+        end=None,
+        tag=None,
+        days_ahead=1,
+        issued="latest",
+        time_of_day=None,
+        after_time_of_day=None,
+        before_time_of_day=None,
+        modified_at_latest=None,
+        time_zone=None,
+        frequency=None,
+        aggregation=None,
+        hour_filter=None,
+        threshold=None,
+        unit=None,
+    ):
         """
         Load one instance for each day based on some common criteria, stitch
         them together and return a continuous time series.
@@ -435,10 +466,14 @@ class InstancesAPI(BaseAPI):
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
         self._add_str(params, "tag", tag, required=True)
-        self._add_int(params, "days-ahead", days_ahead, min=0, max=10000,
-                      required=True)
-        self._add_str(params, "issued", issued,
-                      allowed_values=['earliest', 'latest'], required=True)
+        self._add_int(params, "days-ahead", days_ahead, min=0, max=10000, required=True)
+        self._add_str(
+            params,
+            "issued",
+            issued,
+            allowed_values=["earliest", "latest"],
+            required=True,
+        )
         self._add_time(params, "time-of-day", time_of_day)
         self._add_time(params, "after-time-of-day", after_time_of_day)
         self._add_time(params, "before-time-of-day", before_time_of_day)
@@ -455,19 +490,19 @@ class InstancesAPI(BaseAPI):
         return parse_timeseries(response.json())
 
     def rolling(
-            self,
-            curve,
-            begin,
-            end,
-            hours_ahead=0,
-            tags=None,
-            exclude_tags=None,
-            time_zone=None,
-            frequency=None,
-            aggregation=None,
-            hour_filter=None,
-            threshold=None,
-            unit=None,
+        self,
+        curve,
+        begin,
+        end,
+        hours_ahead=0,
+        tags=None,
+        exclude_tags=None,
+        time_zone=None,
+        frequency=None,
+        aggregation=None,
+        hour_filter=None,
+        threshold=None,
+        unit=None,
     ):
         """
         Load a timeseries from ``begin`` to ``end``, where each value is from
@@ -532,19 +567,19 @@ class InstancesAPI(BaseAPI):
         return parse_timeseries(response.json())
 
     def absolute(
-            self,
-            curve,
-            delivery,
-            begin,
-            end,
-            frequency=None,
-            time_zone=None,
-            hour_filter=None,
-            unit=None,
-            aggregation=None,
-            tags=None,
-            exclude_tags=None,
-        ):
+        self,
+        curve,
+        delivery,
+        begin,
+        end,
+        frequency=None,
+        time_zone=None,
+        hour_filter=None,
+        unit=None,
+        aggregation=None,
+        tags=None,
+        exclude_tags=None,
+    ):
         """
         Load forecasted values from various instances for a specific point in time,
         to see how forecasts develop over time.

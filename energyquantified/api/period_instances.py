@@ -1,3 +1,4 @@
+import warnings
 from .base import BaseAPI
 
 from ..metadata import CurveType
@@ -21,13 +22,15 @@ class PeriodInstancesAPI(BaseAPI):
         super().__init__(*args, **kwargs)
 
     def list(
-            self,
-            curve,
-            tags=None,
-            exlude_tags=None,
-            limit=20,
-            issued_at_latest=None,
-            issued_at_earliest=None):
+        self,
+        curve,
+        tags=None,
+        exclude_tags=None,
+        exlude_tags=None,
+        limit=20,
+        issued_at_latest=None,
+        issued_at_earliest=None,
+    ):
         """
         List instances for the curve. Does not lad any period-based series.
 
@@ -45,7 +48,9 @@ class PeriodInstancesAPI(BaseAPI):
         :type curve: :py:class:`energyquantified.metadata.Curve`, str
         :param tags: Filter by instance tags, defaults to None
         :type tags: list, str, optional
-        :param exlude_tags: Exclude instance tags, defaults to None
+        :param exclude_tags: Exclude instance tags, defaults to None
+        :type exclude_tags: list, str, optional
+        :param exlude_tags: **Deprecated**. Use `exclude_tags` instead.
         :type exlude_tags: list, str, optional
         :param limit: Number of instances returned, defaults to 25
         :type limit: int, optional
@@ -56,13 +61,23 @@ class PeriodInstancesAPI(BaseAPI):
         :return: A list of :py:class:`energyquantified.metadata.Instance`
         :rtype: list
         """
+        # Check for deprecated parameter
+        if exlude_tags is not None:
+            warnings.warn(
+                "eq.period_instances.list(exlude_tags=…) is deprecated and will be removed in v1.0; "
+                "use eq.period_instances.list(exclude_tags=…) instead",
+                category=DeprecationWarning,
+                stacklevel=2,
+            )
+            if exclude_tags is None:
+                exclude_tags = exlude_tags
         # Build URL
         safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
         url = f"/period-instances/{safe_curve}/list/"
         # Parameters
         params = {}
         self._add_str_list(params, "tags", tags)
-        self._add_str_list(params, "exclude-tags", exlude_tags)
+        self._add_str_list(params, "exclude-tags", exclude_tags)
         self._add_int(params, "limit", limit, min=1, max=20, required=True)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
         self._add_datetime(params, "issued-at-earliest", issued_at_earliest)
@@ -71,17 +86,19 @@ class PeriodInstancesAPI(BaseAPI):
         return parse_instance_list(response.json())
 
     def load(
-            self,
-            curve,
-            begin=None,
-            end=None,
-            tags=None,
-            exlude_tags=None,
-            limit=3,
-            issued_at_latest=None,
-            issued_at_earliest=None,
-            time_zone=None,
-            unit=None):
+        self,
+        curve,
+        begin=None,
+        end=None,
+        tags=None,
+        exclude_tags=None,
+        exlude_tags=None,
+        limit=3,
+        issued_at_latest=None,
+        issued_at_earliest=None,
+        time_zone=None,
+        unit=None,
+    ):
         """
         Load period-based series instances.
 
@@ -100,7 +117,9 @@ class PeriodInstancesAPI(BaseAPI):
         :type end: date, datetime, str, required
         :param tags: Filter by instance tags, defaults to None
         :type tags: list, str, optional
-        :param exlude_tags: Exclude instance tags, defaults to None
+        :param exclude_tags: Exclude instance tags, defaults to None
+        :type exclude_tags: list, str, optional
+        :param exlude_tags: **Deprecated**. Use `exclude_tags` instead.
         :type exlude_tags: list, str, optional
         :param limit: Number of instances returned, defaults to 3
         :type limit: int, optional
@@ -115,6 +134,16 @@ class PeriodInstancesAPI(BaseAPI):
         :return: List of :py:class:`energyquantified.data.Periodseries` objects
         :rtype: list
         """
+        # Check for deprecated parameter
+        if exlude_tags is not None:
+            warnings.warn(
+                "eq.period_instances.load(exlude_tags=…) is deprecated and will be removed in v1.0; "
+                "use eq.period_instances.load(exclude_tags=…) instead",
+                category=DeprecationWarning,
+                stacklevel=2,
+            )
+            if exclude_tags is None:
+                exclude_tags = exlude_tags
         # Build URL
         safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
         url = f"/period-instances/{safe_curve}/"
@@ -123,7 +152,7 @@ class PeriodInstancesAPI(BaseAPI):
         self._add_datetime(params, "begin", begin, required=True)
         self._add_datetime(params, "end", end, required=True)
         self._add_str_list(params, "tags", tags)
-        self._add_str_list(params, "exclude-tags", exlude_tags)
+        self._add_str_list(params, "exclude-tags", exclude_tags)
         self._add_int(params, "limit", limit, min=1, max=20, required=True)
         self._add_datetime(params, "issued-at-latest", issued_at_latest)
         self._add_datetime(params, "issued-at-earliest", issued_at_earliest)
@@ -134,13 +163,14 @@ class PeriodInstancesAPI(BaseAPI):
         return parse_periodseries_list(response.json())
 
     def latest(
-            self,
-            curve,
-            begin=None,
-            end=None,
-            issued_at_latest=None,
-            time_zone=None,
-            unit=None):
+        self,
+        curve,
+        begin=None,
+        end=None,
+        issued_at_latest=None,
+        time_zone=None,
+        unit=None,
+    ):
         """
         Get the latest period-based series instance.
 
@@ -178,14 +208,15 @@ class PeriodInstancesAPI(BaseAPI):
         return parse_periodseries(response.json())
 
     def get(
-            self,
-            curve,
-            begin=None,
-            end=None,
-            issued=None,
-            tag="",
-            time_zone=None,
-            unit=None):
+        self,
+        curve,
+        begin=None,
+        end=None,
+        issued=None,
+        tag="",
+        time_zone=None,
+        unit=None,
+    ):
         """
         Get a specific period-based series instance.
 
@@ -226,14 +257,15 @@ class PeriodInstancesAPI(BaseAPI):
         return parse_periodseries(response.json())
 
     def relative(
-            self,
-            curve,
-            begin=None,
-            end=None,
-            days_ahead=None,
-            before_time_of_day=None,
-            time_zone=None,
-            unit=None):
+        self,
+        curve,
+        begin=None,
+        end=None,
+        days_ahead=None,
+        before_time_of_day=None,
+        time_zone=None,
+        unit=None,
+    ):
         """
         Loads period-based series instances n days-ahead and stitches them together to a single, continuous period series.
 
