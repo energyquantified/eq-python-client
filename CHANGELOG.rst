@@ -13,7 +13,7 @@ dev
 **Bugfixes**
 
 - Fix a bug in ``PeriodSeries.to_timeseries()`` that caused a crash for python
-  version 3.13 and above.
+  version 3.13 and above. Thank you to @igramatk for reporting this issue.
 
 **Deprecations**
 
