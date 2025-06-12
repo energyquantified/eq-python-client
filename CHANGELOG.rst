@@ -4,6 +4,17 @@ Changelog
 dev
 ---
 
+**Improvements**
+
+- Add ``__len__()`` method to ``Timeseries`` and ``PeriodSeries`` classes. This
+  allows users to use the built-in ``len()`` function to get the number of
+  values in a time series or period-based series.
+
+**Bugfixes**
+
+- Fix a bug in ``PeriodSeries.to_timeseries()`` that caused a crash for python
+  version 3.13 and above.
+
 **Deprecations**
 
 - Deprecate method parameter ``exlude_tags`` and add ``exclude_tags`` as method parameter
