@@ -577,7 +577,7 @@ class _PeriodsToTimeseriesIterator:
     def __iter__(self):
         # No periods available
         if not self.periods:
-            return []
+            return (p for p in self.periods)
         # Get first period
         self.d = self.begin
         self.p = self.periods.pop(0)
@@ -787,7 +787,7 @@ class PeriodseriesList(list):
     def to_dataframe(self, frequency=None, single_level_header=False, field="value"):
         """
         DEPRECATED: Use ``to_pandas_dataframe`` instead.
-        
+
         Convert this PeriodseriesList to a ``pandas.DataFrame`` where all time
         series are placed in its own column and are lined up with the date-time
         as index.
