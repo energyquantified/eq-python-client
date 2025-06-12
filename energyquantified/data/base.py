@@ -106,3 +106,12 @@ class Series:
         :rtype: generator
         """
         return (item for item in self.data or [])
+
+    def __len__(self):
+        """
+        Get the number of data points in the time series.
+
+        :return: The number of data points
+        :rtype: int
+        """
+        return len(self.data) if self.data else 0
