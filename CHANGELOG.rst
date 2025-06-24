@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Bugfixes**
+
+- Patch ``PeriodSeries.to_timeseries()`` due to a regression with iterator behaviour in Python versions >=3.13.1, <3.13.4
+
+
 0.14.5
 ------
 
