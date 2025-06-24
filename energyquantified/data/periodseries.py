@@ -573,17 +573,20 @@ class _PeriodsToTimeseriesIterator:
         # Iterator stuff
         self.d = None
         self.p = None
+        self._is_first_iter = True
 
     def __iter__(self):
         # No periods available
         if not self.periods:
             return (p for p in self.periods)
-        # Get first period
-        self.d = self.begin
-        self.p = self.periods.pop(0)
         return self
 
     def __next__(self):
+        if self._is_first_iter:
+            # Get first period
+            self.d = self.begin
+            self.p = self.periods.pop(0)
+            self._is_first_iter = False
         # Get dates and current period
         p = self.p
         d0 = self.d
