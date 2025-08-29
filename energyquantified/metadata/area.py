@@ -583,7 +583,7 @@ BG = Area(tag="BG", name="Bulgaria", country=True, price_area=True)
 AL = Area(tag="AL", name="Albania", country=True, price_area=True)
 MK = Area(tag="MK", name="North Macedonia", country=True, price_area=True)
 GR = Area(tag="GR", name="Greece", country=True, price_area=True)
-XK = Area(tag="XK", name="Kosovo", country=True, control_area=True)
+XK = Area(tag="XK", name="Kosovo", country=True, price_area=True)
 
 
 ## South-Eastern Europe
