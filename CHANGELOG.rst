@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.14.7
+------
+
+**Bugfixes**
+
+- Set ``price_area=True`` for area ``XK``
+
+
 0.14.6
 ------
 
