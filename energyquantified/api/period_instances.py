@@ -279,7 +279,10 @@ class PeriodInstancesAPI(BaseAPI):
         :type end: date, datetime, str, required
         :param days_ahead: The n days ahead of the instance's issue date. days-head = 0 means intraday forecasts, days-ahead = 1 means day-ahead, days-ahead = 2 means the day after day-ahead, and so on.
         :type days_ahead: int, required
-        :param before_time_of_day: The time of day to load the instance, defaults to None
+        :param before_time_of_day: The time of day to load the instance,
+            defaults to None. The time is in the instance's issued timezone,
+            which is also found at the Curve's `instance_issued_timezone`
+            property.
         :type before_time_of_day: time, str, optional
         :param time_zone: Set the timezone for the date-times
         :type time_zone: TzInfo, optional

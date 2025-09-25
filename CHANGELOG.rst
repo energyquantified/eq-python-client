@@ -1,6 +1,14 @@
 Changelog
 =========
 
+dev
+---
+
+**Improvements**
+
+- Minor improvements in the documentation for relative forecasts
+
+
 0.14.7
 ------
 

@@ -427,13 +427,19 @@ class InstancesAPI(BaseAPI):
             defaults to "earliest"
         :type issued: str, optional
         :param time_of_day: The exact time of the instance is issued,\
-            defaults to None
+            defaults to None. The time is in the instance's issued timezone,
+            which is also found at the Curve's `instance_issued_timezone`
+            property.
         :type time_of_day: time, str, optional
         :param after_time_of_day: The instance must be issued at this time of\
-            day or after, defaults to None
+            day or after, defaults to None. The time is in the instance's issued
+            timezone, which is also found at the Curve's
+            `instance_issued_timezone` property.
         :type after_time_of_day: time, str, optional
         :param before_time_of_day:  The instance must be issued before this\
-            time of day, defaults to None
+            time of day, defaults to None. The time is in the instance's issued
+            timezone, which is also found at the Curve's
+            `instance_issued_timezone` property.
         :type before_time_of_day: time, str, optional
         :param modified-at-latest:  The instance must be modified (or created\
             if modified is null) before this time of day, defaults to None
