@@ -6,17 +6,17 @@ Release |version| (:doc:`Installation <intro/install>`)
 .. image:: https://img.shields.io/github/license/energyquantified/eq-python-client?style=flat
    :alt: Apache License version 2.0
 .. image:: https://img.shields.io/pypi/pyversions/energyquantified?style=flat
-   :alt: Python 3.7+
+   :alt: Python 3.10+
 .. image:: https://img.shields.io/pypi/wheel/energyquantified?style=flat
    :alt: PyPI – Wheel
 
 The official Python library for `Energy Quantified <https://www.energyquantified.com>`_'s
 Time Series API. It allows you to access thousands of data series directly from
 Energy Quantified's time series database. It integrates with the popular
-`pandas <https://pandas.pydata.org/docs/>`_ library and the `polars <https://docs.pola.rs/>`_ 
+`pandas <https://pandas.pydata.org/docs/>`_ library and the `polars <https://docs.pola.rs/>`_
 library for high-performance data analysis and manipulation.
 
-Developed for **Python 3.7+**.
+Developed for **Python 3.10+**.
 
 .. code-block:: python
 
