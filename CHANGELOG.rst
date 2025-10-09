@@ -7,6 +7,7 @@ dev
 **Improvements**
 
 - Minor improvements in the documentation for relative forecasts
+- Update supported Python versions in the documentation to 3.10+
 
 
 0.14.7

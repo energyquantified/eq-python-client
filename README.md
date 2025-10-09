@@ -1,7 +1,7 @@
 # Energy Quantified Python Client
 
 ![Apache License version 2.0](https://img.shields.io/github/license/energyquantified/eq-python-client?style=flat "Apache License version 2.0")
-![Python 3.7+](https://img.shields.io/pypi/pyversions/energyquantified.svg?style=flat "Python versions")
+![Python 3.10+](https://img.shields.io/pypi/pyversions/energyquantified.svg?style=flat "Python versions")
 ![Wheel](https://img.shields.io/pypi/wheel/energyquantified "Wheel")
 
 [Documentation](https://energyquantified-python.readthedocs.io) |
@@ -14,7 +14,7 @@ Energy Quantified's time series database. It integrates with the popular
 [pandas](https://pandas.pydata.org/docs/) library and the [polars](https://docs.pola.rs/)
 libarary for high-performance data analysis and manipulation.
 
-Developed for **Python 3.7+**.
+Developed for **Python 3.10+**.
 
 ```python
 from datetime import date, timedelta

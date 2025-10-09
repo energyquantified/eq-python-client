@@ -1,7 +1,7 @@
 # Installation
 
 **Requirements:** The Energy Quantified Python client is developed for
-**Python 3.7 or newer**.
+**Python 3.10 or newer**.
 
 ## Install
 
