@@ -29,7 +29,6 @@ dev
 **Bugfixes**
 
 - Set ``price_area=True`` for area ``XK``
->>>>>>> master
 
 
 0.14.6
