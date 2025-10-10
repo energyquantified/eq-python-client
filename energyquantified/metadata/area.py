@@ -606,33 +606,33 @@ LY = Area(tag="LY", name="Libya", country=True, external=True)
 DZ = Area(tag="DZ", name="Algeria", country=True, external=True)
 
 
-## Nordic borders
+# Nordic borders
 
 NO1._add_borders((NO2, "F"), (NO3, "F"), (NO5, "F"), (SE3, "F"))
 NO2._add_borders((DE, "F"), (DK1, "F"), (GB, "I"), (NL, "F"), (NO1, "F"), (NO5, "F"))
 NO3._add_borders((NO1, "F"), (NO4, "F"), (NO5, "F"), (SE2, "F"))
-NO4._add_borders((FI, "N"), (NO3, "F"), (SE1, "F"), (SE2, "F"))
+NO4._add_borders((FI, "F"), (NO3, "F"), (SE1, "F"), (SE2, "F"))
 NO5._add_borders((NO1, "F"), (NO2, "F"), (NO3, "F"))
 
 SE1._add_borders((FI, "F"), (NO4, "F"), (SE2, "F"))
 SE2._add_borders((NO3, "F"), (NO4, "F"), (SE1, "F"), (SE3, "F"))
 SE3._add_borders((DK1, "F"), (FI, "F"), (NO1, "F"), (SE2, "F"), (SE4, "F"))
-SE4._add_borders((DE, "I"), (DK2, "F"), (LT, "F"), (PL, "F"), (SE3, "F"))
+SE4._add_borders((DE, "F"), (DK2, "F"), (LT, "F"), (PL, "F"), (SE3, "F"))
 
 DK1._add_borders((DE, "F"), (DK2, "F"), (GB, "E"), (NL, "F"), (NO2, "F"), (SE3, "F"))
 DK2._add_borders((DE, "F"), (DK1, "F"), (SE4, "F"))
 
-FI._add_borders((EE, "F"), (NO4, "N"), (RU, "N"), (SE1, "F"), (SE3, "F"))
+FI._add_borders((EE, "F"), (NO4, "F"), (RU, "N"), (SE1, "F"), (SE3, "F"))
 
 
-## Baltic borders
+# Baltic borders
 
 EE._add_borders((FI, "F"), (LV, "I"), (RU, "N"))
 LV._add_borders((EE, "I"), (LT, "I"), (RU, "N"))
 LT._add_borders((BY, "N"), (LV, "I"), (PL, "I"), (RU_KGD, "N"), (SE4, "F"))
 
 
-## Central Western Europe
+# Central Western Europe
 
 DE._add_borders(
     (AT, "F"),
@@ -650,33 +650,37 @@ DE._add_borders(
 AT._add_borders((CH, "E"), (CZ, "F"), (DE, "F"), (HU, "F"), (IT_NORD, "EI"), (SI, "F"))
 FR._add_borders((BE, "F"), (CH, "E"), (DE, "F"), (ES, "EI"), (GB, "E"), (IT_NORD, "EI"))
 FR_COR._add_borders((IT_SARD, "I"))
-NL._add_borders((BE, "F"), (DE, "F"), (DK1, "I"), (GB, "E"), (NO2, "I"))
+NL._add_borders((BE, "F"), (DE, "F"), (DK1, "F"), (GB, "E"), (NO2, "F"))
 BE._add_borders((DE, "F"), (FR, "F"), (GB, "E"), (NL, "F"))
 CH._add_borders((AT, "E"), (DE, "E"), (FR, "E"), (IT_NORD, "E"))
 
 
-## United Kingdom/Ireland
+# United Kingdom/Ireland
 
-GB._add_borders((BE, "E"), (DK1, "E"), (FR, "E"), (NL, "E"), (NIE, "I"), (IE, "I"), (NO2, "I"))
+GB._add_borders(
+    (BE, "E"), (DK1, "E"), (FR, "E"), (NL, "E"), (NIE, "I"), (IE, "I"), (NO2, "I")
+)
 NIE._add_borders((IE, "I"), (GB, "I"))
 IE._add_borders((NIE, "I"), (GB, "I"))
 
 
-## Central Eastern Europe
+# Central Eastern Europe
 
-PL._add_borders((CZ, "F"), (DE, "F"), (LT, "I"), (SE4, "I"), (SK, "F"), (UA, "E"))
+PL._add_borders((CZ, "F"), (DE, "F"), (LT, "I"), (SE4, "F"), (SK, "F"), (UA, "E"))
 CZ._add_borders((AT, "F"), (DE, "F"), (PL, "F"), (SK, "F"))
-HU._add_borders((AT, "F"), (HR, "F"), (RO, "F"), (RS, "E"), (SI, "F"), (SK, "F"), (UA, "E"))
+HU._add_borders(
+    (AT, "F"), (HR, "F"), (RO, "F"), (RS, "E"), (SI, "F"), (SK, "F"), (UA, "E")
+)
 SK._add_borders((CZ, "F"), (HU, "F"), (PL, "F"), (UA, "E"))
 
 
-## Iberian Peninsula
+# Iberian Peninsula
 
 ES._add_borders((FR, "EI"), (PT, "I"))
 PT._add_borders((ES, "I"))
 
 
-## Southern Europe
+# Southern Europe
 
 IT_NORD._add_borders((AT, "EI"), (CH, "E"), (FR, "EI"), (IT_CNOR, "I"), (SI, "EI"))
 IT_CNOR._add_borders((IT_CSUD, "I"), (IT_NORD, "I"), (IT_SARD, "I"))
@@ -688,7 +692,7 @@ IT_SARD._add_borders((FR_COR, "I"), (IT_CNOR, "I"), (IT_CSUD, "I"))
 
 
 SI._add_borders((AT, "F"), (HR, "EF"), (HU, "F"), (IT_NORD, "EI"))
-RO._add_borders((BG, "E"), (HU, "F"), (RS, "E"), (UA, "E"), (MD, "E"))
+RO._add_borders((BG, "EI"), (HU, "F"), (RS, "E"), (UA, "E"), (MD, "E"))
 HR._add_borders((BA, "E"), (HU, "F"), (RS, "E"), (SI, "EF"))
 BA._add_borders((HR, "E"), (ME, "E"), (RS, "E"))
 RS._add_borders(
@@ -702,19 +706,19 @@ RS._add_borders(
     (XK, "E"),
 )
 ME._add_borders((AL, "E"), (BA, "E"), (IT_CSUD, "E"), (RS, "E"), (XK, "E"))
-BG._add_borders((GR, "EI"), (MK, "E"), (RO, "E"), (RS, "E"), (TR, "E"))
+BG._add_borders((GR, "EI"), (MK, "E"), (RO, "EI"), (RS, "E"), (TR, "E"))
 AL._add_borders((GR, "E"), (ME, "E"), (XK, "E"))
 MK._add_borders((BG, "E"), (GR, "E"), (RS, "E"), (XK, "E"))
 GR._add_borders((AL, "E"), (BG, "EI"), (IT_SUD, "EI"), (MK, "E"), (TR, "E"))
 XK._add_borders((AL, "E"), (ME, "E"), (MK, "E"), (RS, "E"))
 
 
-## South-Eastern Europe
+# South-Eastern Europe
 
 TR._add_borders((BG, "E"), (GE, "E"), (GR, "E"))
 
 
-## Others
+# Others
 
 RU._add_borders((EE, "N"), (FI, "N"), (LV, "N"))
 RU_KGD._add_borders((LT, "N"))
