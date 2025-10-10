@@ -14,6 +14,24 @@ dev
     allocations (all changed to flow-based where applicable)
 
 
+0.15
+----
+
+**Improvements**
+
+- Minor improvements in the documentation for relative forecasts
+- Update supported Python versions in the documentation to 3.10+
+
+
+0.14.7
+------
+
+**Bugfixes**
+
+- Set ``price_area=True`` for area ``XK``
+>>>>>>> master
+
+
 0.14.6
 ------
 
