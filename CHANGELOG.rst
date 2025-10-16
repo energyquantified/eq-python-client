@@ -1,6 +1,19 @@
 Changelog
 =========
 
+
+dev
+---
+
+**Improvements**
+
+- Update border allocations for these borders:
+  - ``FI-NO4`` is flow-based
+  - ``RO-BG`` is both explicit and implicit
+  - Various borders in the Nordics and between the Nordics and the Continent had wrong
+    allocations (all changed to flow-based where applicable)
+
+
 0.15
 ----
 
