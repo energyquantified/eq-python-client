@@ -474,35 +474,45 @@ class BaseAPI:
         params,
         name,
         threshold,
-        threshold_pct_name,
         threshold_pct,
+        threshold_name="threshold",
+        threshold_pct_name="threshold_pct",
         required=False,
     ):
         if threshold is not None and threshold_pct is not None:
             raise ValidationError(
                 reason=(
-                    f"Only one of '{name}' and '{threshold_pct_name}' "
+                    f"Only one of '{threshold_name}' and '{threshold_pct_name}' "
                     f"may be provided"
                 ),
-                parameter=name
+                parameter=threshold_name
             )
         if threshold is not None:
-            BaseAPI._add_int(params, name, threshold, required=False, min=0)
+            if isinstance(threshold, int) and threshold > 0:
+                params[name] = threshold
+            else:
+                raise ValidationError(
+                    reason="Provide a non-negative integer",
+                    parameter=threshold_name
+                )
         elif threshold_pct is not None:
-            BaseAPI._add_number(
-                params,
-                threshold_pct_name,
-                threshold_pct,
-                required=False,
-                min=0.0,
-                max=100.0,
-            )
-            # Change key, and format as percentage string with 2 decimals
-            params[name] = f"{params[threshold_pct_name]:.2f}%"
-            del params[threshold_pct_name]
+            if (
+                isinstance(threshold_pct, numbers.Number)
+                and threshold_pct >= 0.0
+                and threshold_pct < 100
+            ):
+                params[name] = f"{threshold_pct:.2f}%"
+            else:
+                raise ValidationError(
+                    reason="Provide a number >=0 and <100",
+                    parameter=threshold_pct_name,
+                )
         else:
             if required:
                 raise ValidationError(
-                    reason=f"Provide either '{name}' or '{threshold_pct_name}'",
-                    parameter=name
+                    reason=(
+                        f"Provide either '{threshold_name}' "
+                        f"or '{threshold_pct_name}'"
+                    ),
+                    parameter=threshold_name,
                 )

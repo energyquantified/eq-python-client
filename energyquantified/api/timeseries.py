@@ -79,14 +79,7 @@ class TimeseriesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            self._add_threshold(
-                params,
-                "threshold",
-                threshold,
-                "threshold_pct",
-                threshold_pct,
-                required=False,
-            )
+            self._add_threshold(params, "threshold", threshold, threshold_pct)
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
