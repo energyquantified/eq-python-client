@@ -631,7 +631,7 @@ class InstancesAPI(BaseAPI):
         :param threshold: Allow that many values to be missing within one frame\
             of *frequency*. Has no effect unless *frequency* is provided,\
             defaults to 0.
-        :type threshold: _type_, optional
+        :type threshold: int, optional
         :param threshold_pct: Allow that percentage of values to be missing \
             within one frame of *frequency*. Has no effect unless *frequency* \
             is provided, defaults to None. Maximum one of *threshold* and \
