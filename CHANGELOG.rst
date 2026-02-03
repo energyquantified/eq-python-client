@@ -12,6 +12,7 @@ dev
   - ``RO-BG`` is both explicit and implicit
   - Various borders in the Nordics and between the Nordics and the Continent had wrong
     allocations (all changed to flow-based where applicable)
+- Added `threshold_pct` parameters for percentage-based aggregation thresholds
 
 
 0.15
