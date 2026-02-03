@@ -498,7 +498,7 @@ class BaseAPI:
                 max=100.0,
             )
             # Change key, and format as percentage string with 2 decimals
-            params[name] =  f"{params[threshold_pct_name]:.2f}%"
+            params[name] = f"{params[threshold_pct_name]:.2f}%"
             del params[threshold_pct_name]
         else:
             if required:
