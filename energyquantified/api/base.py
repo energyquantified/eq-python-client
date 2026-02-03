@@ -495,6 +495,7 @@ class BaseAPI:
                 threshold_pct,
                 required=False,
                 min=0.0,
+                max=100.0,
             )
             # Change key, and format as percentage string with 2 decimals
             params[name] =  f"{params[threshold_pct_name]:.2f}%"
