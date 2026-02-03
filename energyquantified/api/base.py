@@ -488,7 +488,7 @@ class BaseAPI:
                 parameter=threshold_name
             )
         if threshold is not None:
-            if isinstance(threshold, int) and threshold > 0:
+            if isinstance(threshold, int) and threshold >= 0:
                 params[name] = threshold
             else:
                 raise ValidationError(
