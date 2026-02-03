@@ -29,6 +29,7 @@ class TimeseriesAPI(BaseAPI):
             aggregation=None,
             hour_filter=None,
             threshold=None,
+            threshold_pct=None,
             unit=None):
         """
         Load time series data for a :py:class:`energyquantified.metadata.Curve`.
@@ -56,6 +57,11 @@ class TimeseriesAPI(BaseAPI):
             *frequency*. Has no effect unless *frequency* is provided, \
             defaults to 0.
         :type threshold: int, optional
+        :param threshold_pct: Allow that percentage of values to be missing \
+            within one frame of *frequency*. Has no effect unless *frequency* \
+            is provided, defaults to None. Maximum one of *threshold* and \
+            *threshold_pct* may be provided.
+        :type threshold_pct: float, optional
         :param unit: Convert unit of data, defaults to curves unit
         :type unit: str, optional
         :return: A time series
@@ -73,7 +79,22 @@ class TimeseriesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            self._add_int(params, "threshold", threshold, min=0)
+            if threshold is not None and threshold_pct is not None:
+                raise ValueError(
+                    "Only one of 'threshold' and 'threshold_pct' may be provided."
+                )
+            if threshold is not None:
+                self._add_int(params, "threshold", threshold, min=0)
+            if threshold_pct is not None:
+                self._add_number(
+                    params,
+                    "threshold",
+                    threshold_pct,
+                    min=0.0,
+                    max=100.0,
+                )
+                # Format as percentage string with two decimals
+                params["threshold"] = f"{params['threshold']:.2f}%"
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)

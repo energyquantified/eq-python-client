@@ -126,6 +126,7 @@ class InstancesAPI(BaseAPI):
         aggregation=None,
         hour_filter=None,
         threshold=None,
+        threshold_pct=None,
         ensembles=False,
         unit=None,
     ):
@@ -176,8 +177,14 @@ class InstancesAPI(BaseAPI):
         :type hour_filter: Filter, optional
         :param threshold: Allow that many values to be missing within one \
             frame of *frequency*. Has no effect unless *frequency* is \
-            provided, defaults to 0.
+            provided, defaults to 0. Maximum one of *threshold* and \
+            *threshold_pct* may be provided.
         :type threshold: int, optional
+        :param threshold_pct: Allow that percentage of values to be missing \
+            within one frame of *frequency*. Has no effect unless *frequency* \
+            is provided, defaults to None. Maximum one of *threshold* and \
+            *threshold_pct* may be provided.
+        :type threshold_pct: float, optional
         :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
@@ -218,7 +225,22 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            self._add_int(params, "threshold", threshold, min=0)
+            if threshold is not None and threshold_pct is not None:
+                raise ValueError(
+                    "Only one of 'threshold' and 'threshold_pct' may be provided."
+                )
+            if threshold is not None:
+                self._add_int(params, "threshold", threshold, min=0)
+            if threshold_pct is not None:
+                self._add_number(
+                    params,
+                    "threshold",
+                    threshold_pct,
+                    min=0.0,
+                    max=100.0,
+                )
+                # Format as percentage string with two decimals
+                params["threshold"] = f"{params['threshold']:.2f}%"
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
@@ -235,6 +257,7 @@ class InstancesAPI(BaseAPI):
         aggregation=None,
         hour_filter=None,
         threshold=None,
+        threshold_pct=None,
         ensembles=False,
         unit=None,
     ):
@@ -271,6 +294,11 @@ class InstancesAPI(BaseAPI):
             frame of *frequency*. Has no effect unless *frequency* is provided,\
             defaults to 0.
         :type threshold: int, optional
+        :param threshold_pct: Allow that percentage of values to be missing \
+            within one frame of *frequency*. Has no effect unless *frequency* \
+            is provided, defaults to None. Maximum one of *threshold* and \
+            *threshold_pct* may be provided.
+        :type threshold_pct: float, optional
         :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
@@ -296,7 +324,22 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            self._add_int(params, "threshold", threshold, min=0)
+            if threshold is not None and threshold_pct is not None:
+                raise ValueError(
+                    "Only one of 'threshold' and 'threshold_pct' may be provided."
+                )
+            if threshold is not None:
+                self._add_int(params, "threshold", threshold, min=0)
+            if threshold_pct is not None:
+                self._add_number(
+                    params,
+                    "threshold",
+                    threshold_pct,
+                    min=0.0,
+                    max=100.0,
+                )
+                # Format as percentage string with two decimals
+                params["threshold"] = f"{params['threshold']:.2f}%"
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
@@ -312,6 +355,7 @@ class InstancesAPI(BaseAPI):
         aggregation=None,
         hour_filter=None,
         threshold=None,
+        threshold_pct=None,
         ensembles=False,
         unit=None,
     ):
@@ -346,6 +390,11 @@ class InstancesAPI(BaseAPI):
             frame of *frequency*. Has no effect unless *frequency* is provided,\
             defaults to 0.
         :type threshold: int, optional
+        :param threshold_pct: Allow that percentage of values to be missing \
+            within one frame of *frequency*. Has no effect unless *frequency* \
+            is provided, defaults to None. Maximum one of *threshold* and \
+            *threshold_pct* may be provided.
+        :type threshold_pct: float, optional
         :param ensembles: Whether to include ensembles where available,\
             defaults to False
         :type ensembles: bool, optional
@@ -370,7 +419,22 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            self._add_int(params, "threshold", threshold, min=0)
+            if threshold is not None and threshold_pct is not None:
+                raise ValueError(
+                    "Only one of 'threshold' and 'threshold_pct' may be provided."
+                )
+            if threshold is not None:
+                self._add_int(params, "threshold", threshold, min=0)
+            if threshold_pct is not None:
+                self._add_number(
+                    params,
+                    "threshold",
+                    threshold_pct,
+                    min=0.0,
+                    max=100.0,
+                )
+                # Format as percentage string with two decimals
+                params["threshold"] = f"{params['threshold']:.2f}%"
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
@@ -393,6 +457,7 @@ class InstancesAPI(BaseAPI):
         aggregation=None,
         hour_filter=None,
         threshold=None,
+        threshold_pct=None,
         unit=None,
     ):
         """
@@ -459,6 +524,11 @@ class InstancesAPI(BaseAPI):
             frame of *frequency*. Has no effect unless *frequency* is provided, \
             defaults to 0.
         :type threshold: int, optional
+        :param threshold_pct: Allow that percentage of values to be missing \
+            within one frame of *frequency*. Has no effect unless *frequency* \
+            is provided, defaults to None. Maximum one of *threshold* and \
+            *threshold_pct* may be provided.
+        :type threshold_pct: float, optional
         :param unit: Convert unit of data, defaults to curves unit
         :type unit: str, optional
         :return: A time series
@@ -489,7 +559,22 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            self._add_int(params, "threshold", threshold, min=0)
+            if threshold is not None and threshold_pct is not None:
+                raise ValueError(
+                    "Only one of 'threshold' and 'threshold_pct' may be provided."
+                )
+            if threshold is not None:
+                self._add_int(params, "threshold", threshold, min=0)
+            if threshold_pct is not None:
+                self._add_number(
+                    params,
+                    "threshold",
+                    threshold_pct,
+                    min=0.0,
+                    max=100.0,
+                )
+                # Format as percentage string with two decimals
+                params["threshold"] = f"{params['threshold']:.2f}%"
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
@@ -508,6 +593,7 @@ class InstancesAPI(BaseAPI):
         aggregation=None,
         hour_filter=None,
         threshold=None,
+        threshold_pct=None,
         unit=None,
     ):
         """
@@ -546,6 +632,11 @@ class InstancesAPI(BaseAPI):
             of *frequency*. Has no effect unless *frequency* is provided,\
             defaults to 0.
         :type threshold: _type_, optional
+        :param threshold_pct: Allow that percentage of values to be missing \
+            within one frame of *frequency*. Has no effect unless *frequency* \
+            is provided, defaults to None. Maximum one of *threshold* and \
+            *threshold_pct* may be provided.
+        :type threshold_pct: float, optional
         :param unit: Convert unit of data, defaults to the Curve's unit
         :type unit: str, optional
         :return: A time series instance
@@ -566,7 +657,21 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            self._add_int(params, "threshold", threshold, min=0)
+            if threshold is not None and threshold_pct is not None:
+                raise ValueError(
+                    "Only one of 'threshold' and 'threshold_pct' may be provided."
+                )
+            if threshold is not None:
+                self._add_int(params, "threshold", threshold, min=0)
+            if threshold_pct is not None:
+                self._add_number(
+                    params, "threshold",
+                    threshold_pct,
+                    min=0.0,
+                    max=100.0,
+                )
+                # Format as percentage string with two decimals
+                params["threshold"] = f"{params['threshold']:.2f}%"
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
