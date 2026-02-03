@@ -665,7 +665,8 @@ class InstancesAPI(BaseAPI):
                 self._add_int(params, "threshold", threshold, min=0)
             if threshold_pct is not None:
                 self._add_number(
-                    params, "threshold",
+                    params,
+                    "threshold",
                     threshold_pct,
                     min=0.0,
                     max=100.0,
