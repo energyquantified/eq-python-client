@@ -225,22 +225,14 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            if threshold is not None and threshold_pct is not None:
-                raise ValueError(
-                    "Only one of 'threshold' and 'threshold_pct' may be provided."
-                )
-            if threshold is not None:
-                self._add_int(params, "threshold", threshold, min=0)
-            if threshold_pct is not None:
-                self._add_number(
-                    params,
-                    "threshold",
-                    threshold_pct,
-                    min=0.0,
-                    max=100.0,
-                )
-                # Format as percentage string with two decimals
-                params["threshold"] = f"{params['threshold']:.2f}%"
+            self._add_threshold(
+                params,
+                "threshold",
+                threshold,
+                "threshold_pct",
+                threshold_pct,
+                required=False,
+            )
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
@@ -324,22 +316,14 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            if threshold is not None and threshold_pct is not None:
-                raise ValueError(
-                    "Only one of 'threshold' and 'threshold_pct' may be provided."
-                )
-            if threshold is not None:
-                self._add_int(params, "threshold", threshold, min=0)
-            if threshold_pct is not None:
-                self._add_number(
-                    params,
-                    "threshold",
-                    threshold_pct,
-                    min=0.0,
-                    max=100.0,
-                )
-                # Format as percentage string with two decimals
-                params["threshold"] = f"{params['threshold']:.2f}%"
+            self._add_threshold(
+                params,
+                "threshold",
+                threshold,
+                "threshold_pct",
+                threshold_pct,
+                required=False,
+            )
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
@@ -419,22 +403,14 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            if threshold is not None and threshold_pct is not None:
-                raise ValueError(
-                    "Only one of 'threshold' and 'threshold_pct' may be provided."
-                )
-            if threshold is not None:
-                self._add_int(params, "threshold", threshold, min=0)
-            if threshold_pct is not None:
-                self._add_number(
-                    params,
-                    "threshold",
-                    threshold_pct,
-                    min=0.0,
-                    max=100.0,
-                )
-                # Format as percentage string with two decimals
-                params["threshold"] = f"{params['threshold']:.2f}%"
+            self._add_threshold(
+                params,
+                "threshold",
+                threshold,
+                "threshold_pct",
+                threshold_pct,
+                required=False,
+            )
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
@@ -559,22 +535,14 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            if threshold is not None and threshold_pct is not None:
-                raise ValueError(
-                    "Only one of 'threshold' and 'threshold_pct' may be provided."
-                )
-            if threshold is not None:
-                self._add_int(params, "threshold", threshold, min=0)
-            if threshold_pct is not None:
-                self._add_number(
-                    params,
-                    "threshold",
-                    threshold_pct,
-                    min=0.0,
-                    max=100.0,
-                )
-                # Format as percentage string with two decimals
-                params["threshold"] = f"{params['threshold']:.2f}%"
+            self._add_threshold(
+                params,
+                "threshold",
+                threshold,
+                "threshold_pct",
+                threshold_pct,
+                required=False,
+            )
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)
@@ -657,22 +625,14 @@ class InstancesAPI(BaseAPI):
         if "frequency" in params:
             self._add_aggregation(params, "aggregation", aggregation)
             self._add_filter(params, "hour-filter", hour_filter)
-            if threshold is not None and threshold_pct is not None:
-                raise ValueError(
-                    "Only one of 'threshold' and 'threshold_pct' may be provided."
-                )
-            if threshold is not None:
-                self._add_int(params, "threshold", threshold, min=0)
-            if threshold_pct is not None:
-                self._add_number(
-                    params,
-                    "threshold",
-                    threshold_pct,
-                    min=0.0,
-                    max=100.0,
-                )
-                # Format as percentage string with two decimals
-                params["threshold"] = f"{params['threshold']:.2f}%"
+            self._add_threshold(
+                params,
+                "threshold",
+                threshold,
+                "threshold_pct",
+                threshold_pct,
+                required=False,
+            )
         self._add_str(params, "unit", unit)
         # HTTP request
         response = self._get(url, params=params)

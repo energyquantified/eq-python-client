@@ -468,3 +468,40 @@ class BaseAPI:
             ),
             parameter=name
         )
+
+    @staticmethod
+    def _add_threshold(
+        params,
+        name,
+        threshold,
+        threshold_pct_name,
+        threshold_pct,
+        required=False,
+    ):
+        if threshold is not None and threshold_pct is not None:
+            raise ValidationError(
+                reason=(
+                    f"Only one of '{name}' and '{threshold_pct_name}' "
+                    f"may be provided"
+                ),
+                parameter=name
+            )
+        if threshold is not None:
+            BaseAPI._add_int(params, name, threshold, required=False, min=0)
+        elif threshold_pct is not None:
+            BaseAPI._add_number(
+                params,
+                threshold_pct_name,
+                threshold_pct,
+                required=False,
+                min=0.0,
+            )
+            # Change key, and format as percentage string with 2 decimals
+            params[name] =  f"{params[threshold_pct_name]:.2f}%"
+            del params[threshold_pct_name]
+        else:
+            if required:
+                raise ValidationError(
+                    reason=f"Provide either '{name}' or '{threshold_pct_name}'",
+                    parameter=name
+                )
