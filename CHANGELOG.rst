@@ -2,8 +2,8 @@ Changelog
 =========
 
 
-dev
----
+0.15.1
+------
 
 **Improvements**
 
