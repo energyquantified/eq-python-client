@@ -468,3 +468,51 @@ class BaseAPI:
             ),
             parameter=name
         )
+
+    @staticmethod
+    def _add_threshold(
+        params,
+        name,
+        threshold,
+        threshold_pct,
+        threshold_name="threshold",
+        threshold_pct_name="threshold_pct",
+        required=False,
+    ):
+        if threshold is not None and threshold_pct is not None:
+            raise ValidationError(
+                reason=(
+                    f"Only one of '{threshold_name}' and '{threshold_pct_name}' "
+                    f"may be provided"
+                ),
+                parameter=threshold_name
+            )
+        if threshold is not None:
+            if isinstance(threshold, int) and threshold >= 0:
+                params[name] = threshold
+            else:
+                raise ValidationError(
+                    reason="Provide a non-negative integer",
+                    parameter=threshold_name
+                )
+        elif threshold_pct is not None:
+            if (
+                isinstance(threshold_pct, numbers.Number)
+                and threshold_pct >= 0.0
+                and threshold_pct < 100
+            ):
+                params[name] = f"{threshold_pct:.2f}%"
+            else:
+                raise ValidationError(
+                    reason="Provide a number >=0 and <100",
+                    parameter=threshold_pct_name,
+                )
+        else:
+            if required:
+                raise ValidationError(
+                    reason=(
+                        f"Provide either '{threshold_name}' "
+                        f"or '{threshold_pct_name}'"
+                    ),
+                    parameter=threshold_name,
+                )
