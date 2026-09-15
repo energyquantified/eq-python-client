@@ -2,6 +2,14 @@ Changelog
 =========
 
 
+dev
+---
+
+**Improvements**
+
+- Added ``remit_units`` to the ``Place`` model
+
+
 0.15.1
 ------
 
