@@ -29,8 +29,8 @@ class Place:
         self.children = children or []
         #: A list of curves with data for this place. See :py:class:`Curve`.
         self.curves = curves or []
-        #: A list of REMIT unit keys associated with this place (not all
-        #: places have any)
+        #: A list of unique identifiers (usually EIC codes) for the REMIT
+        #: units associated with this place (not all places have any)
         self.remit_units = remit_units or []
 
     @property
