@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.16
+0.17
 ----
 
 **Improvements**
@@ -10,6 +10,12 @@ Changelog
 - Added ``remit_units`` to the ``Place`` model: a list of unique identifiers
   (usually EIC codes) for the REMIT units at a place. Empty for places that
   do not have any.
+
+
+0.16
+----
+
+Version revoked due to build failure. Please use version 17.
 
 
 0.15.1
