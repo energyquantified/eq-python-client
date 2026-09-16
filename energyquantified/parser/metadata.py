@@ -134,6 +134,7 @@ def parse_place(json):
     unit = json.get("unit")
     fuels = json.get("fuels") or []
     location = json.get("location") or None
+    remit_units = json.get("remit_units") or []
 
     areas = json.get("areas")
     if areas:
@@ -159,6 +160,7 @@ def parse_place(json):
         location=location,
         children=children,
         curves=curves,
+        remit_units=remit_units,
     )
 
 

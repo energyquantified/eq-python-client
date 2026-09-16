@@ -2,6 +2,16 @@ Changelog
 =========
 
 
+dev
+---
+
+**Improvements**
+
+- Added ``remit_units`` to the ``Place`` model: a list of unique identifiers
+  (usually EIC codes) for the REMIT units at a place. Empty for places that
+  do not have any.
+
+
 0.15.1
 ------
 
