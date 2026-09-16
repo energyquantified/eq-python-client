@@ -33,7 +33,7 @@ version = energyquantified.__version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'recommonmark',
+    'myst_parser',
     'sphinx.ext.autodoc',
 ]
 
