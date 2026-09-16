@@ -1,3 +1,5 @@
+.. _polars-integration:
+
 Polars integration
 ==================
 
@@ -11,7 +13,7 @@ Polars is **not required** to use the ``energyquantified`` package. You must
 therefore **install polars** separately to use the following operations.
 
 We also support `pandas <https://pandas.pydata.org>`_ for data frames. See the
-:ref:`pandas integration page <pandas>` for more information.
+:ref:`pandas integration page <pandas-integration>` for more information.
 
 
 Convert data series to data frames
@@ -31,7 +33,7 @@ There also exists an alias of ``to_polars_dataframe()`` called ``to_pl_df()``. T
 
 Note: There also exist a method called ``to_pandas_dataframe()`` and ``to_pd_df()`` for
 converting to `pandas <https://pandas.pydata.org>`_ data frames. See the
-:ref:`pandas integration page <pandas>` for more information.
+:ref:`pandas integration page <pandas-integration>` for more information.
 
 Convert time series
 ^^^^^^^^^^^^^^^^^^^
