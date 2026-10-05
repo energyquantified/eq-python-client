@@ -4,12 +4,19 @@ from dateutil.relativedelta import relativedelta
 
 from .helpers import (
     shift,
-    truncate_second, truncate_5min, truncate_10min,
-    truncate_15min, truncate_30min, truncate_hour, truncate_date,
-    truncate_week, truncate_month, truncate_quarter, truncate_year,
-    truncate_season
+    truncate_5min,
+    truncate_10min,
+    truncate_15min,
+    truncate_30min,
+    truncate_date,
+    truncate_hour,
+    truncate_minute,
+    truncate_month,
+    truncate_quarter,
+    truncate_season,
+    truncate_week,
+    truncate_year,
 )
-
 
 # Lookup dict for frequencies by tag
 _frequencies_lookup = {}
@@ -31,32 +38,40 @@ class Frequency(enum.Enum):
      * ``PT15M`` – 15 minutes
      * ``PT10M`` – 10 minutes
      * ``PT5M`` – 5 minutes
+     * ``PT1M`` – 1 minute
      * ``NONE`` – Tick-data (no frequency)
     """
 
     # Fixed-interval frequencies
-    P1Y    = (True, "years", 1, truncate_year, "Y")
+    P1Y = (True, "years", 1, truncate_year, "Y")
     SEASON = (True, "months", 6, truncate_season, "S")
-    P3M    = (True, "months", 3, truncate_quarter, "Q")
-    P1M    = (True, "months", 1, truncate_month, "M")
-    P1W    = (True, "weeks", 1, truncate_week, "W")
-    P1D    = (True, "days", 1, truncate_date, "D")
-    PT1H   = (True, "hours", 1, truncate_hour, "H")
-    PT30M  = (True, "minutes", 30, truncate_30min, "30min")
-    PT15M  = (True, "minutes", 15, truncate_15min, "15min")
-    PT10M  = (True, "minutes", 10, truncate_10min, "10min")
-    PT5M   = (True, "minutes", 5, truncate_5min, "5min")
+    P3M = (True, "months", 3, truncate_quarter, "Q")
+    P1M = (True, "months", 1, truncate_month, "M")
+    P1W = (True, "weeks", 1, truncate_week, "W")
+    P1D = (True, "days", 1, truncate_date, "D")
+    PT1H = (True, "hours", 1, truncate_hour, "H")
+    PT30M = (True, "minutes", 30, truncate_30min, "30min")
+    PT15M = (True, "minutes", 15, truncate_15min, "15min")
+    PT10M = (True, "minutes", 10, truncate_10min, "10min")
+    PT5M = (True, "minutes", 5, truncate_5min, "5min")
+    PT1M = (True, "minutes", 1, truncate_minute, "1min")
 
     # No fixed interval (i.e. tick data)
-    NONE  = (False, "microseconds", 1, lambda dt: dt, None)
+    NONE = (False, "microseconds", 1, lambda dt: dt, None)
 
-    def __init__(self, is_iterable=None, field=None, steps=1,
-                 truncate_func=None, pretty_name=None):
+    def __init__(
+        self,
+        is_iterable=None,
+        field=None,
+        steps=1,
+        truncate_func=None,
+        pretty_name=None,
+    ):
         self.is_iterable = is_iterable
         self.ordinal = len(self.__class__.__members__) + 1
         self.field = field
         self.steps = steps
-        self.delta = relativedelta(**{ field: steps }) if is_iterable else None
+        self.delta = relativedelta(**{field: steps}) if is_iterable else None
         self.truncate_func = truncate_func
         self.pretty_name = pretty_name
         _frequencies_lookup[self.name.lower()] = self
@@ -85,10 +100,17 @@ class Frequency(enum.Enum):
         """
         return tag.lower() in _frequencies_lookup
 
-    def __lt__(self, b): return self.ordinal < b.ordinal
-    def __gt__(self, b): return self.ordinal > b.ordinal
-    def __le__(self, b): return self.ordinal <= b.ordinal
-    def __ge__(self, b): return self.ordinal >= b.ordinal
+    def __lt__(self, b):
+        return self.ordinal < b.ordinal
+
+    def __gt__(self, b):
+        return self.ordinal > b.ordinal
+
+    def __le__(self, b):
+        return self.ordinal <= b.ordinal
+
+    def __ge__(self, b):
+        return self.ordinal >= b.ordinal
 
     @property
     def tag(self):
@@ -140,7 +162,7 @@ class Frequency(enum.Enum):
         """
         # Requires an iterable frequency
         assert self.is_iterable, "%s is not iterable" % self
-        return relativedelta(**{ self.field: self.steps * num_steps })
+        return relativedelta(**{self.field: self.steps * num_steps})
 
     def shift(self, datetime_obj, num_steps):
         """
@@ -158,7 +180,7 @@ class Frequency(enum.Enum):
         """
         # Requires an iterable frequency
         assert self.is_iterable, "%s is not iterable" % self
-        return shift(datetime_obj, **{ self.field: self.steps * num_steps })
+        return shift(datetime_obj, **{self.field: self.steps * num_steps})
 
     def between(self, datetime_obj1, datetime_obj2):
         """
@@ -204,23 +226,24 @@ _frequencies_lookup["pt60m"] = Frequency.PT1H
 
 # Constants
 
-NONE   = Frequency.NONE
+NONE = Frequency.NONE
 
-PT5M   = Frequency.PT5M
-PT10M  = Frequency.PT10M
-PT15M  = Frequency.PT15M
-PT30M  = Frequency.PT30M
-PT60M  = Frequency.PT1H
-PT1H   = Frequency.PT1H
-P1D    = Frequency.P1D
-P1W    = Frequency.P1W
-P1M    = Frequency.P1M
-P3M    = Frequency.P3M
+PT1M = Frequency.PT1M
+PT5M = Frequency.PT5M
+PT10M = Frequency.PT10M
+PT15M = Frequency.PT15M
+PT30M = Frequency.PT30M
+PT60M = Frequency.PT1H
+PT1H = Frequency.PT1H
+P1D = Frequency.P1D
+P1W = Frequency.P1W
+P1M = Frequency.P1M
+P3M = Frequency.P3M
 SEASON = Frequency.SEASON
-P1Y    = Frequency.P1Y
+P1Y = Frequency.P1Y
 
 
 # Lookup
 
-LOOKUP = { str(f): f for f in list(Frequency) }
+LOOKUP = {str(f): f for f in list(Frequency)}
 LOOKUP["PT60M"] = PT1H
