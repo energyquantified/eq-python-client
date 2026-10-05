@@ -65,6 +65,7 @@ class CurveUpdateEvent(_Event):
         end = None,
         instance = None,
         num_values = None,
+        trade_contract = None,
     ):
         #: See :py:class:`energyquantified.events.EventType`. Is one of
         #: ``CURVE_UPDATE``, ``CURVE_DELETE`` or ``CURVE_TRUNCATE``.
@@ -78,6 +79,10 @@ class CurveUpdateEvent(_Event):
         #: See :py:class:`energyquantified.metadata.Instance`. The instace
         #: with modified data. Only provided where applicable.
         self.instance = instance
+        #: See :py:class:`energyquantified.data.TradeContract`. The trade
+        #: contract with modified data. Only provided for trade curves, where
+        #: ``begin`` and ``end`` describe the trading-time interval.
+        self.trade_contract = trade_contract
         #: The begin date (inclusive)
         self.begin = begin
         #: The end date (exclusive)
@@ -102,6 +107,7 @@ class CurveUpdateEvent(_Event):
             f"begin={begin_str}, "
             f"end={end_str}, "
             f"instance={self.instance}, "
+            f"trade_contract={self.trade_contract}, "
             f"num_values:{self.num_values}"
             f">"
         )
@@ -120,7 +126,8 @@ class CurveUpdateEvent(_Event):
         :return: The range of data the event describes
         :rtype: :py:class:`energyquantified.data.TimeSeries`,\
             :py:class:`energyquantified.data.Periodseries`,\
-            :py:class:`energyquantified.data.OHLCList`
+            :py:class:`energyquantified.data.OHLCList`,\
+            :py:class:`energyquantified.data.TradeOHLCSeriesList`
         :raises ValueError: Invalid object
         :raises APIError: If there were any network- or server-related \
             issues while loading the data
@@ -195,4 +202,21 @@ class CurveUpdateEvent(_Event):
                 self.curve,
                 begin=self.begin,
                 end=self.end,
+            )
+        # Trades
+        if self.curve.curve_type == CurveType.TRADES:
+            if self.trade_contract is None:
+                raise ValueError(
+                    f"Cannot load data for event: {self}, "
+                    f"trade_contract cannot be None for "
+                    f"curve type: {CurveType.TRADES}"
+                )
+            # Search for the event's contract only
+            delivery = self.trade_contract.delivery
+            period = self.trade_contract.period
+            return eq.trades.ohlc.load(
+                self.curve,
+                begin=delivery,
+                end=period.shift(delivery, 1),
+                periods=period,
             )
