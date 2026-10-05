@@ -1,11 +1,11 @@
 from .classes import (
     _get_absolute_result_class,
     _get_ohlc_list_class,
+    _get_ppa_list_class,
     _get_timeseries_class,
     _get_value_type_class,
 )
 from .deprecation import deprecated
-
 
 pd = None
 _is_pandas_installed = None
@@ -62,12 +62,12 @@ def timeseries_to_pandas_dataframe(timeseries, name=None, single_level_header=Fa
     """
     # Checks
     assert_pandas_installed()
-    assert isinstance(
-        timeseries, _get_timeseries_class()
-    ), "timeseries must be an instance of energyquantified.data.Timeseries"
-    assert isinstance(
-        name, (type(None), str)
-    ), f"parameter name must be string or None, was {type(name)}"
+    assert isinstance(timeseries, _get_timeseries_class()), (
+        "timeseries must be an instance of energyquantified.data.Timeseries"
+    )
+    assert isinstance(name, (type(None), str)), (
+        f"parameter name must be string or None, was {type(name)}"
+    )
     if name is None:
         name = timeseries.name
         include_instance = True
@@ -101,7 +101,7 @@ def timeseries_to_pandas_dataframe(timeseries, name=None, single_level_header=Fa
             return _timeseries_to_dataframe_mean_and_scenarios(timeseries, name)
     # Unknown value type for time series
     raise ValueError(
-        "Unknown ValueType: timeseries.value_type = " f"{timeseries.value_type()}"
+        f"Unknown ValueType: timeseries.value_type = {timeseries.value_type()}"
     )
 
 
@@ -393,27 +393,65 @@ def ohlc_list_to_pandas_dataframe(ohlc_list):
     """
     # Checks
     assert_pandas_installed()
-    assert isinstance(
-        ohlc_list, _get_ohlc_list_class()
-    ), "ohlc_list must be an instance of energyquantified.data.OHLCList"
+    assert isinstance(ohlc_list, _get_ohlc_list_class()), (
+        "ohlc_list must be an instance of energyquantified.data.OHLCList"
+    )
+    # Conversion
+    return pd.DataFrame.from_records(
+        {
+            "traded": ohlc.product.traded,
+            "period": ohlc.product.period.tag,
+            "front": ohlc.product.front,
+            "delivery": ohlc.product.delivery,
+            "open": ohlc.open,
+            "high": ohlc.high,
+            "low": ohlc.low,
+            "close": ohlc.close,
+            "settlement": ohlc.settlement,
+            "volume": ohlc.volume,
+            "open_interest": ohlc.open_interest,
+        }
+        for ohlc in ohlc_list
+    )
+
+
+def ppa_list_to_pandas_dataframe(ppa_list):
+    """
+    Convert an :py:class:`energyquantified.data.PPAList` to a
+    ``pandas.DataFrame``.
+
+    :param ppa_list: A list of PPA objects
+    :type ppa_list: PPAList
+    :return: A DataFrame
+    :rtype: pandas.DataFrame
+    :raises ImportError: When pandas is not installed on the system
+    """
+    # Checks
+    assert_pandas_installed()
+    assert isinstance(ppa_list, _get_ppa_list_class()), (
+        "ppa_list must be an instance of energyquantified.data.PPAList"
+    )
     # Conversion
     return pd.DataFrame.from_records(
         (
             {
-                "traded": ohlc.product.traded,
-                "period": ohlc.product.period.tag,
-                "front": ohlc.product.front,
-                "delivery": ohlc.product.delivery,
-                "open": ohlc.open,
-                "high": ohlc.high,
-                "low": ohlc.low,
-                "close": ohlc.close,
-                "settlement": ohlc.settlement,
-                "volume": ohlc.volume,
-                "open_interest": ohlc.open_interest,
+                "date": ppa.product.date,
+                "technology": ppa.product.technology.tag,
+                "contract_structure": ppa.product.contract_structure.tag,
+                "delivery_begin": ppa.product.delivery_begin,
+                "duration": ppa.product.duration.years,
+                "price": ppa.price,
             }
-            for ohlc in ohlc_list
-        )
+            for ppa in ppa_list
+        ),
+        columns=[
+            "date",
+            "technology",
+            "contract_structure",
+            "delivery_begin",
+            "duration",
+            "price",
+        ],
     )
 
 
@@ -453,12 +491,12 @@ def absolute_result_to_pandas_dataframe(
     :raises ImportError: When pandas is not installed on the system
     """
     assert_pandas_installed()
-    assert isinstance(
-        absolute_result, _get_absolute_result_class()
-    ), "absolute_result must be an instance of energyquantified.data.AbsoluteResult"
-    assert isinstance(
-        name, (type(None), str)
-    ), f"parameter name must be string or None, was {type(name)}"
+    assert isinstance(absolute_result, _get_absolute_result_class()), (
+        "absolute_result must be an instance of energyquantified.data.AbsoluteResult"
+    )
+    assert isinstance(name, (type(None), str)), (
+        f"parameter name must be string or None, was {type(name)}"
+    )
     if name is None:
         name = absolute_result.curve.name
     if single_level_index:
