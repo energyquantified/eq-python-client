@@ -96,6 +96,7 @@ User guide
    userguide/periods
    userguide/period-instances
    userguide/ohlc
+   userguide/trades
    userguide/srmc
    userguide/pandas
    userguide/polars

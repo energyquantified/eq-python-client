@@ -587,10 +587,15 @@ modified value, even those that have not changed.
             print("Updated data:", data)
 
 The data loaded can either be a :py:class:`~energyquantified.data.Timeseries`, a
-:py:class:`~energyquantified.data.Periodseries` or an :py:class:`~energyquantified.data.OHLCList`,
-depending on the
+:py:class:`~energyquantified.data.Periodseries`, an :py:class:`~energyquantified.data.OHLCList`
+or a :py:class:`~energyquantified.data.TradeOHLCSeriesList`, depending on the
 :py:attr:`CurveUpdateEvent.curve <energyquantified.events.CurveUpdateEvent.curve>`'s
 curve type.
+
+Events for trade curves also have a
+:py:attr:`CurveUpdateEvent.trade_contract <energyquantified.events.CurveUpdateEvent.trade_contract>`.
+For these events, ``begin`` and ``end`` describe the trading time of the
+modified data, and ``load_data()`` loads the OHLC data for that one contract.
 
 Note that you cannot load data for ``CURVE_DELETE`` and ``CURVE_TRUNCATE`` events,
 as deleted data no longer exists.

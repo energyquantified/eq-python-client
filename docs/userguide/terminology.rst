@@ -152,6 +152,7 @@ for an excellent explanation of the format.
 - ``PT15M`` – 15 minutes
 - ``PT10M`` – 10 minutes
 - ``PT5M`` – 5 minutes
+- ``PT1M`` – 1 minute
 
 The ``SEASON`` frequency is used for gas market contracts. It starts on 1
 April (summer) or 1 October (winter) and lasts six months.

@@ -50,6 +50,11 @@ implemented:
  * :py:class:`OHLCList <energyquantified.data.OHLCList>`: A list of OHLC data
    objects.
 
+ * :py:class:`TradeOHLCSeries <energyquantified.data.TradeOHLCSeries>`: OHLC
+   data for one intraday trade contract. Its values are
+   :py:class:`TradeOHLC <energyquantified.data.TradeOHLC>` objects and its
+   contract is a :py:class:`TradeContract <energyquantified.data.TradeContract>`.
+
  * :py:class:`SRMC <energyquantified.data.SRMC>`: The server response from
    an short-run marginal cost (SRMC) calculation. It has multiple attributes,
    most are defined and used elsewhere. But it has one that is specific for
