@@ -65,6 +65,16 @@ home page. Trial users get access to 30 days of history.
 
 ## Installation
 
+Install with **uv**:
+
+```bash
+# Install
+uv add energyquantified
+
+## Upgrade (all dependencies)
+uv lock --upgrade
+```
+
 Install with **pip**:
 
 ```bash

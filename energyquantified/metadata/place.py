@@ -8,7 +8,8 @@ class Place:
     """
 
     def __init__(self, kind, key, name, unit=None, fuels=None, areas=None,
-                 location=None, children=None, curves=None):
+                 location=None, children=None, curves=None,
+                 remit_units=None):
         #: The place type. See :py:class:`PlaceType`.
         self.kind = kind
         #: The identifier
@@ -28,6 +29,9 @@ class Place:
         self.children = children or []
         #: A list of curves with data for this place. See :py:class:`Curve`.
         self.curves = curves or []
+        #: A list of unique identifiers (usually EIC codes) for the REMIT
+        #: units associated with this place (not all places have any)
+        self.remit_units = remit_units or []
 
     @property
     def latitude(self):

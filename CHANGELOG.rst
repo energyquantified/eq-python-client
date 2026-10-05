@@ -2,16 +2,34 @@ Changelog
 =========
 
 
+0.17
+----
+
+**Improvements**
+
+- Added ``remit_units`` to the ``Place`` model: a list of unique identifiers
+  (usually EIC codes) for the REMIT units at a place. Empty for places that
+  do not have any.
+
+
+0.16
+----
+
+Version revoked due to build failure. Please use version 17.
+
+
 0.15.1
 ------
 
 **Improvements**
 
 - Update border allocations for these borders:
+
   - ``FI-NO4`` is flow-based
   - ``RO-BG`` is both explicit and implicit
   - Various borders in the Nordics and between the Nordics and the Continent had wrong
     allocations (all changed to flow-based where applicable)
+
 - Added ``threshold_pct`` parameters for percentage-based aggregation thresholds
 
 
@@ -57,8 +75,10 @@ Changelog
 **Deprecations**
 
 - Deprecate method parameter ``exlude_tags`` and add ``exclude_tags`` as method parameter
+
   - Deprecated parameter will be removed in the next major release
   - Affected methods:
+
     - ``eq.instances.list()``
     - ``eq.instances.load()``
     - ``eq.period_instances.list()``

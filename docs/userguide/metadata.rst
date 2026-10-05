@@ -156,6 +156,13 @@ REMIT capacity curve for the German nuclear powerplant Brokdorf:
    [<Curve: "DE @Brokdorf Nuclear Capacity Available MW REMIT", curve_type=INSTANCE_PERIOD, subscription=FREEMIUM>,
     <Curve: "DE @Brokdorf Nuclear Production MWh/h H Actual", curve_type=TIMESERIES, subscription=FREEMIUM>]
 
+Some places also have a list of REMIT units. Each entry is a unique
+identifier for a unit, usually an EIC code. Not all places have these, in
+which case the list is empty:
+
+   >>> brokdorf.remit_units
+   ['11WD2BROK000123P']
+
 See :meth:`energyquantified.api.MetadataAPI.places` for a full reference.
 
 Categories
