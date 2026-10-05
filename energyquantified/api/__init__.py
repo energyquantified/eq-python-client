@@ -6,7 +6,7 @@ from .period_instances import PeriodInstancesAPI
 from .periods import PeriodsAPI
 from .srmc import SrmcAPI
 from .timeseries import TimeseriesAPI
-from .trades import TradesAPI
+from .trades import TradesAPI, TradesOhlcAPI
 from .user import UserAPI
 
 __all__ = [
@@ -20,5 +20,6 @@ __all__ = [
     "SrmcAPI",
     "TimeseriesAPI",
     "TradesAPI",
+    "TradesOhlcAPI",
     "UserAPI",
 ]
