@@ -9,6 +9,7 @@ from .ohlc import (
 )
 from .options import Aggregation, Filter
 from .place import Place, PlaceType
+from .trades import TradeOHLCField
 from .subscription import (
     Subscription,
     SubscriptionAccess,
@@ -38,6 +39,8 @@ __all__ = [
     "ContractPeriod",
     "ContinuousContract",
     "SpecificContract",
+    # Trades
+    "TradeOHLCField",
     # Subscription
     "Subscription",
     "SubscriptionAccess",

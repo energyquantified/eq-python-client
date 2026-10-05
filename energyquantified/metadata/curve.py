@@ -114,6 +114,8 @@ class DataType(enum.Enum):
     FOREX = ("FOREX", "Forex")
     #: Closing data from the market.
     OHLC = ("OHLC", "OHLC")
+    #: Intraday trade data.
+    TRADES = ("TRADES", "Trades")
     #: Capacity data generated from REMIT outage messages.
     REMIT = ("REMIT", "REMIT")
     #: Total installed capacity.
@@ -189,6 +191,8 @@ class CurveType(enum.Enum):
     INSTANCE_PERIOD = ("INSTANCE_PERIOD", True)
     #: Closing prices for market data
     OHLC = ("OHLC", False)
+    #: Intraday trade contracts and OHLC data
+    TRADES = ("TRADES", False)
 
     def __init__(self, tag=None, has_instances=False):
         self.tag = tag

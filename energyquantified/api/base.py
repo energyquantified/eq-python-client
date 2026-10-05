@@ -1,6 +1,6 @@
 import numbers
 import urllib
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 
 import pytz
 from requests import exceptions
@@ -22,6 +22,7 @@ from ..metadata import (
     Filter,
     ContractPeriod,
     OHLCField,
+    TradeOHLCField,
 )
 from ..time import (
     Frequency,
@@ -164,6 +165,29 @@ class BaseAPI:
             field_string = ohlc_field.tag
         else:
             raise ValidationError(reason="Provide an OHLCField", parameter=name)
+        return _urlencode(field_string)
+
+    @staticmethod
+    def _urlencode_trade_ohlc_field(trade_ohlc_field, name):
+        if trade_ohlc_field is None:
+            raise ValidationError(
+                reason="Provide a TradeOHLCField",
+                parameter=name
+            )
+        if isinstance(trade_ohlc_field, str):
+            if not TradeOHLCField.is_valid_tag(trade_ohlc_field):
+                raise ValidationError(
+                    reason=f"Not a valid TradeOHLCField: '{trade_ohlc_field}'",
+                    parameter=name
+                )
+            field_string = TradeOHLCField.by_tag(trade_ohlc_field).tag
+        elif isinstance(trade_ohlc_field, TradeOHLCField):
+            field_string = trade_ohlc_field.tag
+        else:
+            raise ValidationError(
+                reason="Provide a TradeOHLCField",
+                parameter=name
+            )
         return _urlencode(field_string)
 
     @staticmethod
@@ -394,6 +418,76 @@ class BaseAPI:
                 reason=f"Not a valid Frequency: '{var}'",
                 parameter=name
             )
+
+    @staticmethod
+    def _add_frequency_list(params, name, var, allowed_values=None, required=False):
+        if (var is None or var == []) and not required:
+            return
+        if var is None or isinstance(var, (str, Frequency)):
+            var = [var]
+        if not isinstance(var, (list, tuple, set, frozenset)):
+            raise ValidationError(
+                reason="Provide a Frequency or a list of Frequency",
+                parameter=name
+            )
+        tags = []
+        for element in var:
+            if isinstance(element, str):
+                if not Frequency.is_valid_tag(element):
+                    raise ValidationError(
+                        reason=f"Not a valid Frequency: '{element}'",
+                        parameter=name
+                    )
+                element = Frequency.by_tag(element)
+            elif not isinstance(element, Frequency):
+                raise ValidationError(
+                    reason=f"Not a valid Frequency: '{element}'",
+                    parameter=name
+                )
+            if allowed_values and element not in allowed_values:
+                allowed = ", ".join(f.tag for f in allowed_values)
+                raise ValidationError(
+                    reason=(
+                        f"Frequency '{element.tag}' is not supported. "
+                        f"Allowed values are: {allowed}"
+                    ),
+                    parameter=name
+                )
+            tags.append(element.tag)
+        params[name] = tags
+
+    @staticmethod
+    def _add_duration(params, name, var, required=False, min=None, max=None):
+        if var is None and not required:
+            return
+        if isinstance(var, str):
+            params[name] = var
+            return
+        if not isinstance(var, timedelta):
+            raise ValidationError(
+                reason=(
+                    "Provide a datetime.timedelta or an ISO-8601 duration "
+                    "string (such as 'PT36H')"
+                ),
+                parameter=name
+            )
+        if min is not None and var < min:
+            raise ValidationError(
+                reason=f"Must be at least {min}, but was {var}",
+                parameter=name
+            )
+        if max is not None and var > max:
+            raise ValidationError(
+                reason=f"Must be at most {max}, but was {var}",
+                parameter=name
+            )
+        total_seconds = var.total_seconds()
+        if total_seconds % 60 or var.microseconds:
+            raise ValidationError(
+                reason="Must be an exact multiple of one minute",
+                parameter=name
+            )
+        params[name] = f"PT{int(total_seconds // 60)}M"
 
     @staticmethod
     def _add_aggregation(params, name, var, required=False):

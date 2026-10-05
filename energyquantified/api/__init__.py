@@ -6,17 +6,19 @@ from .period_instances import PeriodInstancesAPI
 from .periods import PeriodsAPI
 from .srmc import SrmcAPI
 from .timeseries import TimeseriesAPI
+from .trades import TradesAPI
 from .user import UserAPI
 
 __all__ = [
+    "EventsAPI",
     "InstancesAPI",
     "MetadataAPI",
-    "RealtoMetadataAPI",
-    "TimeseriesAPI",
-    "PeriodsAPI",
-    "PeriodInstancesAPI",
     "OhlcAPI",
+    "PeriodInstancesAPI",
+    "PeriodsAPI",
+    "RealtoMetadataAPI",
     "SrmcAPI",
+    "TimeseriesAPI",
+    "TradesAPI",
     "UserAPI",
-    "EventsAPI",
 ]

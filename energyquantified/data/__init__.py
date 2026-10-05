@@ -15,6 +15,12 @@ from .periodseries import (
 from .ohlc import Product, OHLC, OHLCList
 from .srmc import SRMC, SRMCOptions
 from .absolute import AbsoluteItem, AbsoluteResult
+from .trades import (
+    TradeContract,
+    TradeOHLC,
+    TradeOHLCSeries,
+    TradeOHLCSeriesList,
+)
 
 __all__ = [
     # Time series
@@ -39,4 +45,9 @@ __all__ = [
     # Absolute
     "AbsoluteItem",
     "AbsoluteResult",
+    # Trades
+    "TradeContract",
+    "TradeOHLC",
+    "TradeOHLCSeries",
+    "TradeOHLCSeriesList",
 ]
