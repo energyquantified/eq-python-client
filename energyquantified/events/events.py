@@ -1,5 +1,9 @@
+from datetime import timezone
+
 from energyquantified.metadata import CurveType
+
 from .event_type import EventType
+
 
 class _Event:
     def __init__(self, event_type):
@@ -20,6 +24,7 @@ class _Event:
     def _set_event_type(self, event_type):
         raise NotImplementedError
 
+
 class TimeoutEvent(_Event):
     """
     Filler event used to indicate that a certain time has passed without
@@ -39,11 +44,7 @@ class TimeoutEvent(_Event):
         self.event_type = event_type
 
     def __str__(self):
-        return (
-            f"<TimeoutEvent: "
-            f"event_type={self.event_type}"
-            f">"
-        )
+        return f"<TimeoutEvent: event_type={self.event_type}>"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -61,11 +62,11 @@ class CurveUpdateEvent(_Event):
         event_id,
         curve,
         event_type,
-        begin = None,
-        end = None,
-        instance = None,
-        num_values = None,
-        trade_contract = None,
+        begin=None,
+        end=None,
+        instance=None,
+        num_values=None,
+        trade_contract=None,
     ):
         #: See :py:class:`energyquantified.events.EventType`. Is one of
         #: ``CURVE_UPDATE``, ``CURVE_DELETE`` or ``CURVE_TRUNCATE``.
@@ -127,7 +128,8 @@ class CurveUpdateEvent(_Event):
         :rtype: :py:class:`energyquantified.data.TimeSeries`,\
             :py:class:`energyquantified.data.Periodseries`,\
             :py:class:`energyquantified.data.OHLCList`,\
-            :py:class:`energyquantified.data.TradeOHLCSeriesList`
+            :py:class:`energyquantified.data.TradeOHLCSeriesList`,\
+            :py:class:`energyquantified.data.PPAList`
         :raises ValueError: Invalid object
         :raises APIError: If there were any network- or server-related \
             issues while loading the data
@@ -139,7 +141,7 @@ class CurveUpdateEvent(_Event):
         # Timeseries and scenarios
         if self.curve.curve_type in (
             CurveType.TIMESERIES,
-            CurveType.SCENARIO_TIMESERIES
+            CurveType.SCENARIO_TIMESERIES,
         ):
             return eq.timeseries.load(
                 self.curve,
@@ -219,4 +221,12 @@ class CurveUpdateEvent(_Event):
                 begin=delivery,
                 end=period.shift(delivery, 1),
                 periods=period,
+            )
+        # PPA
+        if self.curve.curve_type == CurveType.PPA:
+            # The event spans quote dates as UTC midnights (end exclusive)
+            return eq.ppa.load(
+                self.curve,
+                begin=self.begin.astimezone(timezone.utc).date(),
+                end=self.end.astimezone(timezone.utc).date(),
             )

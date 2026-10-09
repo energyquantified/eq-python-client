@@ -5,6 +5,7 @@ from .api import (
     OhlcAPI,
     PeriodInstancesAPI,
     PeriodsAPI,
+    PpaAPI,
     RealtoMetadataAPI,
     SrmcAPI,
     TimeseriesAPI,
@@ -125,6 +126,9 @@ class EnergyQuantified:
         #: contracts. Intraday trade OHLC data is loaded through
         #: ``eq.trades.ohlc.*``.
         self.trades = TradesAPI(self)
+        #: See :py:class:`energyquantified.api.PpaAPI`. For loading power
+        #: purchase agreement (PPA) prices.
+        self.ppa = PpaAPI(self)
         #: See :py:class:`energyquantified.api.SrmcAPI`. For loading and
         #: calculating short-run marginal costs (SRMC) from OHLC data.
         self.srmc = SrmcAPI(self)

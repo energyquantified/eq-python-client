@@ -1,12 +1,12 @@
 from .classes import (
     _get_absolute_result_class,
     _get_ohlc_list_class,
+    _get_ppa_list_class,
     _get_timeseries_class,
     _get_trade_ohlc_series_class,
     _get_trade_ohlc_series_list_class,
     _get_value_type_class,
 )
-
 
 INDEX_NAME = "date"
 DEFAULT_COLUMN_NAME = "value"
@@ -72,12 +72,12 @@ def timeseries_to_polars_dataframe(timeseries, name=None):
     """
     # Checks
     assert_polars_installed()
-    assert isinstance(
-        timeseries, _get_timeseries_class()
-    ), "timeseries must be an instance of energyquantified.data.Timeseries"
-    assert isinstance(
-        name, (type(None), str)
-    ), f"parameter name must be string or None, was {type(name)}"
+    assert isinstance(timeseries, _get_timeseries_class()), (
+        "timeseries must be an instance of energyquantified.data.Timeseries"
+    )
+    assert isinstance(name, (type(None), str)), (
+        f"parameter name must be string or None, was {type(name)}"
+    )
     if name is None:
         name = timeseries.name
         include_instance = True
@@ -104,7 +104,7 @@ def timeseries_to_polars_dataframe(timeseries, name=None):
         )
     # Unknown value type for time series
     raise ValueError(
-        "Unknown ValueType: timeseries.value_type = " f"{timeseries.value_type()}"
+        f"Unknown ValueType: timeseries.value_type = {timeseries.value_type()}"
     )
 
 
@@ -276,9 +276,9 @@ def ohlc_list_to_polars_dataframe(ohlc_list):
     """
     # Checks
     assert_polars_installed()
-    assert isinstance(
-        ohlc_list, _get_ohlc_list_class()
-    ), "ohlc_list must be an instance of energyquantified.data.OHLCList"
+    assert isinstance(ohlc_list, _get_ohlc_list_class()), (
+        "ohlc_list must be an instance of energyquantified.data.OHLCList"
+    )
     # Conversion
     return pl.DataFrame(
         [
@@ -313,6 +313,51 @@ def ohlc_list_to_polars_dataframe(ohlc_list):
     )
 
 
+def ppa_list_to_polars_dataframe(ppa_list):
+    """
+    Convert an :py:class:`energyquantified.data.PPAList` to a
+    ``polars.DataFrame``.
+
+    :param ppa_list: A list of PPA objects
+    :type ppa_list: PPAList
+    :return: A DataFrame
+    :rtype: polars.DataFrame
+    :raises ImportError: When polars is not installed on the system
+    """
+    # Checks
+    assert_polars_installed()
+    assert isinstance(ppa_list, _get_ppa_list_class()), (
+        "ppa_list must be an instance of energyquantified.data.PPAList"
+    )
+    # Conversion
+    return pl.DataFrame(
+        [
+            pl.Series("date", [ppa.product.date for ppa in ppa_list], dtype=pl.Date),
+            pl.Series(
+                "technology",
+                [ppa.product.technology.tag for ppa in ppa_list],
+                dtype=pl.String,
+            ),
+            pl.Series(
+                "contract_structure",
+                [ppa.product.contract_structure.tag for ppa in ppa_list],
+                dtype=pl.String,
+            ),
+            pl.Series(
+                "delivery_begin",
+                [ppa.product.delivery_begin for ppa in ppa_list],
+                dtype=pl.Date,
+            ),
+            pl.Series(
+                "duration",
+                [ppa.product.duration.years for ppa in ppa_list],
+                dtype=pl.Int32,
+            ),
+            pl.Series("price", [ppa.price for ppa in ppa_list], dtype=pl.Float64),
+        ]
+    )
+
+
 def absolute_result_to_polars_dataframe(absolute_result, name=None):
     """
     Convert an :py:class:`energyquantified.data.AbsoluteResult` to a
@@ -328,12 +373,12 @@ def absolute_result_to_polars_dataframe(absolute_result, name=None):
     :raises ImportError: When polars is not installed on the system
     """
     assert_polars_installed()
-    assert isinstance(
-        absolute_result, _get_absolute_result_class()
-    ), "absolute_result must be an instance of energyquantified.data.AbsoluteResult"
-    assert isinstance(
-        name, (type(None), str)
-    ), f"parameter name must be string or None, was {type(name)}"
+    assert isinstance(absolute_result, _get_absolute_result_class()), (
+        "absolute_result must be an instance of energyquantified.data.AbsoluteResult"
+    )
+    assert isinstance(name, (type(None), str)), (
+        f"parameter name must be string or None, was {type(name)}"
+    )
     if name is None:
         name = absolute_result.curve.name
     # Create dataframe

@@ -1,20 +1,16 @@
+from .absolute import AbsoluteItem, AbsoluteResult
+from .ohlc import OHLC, OHLCList, Product
+from .periodseries import CapacityPeriod, Period, Periodseries, PeriodseriesList
+from .ppa import PPA, PPAList, PPAProduct
+from .srmc import SRMC, SRMCOptions
 from .timeseries import (
+    MeanScenariosValue,
+    ScenariosValue,
     Timeseries,
     TimeseriesList,
-    ValueType,
     Value,
-    ScenariosValue,
-    MeanScenariosValue
+    ValueType,
 )
-from .periodseries import (
-    Periodseries,
-    PeriodseriesList,
-    Period,
-    CapacityPeriod
-)
-from .ohlc import Product, OHLC, OHLCList
-from .srmc import SRMC, SRMCOptions
-from .absolute import AbsoluteItem, AbsoluteResult
 from .trades import (
     TradeContract,
     TradeOHLC,
@@ -39,6 +35,10 @@ __all__ = [
     "Product",
     "OHLC",
     "OHLCList",
+    # PPA
+    "PPAProduct",
+    "PPA",
+    "PPAList",
     # SRMC
     "SRMCOptions",
     "SRMC",

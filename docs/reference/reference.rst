@@ -77,6 +77,11 @@ Here are the different API section classes:
 
 ------
 
+.. autoclass:: energyquantified.api.PpaAPI
+   :inherited-members:
+
+------
+
 .. autoclass:: energyquantified.api.SrmcAPI
    :inherited-members:
 
@@ -95,7 +100,7 @@ Data types
 ----------
 
 The main data type groups include time series, period-based series, OHLC data,
-and intraday trade data:
+intraday trade data, and PPA data:
 
 
 Time series classes
@@ -197,6 +202,24 @@ Trade data classes
    :show-inheritance:
 
 
+PPA data classes
+^^^^^^^^^^^^^^^^
+
+.. autoclass:: energyquantified.data.PPAProduct
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.data.PPA
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.data.PPAList
+   :show-inheritance:
+   :members:
+
+
 SRMC data classes
 ^^^^^^^^^^^^^^^^^
 
@@ -292,6 +315,21 @@ Metadata
 ------
 
 .. autoclass:: energyquantified.metadata.TradeOHLCField
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.Technology
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.ContractStructure
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.PPADuration
    :inherited-members:
 
 ------

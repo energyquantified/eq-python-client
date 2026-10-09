@@ -587,8 +587,9 @@ modified value, even those that have not changed.
             print("Updated data:", data)
 
 The data loaded can either be a :py:class:`~energyquantified.data.Timeseries`, a
-:py:class:`~energyquantified.data.Periodseries`, an :py:class:`~energyquantified.data.OHLCList`
-or a :py:class:`~energyquantified.data.TradeOHLCSeriesList`, depending on the
+:py:class:`~energyquantified.data.Periodseries`, an :py:class:`~energyquantified.data.OHLCList`,
+a :py:class:`~energyquantified.data.TradeOHLCSeriesList` or a
+:py:class:`~energyquantified.data.PPAList`, depending on the
 :py:attr:`CurveUpdateEvent.curve <energyquantified.events.CurveUpdateEvent.curve>`'s
 curve type.
 

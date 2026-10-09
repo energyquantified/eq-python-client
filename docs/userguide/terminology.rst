@@ -31,6 +31,8 @@ describes what kind of data the curve stores. There different types are:
 - ``PERIODS``
 - ``PERIOD_INSTANCES``
 - ``OHLC``
+- ``TRADES``
+- ``PPA``
 
 The ``curve_type`` tells you which operations you shall use to load data
 from the curve in the API.
@@ -406,6 +408,17 @@ market regions in Europe, as well as prices for gas markets, carbon emissions
 
 **Example:** The Nasdaq Nordic Power Future contract for a front quarter
 contract (Q1).
+
+
+PPA
+---
+
+A **power purchase agreement** (PPA) is a long-term contract to buy power
+from a renewable power producer. Energy Quantified provides
+:py:class:`PPA <energyquantified.data.PPA>` prices per price area for solar,
+onshore wind and offshore wind, with different contract structures,
+delivery starts and durations. See :doc:`PPA <../userguide/ppa>` for how to
+load them.
 
 
 SRMC

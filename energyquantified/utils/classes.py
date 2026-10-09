@@ -26,6 +26,20 @@ def _get_ohlc_list_class():
         _ohlc_list_class = OHLCList
     return _ohlc_list_class
 
+_ppa_list_class = None
+def _get_ppa_list_class():
+    """
+    Private utility function for lazy-loading the PPAList class.
+
+    :return: The PPAList class
+    :rtype: class
+    """
+    global _ppa_list_class
+    if not _ppa_list_class:
+        from energyquantified.data import PPAList
+        _ppa_list_class = PPAList
+    return _ppa_list_class
+
 _value_type_class = None
 def _get_value_type_class():
     """
