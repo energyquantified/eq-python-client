@@ -238,6 +238,14 @@ class TradeOHLCSeriesList(list):
         #: The denominator of the price fields
         self.denominator = denominator
 
+    def __reduce__(self):
+        # copy and pickle rebuild list subclasses with append/extend, which
+        # are disabled, so rebuild through the constructor instead
+        return (
+            self.__class__,
+            (list(self), self.curve, self.frequency, self.unit, self.denominator),
+        )
+
     def __str__(self):
         parts = [f"frequency={self.frequency}"]
         if self.curve:

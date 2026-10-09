@@ -589,9 +589,8 @@ def trade_ohlc_series_to_pandas_dataframe(series):
         series, _get_trade_ohlc_series_class()
     ), "series must be an instance of energyquantified.data.TradeOHLCSeries"
     # Conversion
-    return pd.DataFrame.from_records(
-        _trade_ohlc_series_records(series),
-        columns=_TRADE_OHLC_COLUMNS,
+    return _trade_ohlc_pandas_dataframe(
+        _trade_ohlc_series_records(series), series.curve
     )
 
 
@@ -619,13 +618,13 @@ def trade_ohlc_series_list_to_pandas_dataframe(series_list):
         "energyquantified.data.TradeOHLCSeriesList"
     )
     # Conversion
-    return pd.DataFrame.from_records(
+    return _trade_ohlc_pandas_dataframe(
         (
             record
             for series in series_list
             for record in _trade_ohlc_series_records(series)
         ),
-        columns=_TRADE_OHLC_COLUMNS,
+        series_list.curve,
     )
 
 
@@ -641,6 +640,25 @@ _TRADE_OHLC_COLUMNS = [
     "volume",
     "count",
 ]
+
+_TRADE_OHLC_DTYPES = {
+    "open": "float64",
+    "high": "float64",
+    "low": "float64",
+    "close": "float64",
+    "vwap": "float64",
+    "volume": "float64",
+    "count": "int64",
+}
+
+
+def _trade_ohlc_pandas_dataframe(records, curve):
+    df = pd.DataFrame.from_records(records, columns=_TRADE_OHLC_COLUMNS)
+    # Show datetimes in the curve's timezone, also when the frame is empty
+    timezone = curve.timezone.zone if curve and curve.timezone else "UTC"
+    for column in ("delivery", "traded_at"):
+        df[column] = pd.to_datetime(df[column], utc=True).dt.tz_convert(timezone)
+    return df.astype(_TRADE_OHLC_DTYPES)
 
 
 def _trade_ohlc_series_records(series):

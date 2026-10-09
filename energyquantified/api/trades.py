@@ -168,8 +168,9 @@ class TradesOhlcAPI(_BaseTradesAPI):
         :param exclude_periods: Exclude contracts with these delivery periods
         :type exclude_periods: Frequency, str, list, optional
         :param frequency: Aggregate the trade data into coarser buckets.\
-            Buckets are aligned backwards from each contract's delivery. It\
-            cannot be combined with ``aggregate_by_contract``.
+            Buckets are aligned backwards from each contract's delivery minus\
+            ``min_lead_time``. It cannot be combined with\
+            ``aggregate_by_contract``.
         :type frequency: Frequency, str, optional
         :param aggregate_by_contract: Set to True to combine all trade data\
             for each contract into one OHLC value, defaults to False

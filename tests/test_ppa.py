@@ -1,7 +1,7 @@
 import copy
 import pickle
 import unittest
-from datetime import date, datetime
+from datetime import date
 
 import pytz
 
@@ -198,27 +198,6 @@ class PpaAPITest(unittest.TestCase):
         self.assertEqual(params["technology"], ["wind_offshore"])
         self.assertEqual(params["contract-structure"], ["proxy"])
         self.assertEqual(params["duration"], [15])
-
-    def test_datetimes_are_sent_as_dates(self):
-        client = Client([RESPONSE_JSON, RESPONSE_JSON])
-        api = PpaAPI(client)
-
-        api.load(
-            self.curve,
-            begin=datetime(2026, 1, 1, tzinfo=pytz.UTC),
-            end=datetime(2026, 12, 31),
-            delivery_begin=datetime(2027, 1, 1),
-        )
-        api.latest(self.curve, date=datetime(2026, 9, 29, 12, 30))
-
-        _, load_params = client._session.requests[0]
-        self.assertEqual(load_params["begin"], date(2026, 1, 1))
-        self.assertEqual(load_params["end"], date(2026, 12, 31))
-        self.assertEqual(load_params["delivery-begin"], date(2027, 1, 1))
-        _, latest_params = client._session.requests[1]
-        self.assertEqual(latest_params["date"], date(2026, 9, 29))
-        for value in (*load_params.values(), *latest_params.values()):
-            self.assertNotIsInstance(value, datetime)
 
     def test_accepts_numpy_filter_values(self):
         try:

@@ -1,3 +1,5 @@
+import copy
+import pickle
 import unittest
 from datetime import datetime, time, timedelta
 
@@ -15,6 +17,7 @@ from energyquantified.events.messages.server.messages.event import _parse_curve_
 from energyquantified.exceptions import ValidationError
 from energyquantified.metadata import Curve, CurveType, DataType, TradeOHLCField
 from energyquantified.parser.metadata import parse_curve
+from energyquantified.parser.trades import parse_trade_ohlc_series_list
 from energyquantified.time import Frequency
 
 CURVE_JSON = {
@@ -129,7 +132,7 @@ class TradesAPITest(unittest.TestCase):
         contracts = api.contracts(
             self.curve,
             begin=begin,
-            end="2026-08-19T00:00:00+02:00",
+            end="2026-08-19 00:00:00+02:00",
             after_time_of_day=time(8),
             before_time_of_day="20:00:00",
             periods=[Frequency.PT15M, "PT30M"],
@@ -146,7 +149,7 @@ class TradesAPITest(unittest.TestCase):
                 "/trades/NO%20Power%20EUR%2FMWh%201min%20Trade/contracts/",
                 {
                     "begin": begin,
-                    "end": "2026-08-19T00:00:00+02:00",
+                    "end": "2026-08-19 00:00:00+02:00",
                     "after-time-of-day": "08:00:00.000",
                     "before-time-of-day": "20:00:00",
                     "periods": ["PT15M", "PT30M"],
@@ -333,6 +336,82 @@ class TradeEventTest(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             event.load_data(EQ([]))
+
+
+class TradeOHLCSeriesListTest(unittest.TestCase):
+    EMPTY_RESPONSE_JSON = {"curve": CURVE_JSON, "data": []}
+
+    def test_copy_and_pickle(self):
+        series_list = parse_trade_ohlc_series_list(OHLC_RESPONSE_JSON)
+
+        for copied in (
+            copy.copy(series_list),
+            copy.deepcopy(series_list),
+            pickle.loads(pickle.dumps(series_list)),
+        ):
+            self.assertIsInstance(copied, TradeOHLCSeriesList)
+            self.assertEqual(len(copied), 1)
+            self.assertEqual(copied[0].data, series_list[0].data)
+            self.assertEqual(copied.curve.name, CURVE_JSON["name"])
+            self.assertEqual(copied.frequency, Frequency.PT1M)
+            self.assertEqual(copied.unit, "EUR")
+            self.assertEqual(copied.denominator, "MWh")
+
+    def test_to_pandas_dataframe_dtypes(self):
+        try:
+            import pandas  # noqa: F401
+        except ImportError:
+            self.skipTest("pandas is not installed")
+
+        # Whole-number prices must still give float columns
+        int_ohlc_json = {**OHLC_JSON, "open": 10, "high": 14, "low": 9}
+        int_response_json = {
+            **OHLC_RESPONSE_JSON,
+            "data": [{"trade_contract": CONTRACT_JSON, "data": [int_ohlc_json]}],
+        }
+        for json in (int_response_json, self.EMPTY_RESPONSE_JSON):
+            series_list = parse_trade_ohlc_series_list(json)
+            for df in (
+                series_list.to_pandas_dataframe(),
+                TradeOHLCSeries(curve=series_list.curve).to_pandas_dataframe(),
+            ):
+                dtypes = {column: str(dtype) for column, dtype in df.dtypes.items()}
+                for column in ("delivery", "traded_at"):
+                    self.assertEqual(str(df[column].dt.tz), "Europe/Oslo")
+                for column in ("open", "high", "low", "close", "vwap", "volume"):
+                    self.assertEqual(dtypes[column], "float64")
+                self.assertEqual(dtypes["count"], "int64")
+
+        df = parse_trade_ohlc_series_list(OHLC_RESPONSE_JSON).to_pandas_dataframe()
+        self.assertEqual(df["delivery"][0].isoformat(), "2026-08-18T12:00:00+02:00")
+        self.assertEqual(df["traded_at"][0].isoformat(), "2026-08-18T10:00:00+02:00")
+
+    def test_to_polars_dataframe_uses_curve_timezone(self):
+        try:
+            import polars as pl
+        except ImportError:
+            self.skipTest("polars is not installed")
+
+        for json in (OHLC_RESPONSE_JSON, self.EMPTY_RESPONSE_JSON):
+            series_list = parse_trade_ohlc_series_list(json)
+            for df in (
+                series_list.to_polars_dataframe(),
+                TradeOHLCSeries(curve=series_list.curve).to_polars_dataframe(),
+            ):
+                for column in ("delivery", "traded_at"):
+                    self.assertEqual(
+                        df.schema[column], pl.Datetime("us", "Europe/Oslo")
+                    )
+
+        # Empty and non-empty frames can be combined
+        df = pl.concat(
+            [
+                parse_trade_ohlc_series_list(self.EMPTY_RESPONSE_JSON).to_pl_df(),
+                parse_trade_ohlc_series_list(OHLC_RESPONSE_JSON).to_pl_df(),
+            ]
+        )
+        self.assertEqual(df["delivery"][0].isoformat(), "2026-08-18T12:00:00+02:00")
+        self.assertEqual(df["traded_at"][0].isoformat(), "2026-08-18T10:00:00+02:00")
 
 
 class PPACurveTest(unittest.TestCase):

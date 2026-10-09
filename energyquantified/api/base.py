@@ -188,9 +188,6 @@ class BaseAPI:
             return
         if isinstance(var, str):
             params[name] = var
-        elif isinstance(var, datetime):
-            # The API only accepts plain dates (YYYY-MM-DD)
-            params[name] = var.date()
         elif isinstance(var, date):
             params[name] = var
         else:

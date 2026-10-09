@@ -417,7 +417,7 @@ def trade_ohlc_series_to_polars_dataframe(series):
         series, _get_trade_ohlc_series_class()
     ), "series must be an instance of energyquantified.data.TradeOHLCSeries"
     # Conversion
-    return _trade_ohlc_polars_dataframe([series])
+    return _trade_ohlc_polars_dataframe([series], series.curve)
 
 
 def trade_ohlc_series_list_to_polars_dataframe(series_list):
@@ -444,10 +444,10 @@ def trade_ohlc_series_list_to_polars_dataframe(series_list):
         "energyquantified.data.TradeOHLCSeriesList"
     )
     # Conversion
-    return _trade_ohlc_polars_dataframe(series_list)
+    return _trade_ohlc_polars_dataframe(series_list, series_list.curve)
 
 
-def _trade_ohlc_polars_dataframe(series_iterable):
+def _trade_ohlc_polars_dataframe(series_iterable, curve):
     periods = []
     deliveries = []
     traded_at = []
@@ -473,6 +473,8 @@ def _trade_ohlc_polars_dataframe(series_iterable):
             vwaps.append(ohlc.vwap)
             volumes.append(ohlc.volume)
             counts.append(ohlc.count)
+    # Show datetimes in the curve's timezone, also when the list is empty
+    timezone = curve.timezone.zone if curve and curve.timezone else "UTC"
     return pl.DataFrame(
         [
             pl.Series("period", periods, dtype=pl.String),
@@ -486,4 +488,7 @@ def _trade_ohlc_polars_dataframe(series_iterable):
             pl.Series("volume", volumes, dtype=pl.Float64),
             pl.Series("count", counts, dtype=pl.Int64),
         ]
+    ).with_columns(
+        pl.col("delivery").dt.convert_time_zone(timezone),
+        pl.col("traded_at").dt.convert_time_zone(timezone),
     )

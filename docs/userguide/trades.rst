@@ -22,8 +22,8 @@ interval:
 
    contracts = eq.trades.contracts(
        curve,
-       begin="2026-08-18T00:00:00+02:00",
-       end="2026-08-19T00:00:00+02:00",
+       begin="2026-08-18 00:00:00+02:00",
+       end="2026-08-19 00:00:00+02:00",
        periods=[Frequency.PT15M, Frequency.PT1H],
    )
 
@@ -74,8 +74,9 @@ Parameters for ``ohlc.load``
    Optionally aggregate each contract's trade data into coarser buckets. It
    accepts a :py:class:`energyquantified.time.Frequency` or frequency string.
    The frequency cannot be finer than ``PT1M`` or coarser than ``P1D``.
-   Buckets are aligned backwards from the contract's delivery, as described
-   below. If omitted, data is returned at the frequency of ``PT1M``.
+   Buckets are aligned backwards from the contract's delivery minus
+   ``min_lead_time``, as described below. If omitted, data is returned at the
+   frequency of ``PT1M``.
 
 ``aggregate_by_contract``
    Set to ``True`` to combine all available trade data for each contract into
@@ -104,9 +105,9 @@ How backwards aggregation works
 
 "Backwards" describes how bucket boundaries are calculated; it does not mean
 that the returned series is in reverse chronological order. The beginning of
-the contract's delivery is used as an anchor. Starting at that instant,
-the requested ``frequency`` is repeatedly subtracted to form trading-time
-buckets:
+the contract's delivery, minus ``min_lead_time`` (zero by default), is used
+as an anchor. Starting at that instant, the requested ``frequency`` is
+repeatedly subtracted to form trading-time buckets:
 
 .. code-block:: text
 
@@ -130,9 +131,28 @@ to the wall-clock hour:
 
 The returned value whose ``traded_at`` is ``11:45`` summarizes trades in
 ``[11:45, 12:45)``: the start is inclusive and the end is exclusive. The
-previous values summarize ``[10:45, 11:45)`` and ``[09:45, 10:45)``. Thus the
-last bucket is always a complete bucket ending exactly when delivery begins;
-it is not a partial ``[12:00, 12:45)`` wall-clock bucket.
+previous values summarize ``[10:45, 11:45)`` and ``[09:45, 10:45)``. Thus,
+without a ``min_lead_time``, the last bucket is a complete bucket ending
+exactly when delivery begins; it is not a partial ``[12:00, 12:45)``
+wall-clock bucket.
+
+Setting ``min_lead_time`` moves the anchor away from delivery before the
+buckets are calculated. For the same ``12:45`` delivery,
+``frequency=Frequency.PT1H`` and ``min_lead_time=timedelta(minutes=15)`` make
+``12:30`` the exclusive end of the selected trading window:
+
+.. code-block:: text
+
+   09:30              10:30              11:30              12:30       12:45
+     |------------------|------------------|------------------|-----------|
+       earlier bucket     preceding bucket   final bucket       excluded    delivery
+                                                                15 minutes  begins
+
+The final value now has ``traded_at`` set to ``11:30`` and summarizes trades
+in ``[11:30, 12:30)``. Trades at or after ``12:30`` have a lead time of 15
+minutes or less and are excluded, as the ``min_lead_time`` boundary is
+exclusive. Because the buckets are aligned backwards from ``12:30`` rather
+than from ``12:45``, the final bucket still covers a full hour.
 
 This alignment is calculated independently for each contract. With the same
 ``PT1H`` frequency, a contract delivered at ``13:00`` has buckets beginning on
@@ -167,8 +187,8 @@ two hours before delivery:
 
    series_list = eq.trades.ohlc.load(
        curve,
-       begin="2026-08-18T00:00:00+02:00",
-       end="2026-08-25T00:00:00+02:00",
+       begin="2026-08-18 00:00:00+02:00",
+       end="2026-08-25 00:00:00+02:00",
        after_time_of_day=time(8, 0),
        before_time_of_day=time(20, 0),
        exclude_periods=Frequency.PT1H,
@@ -241,4 +261,4 @@ intervals. A contract without trades gives an empty time series.
        fill="forward-fill",
    )
 
-   df = timeseries_list.to_dataframe()
+   df = timeseries_list.to_pd_df()
