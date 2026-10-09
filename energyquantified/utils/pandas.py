@@ -452,7 +452,7 @@ def ppa_list_to_pandas_dataframe(ppa_list):
             "duration",
             "price",
         ],
-    )
+    ).astype({"duration": "int64", "price": "float64"})
 
 
 @deprecated(alt=ohlc_list_to_pandas_dataframe)

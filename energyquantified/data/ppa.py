@@ -66,6 +66,14 @@ class PPAList(list):
         #: The denominator of the prices
         self.denominator = denominator
 
+    def __reduce__(self):
+        # copy and pickle rebuild list subclasses with append/extend, which
+        # are disabled, so rebuild through the constructor instead
+        return (
+            self.__class__,
+            (list(self), self.curve, self.unit, self.denominator),
+        )
+
     def append(self, value):
         raise NotImplementedError("PPAList does not support append")
 

@@ -188,6 +188,9 @@ class BaseAPI:
             return
         if isinstance(var, str):
             params[name] = var
+        elif isinstance(var, datetime):
+            # The API only accepts plain dates (YYYY-MM-DD)
+            params[name] = var.date()
         elif isinstance(var, date):
             params[name] = var
         else:
@@ -497,7 +500,8 @@ class BaseAPI:
 
     @staticmethod
     def _add_tag_enum_list(params, name, var, enum_type, required=False):
-        if (var is None or var == []) and not required:
+        is_empty_list = isinstance(var, (list, tuple, set, frozenset)) and not var
+        if (var is None or is_empty_list) and not required:
             return
         if var is None or isinstance(var, (str, enum_type)):
             var = [var]
@@ -532,9 +536,11 @@ class BaseAPI:
 
     @staticmethod
     def _add_ppa_duration_list(params, name, var, required=False):
-        if (var is None or var == []) and not required:
+        is_empty_list = isinstance(var, (list, tuple, set, frozenset)) and not var
+        if (var is None or is_empty_list) and not required:
             return
-        if var is None or isinstance(var, (int, PPADuration)):
+        # numbers.Integral also covers NumPy integers (e.g. numpy.int64)
+        if var is None or isinstance(var, (numbers.Integral, PPADuration)):
             var = [var]
         if not isinstance(var, (list, tuple, set, frozenset)):
             raise ValidationError(
@@ -543,7 +549,7 @@ class BaseAPI:
         years = []
         for element in var:
             if (
-                isinstance(element, int)
+                isinstance(element, numbers.Integral)
                 and not isinstance(element, bool)
                 and PPADuration.is_valid_years(element)
             ):
