@@ -1,5 +1,7 @@
+import copy
+import pickle
 import unittest
-from datetime import date
+from datetime import date, datetime
 
 import pytz
 
@@ -120,6 +122,20 @@ class PPAParserTest(unittest.TestCase):
         with self.assertRaises(ParseException):
             parse_ppa_response({"data": [bad_json]})
 
+    def test_copy_and_pickle(self):
+        ppa_list = parse_ppa_response(RESPONSE_JSON)
+
+        for copied in (
+            copy.copy(ppa_list),
+            copy.deepcopy(ppa_list),
+            pickle.loads(pickle.dumps(ppa_list)),
+        ):
+            self.assertIsInstance(copied, PPAList)
+            self.assertEqual(list(copied), list(ppa_list))
+            self.assertEqual(copied.curve.name, CURVE_NAME)
+            self.assertEqual(copied.unit, "EUR")
+            self.assertEqual(copied.denominator, "MWh")
+
 
 class PpaAPITest(unittest.TestCase):
     def setUp(self):
@@ -182,6 +198,54 @@ class PpaAPITest(unittest.TestCase):
         self.assertEqual(params["technology"], ["wind_offshore"])
         self.assertEqual(params["contract-structure"], ["proxy"])
         self.assertEqual(params["duration"], [15])
+
+    def test_datetimes_are_sent_as_dates(self):
+        client = Client([RESPONSE_JSON, RESPONSE_JSON])
+        api = PpaAPI(client)
+
+        api.load(
+            self.curve,
+            begin=datetime(2026, 1, 1, tzinfo=pytz.UTC),
+            end=datetime(2026, 12, 31),
+            delivery_begin=datetime(2027, 1, 1),
+        )
+        api.latest(self.curve, date=datetime(2026, 9, 29, 12, 30))
+
+        _, load_params = client._session.requests[0]
+        self.assertEqual(load_params["begin"], date(2026, 1, 1))
+        self.assertEqual(load_params["end"], date(2026, 12, 31))
+        self.assertEqual(load_params["delivery-begin"], date(2027, 1, 1))
+        _, latest_params = client._session.requests[1]
+        self.assertEqual(latest_params["date"], date(2026, 9, 29))
+        for value in (*load_params.values(), *latest_params.values()):
+            self.assertNotIsInstance(value, datetime)
+
+    def test_accepts_numpy_filter_values(self):
+        try:
+            import numpy as np
+        except ImportError:
+            self.skipTest("numpy is not installed")
+
+        client = Client([RESPONSE_JSON, RESPONSE_JSON])
+        api = PpaAPI(client)
+
+        api.latest(self.curve, duration=np.int64(10))
+        api.latest(
+            self.curve,
+            technology=[np.str_("solar")],
+            duration=[np.int64(5), np.int32(15)],
+        )
+
+        self.assertEqual(client._session.requests[0][1], {"duration": [10]})
+        self.assertEqual(
+            client._session.requests[1][1],
+            {"technology": ["solar"], "duration": [5, 15]},
+        )
+        # Arrays must be converted to lists first (e.g. with .tolist())
+        with self.assertRaises(ValidationError):
+            api.latest(self.curve, duration=np.array([5, 10]))
+        with self.assertRaises(ValidationError):
+            api.latest(self.curve, technology=np.array(["solar"]))
 
     def test_latest(self):
         client = Client([RESPONSE_JSON, RESPONSE_JSON])
@@ -286,6 +350,20 @@ class PPADataFrameTest(unittest.TestCase):
                 "price": 45.2,
             },
         )
+
+    def test_to_pandas_dataframe_keeps_numeric_dtypes_when_empty(self):
+        try:
+            import pandas  # noqa: F401
+        except ImportError:
+            self.skipTest("pandas is not installed")
+
+        for ppa_list in (
+            parse_ppa_response(RESPONSE_JSON),
+            parse_ppa_response({"curve": CURVE_JSON, "data": []}),
+        ):
+            df = ppa_list.to_pandas_dataframe()
+            self.assertEqual(str(df["duration"].dtype), "int64")
+            self.assertEqual(str(df["price"].dtype), "float64")
 
     def test_to_polars_dataframe(self):
         try:
