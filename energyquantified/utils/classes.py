@@ -53,3 +53,31 @@ def _get_absolute_result_class():
         from energyquantified.data import AbsoluteResult
         _absolute_result_class = AbsoluteResult
     return _absolute_result_class
+
+_trade_ohlc_series_class = None
+def _get_trade_ohlc_series_class():
+    """
+    Private utility function for lazy-loading the TradeOHLCSeries class.
+
+    :return: The TradeOHLCSeries class
+    :rtype: class
+    """
+    global _trade_ohlc_series_class
+    if not _trade_ohlc_series_class:
+        from energyquantified.data import TradeOHLCSeries
+        _trade_ohlc_series_class = TradeOHLCSeries
+    return _trade_ohlc_series_class
+
+_trade_ohlc_series_list_class = None
+def _get_trade_ohlc_series_list_class():
+    """
+    Private utility function for lazy-loading the TradeOHLCSeriesList class.
+
+    :return: The TradeOHLCSeriesList class
+    :rtype: class
+    """
+    global _trade_ohlc_series_list_class
+    if not _trade_ohlc_series_list_class:
+        from energyquantified.data import TradeOHLCSeriesList
+        _trade_ohlc_series_list_class = TradeOHLCSeriesList
+    return _trade_ohlc_series_list_class

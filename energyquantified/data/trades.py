@@ -4,7 +4,14 @@ from datetime import datetime
 from energyquantified.metadata import Curve
 
 from ..time import Frequency
-
+from ..utils.pandas import (
+    trade_ohlc_series_list_to_pandas_dataframe,
+    trade_ohlc_series_to_pandas_dataframe,
+)
+from ..utils.polars import (
+    trade_ohlc_series_list_to_polars_dataframe,
+    trade_ohlc_series_to_polars_dataframe,
+)
 
 @dataclass(frozen=True)
 class TradeContract:
@@ -123,6 +130,50 @@ class TradeOHLCSeries:
             raise ValueError("TradeOHLCSeries has no values")
         return self.frequency.shift(self.data[-1].traded_at, 1)
 
+    def to_pandas_dataframe(self):
+        """
+        Convert this TradeOHLCSeries to a ``pandas.DataFrame`` with one row per
+        trading-time bucket and columns for the contract (``period`` and
+        ``delivery``), the ``traded_at`` bucket, and the OHLC fields.
+
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return trade_ohlc_series_to_pandas_dataframe(self)
+
+    def to_pd_df(self):
+        """
+        Alias for :meth:`TradeOHLCSeries.to_pandas_dataframe`.
+
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe()
+
+    def to_polars_dataframe(self):
+        """
+        Convert this TradeOHLCSeries to a ``polars.DataFrame`` with one row per
+        trading-time bucket and columns for the contract (``period`` and
+        ``delivery``), the ``traded_at`` bucket, and the OHLC fields.
+
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return trade_ohlc_series_to_polars_dataframe(self)
+
+    def to_pl_df(self):
+        """
+        Alias for :meth:`TradeOHLCSeries.to_polars_dataframe`.
+
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return self.to_polars_dataframe()
+
     def __iter__(self):
         return iter(self.data)
 
@@ -200,6 +251,52 @@ class TradeOHLCSeriesList(list):
 
     def __repr__(self):
         return self.__str__()
+
+    def to_pandas_dataframe(self):
+        """
+        Convert this TradeOHLCSeriesList to a ``pandas.DataFrame`` with one row
+        per contract and trading-time bucket and columns for the contract
+        (``period`` and ``delivery``), the ``traded_at`` bucket, and the OHLC
+        fields.
+
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return trade_ohlc_series_list_to_pandas_dataframe(self)
+
+    def to_pd_df(self):
+        """
+        Alias for :meth:`TradeOHLCSeriesList.to_pandas_dataframe`.
+
+        :return: A DataFrame
+        :rtype: pandas.DataFrame
+        :raises ImportError: When pandas is not installed on the system
+        """
+        return self.to_pandas_dataframe()
+
+    def to_polars_dataframe(self):
+        """
+        Convert this TradeOHLCSeriesList to a ``polars.DataFrame`` with one row
+        per contract and trading-time bucket and columns for the contract
+        (``period`` and ``delivery``), the ``traded_at`` bucket, and the OHLC
+        fields.
+
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return trade_ohlc_series_list_to_polars_dataframe(self)
+
+    def to_pl_df(self):
+        """
+        Alias for :meth:`TradeOHLCSeriesList.to_polars_dataframe`.
+
+        :return: A DataFrame
+        :rtype: polars.DataFrame
+        :raises ImportError: When polars is not installed on the system
+        """
+        return self.to_polars_dataframe()
 
     def append(self, value):
         raise NotImplementedError("TradeOHLCSeriesList does not support append")

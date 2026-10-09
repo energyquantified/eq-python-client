@@ -2,6 +2,8 @@ from .classes import (
     _get_absolute_result_class,
     _get_ohlc_list_class,
     _get_timeseries_class,
+    _get_trade_ohlc_series_class,
+    _get_trade_ohlc_series_list_class,
     _get_value_type_class,
 )
 
@@ -346,4 +348,97 @@ def absolute_result_to_polars_dataframe(absolute_result, name=None):
                 item.value for item in absolute_result.items
             ],
         }
+    )
+
+
+def trade_ohlc_series_to_polars_dataframe(series):
+    """
+    Convert an :py:class:`energyquantified.data.TradeOHLCSeries` to a
+    ``polars.DataFrame``.
+
+    The frame is in a flat, CSV-like layout with one row per trading-time
+    bucket and columns for the contract (``period`` and ``delivery``), the
+    ``traded_at`` bucket, and the OHLC fields.
+
+    :param series: A trade OHLC series
+    :type series: TradeOHLCSeries
+    :return: A DataFrame
+    :rtype: polars.DataFrame
+    :raises ImportError: When polars is not installed on the system
+    """
+    # Checks
+    assert_polars_installed()
+    assert isinstance(
+        series, _get_trade_ohlc_series_class()
+    ), "series must be an instance of energyquantified.data.TradeOHLCSeries"
+    # Conversion
+    return _trade_ohlc_polars_dataframe([series])
+
+
+def trade_ohlc_series_list_to_polars_dataframe(series_list):
+    """
+    Convert an :py:class:`energyquantified.data.TradeOHLCSeriesList` to a
+    ``polars.DataFrame``.
+
+    The frame is in a flat, CSV-like layout with one row per contract and
+    trading-time bucket and columns for the contract (``period`` and
+    ``delivery``), the ``traded_at`` bucket, and the OHLC fields.
+
+    :param series_list: A list of trade OHLC series
+    :type series_list: TradeOHLCSeriesList
+    :return: A DataFrame
+    :rtype: polars.DataFrame
+    :raises ImportError: When polars is not installed on the system
+    """
+    # Checks
+    assert_polars_installed()
+    assert isinstance(
+        series_list, _get_trade_ohlc_series_list_class()
+    ), (
+        "series_list must be an instance of "
+        "energyquantified.data.TradeOHLCSeriesList"
+    )
+    # Conversion
+    return _trade_ohlc_polars_dataframe(series_list)
+
+
+def _trade_ohlc_polars_dataframe(series_iterable):
+    periods = []
+    deliveries = []
+    traded_at = []
+    opens = []
+    highs = []
+    lows = []
+    closes = []
+    vwaps = []
+    volumes = []
+    counts = []
+    for series in series_iterable:
+        contract = series.contract
+        period = contract.period.tag if contract else None
+        delivery = contract.delivery if contract else None
+        for ohlc in series.data:
+            periods.append(period)
+            deliveries.append(delivery)
+            traded_at.append(ohlc.traded_at)
+            opens.append(ohlc.open)
+            highs.append(ohlc.high)
+            lows.append(ohlc.low)
+            closes.append(ohlc.close)
+            vwaps.append(ohlc.vwap)
+            volumes.append(ohlc.volume)
+            counts.append(ohlc.count)
+    return pl.DataFrame(
+        [
+            pl.Series("period", periods, dtype=pl.String),
+            pl.Series("delivery", deliveries, dtype=pl.Datetime),
+            pl.Series("traded_at", traded_at, dtype=pl.Datetime),
+            pl.Series("open", opens, dtype=pl.Float64),
+            pl.Series("high", highs, dtype=pl.Float64),
+            pl.Series("low", lows, dtype=pl.Float64),
+            pl.Series("close", closes, dtype=pl.Float64),
+            pl.Series("vwap", vwaps, dtype=pl.Float64),
+            pl.Series("volume", volumes, dtype=pl.Float64),
+            pl.Series("count", counts, dtype=pl.Int64),
+        ]
     )
