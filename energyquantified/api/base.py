@@ -366,7 +366,7 @@ class BaseAPI:
         )
 
     @staticmethod
-    def _add_frequency(params, name, var, required=False):
+    def _add_frequency(params, name, var, allowed_values=None, required=False):
         if var is None and not required:
             return
         if isinstance(var, str):
@@ -374,13 +374,21 @@ class BaseAPI:
                 raise ValidationError(
                     reason=f"Not a valid Frequency: '{var}'", parameter=name
                 )
-            params[name] = var
-        elif isinstance(var, Frequency):
-            params[name] = var.tag
-        else:
+            var = Frequency.by_tag(var)
+        elif not isinstance(var, Frequency):
             raise ValidationError(
                 reason=f"Not a valid Frequency: '{var}'", parameter=name
             )
+        if allowed_values and var not in allowed_values:
+            allowed = ", ".join(f.tag for f in allowed_values)
+            raise ValidationError(
+                reason=(
+                    f"Frequency '{var.tag}' is not supported. "
+                    f"Allowed values are: {allowed}"
+                ),
+                parameter=name,
+            )
+        params[name] = var.tag
 
     @staticmethod
     def _add_frequency_list(params, name, var, allowed_values=None, required=False):

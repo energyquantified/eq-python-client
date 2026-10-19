@@ -200,6 +200,7 @@ Trade data classes
 
 .. autoclass:: energyquantified.data.TradeOHLCSeriesList
    :show-inheritance:
+   :members:
 
 
 PPA data classes

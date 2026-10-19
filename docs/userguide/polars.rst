@@ -24,6 +24,10 @@ You can convert any of these types to a ``polars.DataFrame``:
  * :py:class:`~energyquantified.data.Timeseries`
  * :py:class:`~energyquantified.data.Periodseries`
  * :py:class:`~energyquantified.data.OHLCList`
+ * :py:class:`~energyquantified.data.TradeOHLCSeries` and
+   :py:class:`~energyquantified.data.TradeOHLCSeriesList` (see
+   :doc:`intraday trades <trades>`)
+ * :py:class:`~energyquantified.data.PPAList` (see :doc:`PPA <ppa>`)
 
 They all have a method called ``to_polars_dataframe()``. ``Periodseries`` differs from
 the two others in which you must supply a **frequency** parameter.

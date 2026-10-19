@@ -54,6 +54,7 @@ Features
 - Forecasts- and time series data
 - Period-based data
 - OHLC data with SRMC calculations
+- Intraday trade OHLC data
 - Power purchase agreement (PPA) prices
 - Shows your subscription for each data series
 - Support for timezones, resolutions, aggregations and unit conversions

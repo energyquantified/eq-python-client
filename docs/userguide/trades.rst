@@ -1,13 +1,66 @@
 Intraday trades
 ===============
 
-Trade operations are available under ``eq.trades.*`` for curves whose
-``curve_type`` is ``TRADES``.
+This page shows how to load OHLC data for intraday trades. All examples below
+expects you to have an initialized instance of the client called ``eq``, and
+a trade curve called ``curve``:
+
+   >>> curve = eq.metadata.curve('DE Intraday Continuous EUR/MWh EPEX Trades')
+
+Operations described here are available under ``eq.trades.*``.
+
+**Requirements:** Use these operations for curves with ``curve_type`` set
+to any of the following:
+
+ * ``TRADES``
 
 The operations are grouped to follow the API's endpoint structure. Contract
 searches live directly on ``eq.trades.*``, matching
 ``/trades/{curve}/contracts/``, while OHLC data is served from
 ``/trades/{curve}/ohlc/`` and is therefore grouped under ``eq.trades.ohlc.*``.
+
+Trade objects
+-------------
+
+Each trade curve holds the intraday trades for one market, stored in
+1-minute (``PT1M``) buckets of trading time. A trade is always made for a
+**contract**, which is identified by the length of its delivery interval
+and the start of delivery:
+
+.. code-block::
+
+   class TradeContract:
+       period: Frequency
+       delivery: datetime
+
+ * **period** – The length of the delivery interval: ``PT15M``, ``PT30M``
+   or ``PT1H``.
+ * **delivery** – The beginning of the delivery interval, in the curve's
+   timezone.
+
+The OHLC data for a contract is a series of
+:py:class:`TradeOHLC <energyquantified.data.TradeOHLC>` values, one per bucket
+of trading time:
+
+.. code-block::
+
+   class TradeOHLC:
+       traded_at: datetime
+       open: number
+       high: number
+       low: number
+       close: number
+       vwap: number
+       volume: number
+       count: int
+
+ * **traded_at** – The beginning of the trading-time bucket. This is when
+   the trades happened, not when the contract is delivered.
+ * **open**, **high**, **low** and **close** – The first, highest, lowest
+   and last price traded in the bucket.
+ * **vwap** – The volume-weighted average price in the bucket.
+ * **volume** – The total volume traded in the bucket.
+ * **count** – The number of trades in the bucket.
 
 List contracts
 --------------
@@ -42,7 +95,7 @@ frequency, unit and denominator are the same for every series, so they are
 also available on the list itself.
 
 Parameters for ``ohlc.load``
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``curve``
    The trade curve or its name. When a
@@ -73,7 +126,7 @@ Parameters for ``ohlc.load``
 ``frequency``
    Optionally aggregate each contract's trade data into coarser buckets. It
    accepts a :py:class:`energyquantified.time.Frequency` or frequency string.
-   The frequency cannot be finer than ``PT1M`` or coarser than ``P1D``.
+   The frequency cannot be finer than ``PT1M`` or coarser than ``PT1H``.
    Buckets are aligned backwards from the contract's delivery minus
    ``min_lead_time``, as described below. If omitted, data is returned at the
    frequency of ``PT1M``.
@@ -218,6 +271,58 @@ Return one OHLC value for each matching contract:
        aggregate_by_contract=True,
    )
 
+A list loaded with ``frequency=Frequency.PT15M``, and the series and values
+in it, print like this:
+
+   >>> series_list
+   <TradeOHLCSeriesList: frequency=PT15M, curve="DE Intraday Continuous EUR/MWh EPEX Trades", unit="EUR", denominator="MWh", items=2>
+
+   >>> series_list[0]
+   <TradeOHLCSeries: frequency=PT15M, curve="DE Intraday Continuous EUR/MWh EPEX Trades", contract=<TradeContract: period=PT15M, delivery=2026-08-18 12:00:00+02:00>, unit="EUR", denominator="MWh", items=3>
+
+   >>> series_list[0][0]
+   <TradeOHLC: traded_at=2026-08-18 11:15:00+02:00, open=61.2, high=62.0, low=60.8, close=61.5, vwap=61.43, volume=12.4, count=9>
+
+Convert trade OHLC data to a data frame
+---------------------------------------
+
+Both :py:class:`TradeOHLCSeriesList <energyquantified.data.TradeOHLCSeriesList>`
+and :py:class:`TradeOHLCSeries <energyquantified.data.TradeOHLCSeries>` convert
+to a data frame in a flat layout, with one row per contract and trading-time
+bucket. The ``delivery`` and ``traded_at`` columns are in the curve's
+timezone.
+
+Convert to a ``pandas.DataFrame`` like this:
+
+   >>> series_list.to_pandas_dataframe()
+     period                  delivery                 traded_at  open  high   low  close   vwap  volume  count
+   0  PT15M 2026-08-18 12:00:00+02:00 2026-08-18 11:15:00+02:00  61.2  62.0  60.8   61.5  61.43    12.4      9
+   1  PT15M 2026-08-18 12:00:00+02:00 2026-08-18 11:30:00+02:00  61.5  63.1  61.5   62.9  62.37    20.1     14
+   2  PT15M 2026-08-18 12:00:00+02:00 2026-08-18 11:45:00+02:00  62.9  64.0  62.2   63.6  63.25    35.7     27
+   3  PT15M 2026-08-18 12:15:00+02:00 2026-08-18 11:30:00+02:00  58.0  58.4  57.1   57.6  57.82     8.3      6
+   4  PT15M 2026-08-18 12:15:00+02:00 2026-08-18 11:45:00+02:00  57.6  59.2  57.6   58.9  58.51    16.0     11
+   5  PT15M 2026-08-18 12:15:00+02:00 2026-08-18 12:00:00+02:00  58.9  60.3  58.5   60.1  59.47    41.2     33
+
+Convert to a ``polars.DataFrame`` like this:
+
+   >>> series_list.to_polars_dataframe()
+   shape: (6, 10)
+   ┌────────┬──────────────────────────┬──────────────────────────┬──────┬──────┬──────┬───────┬───────┬────────┬───────┐
+   │ period ┆ delivery                 ┆ traded_at                ┆ open ┆ high ┆ low  ┆ close ┆ vwap  ┆ volume ┆ count │
+   │ ---    ┆ ---                      ┆ ---                      ┆ ---  ┆ ---  ┆ ---  ┆ ---   ┆ ---   ┆ ---    ┆ ---   │
+   │ str    ┆ datetime[μs, CET]        ┆ datetime[μs, CET]        ┆ f64  ┆ f64  ┆ f64  ┆ f64   ┆ f64   ┆ f64    ┆ i64   │
+   ╞════════╪══════════════════════════╪══════════════════════════╪══════╪══════╪══════╪═══════╪═══════╪════════╪═══════╡
+   │ PT15M  ┆ 2026-08-18 12:00:00 CEST ┆ 2026-08-18 11:15:00 CEST ┆ 61.2 ┆ 62.0 ┆ 60.8 ┆ 61.5  ┆ 61.43 ┆ 12.4   ┆ 9     │
+   │ PT15M  ┆ 2026-08-18 12:00:00 CEST ┆ 2026-08-18 11:30:00 CEST ┆ 61.5 ┆ 63.1 ┆ 61.5 ┆ 62.9  ┆ 62.37 ┆ 20.1   ┆ 14    │
+   │ PT15M  ┆ 2026-08-18 12:00:00 CEST ┆ 2026-08-18 11:45:00 CEST ┆ 62.9 ┆ 64.0 ┆ 62.2 ┆ 63.6  ┆ 63.25 ┆ 35.7   ┆ 27    │
+   │ PT15M  ┆ 2026-08-18 12:15:00 CEST ┆ 2026-08-18 11:30:00 CEST ┆ 58.0 ┆ 58.4 ┆ 57.1 ┆ 57.6  ┆ 57.82 ┆ 8.3    ┆ 6     │
+   │ PT15M  ┆ 2026-08-18 12:15:00 CEST ┆ 2026-08-18 11:45:00 CEST ┆ 57.6 ┆ 59.2 ┆ 57.6 ┆ 58.9  ┆ 58.51 ┆ 16.0   ┆ 11    │
+   │ PT15M  ┆ 2026-08-18 12:15:00 CEST ┆ 2026-08-18 12:00:00 CEST ┆ 58.9 ┆ 60.3 ┆ 58.5 ┆ 60.1  ┆ 59.47 ┆ 41.2   ┆ 33    │
+   └────────┴──────────────────────────┴──────────────────────────┴──────┴──────┴──────┴───────┴───────┴────────┴───────┘
+
+Use ``to_pd_df()`` and ``to_pl_df()`` as shorthands. A contract without
+trades has no rows in the data frame.
+
 Convert trade OHLC data to time series
 --------------------------------------
 
@@ -229,8 +334,24 @@ contract it was extracted from in its ``trade_contract`` attribute, so the
 result converts cleanly to a ``pandas.DataFrame`` with one column per
 contract.
 
-It takes the same contract filters and aggregation options as ``load``, plus
-two of its own:
+It takes the same contract filters and aggregation options as ``load``, but
+two of them work differently:
+
+``frequency``
+   Buckets are aligned to the frequency itself, such as full hours for
+   ``PT1H``, and not backwards from each contract's delivery. This puts the
+   series for all contracts on the same time grid, so they line up in a data
+   frame.
+
+``unit``
+   Converts the extracted field. Price fields (``open``, ``high``, ``low``,
+   ``close`` and ``vwap``) are in the curve's currency, ``volume`` is in
+   ``MWh/h`` and ``count`` has no unit. Price fields convert to other
+   currencies and ``volume`` to other power units, such as ``MW``. ``count``
+   cannot be converted. Converting a field to a unit it is not compatible
+   with, such as ``volume`` to ``NOK``, fails with a validation error.
+
+It also has two options of its own:
 
 ``field``
    Required. The field to extract: a
@@ -246,7 +367,7 @@ two of its own:
 Like in ``load``, ``begin`` and ``end`` only select contracts by delivery.
 Each time series runs from the first to the last bucket with trades for its
 contract, so the series in the list usually cover different trading-time
-intervals. A contract without trades gives an empty time series.
+intervals. Contracts without trades are left out of the list.
 
 .. code-block:: python
 

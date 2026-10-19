@@ -246,6 +246,24 @@ class TradesAPITest(unittest.TestCase):
                 aggregate_by_contract=True,
             )
 
+        # Aggregation frequency must be between PT1M and PT1H
+        for frequency in (Frequency.P1D, "P1D", Frequency.NONE):
+            with self.assertRaises(ValidationError):
+                api.ohlc.load(
+                    self.curve,
+                    begin="2026-08-18",
+                    end="2026-08-19",
+                    frequency=frequency,
+                )
+            with self.assertRaises(ValidationError):
+                api.ohlc.load_as_timeseries(
+                    self.curve,
+                    field="vwap",
+                    begin="2026-08-18",
+                    end="2026-08-19",
+                    frequency=frequency,
+                )
+
         # Delivery periods must be PT15M, PT30M or PT1H
         with self.assertRaises(ValidationError):
             api.contracts(

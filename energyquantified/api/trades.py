@@ -12,6 +12,14 @@ from .base import BaseAPI
 
 CURVE_TYPES = (CurveType.TRADES,)
 TRADE_PERIODS = (Frequency.PT15M, Frequency.PT30M, Frequency.PT1H)
+TRADE_FREQUENCIES = (
+    Frequency.PT1M,
+    Frequency.PT5M,
+    Frequency.PT10M,
+    Frequency.PT15M,
+    Frequency.PT30M,
+    Frequency.PT1H,
+)
 
 MIN_LEAD_TIME = timedelta(0)
 MAX_LEAD_TIME = timedelta(hours=36)
@@ -167,10 +175,10 @@ class TradesOhlcAPI(_BaseTradesAPI):
         :type periods: Frequency, str, list, optional
         :param exclude_periods: Exclude contracts with these delivery periods
         :type exclude_periods: Frequency, str, list, optional
-        :param frequency: Aggregate the trade data into coarser buckets.\
-            Buckets are aligned backwards from each contract's delivery minus\
-            ``min_lead_time``. It cannot be combined with\
-            ``aggregate_by_contract``.
+        :param frequency: Aggregate the trade data into coarser buckets,\
+            between ``PT1M`` and ``PT1H``. Buckets are aligned backwards from\
+            each contract's delivery minus ``min_lead_time``. It cannot be\
+            combined with ``aggregate_by_contract``.
         :type frequency: Frequency, str, optional
         :param aggregate_by_contract: Set to True to combine all trade data\
             for each contract into one OHLC value, defaults to False
@@ -234,7 +242,8 @@ class TradesOhlcAPI(_BaseTradesAPI):
 
         ``begin`` and ``end`` only bound the delivery interval used to find
         contracts. Each returned time series runs from the first to the last
-        bucket with trades for its contract.
+        bucket with trades for its contract. Contracts without trades are
+        left out.
 
         This operation works for curves with ``curve_type = TRADES`` only.
 
@@ -259,8 +268,11 @@ class TradesOhlcAPI(_BaseTradesAPI):
         :type periods: Frequency, str, list, optional
         :param exclude_periods: Exclude contracts with these delivery periods
         :type exclude_periods: Frequency, str, list, optional
-        :param frequency: Aggregate the trade data into coarser buckets. It\
-            cannot be combined with ``aggregate_by_contract``.
+        :param frequency: Aggregate the trade data into coarser buckets,\
+            between ``PT1M`` and ``PT1H``. Unlike in :py:meth:`load`, buckets\
+            are aligned to the frequency (for instance full hours for\
+            ``PT1H``), not to each contract's delivery. It cannot be combined\
+            with ``aggregate_by_contract``.
         :type frequency: Frequency, str, optional
         :param aggregate_by_contract: Set to True to combine all trade data\
             for each contract into one OHLC value, defaults to False
@@ -276,10 +288,13 @@ class TradesOhlcAPI(_BaseTradesAPI):
             nothing, ``fill-holes`` and ``forward-fill`` both repeat the\
             previous value. Defaults to ``no-fill``.
         :type fill: str, optional
-        :param unit: Convert the price fields to another unit, defaults to\
-            the curve's unit
+        :param unit: Convert the field to another unit. Without it, price\
+            fields (open, high, low, close, and vwap) are in the curve's\
+            currency, ``volume`` is in ``MWh/h``, and ``count`` has no unit.\
+            Price fields convert to other currencies, ``volume`` to other\
+            power units (such as ``MW``), and ``count`` cannot be converted.
         :type unit: str, optional
-        :return: A list of time series, one per contract
+        :return: A list of time series, one per contract with trades
         :rtype: :py:class:`energyquantified.data.TimeseriesList`
         """
         safe_curve = self._urlencode_curve_name(curve, curve_types=CURVE_TYPES)
@@ -320,7 +335,9 @@ class TradesOhlcAPI(_BaseTradesAPI):
                 ),
                 parameter="frequency",
             )
-        self._add_frequency(params, "frequency", frequency)
+        self._add_frequency(
+            params, "frequency", frequency, allowed_values=TRADE_FREQUENCIES
+        )
         self._add_bool(
             params,
             "aggregate-by-contract",
