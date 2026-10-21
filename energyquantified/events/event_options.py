@@ -110,7 +110,7 @@ class _BaseCurveFilter:
         :rtype: :py:class:`energyquantified.events.CurveNameFilter`,\
             :py:class:`energyquantified.events.CurveAttributeFilter`
         """
-        new_event_types = set()
+        new_event_types = []
         if not isinstance(event_types, (list, tuple, set)):
             event_types = [event_types]
         for event_type in event_types:
@@ -126,8 +126,9 @@ class _BaseCurveFilter:
                 raise ValueError(
                     f"EventType: {event_type} not valid for curve filters"
                 )
-            new_event_types.add(event_type)
-        self._event_types = list(new_event_types)
+            new_event_types.append(event_type)
+        # Store as list (without duplicates, keeps order)
+        self._event_types = list(dict.fromkeys(new_event_types))
         return self
 
     def has_tags(self):
@@ -148,14 +149,15 @@ class _BaseCurveFilter:
         :rtype: :py:class:`energyquantified.events.CurveNameFilter`,\
             :py:class:`energyquantified.events.CurveAttributeFilter`
         """
-        new_tags = set()
+        new_tags = []
         if not isinstance(tags, (list, tuple, set)):
             tags = [tags]
         for tag in tags:
             if not isinstance(tag, str):
                 raise ValueError(f"'{tag}' is not type 'str'")
-            new_tags.add(tag)
-        self._tags = list(new_tags)
+            new_tags.append(tag)
+        # Store as list (without duplicates, keeps order)
+        self._tags = list(dict.fromkeys(new_tags))
         return self
 
     def has_exclude_tags(self):
@@ -176,14 +178,15 @@ class _BaseCurveFilter:
         :rtype: :py:class:`energyquantified.events.CurveNameFilter`,\
             :py:class:`energyquantified.events.CurveAttributeFilter`
         """
-        new_exclude_tags = set()
+        new_exclude_tags = []
         if not isinstance(exclude_tags, (list, tuple, set)):
             exclude_tags = [exclude_tags]
         for tag in exclude_tags:
             if not isinstance(tag, str):
                 raise ValueError(f"'{tag}' is not type 'str'")
-            new_exclude_tags.add(tag)
-        self._exclude_tags = list(new_exclude_tags)
+            new_exclude_tags.append(tag)
+        # Store as list (without duplicates, keeps order)
+        self._exclude_tags = list(dict.fromkeys(new_exclude_tags))
         return self
 
     def to_json(self):
@@ -341,7 +344,7 @@ class CurveNameFilter(_BaseCurveFilter):
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.CurveNameFilter`
         """
-        new_curves = set()
+        new_curves = []
         if not isinstance(curves, (list, tuple, set)):
             curves = [curves]
         for curve in curves:
@@ -353,8 +356,9 @@ class CurveNameFilter(_BaseCurveFilter):
                 raise ValueError(
                     f"curve: '{curve}' is not type 'str' or 'Curve'"
                 )
-            new_curves.add(curve)
-        self._curves = list(new_curves)
+            new_curves.append(curve)
+        # Store as list (without duplicates, keeps order)
+        self._curves = list(dict.fromkeys(new_curves))
         return self
 
     def to_json(self):
@@ -558,7 +562,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
-        new_areas = set()
+        new_areas = []
         if not isinstance(areas, (list, tuple, set)):
             areas = [areas]
         for area in areas:
@@ -569,8 +573,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
                 area = Area.by_tag(area)
             if not isinstance(area, Area):
                 raise ValueError(f"'{area}' must be type Area or string")
-            new_areas.add(area)
-        self._areas = list(new_areas)
+            new_areas.append(area)
+        # Store as list (without duplicates, keeps order)
+        self._areas = list(dict.fromkeys(new_areas))
         return self
 
     def has_data_types(self):
@@ -590,7 +595,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
-        new_data_types = set()
+        new_data_types = []
         if not isinstance(data_types, (list, tuple, set)):
             data_types = [data_types]
         for data_type in data_types:
@@ -603,8 +608,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
                 raise ValueError(
                     f"'{data_type}' must be type DataType or string"
                 )
-            new_data_types.add(data_type)
-        self._data_types = list(new_data_types)
+            new_data_types.append(data_type)
+        # Store as list (without duplicates, keeps order)
+        self._data_types = list(dict.fromkeys(new_data_types))
         return self
 
     def has_commodities(self):
@@ -629,8 +635,8 @@ class CurveAttributeFilter(_BaseCurveFilter):
             raise ValueError(
                 "commodities must be a str or a list/tuple/set of strings"
             )
-        # Store as list (without duplicates)
-        self._commodities = list(set(commodities))
+        # Store as list (without duplicates, keeps order)
+        self._commodities = list(dict.fromkeys(commodities))
         return self
 
     def has_categories(self):
@@ -655,8 +661,8 @@ class CurveAttributeFilter(_BaseCurveFilter):
             raise ValueError(
                 "categories must be a str or a list/tuple/set of string"
             )
-        # Store as list (without duplicates)
-        self._categories = list(set(categories))
+        # Store as list (without duplicates, keeps order)
+        self._categories = list(dict.fromkeys(categories))
         return self
 
     def has_exact_categories(self):
@@ -682,8 +688,8 @@ class CurveAttributeFilter(_BaseCurveFilter):
             raise ValueError(
                 "exact_categories must be a str or a list/tuple/set of strings"
             )
-        # Store as list (without duplicates)
-        self._exact_categories = list(set(exact_categories))
+        # Store as list (without duplicates, keeps order)
+        self._exact_categories = list(dict.fromkeys(exact_categories))
         return self
 
     def has_frequencies(self):
@@ -704,7 +710,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
-        new_frequencies = set()
+        new_frequencies = []
         if not isinstance(frequencies, (list, tuple, set)):
             frequencies = [frequencies]
         for frequency in frequencies:
@@ -717,8 +723,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
                 raise ValueError(
                     f"'{frequency}' must be type Frequency or string"
                 )
-            new_frequencies.add(frequency)
-        self._frequencies = list(new_frequencies)
+            new_frequencies.append(frequency)
+        # Store as list (without duplicates, keeps order)
+        self._frequencies = list(dict.fromkeys(new_frequencies))
         return self
 
     def has_units(self):
@@ -743,8 +750,8 @@ class CurveAttributeFilter(_BaseCurveFilter):
             raise ValueError(
                 "units must be a str or a list/tuple/set of strings"
             )
-        # Store as list (without duplicates)
-        self._units = list(set(units))
+        # Store as list (without duplicates, keeps order)
+        self._units = list(dict.fromkeys(units))
         return self
 
     def has_curve_types(self):
@@ -765,7 +772,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         :return: The instance this method was invoked upon
         :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
-        new_curve_types = set()
+        new_curve_types = []
         if not isinstance(curve_types, (list, tuple, set)):
             curve_types = [curve_types]
         for curve_type in curve_types:
@@ -778,8 +785,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
                 raise ValueError(
                     f"'{curve_type}' must be type CurveType or string"
                 )
-            new_curve_types.add(curve_type)
-        self._curve_types = list(new_curve_types)
+            new_curve_types.append(curve_type)
+        # Store as list (without duplicates, keeps order)
+        self._curve_types = list(dict.fromkeys(new_curve_types))
         return self
 
     def has_sources(self):
@@ -814,9 +822,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
                 "sources must be a str, None or a list/tuple/set of strings "
                 "and None"
             )
-        # Store as list (without duplicates), where None is stored as "null"
-        # (matches curves without a source)
-        self._sources = list(set(
+        # Store as list (without duplicates, keeps order), where None is
+        # stored as "null" (matches curves without a source)
+        self._sources = list(dict.fromkeys(
             "null" if source is None else source for source in sources
         ))
         return self
