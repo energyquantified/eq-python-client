@@ -429,7 +429,8 @@ attributes.
       not affected by this filter.
 
     * ``areas``: Filter by :py:class:`Area <energyquantified.metadata.Area>`.
-      For curves with two areas (e.g., exchange curves), both areas are matched.
+      For curves with two areas (e.g., exchange curves), a curve matches if
+      either of its areas is in the filter.
 
     * ``data_types``: Filter by
       :py:class:`DataType <energyquantified.metadata.DataType>`.
