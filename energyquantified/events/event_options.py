@@ -2,8 +2,9 @@ import json
 from datetime import datetime, date
 from dateutil.parser import isoparse
 
-from energyquantified.metadata.curve import Curve, DataType
+from energyquantified.metadata.curve import Curve, CurveType, DataType
 from energyquantified.metadata.area import Area
+from energyquantified.time.frequency import Frequency
 from .event_type import EventType
 
 class _BaseCurveFilter:
@@ -428,6 +429,20 @@ class CurveAttributeFilter(_BaseCurveFilter):
         (e.g., "Wind Power"). The order matter. Ignored if None, defaults\
             to None.
     :type exact_categories: str, list[str], optional
+    :param frequencies: Filter curves by frequency. Ignored if None, defaults\
+        to None.
+    :type frequencies: Frequency, str, list[Frequency, str], optional
+    :param units: Filter by units (e.g., "MWh/h"), case-sensitive. Ignored if\
+        None, defaults to None.
+    :type units: str, list[str], optional
+    :param curve_types: Filter curves by curve type. Ignored if None, defaults\
+        to None.
+    :type curve_types: CurveType, str, list[CurveType, str], optional
+    :param sources: Sources (e.g., "NordPool"), case-sensitive. Filter for\
+        curves without a source with [None] (i.e., None in a list).\
+        Alternatively, the string 'null' can also be used to filter curves\
+        without a source. Ignored if None, defaults to None.
+    :type sources: str, list[str, None], optional
     """
     def __init__(
             self,
@@ -441,6 +456,10 @@ class CurveAttributeFilter(_BaseCurveFilter):
             commodities=None,
             categories=None,
             exact_categories=None,
+            frequencies=None,
+            units=None,
+            curve_types=None,
+            sources=None,
     ):
         super().__init__(
             begin=begin,
@@ -454,6 +473,10 @@ class CurveAttributeFilter(_BaseCurveFilter):
         self._commodities = None
         self._categories = None
         self._exact_categories = None
+        self._frequencies = None
+        self._units = None
+        self._curve_types = None
+        self._sources = None
         if areas:
             self.set_areas(areas)
         if data_types:
@@ -464,6 +487,14 @@ class CurveAttributeFilter(_BaseCurveFilter):
             self.set_categories(categories)
         if exact_categories:
             self.set_exact_categories(exact_categories)
+        if frequencies:
+            self.set_frequencies(frequencies)
+        if units:
+            self.set_units(units)
+        if curve_types:
+            self.set_curve_types(curve_types)
+        if sources:
+            self.set_sources(sources)
 
     def __str__(self):
         """
@@ -493,6 +524,14 @@ class CurveAttributeFilter(_BaseCurveFilter):
             str_list.append(f"categories={self._categories}")
         if self.has_exact_categories():
             str_list.append(f"exact_categories={self._exact_categories}")
+        if self.has_frequencies():
+            str_list.append(f"frequencies={self._frequencies}")
+        if self.has_units():
+            str_list.append(f"units={self._units}")
+        if self.has_curve_types():
+            str_list.append(f"curve_types={self._curve_types}")
+        if self.has_sources():
+            str_list.append(f"sources={self._sources}")
         return (
             f"<CurveAttributeFilter: "
             f"{', '.join(str_list)}"
@@ -650,6 +689,139 @@ class CurveAttributeFilter(_BaseCurveFilter):
         self._exact_categories = list(exact_categories)
         return self
 
+    def has_frequencies(self):
+        if not isinstance(self._frequencies, list):
+            return False
+        return len(self._frequencies) > 0
+
+    def set_frequencies(self, frequencies):
+        """
+        Set one or more frequencies. Limit events to events having a curve
+        with a matching Frequency.
+
+        :param frequencies: The Frequencies (optionally by tag) to receive\
+            events for
+        :type frequencies: Frequency, str, list[Frequency, str]
+        :raises ValueError: Invalid arg type
+        :raises ValueError: Tag is not a valid Frequency tag
+        :return: The instance this method was invoked upon
+        :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
+        """
+        new_frequencies = set()
+        if not isinstance(frequencies, (list, tuple, set)):
+            frequencies = [frequencies]
+        for frequency in frequencies:
+            # Get Frequency by tag if string
+            if isinstance(frequency, str):
+                if not Frequency.is_valid_tag(frequency):
+                    raise ValueError(f"Frequency not found for tag: {frequency}")
+                frequency = Frequency.by_tag(frequency)
+            if not isinstance(frequency, Frequency):
+                raise ValueError(
+                    f"'{frequency}' must be type Frequency or string"
+                )
+            new_frequencies.add(frequency)
+        self._frequencies = list(new_frequencies)
+        return self
+
+    def has_units(self):
+        if not isinstance(self._units, list):
+            return False
+        return len(self._units) > 0
+
+    def set_units(self, units):
+        """
+        Set one or more units (e.g., "MWh/h"). Limit events to those having a
+        curve with a matching unit. Units are case-sensitive.
+
+        :param units: The units to filter for
+        :type units: str, list[str]
+        :raises ValueError: Invalid arg type
+        :return: The instance this method was invoked upon
+        :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
+        """
+        if not isinstance(units, (list, tuple, set)):
+            # Set to remove duplicates
+            units = set([units])
+        if not all(isinstance(unit, str) for unit in units):
+            raise ValueError(
+                "units must be a str or a list/tuple/set of strings"
+            )
+        # Store as list (without duplicates)
+        self._units = list(set(units))
+        return self
+
+    def has_curve_types(self):
+        if not isinstance(self._curve_types, list):
+            return False
+        return len(self._curve_types) > 0
+
+    def set_curve_types(self, curve_types):
+        """
+        Set one or more CurveTypes. Limit events to events having a curve
+        with a matching CurveType.
+
+        :param curve_types: The CurveTypes (optionally by tag) to receive\
+            events for
+        :type curve_types: CurveType, str, list[CurveType, str]
+        :raises ValueError: Invalid arg type
+        :raises ValueError: Tag is not a valid CurveType tag
+        :return: The instance this method was invoked upon
+        :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
+        """
+        new_curve_types = set()
+        if not isinstance(curve_types, (list, tuple, set)):
+            curve_types = [curve_types]
+        for curve_type in curve_types:
+            # Get CurveType by tag if string
+            if isinstance(curve_type, str):
+                if not CurveType.is_valid_tag(curve_type):
+                    raise ValueError(f"CurveType not found for tag: {curve_type}")
+                curve_type = CurveType.by_tag(curve_type)
+            if not isinstance(curve_type, CurveType):
+                raise ValueError(
+                    f"'{curve_type}' must be type CurveType or string"
+                )
+            new_curve_types.add(curve_type)
+        self._curve_types = list(new_curve_types)
+        return self
+
+    def has_sources(self):
+        if not isinstance(self._sources, list):
+            return False
+        return len(self._sources) > 0
+
+    def set_sources(self, sources):
+        """
+        Set one or more sources (e.g., "NordPool"). Limit events to those
+        having a curve with a matching source. Sources are case-sensitive.
+        Filter for curves without a source with [None] (i.e., None in a
+        list), or the string 'null'.
+
+        :param sources: The sources to filter for
+        :type sources: str, list[str, None]
+        :raises ValueError: Invalid arg type
+        :return: The instance this method was invoked upon
+        :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
+        """
+        if not isinstance(sources, (list, tuple, set)):
+            # A single None is not allowed (same as in the curve search), use
+            # [None] to filter for curves without a source
+            if not isinstance(sources, str):
+                raise ValueError(
+                    "sources must be a str or a list/tuple/set of strings "
+                    "and None"
+                )
+            sources = [sources]
+        if not all(source is None or isinstance(source, str) for source in sources):
+            raise ValueError(
+                "sources must be a str, None or a list/tuple/set of strings "
+                "and None"
+            )
+        # Store as list (without duplicates)
+        self._sources = list(set(sources))
+        return self
+
     def to_json(self):
         """
         Represent the output of `to_dict` as json.
@@ -693,6 +865,33 @@ class CurveAttributeFilter(_BaseCurveFilter):
             filters["exact_categories"] = self._exact_categories
         elif include_not_set:
             filters["exact_categories"] = None
+        # Frequencies
+        if self.has_frequencies():
+            filters["frequencies"] = list(
+                frequency.tag for frequency in self._frequencies
+            )
+        elif include_not_set:
+            filters["frequencies"] = None
+        # Units
+        if self.has_units():
+            filters["units"] = self._units
+        elif include_not_set:
+            filters["units"] = None
+        # Curve types
+        if self.has_curve_types():
+            filters["curve_types"] = list(
+                curve_type.tag for curve_type in self._curve_types
+            )
+        elif include_not_set:
+            filters["curve_types"] = None
+        # Sources ("null" matches curves without a source)
+        if self.has_sources():
+            filters["sources"] = list(
+                source if source is not None else "null"
+                for source in self._sources
+            )
+        elif include_not_set:
+            filters["sources"] = None
         return filters
 
     def validate(self):
@@ -736,5 +935,33 @@ class CurveAttributeFilter(_BaseCurveFilter):
             ):
                 errors.append(
                     "All objects in 'exact_categories' must be type str"
+                )
+        if self.has_frequencies():
+            if not all(
+                isinstance(frequency, Frequency) for frequency in self._frequencies
+            ):
+                errors.append(
+                    "All objects in 'frequencies' must be type Frequency"
+                )
+        if self.has_units():
+            if not all(isinstance(unit, str) for unit in self._units):
+                errors.append(
+                    "All objects in 'units' must be type str"
+                )
+        if self.has_curve_types():
+            if not all(
+                isinstance(curve_type, CurveType)
+                for curve_type in self._curve_types
+            ):
+                errors.append(
+                    "All objects in 'curve_types' must be type CurveType"
+                )
+        if self.has_sources():
+            if not all(
+                source is None or isinstance(source, str)
+                for source in self._sources
+            ):
+                errors.append(
+                    "All objects in 'sources' must be type str or None"
                 )
         return len(errors) == 0, errors
