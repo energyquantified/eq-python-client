@@ -812,16 +812,10 @@ class CurveAttributeFilter(_BaseCurveFilter):
             # A single None is not allowed (same as in the curve search), use
             # [None] to filter for curves without a source
             if not isinstance(sources, str):
-                raise ValueError(
-                    "sources must be a str or a list/tuple/set of strings "
-                    "and None"
-                )
+                raise ValueError("sources must be a str, or a list of str/None")
             sources = [sources]
         if not all(source is None or isinstance(source, str) for source in sources):
-            raise ValueError(
-                "sources must be a str, None or a list/tuple/set of strings "
-                "and None"
-            )
+            raise ValueError("sources must be a str, or a list of str/None")
         # Store as list (without duplicates, keeps order), where None is
         # stored as "null" (matches curves without a source)
         self._sources = list(dict.fromkeys(
