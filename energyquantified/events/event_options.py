@@ -624,14 +624,13 @@ class CurveAttributeFilter(_BaseCurveFilter):
         :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         if not isinstance(commodities, (list, tuple, set)):
-            # Set to remove duplicates
-            commodities = set([commodities])
+            commodities = [commodities]
         if not all(isinstance(commodity, str) for commodity in commodities):
             raise ValueError(
                 "commodities must be a str or a list/tuple/set of strings"
             )
-        # Store as list
-        self._commodities = list(commodities)
+        # Store as list (without duplicates)
+        self._commodities = list(set(commodities))
         return self
 
     def has_categories(self):
@@ -651,14 +650,13 @@ class CurveAttributeFilter(_BaseCurveFilter):
         :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         if not isinstance(categories, (list, tuple, set)):
-            # Set to remove duplicates
-            categories = set([categories])
+            categories = [categories]
         if not all(isinstance(category, str) for category in categories):
             raise ValueError(
                 "categories must be a str or a list/tuple/set of string"
             )
-        # Store as list
-        self._categories = list(categories)
+        # Store as list (without duplicates)
+        self._categories = list(set(categories))
         return self
 
     def has_exact_categories(self):
@@ -679,14 +677,13 @@ class CurveAttributeFilter(_BaseCurveFilter):
         :rtype: CurveAttributeFilter
         """
         if not isinstance(exact_categories, (list, tuple, set)):
-            # Set to remove duplicates
-            exact_categories = set([exact_categories])
+            exact_categories = [exact_categories]
         if not all(isinstance(category, str) for category in exact_categories):
             raise ValueError(
                 "exact_categories must be a str or a list/tuple/set of strings"
             )
-        # Store as list
-        self._exact_categories = list(exact_categories)
+        # Store as list (without duplicates)
+        self._exact_categories = list(set(exact_categories))
         return self
 
     def has_frequencies(self):
