@@ -176,9 +176,7 @@ def _parse_filter_options(json):
     # Sources ("null" means curves without a source)
     sources = json.get("sources")
     if sources is not None:
-        options.set_sources([
-            None if source == "null" else source for source in sources
-        ])
+        options.set_sources(sources)
     return options
 
 def _parse_shared_options(json, options):

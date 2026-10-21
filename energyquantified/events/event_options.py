@@ -439,9 +439,9 @@ class CurveAttributeFilter(_BaseCurveFilter):
         to None.
     :type curve_types: CurveType, str, list[CurveType, str], optional
     :param sources: Sources (e.g., "NordPool"), case-sensitive. Filter for\
-        curves without a source with [None] (i.e., None in a list).\
-        Alternatively, the string 'null' can also be used to filter curves\
-        without a source. Ignored if None, defaults to None.
+        curves without a source with [None] (i.e., None in a list) or the\
+        string 'null'. None is stored as 'null'. Ignored if None, defaults\
+        to None.
     :type sources: str, list[str, None], optional
     """
     def __init__(
@@ -792,7 +792,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         Set one or more sources (e.g., "NordPool"). Limit events to those
         having a curve with a matching source. Sources are case-sensitive.
         Filter for curves without a source with [None] (i.e., None in a
-        list), or the string 'null'.
+        list) or the string 'null'. None is stored as 'null'.
 
         :param sources: The sources to filter for
         :type sources: str, list[str, None]
@@ -814,8 +814,11 @@ class CurveAttributeFilter(_BaseCurveFilter):
                 "sources must be a str, None or a list/tuple/set of strings "
                 "and None"
             )
-        # Store as list (without duplicates)
-        self._sources = list(set(sources))
+        # Store as list (without duplicates), where None is stored as "null"
+        # (matches curves without a source)
+        self._sources = list(set(
+            "null" if source is None else source for source in sources
+        ))
         return self
 
     def to_json(self):
@@ -882,10 +885,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
             filters["curve_types"] = None
         # Sources ("null" matches curves without a source)
         if self.has_sources():
-            filters["sources"] = list(
-                source if source is not None else "null"
-                for source in self._sources
-            )
+            filters["sources"] = self._sources
         elif include_not_set:
             filters["sources"] = None
         return filters
@@ -953,11 +953,8 @@ class CurveAttributeFilter(_BaseCurveFilter):
                     "All objects in 'curve_types' must be type CurveType"
                 )
         if self.has_sources():
-            if not all(
-                source is None or isinstance(source, str)
-                for source in self._sources
-            ):
+            if not all(isinstance(source, str) for source in self._sources):
                 errors.append(
-                    "All objects in 'sources' must be type str or None"
+                    "All objects in 'sources' must be type str"
                 )
         return len(errors) == 0, errors
