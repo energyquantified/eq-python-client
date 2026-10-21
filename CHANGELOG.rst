@@ -2,6 +2,17 @@ Changelog
 =========
 
 
+dev
+---
+
+**Improvements**
+
+- Added ``frequencies``, ``units``, ``curve_types`` and ``sources`` to
+  ``CurveAttributeFilter`` for the push feed, matching the filters in the
+  curve search
+- The push feed now allows up to 20 filters (previously 10)
+
+
 0.17
 ----
 
