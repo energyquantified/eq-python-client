@@ -50,7 +50,8 @@ class _MetadataAPI(BaseAPI):
         :type commodity: str, optional
         :param source: Filter by one or more sources, defaults to None (no\
             filtering). Filter for curves without a source with [None]. Filter\
-            for curves without a source or source=EEX with [None, "EEX"].
+            for curves without a source or source=EEX with [None, "EEX"].\
+            The string "null" can be used instead of None.
         :type source: str, list[str, None], optional
         :param only_subscribed: Filter on curves in your subscription only,\
             defaults to False. If set to True, only subscribed curves are\
