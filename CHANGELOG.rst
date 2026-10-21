@@ -10,7 +10,9 @@ dev
 - Added ``frequencies``, ``units``, ``curve_types`` and ``sources`` to
   ``CurveAttributeFilter`` for the push feed, matching the filters in the
   curve search
-- The push feed now allows up to 20 filters (previously 10)
+- Updated the push feed documentation: the maximum number of filters is
+  now 20 (previously 10), and the ``areas`` filter matches both areas on
+  curves with two areas (e.g., exchange curves)
 
 
 0.17
