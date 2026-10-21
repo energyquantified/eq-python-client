@@ -741,8 +741,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
         :rtype: :py:class:`energyquantified.events.CurveAttributeFilter`
         """
         if not isinstance(units, (list, tuple, set)):
-            # Set to remove duplicates
-            units = set([units])
+            units = [units]
         if not all(isinstance(unit, str) for unit in units):
             raise ValueError(
                 "units must be a str or a list/tuple/set of strings"
