@@ -216,12 +216,12 @@ class _BaseCurveFilter:
             filters["end"] = None
         # Tags
         if self.has_tags():
-            filters["tags"] = self._tags
+            filters["tags"] = list(self._tags)
         elif include_not_set:
             filters["tags"] = None
         # Exclude tags
         if self.has_exclude_tags():
-            filters["exclude_tags"] = self._exclude_tags
+            filters["exclude_tags"] = list(self._exclude_tags)
         elif include_not_set:
             filters["exclude_tags"] = None
         return filters
@@ -379,7 +379,7 @@ class CurveNameFilter(_BaseCurveFilter):
         """
         filters = self._to_dict(include_not_set=include_not_set)
         if self.has_curves():
-            filters["curve_names"] = self._curves
+            filters["curve_names"] = list(self._curves)
         elif include_not_set:
             filters["curve_names"] = None
         return filters
@@ -860,16 +860,16 @@ class CurveAttributeFilter(_BaseCurveFilter):
             filters["data_types"] = None
         # Commodities
         if self.has_commodities():
-            filters["commodities"] = self._commodities
+            filters["commodities"] = list(self._commodities)
         elif include_not_set:
             filters["commodities"] = None
         # Categories
         if self.has_categories():
-            filters["categories"] = self._categories
+            filters["categories"] = list(self._categories)
         elif include_not_set:
             filters["categories"] = None
         if self.has_exact_categories():
-            filters["exact_categories"] = self._exact_categories
+            filters["exact_categories"] = list(self._exact_categories)
         elif include_not_set:
             filters["exact_categories"] = None
         # Frequencies
@@ -881,7 +881,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
             filters["frequencies"] = None
         # Units
         if self.has_units():
-            filters["units"] = self._units
+            filters["units"] = list(self._units)
         elif include_not_set:
             filters["units"] = None
         # Curve types
@@ -893,7 +893,7 @@ class CurveAttributeFilter(_BaseCurveFilter):
             filters["curve_types"] = None
         # Sources ("null" matches curves without a source)
         if self.has_sources():
-            filters["sources"] = self._sources
+            filters["sources"] = list(self._sources)
         elif include_not_set:
             filters["sources"] = None
         return filters
