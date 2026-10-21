@@ -276,7 +276,7 @@ and ``end``.
 You can subscribe with a combination of both
 :py:class:`CurveNameFilter <energyquantified.events.CurveNameFilter>` and
 :py:class:`CurveAttributeFilter <energyquantified.events.CurveAttributeFilter>`.
-The maximum number of filters allowed is limited to ten (10). You will receive
+The maximum number of filters allowed is limited to twenty (20). You will receive
 events for curves that match **any** of your filters, (a filter matches if
 **all set variables** match the event).
 
@@ -429,6 +429,8 @@ attributes.
       not affected by this filter.
 
     * ``areas``: Filter by :py:class:`Area <energyquantified.metadata.Area>`.
+      For curves with two areas (e.g., exchange curves), a curve matches if
+      either of its areas is in the filter.
 
     * ``data_types``: Filter by
       :py:class:`DataType <energyquantified.metadata.DataType>`.
@@ -440,6 +442,18 @@ attributes.
     * ``exact_categories``: Filter by one or more exact categories. An exact
       category is a string of ordered categories separated by space (e.g.,
       ``"Wind Power Production"``).
+
+    * ``frequencies``: Filter by
+      :py:class:`Frequency <energyquantified.time.Frequency>`.
+
+    * ``units``: Filter by units (e.g., ``"MWh/h"``). Units are case-sensitive.
+
+    * ``curve_types``: Filter by
+      :py:class:`CurveType <energyquantified.metadata.CurveType>`.
+
+    * ``sources``: Filter by sources (e.g., ``"NordPool"``). Sources are
+      case-sensitive. Use ``[None]`` (``None`` in a list) or the string
+      ``"null"`` to filter for curves without a source.
 
     * ``begin``: The earliest date to look for changed values (inclusive).
 
