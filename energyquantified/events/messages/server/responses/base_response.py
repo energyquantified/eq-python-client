@@ -161,6 +161,22 @@ def _parse_filter_options(json):
     exact_categories = json.get("exact_categories")
     if exact_categories is not None:
         options.set_exact_categories(exact_categories)
+    # Frequencies
+    frequencies = json.get("frequencies")
+    if frequencies is not None:
+        options.set_frequencies(frequencies)
+    # Units
+    units = json.get("units")
+    if units is not None:
+        options.set_units(units)
+    # Curve types
+    curve_types = json.get("curve_types")
+    if curve_types is not None:
+        options.set_curve_types(curve_types)
+    # Sources ("null" means curves without a source)
+    sources = json.get("sources")
+    if sources is not None:
+        options.set_sources(sources)
     return options
 
 def _parse_shared_options(json, options):
