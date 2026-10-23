@@ -4,13 +4,13 @@ from dateutil.relativedelta import relativedelta
 
 from .helpers import (
     shift,
+    truncate_1min,
     truncate_5min,
     truncate_10min,
     truncate_15min,
     truncate_30min,
     truncate_date,
     truncate_hour,
-    truncate_minute,
     truncate_month,
     truncate_quarter,
     truncate_season,
@@ -54,7 +54,7 @@ class Frequency(enum.Enum):
     PT15M = (True, "minutes", 15, truncate_15min, "15min")
     PT10M = (True, "minutes", 10, truncate_10min, "10min")
     PT5M = (True, "minutes", 5, truncate_5min, "5min")
-    PT1M = (True, "minutes", 1, truncate_minute, "1min")
+    PT1M = (True, "minutes", 1, truncate_1min, "1min")
 
     # No fixed interval (i.e. tick data)
     NONE = (False, "microseconds", 1, lambda dt: dt, None)

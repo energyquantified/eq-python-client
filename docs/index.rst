@@ -98,9 +98,9 @@ User guide
    userguide/periods
    userguide/period-instances
    userguide/ohlc
+   userguide/srmc
    userguide/trades
    userguide/ppa
-   userguide/srmc
    userguide/pandas
    userguide/polars
    userguide/push-feed

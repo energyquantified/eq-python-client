@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.18
+dev
 ----
 
 **Improvements**
@@ -13,7 +13,7 @@ Changelog
     with filters on delivery period and time of day
   - ``eq.trades.ohlc.load()`` loads OHLC data per contract as a
     ``TradeOHLCSeriesList``. Supports aggregation to a coarser ``frequency``
-    (up to ``PT1H``) or per contract, lead-time filters and unit conversion.
+    or per contract, lead-time filters and unit conversion.
   - ``eq.trades.ohlc.load_as_timeseries()`` extracts one ``TradeOHLCField``
     per contract as a ``TimeseriesList``
   - Add ``TradeContract``, ``TradeOHLC``, ``TradeOHLCSeries`` and

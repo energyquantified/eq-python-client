@@ -67,6 +67,11 @@ Here are the different API section classes:
 
 ------
 
+.. autoclass:: energyquantified.api.SrmcAPI
+   :inherited-members:
+
+------
+
 .. autoclass:: energyquantified.api.TradesAPI
    :inherited-members:
 
@@ -78,11 +83,6 @@ Here are the different API section classes:
 ------
 
 .. autoclass:: energyquantified.api.PpaAPI
-   :inherited-members:
-
-------
-
-.. autoclass:: energyquantified.api.SrmcAPI
    :inherited-members:
 
 ------
