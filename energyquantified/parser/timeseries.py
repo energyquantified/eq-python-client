@@ -6,6 +6,7 @@ from .metadata import (
     parse_resolution,
     parse_contract
 )
+from .trades import parse_trade_contract
 from ..data import (
     Timeseries,
     TimeseriesList,
@@ -50,6 +51,13 @@ def parse_timeseries(json):
     contract = json.get("contract")
     if contract:
         contract = parse_contract(contract)
+    # Parse the trade contract
+    trade_contract = json.get("trade_contract")
+    if trade_contract:
+        trade_contract = parse_trade_contract(
+            trade_contract,
+            timezone=resolution.timezone if resolution else None
+        )
     # Parse scenario names
     scenario_names = json.get("scenario_names") or None
     # Parse unit and denominator
@@ -63,6 +71,7 @@ def parse_timeseries(json):
         resolution=resolution,
         instance=instance,
         contract=contract,
+        trade_contract=trade_contract,
         scenario_names=scenario_names,
         unit=unit,
         denominator=denominator,

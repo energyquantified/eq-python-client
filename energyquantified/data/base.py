@@ -10,6 +10,7 @@ class Series:
         resolution=None,
         instance=None,
         contract=None,
+        trade_contract=None,
         unit=None,
         denominator=None,
     ):
@@ -23,6 +24,9 @@ class Series:
         self.instance = instance
         #: The contract for OHLC operations resulting in a time series
         self.contract = contract
+        #: The delivery contract for trade operations resulting in a
+        #: time series
+        self.trade_contract = trade_contract
         #: The unit of the data
         self.unit = unit
         #: The denominator of the data
@@ -67,6 +71,8 @@ class Series:
             return self.instance.as_dataframe_column_header()
         if self.contract:
             return self.contract.as_dataframe_column_header()
+        if self.trade_contract:
+            return self.trade_contract.as_dataframe_column_header()
         return ""
 
     def has_data(self):

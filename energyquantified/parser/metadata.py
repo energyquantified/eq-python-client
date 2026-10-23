@@ -1,13 +1,27 @@
+import warnings
+
 import pytz
 from dateutil import parser
 
 from ..exceptions import ParseException
 from ..metadata import (
-    Curve, Instance, Area, DataType, CurveType, Place, PlaceType,
-    ContractPeriod, ContinuousContract, SpecificContract, OHLCField,
-    Subscription, SubscriptionAccess, SubscriptionType, SubscriptionCollectionPerm
+    Area,
+    ContinuousContract,
+    ContractPeriod,
+    Curve,
+    CurveType,
+    DataType,
+    Instance,
+    OHLCField,
+    Place,
+    PlaceType,
+    SpecificContract,
+    Subscription,
+    SubscriptionAccess,
+    SubscriptionCollectionPerm,
+    SubscriptionType,
 )
-from ..time import Frequency, Resolution, UTC, to_timezone
+from ..time import Frequency, Resolution, to_timezone
 from ..time.timezone import LOCAL_TZ
 
 
@@ -68,8 +82,40 @@ def parse_curve(json):
         data_type=data_type,
         source=source,
         commodity=commodity,
-        subscription=subscription
+        subscription=subscription,
     )
+
+
+def parse_curves_skip_invalid(json):
+    """
+    Parse a JSON list of curves into Curve objects. Curves with values
+    unknown to this client version (e.g. a new data type or frequency) are
+    skipped with a warning instead of failing the whole list.
+    """
+    return _parse_list_skip_invalid(json, parse_curve, "curve")
+
+
+def parse_places_skip_invalid(json):
+    """
+    Parse a JSON list of places into Place objects. Places with values
+    unknown to this client version (e.g. a new place type) are skipped
+    with a warning instead of failing the whole list.
+    """
+    return _parse_list_skip_invalid(json, parse_place, "place")
+
+
+def _parse_list_skip_invalid(json, parse_func, kind):
+    items = []
+    for item_json in json:
+        try:
+            items.append(parse_func(item_json))
+        except KeyError as e:
+            # Lookups of unknown tags and timezones raise KeyError
+            warnings.warn(
+                f"Skipping {kind} '{item_json.get('name')}' because it could "
+                f"not be parsed: {e!r}"
+            )
+    return items
 
 
 def parse_instance_list(json, curve=None):
@@ -105,22 +151,12 @@ def parse_instance(json, curve=None):
     # Created and modified
     created = json.get("created") or None
     if created:
-        created = to_timezone(
-            parser.isoparse(created),
-            tz=curve_timezone
-        )
+        created = to_timezone(parser.isoparse(created), tz=curve_timezone)
     modified = json.get("modified") or None
     if modified:
-        modified = to_timezone(
-            parser.isoparse(modified),
-            tz=curve_timezone
-        )
+        modified = to_timezone(parser.isoparse(modified), tz=curve_timezone)
     return Instance(
-        issued,
-        tag,
-        scenarios=scenarios,
-        created=created,
-        modified=modified
+        issued, tag, scenarios=scenarios, created=created, modified=modified
     )
 
 
@@ -144,11 +180,11 @@ def parse_place(json):
 
     children = json.get("children")
     if children:
-        children = [parse_place(p) for p in children]
+        children = parse_places_skip_invalid(children)
 
     curves = json.get("curves")
     if curves:
-        curves = [parse_curve(c) for c in curves]
+        curves = parse_curves_skip_invalid(curves)
 
     return Place(
         kind,
@@ -174,23 +210,13 @@ def parse_contract(json):
 
     if contract_type == "CONTINUOUS":
         front = json.get("front")
-        return ContinuousContract(
-            field=field,
-            period=period,
-            front=front
-        )
+        return ContinuousContract(field=field, period=period, front=front)
 
     if contract_type == "SPECIFIC":
         delivery = parser.isoparse(json.get("delivery")).date()
-        return SpecificContract(
-            field=field,
-            period=period,
-            delivery=delivery
-        )
+        return SpecificContract(field=field, period=period, delivery=delivery)
 
-    raise ParseException(
-        f"Unknown contract.type in JSON: {contract_type}"
-    )
+    raise ParseException(f"Unknown contract.type in JSON: {contract_type}")
 
 
 def parse_subscription(json):
@@ -209,15 +235,9 @@ def parse_subscription(json):
         if stype in (SubscriptionType.PACKAGE, SubscriptionType.PACKAGE_AREA)
         else None
     )
-    area = (
-        json.get("area")
-        if stype == SubscriptionType.PACKAGE_AREA
-        else None
-    )
+    area = json.get("area") if stype == SubscriptionType.PACKAGE_AREA else None
     collection = (
-        json.get("collection")
-        if stype == SubscriptionType.COLLECTION
-        else None
+        json.get("collection") if stype == SubscriptionType.COLLECTION else None
     )
     collection_perms = (
         SubscriptionCollectionPerm.by_tag(json.get("collection_perms"))
@@ -232,5 +252,5 @@ def parse_subscription(json):
         package=package,
         area=area,
         collection=collection,
-        collection_perms=collection_perms
+        collection_perms=collection_perms,
     )

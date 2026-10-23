@@ -54,6 +54,8 @@ Features
 - Forecasts- and time series data
 - Period-based data
 - OHLC data with SRMC calculations
+- Intraday trade OHLC data
+- Power purchase agreement (PPA) prices
 - Shows your subscription for each data series
 - Support for timezones, resolutions, aggregations and unit conversions
 - Easy-to-use filters for issue dates and forecast types
@@ -97,6 +99,8 @@ User guide
    userguide/period-instances
    userguide/ohlc
    userguide/srmc
+   userguide/trades
+   userguide/ppa
    userguide/pandas
    userguide/polars
    userguide/push-feed

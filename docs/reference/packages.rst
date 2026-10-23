@@ -50,6 +50,20 @@ implemented:
  * :py:class:`OHLCList <energyquantified.data.OHLCList>`: A list of OHLC data
    objects.
 
+ * :py:class:`TradeOHLCSeries <energyquantified.data.TradeOHLCSeries>`: OHLC
+   data for one intraday trade contract. Its values are
+   :py:class:`TradeOHLC <energyquantified.data.TradeOHLC>` objects and its
+   contract is a :py:class:`TradeContract <energyquantified.data.TradeContract>`.
+
+ * :py:class:`PPA <energyquantified.data.PPA>`: A data class for a single
+   power purchase agreement (PPA) price. PPA objects has a reference to:
+
+    * :py:class:`PPAProduct <energyquantified.data.PPAProduct>`: A description
+      of the agreement (technology, contract structure, delivery and duration).
+
+ * :py:class:`PPAList <energyquantified.data.PPAList>`: A list of PPA data
+   objects.
+
  * :py:class:`SRMC <energyquantified.data.SRMC>`: The server response from
    an short-run marginal cost (SRMC) calculation. It has multiple attributes,
    most are defined and used elsewhere. But it has one that is specific for
@@ -88,7 +102,7 @@ are quite many classes in ``energyquantified.metadata``:
  * :py:class:`Curve <energyquantified.metadata.Curve>`: The identifier of any
    data series on Energy Quantified. Curves have a
    :py:class:`CurveType <energyquantified.metadata.CurveType>` to define its
-   storage types (time series, instance, period-based, OHLC) and
+   storage types (time series, instance, period-based, OHLC, PPA) and
    :py:class:`DataType <energyquantified.metadata.DataType>` for its data type
    (forecast, normal, actual, etc.)
 
@@ -108,6 +122,17 @@ are quite many classes in ``energyquantified.metadata``:
     * :py:class:`ContractPeriod <energyquantified.metadata.ContractPeriod>`:
       Enumerator of contract periods for OHLC data objects. Typically week, month,
       quarter, year.
+
+ * For :py:class:`PPA <energyquantified.data.PPA>` data, these metadata classes
+   are used:
+
+    * :py:class:`Technology <energyquantified.metadata.Technology>`: Enumerator
+      of generation technologies (solar, onshore and offshore wind).
+    * :py:class:`ContractStructure <energyquantified.metadata.ContractStructure>`:
+      Enumerator of contract structures, such as yearly baseload or pay as
+      produced.
+    * :py:class:`PPADuration <energyquantified.metadata.PPADuration>`:
+      Enumerator of agreement durations in years.
 
  * These classes are used for subscription information:
 

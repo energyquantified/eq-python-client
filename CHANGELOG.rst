@@ -2,6 +2,49 @@ Changelog
 =========
 
 
+dev
+----
+
+**Improvements**
+
+- Add support for intraday trades (curve type ``TRADES``):
+
+  - ``eq.trades.contracts()`` lists the delivery contracts in an interval,
+    with filters on delivery period and time of day
+  - ``eq.trades.ohlc.load()`` loads OHLC data per contract as a
+    ``TradeOHLCSeriesList``. Supports aggregation to a coarser ``frequency``
+    or per contract, lead-time filters and unit conversion.
+  - ``eq.trades.ohlc.load_as_timeseries()`` extracts one ``TradeOHLCField``
+    per contract as a ``TimeseriesList``
+  - Add ``TradeContract``, ``TradeOHLC``, ``TradeOHLCSeries`` and
+    ``TradeOHLCSeriesList`` data classes, with conversion to pandas and
+    polars data frames
+  - Add ``Series.trade_contract`` for time series extracted from trade data
+
+- Add support for power purchase agreement (PPA) prices (curve type ``PPA``):
+
+  - ``eq.ppa.load()`` loads PPA prices for a range of quote dates
+  - ``eq.ppa.latest()`` loads PPA prices from the latest quote date
+  - Both support filters on technology, contract structure, delivery start
+    and duration, as well as unit conversion
+  - Add ``PPA``, ``PPAProduct`` and ``PPAList`` data classes, with conversion
+    to pandas and polars data frames
+  - Add ``Technology``, ``ContractStructure`` and ``PPADuration`` enums
+
+- Add ``CurveType.TRADES``, ``CurveType.PPA``, ``DataType.TRADES`` and
+  ``DataType.PPA``
+- Add the ``PT1M`` (1 minute) frequency
+- Push feed: ``CurveUpdateEvent.load_data()`` supports trade and PPA curves.
+  Events for trade curves include the modified contract in
+  ``CurveUpdateEvent.trade_contract``.
+- ``eq.metadata.curves()`` and ``eq.metadata.places()`` skip curves and places
+  that this client version cannot parse (for instance due to a new curve type
+  or data type) with a warning, instead of failing the whole request
+
+**Note:** Trade and PPA curves are only available to clients on version 0.18
+or newer.
+
+
 0.18
 ----
 
