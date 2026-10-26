@@ -41,7 +41,7 @@ dev
   that this client version cannot parse (for instance due to a new curve type
   or data type) with a warning, instead of failing the whole request
 
-**Note:** Trade and PPA curves are only available to clients on version 0.18
+**Note:** Trade and PPA curves are only available to clients on version 0.19
 or newer.
 
 
