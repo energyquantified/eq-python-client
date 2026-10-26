@@ -1,6 +1,10 @@
-from .base import BaseAPI
-from ..parser.metadata import parse_curve, parse_place
+from ..parser.metadata import (
+    parse_curve,
+    parse_curves_skip_invalid,
+    parse_places_skip_invalid,
+)
 from ..utils import Page, dict_to_str
+from .base import BaseAPI
 
 
 class _MetadataAPI(BaseAPI):
@@ -13,20 +17,21 @@ class _MetadataAPI(BaseAPI):
         self._cache = {}
 
     def curves(
-            self,
-            q=None,
-            area=None,
-            curve_type=None,
-            data_type=None,
-            category=None,
-            exact_category=None,
-            frequency=None,
-            commodity=None,
-            source=None,
-            only_subscribed=None,
-            has_place=None,
-            page=1,
-            page_size=50):
+        self,
+        q=None,
+        area=None,
+        curve_type=None,
+        data_type=None,
+        category=None,
+        exact_category=None,
+        frequency=None,
+        commodity=None,
+        source=None,
+        only_subscribed=None,
+        has_place=None,
+        page=1,
+        page_size=50,
+    ):
         """
         Search for curves. Supports paging.
 
@@ -64,7 +69,9 @@ class _MetadataAPI(BaseAPI):
         :type page: int, optional
         :param page_size: Set the page size, defaults to 50
         :type page_size: int, optional
-        :return: A page of :py:class:`energyquantified.metadata.Curve`
+        :return: A page of :py:class:`energyquantified.metadata.Curve`.\
+            Curves that cannot be parsed (e.g. a new unknown value of a\
+            field to this client version) are skipped with a warning.
         :rtype: :py:class:`energyquantified.utils.Page` (subclass of list)
         """
         # Parameters
@@ -84,6 +91,7 @@ class _MetadataAPI(BaseAPI):
         self._add_bool(params, "has-place", has_place)
         self._add_int(params, "page", page)
         self._add_int(params, "page-size", page_size)
+
         # Load function
         def _load(page=None):
             # Override page if it is set
@@ -95,11 +103,12 @@ class _MetadataAPI(BaseAPI):
                 return self._cache[cache_key]
             # Do the HTTP request, cache the result and return
             response = self._get("/metadata/curves/", params=params)
-            items_gen = (parse_curve(c) for c in response.json())
-            self._cache[cache_key] = (
-                Page._response_to_page(items_gen, response, load_func=_load)
+            items = parse_curves_skip_invalid(response.json())
+            self._cache[cache_key] = Page._response_to_page(
+                items, response, load_func=_load
             )
             return self._cache[cache_key]
+
         # Invoke load
         return _load()
 
@@ -170,14 +179,15 @@ class MetadataAPI(_MetadataAPI):
         return self._cache[CACHE_KEY]
 
     def places(
-            self,
-            q=None,
-            area=None,
-            fuel=None,
-            kind=None,
-            tree=False,
-            page=1,
-            page_size=50):
+        self,
+        q=None,
+        area=None,
+        fuel=None,
+        kind=None,
+        tree=False,
+        page=1,
+        page_size=50,
+    ):
         """
         Search for places. Supports places.
 
@@ -196,7 +206,10 @@ class MetadataAPI(_MetadataAPI):
         :type page: int, optional
         :param page_size: Set the page size, defaults to 50
         :type page_size: int, optional
-        :return: A page of :py:class:`energyquantified.metadata.Place`
+        :return: A page of :py:class:`energyquantified.metadata.Place`.\
+            Places, child places and curves that cannot be parsed (e.g. with\
+            a place type or data type unknown to this client version) are\
+            skipped with a warning.
         :rtype: :py:class:`energyquantified.utils.Page` (subclass of list)
         """
         # Parameters
@@ -208,6 +221,7 @@ class MetadataAPI(_MetadataAPI):
         self._add_bool(params, "tree", tree)
         self._add_int(params, "page", page)
         self._add_int(params, "page-size", page_size)
+
         # Load function
         def _load(page=None):
             # Override page if it is set
@@ -219,11 +233,12 @@ class MetadataAPI(_MetadataAPI):
                 return self._cache[cache_key]
             # Do the HTTP request, cache the result and return
             response = self._get("/metadata/places/", params=params)
-            items_gen = (parse_place(p) for p in response.json())
-            self._cache[cache_key] = (
-                Page._response_to_page(items_gen, response, load_func=_load)
+            items = parse_places_skip_invalid(response.json())
+            self._cache[cache_key] = Page._response_to_page(
+                items, response, load_func=_load
             )
             return self._cache[cache_key]
+
         # Invoke load
         return _load()
 

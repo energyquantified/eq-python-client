@@ -26,6 +26,20 @@ def _get_ohlc_list_class():
         _ohlc_list_class = OHLCList
     return _ohlc_list_class
 
+_ppa_list_class = None
+def _get_ppa_list_class():
+    """
+    Private utility function for lazy-loading the PPAList class.
+
+    :return: The PPAList class
+    :rtype: class
+    """
+    global _ppa_list_class
+    if not _ppa_list_class:
+        from energyquantified.data import PPAList
+        _ppa_list_class = PPAList
+    return _ppa_list_class
+
 _value_type_class = None
 def _get_value_type_class():
     """
@@ -53,3 +67,31 @@ def _get_absolute_result_class():
         from energyquantified.data import AbsoluteResult
         _absolute_result_class = AbsoluteResult
     return _absolute_result_class
+
+_trade_ohlc_series_class = None
+def _get_trade_ohlc_series_class():
+    """
+    Private utility function for lazy-loading the TradeOHLCSeries class.
+
+    :return: The TradeOHLCSeries class
+    :rtype: class
+    """
+    global _trade_ohlc_series_class
+    if not _trade_ohlc_series_class:
+        from energyquantified.data import TradeOHLCSeries
+        _trade_ohlc_series_class = TradeOHLCSeries
+    return _trade_ohlc_series_class
+
+_trade_ohlc_series_list_class = None
+def _get_trade_ohlc_series_list_class():
+    """
+    Private utility function for lazy-loading the TradeOHLCSeriesList class.
+
+    :return: The TradeOHLCSeriesList class
+    :rtype: class
+    """
+    global _trade_ohlc_series_list_class
+    if not _trade_ohlc_series_list_class:
+        from energyquantified.data import TradeOHLCSeriesList
+        _trade_ohlc_series_list_class = TradeOHLCSeriesList
+    return _trade_ohlc_series_list_class

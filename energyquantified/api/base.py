@@ -1,6 +1,6 @@
 import numbers
 import urllib
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 
 import pytz
 from requests import exceptions
@@ -14,22 +14,23 @@ from ..exceptions import (
     ValidationError,
 )
 from ..metadata import (
+    Aggregation,
     Area,
+    ContractPeriod,
+    ContractStructure,
     Curve,
     CurveType,
     DataType,
-    Aggregation,
     Filter,
-    ContractPeriod,
     OHLCField,
+    PPADuration,
+    Technology,
+    TradeOHLCField,
 )
-from ..time import (
-    Frequency,
-    timezone
-)
+from ..time import Frequency, timezone
 
 
-def _urlencode(text, safe=''):
+def _urlencode(text, safe=""):
     """
     Replace special characters in string using the %xx escape. Letters, digits,
     and the characters '_.-~' are never quoted. This function is intended for
@@ -50,7 +51,6 @@ def _urlencode(text, safe=''):
 
 
 class BaseAPI:
-
     def __init__(self, client):
         self._client = client
         self._session = client._session
@@ -67,8 +67,7 @@ class BaseAPI:
             # Parameters validation error
             json = response.json()
             raise ValidationError(
-                reason=json.get("message"),
-                parameter=json.get("parameter")
+                reason=json.get("message"), parameter=json.get("parameter")
             )
         if response.status_code == 401:
             # Authentication error
@@ -96,8 +95,7 @@ class BaseAPI:
     def _urlencode_curve_name(curve, curve_types=None):
         if curve is None:
             raise ValidationError(
-                reason="Provide a Curve or a curve name",
-                parameter="curve"
+                reason="Provide a Curve or a curve name", parameter="curve"
             )
         curve_name = None
         if isinstance(curve, str):
@@ -109,23 +107,19 @@ class BaseAPI:
                         f"Curve.curve_type must be any of {curve_types}, "
                         f"but was {curve.curve_type}"
                     ),
-                    parameter="curve"
+                    parameter="curve",
                 )
             curve_name = curve.name
         else:
             raise ValidationError(
-                reason="Provide either a string or a Curve instance",
-                parameter="curve"
+                reason="Provide either a string or a Curve instance", parameter="curve"
             )
         return _urlencode(curve_name)
 
     @staticmethod
     def _urlencode_datetime(datetime_obj, name):
         if datetime_obj is None:
-            raise ValidationError(
-                reason="Provide a date or datetime",
-                parameter=name
-            )
+            raise ValidationError(reason="Provide a date or datetime", parameter=name)
         date_string = None
         # Check for different types. IMPORTANT:
         # The isinstance(datetime) check must come before isinstance(date),
@@ -143,10 +137,7 @@ class BaseAPI:
     @staticmethod
     def _urlencode_string(text, name, transform_func=None):
         if text is None or not isinstance(text, str):
-            raise ValidationError(
-                reason="Provide a string",
-                parameter=name
-            )
+            raise ValidationError(reason="Provide a string", parameter=name)
         if transform_func:
             text = transform_func(text)
         return _urlencode(text)
@@ -154,16 +145,30 @@ class BaseAPI:
     @staticmethod
     def _urlencode_ohlc_field(ohlc_field, name):
         if ohlc_field is None:
-            raise ValidationError(
-                reason="Provide an OHLCField",
-                parameter=name
-            )
+            raise ValidationError(reason="Provide an OHLCField", parameter=name)
         if isinstance(ohlc_field, str):
             field_string = ohlc_field
         elif isinstance(ohlc_field, OHLCField):
             field_string = ohlc_field.tag
         else:
             raise ValidationError(reason="Provide an OHLCField", parameter=name)
+        return _urlencode(field_string)
+
+    @staticmethod
+    def _urlencode_trade_ohlc_field(trade_ohlc_field, name):
+        if trade_ohlc_field is None:
+            raise ValidationError(reason="Provide a TradeOHLCField", parameter=name)
+        if isinstance(trade_ohlc_field, str):
+            if not TradeOHLCField.is_valid_tag(trade_ohlc_field):
+                raise ValidationError(
+                    reason=f"Not a valid TradeOHLCField: '{trade_ohlc_field}'",
+                    parameter=name,
+                )
+            field_string = TradeOHLCField.by_tag(trade_ohlc_field).tag
+        elif isinstance(trade_ohlc_field, TradeOHLCField):
+            field_string = trade_ohlc_field.tag
+        else:
+            raise ValidationError(reason="Provide a TradeOHLCField", parameter=name)
         return _urlencode(field_string)
 
     @staticmethod
@@ -195,7 +200,7 @@ class BaseAPI:
         if isinstance(var, str):
             params[name] = var
         elif isinstance(var, time):
-            params[name] = var.isoformat(timespec='milliseconds')
+            params[name] = var.isoformat(timespec="milliseconds")
         else:
             raise ValidationError(reason="Provide a time", parameter=name)
 
@@ -209,7 +214,7 @@ class BaseAPI:
             if isinstance(var[i], str):
                 continue
             elif isinstance(var[i], time):
-                var[i] = var[i].isoformat(timespec='milliseconds')
+                var[i] = var[i].isoformat(timespec="milliseconds")
             else:
                 raise ValidationError(
                     reason="Provide a time or a list of times",
@@ -224,8 +229,7 @@ class BaseAPI:
         if isinstance(var, str):
             if allowed_values and not var in allowed_values:
                 raise ValidationError(
-                    reason=f"Allowed values are {allowed_values}",
-                    parameter=name
+                    reason=f"Allowed values are {allowed_values}", parameter=name
                 )
             params[name] = var
         else:
@@ -245,13 +249,12 @@ class BaseAPI:
                             f"All element in list must be "
                             f"strings, but found: {type(element)}"
                         ),
-                        parameter=name
+                        parameter=name,
                     )
             params[name] = list(var)
         else:
             raise ValidationError(
-                reason="Provide a string or a list of strings",
-                parameter=name
+                reason="Provide a string or a list of strings", parameter=name
             )
 
     @staticmethod
@@ -261,13 +264,11 @@ class BaseAPI:
         if isinstance(var, int):
             if min is not None and var < min:
                 raise ValidationError(
-                    reason=f"Must be higher than {min}, was {var}",
-                    parameter=name
+                    reason=f"Must be higher than {min}, was {var}", parameter=name
                 )
             if max is not None and var > max:
                 raise ValidationError(
-                    reason=f"Must be lower than {max}, was {var}",
-                    parameter=name
+                    reason=f"Must be lower than {max}, was {var}", parameter=name
                 )
             params[name] = var
         else:
@@ -280,13 +281,11 @@ class BaseAPI:
         if isinstance(var, numbers.Number):
             if min is not None and var < min:
                 raise ValidationError(
-                    reason=f"Must be higher than {min}, was {var}",
-                    parameter=name
+                    reason=f"Must be higher than {min}, was {var}", parameter=name
                 )
             if max is not None and var > max:
                 raise ValidationError(
-                    reason=f"Must be lower than {max}, was {var}",
-                    parameter=name
+                    reason=f"Must be lower than {max}, was {var}", parameter=name
                 )
             params[name] = var
         else:
@@ -297,11 +296,10 @@ class BaseAPI:
         if var is None and not required:
             return
         if isinstance(var, bool):
-            params[name] = 'true' if var else 'false'
+            params[name] = "true" if var else "false"
         else:
             raise ValidationError(
-                reason="Provide a boolean (True or False)",
-                parameter=name
+                reason="Provide a boolean (True or False)", parameter=name
             )
 
     @staticmethod
@@ -311,17 +309,13 @@ class BaseAPI:
         if isinstance(var, str):
             if not Area.is_valid_tag(var):
                 raise ValidationError(
-                    reason=f"Not a valid Area: '{var}'",
-                    parameter=name
+                    reason=f"Not a valid Area: '{var}'", parameter=name
                 )
             params[name] = var
         elif isinstance(var, Area):
             params[name] = var.tag
         else:
-            raise ValidationError(
-                reason=f"Not a valid Area: '{var}'",
-                parameter=name
-            )
+            raise ValidationError(reason=f"Not a valid Area: '{var}'", parameter=name)
 
     @staticmethod
     def _add_curve_type(params, name, var, required=False):
@@ -330,16 +324,14 @@ class BaseAPI:
         if isinstance(var, str):
             if not CurveType.is_valid_tag(var):
                 raise ValidationError(
-                    reason=f"Not a valid CurveType: '{var}'",
-                    parameter=name
+                    reason=f"Not a valid CurveType: '{var}'", parameter=name
                 )
             params[name] = var
         elif isinstance(var, CurveType):
             params[name] = var.tag
         else:
             raise ValidationError(
-                reason=f"Not a valid CurveType: '{var}'",
-                parameter=name
+                reason=f"Not a valid CurveType: '{var}'", parameter=name
             )
 
     @staticmethod
@@ -349,16 +341,14 @@ class BaseAPI:
         if isinstance(var, str):
             if not DataType.is_valid_tag(var):
                 raise ValidationError(
-                    reason=f"Not a valid DataType: '{var}'",
-                    parameter=name
+                    reason=f"Not a valid DataType: '{var}'", parameter=name
                 )
             params[name] = var
         elif isinstance(var, DataType):
             params[name] = var.tag
         else:
             raise ValidationError(
-                reason=f"Not a valid DataType: '{var}'",
-                parameter=name
+                reason=f"Not a valid DataType: '{var}'", parameter=name
             )
 
     @staticmethod
@@ -372,28 +362,97 @@ class BaseAPI:
                 params[name] = var.zone
             return
         raise ValidationError(
-            reason=f"Not a supported timezone: '{var}'",
-            parameter=name
+            reason=f"Not a supported timezone: '{var}'", parameter=name
         )
 
     @staticmethod
-    def _add_frequency(params, name, var, required=False):
+    def _add_frequency(params, name, var, allowed_values=None, required=False):
         if var is None and not required:
             return
         if isinstance(var, str):
             if not Frequency.is_valid_tag(var):
                 raise ValidationError(
-                    reason=f"Not a valid Frequency: '{var}'",
-                    parameter=name
+                    reason=f"Not a valid Frequency: '{var}'", parameter=name
                 )
-            params[name] = var
-        elif isinstance(var, Frequency):
-            params[name] = var.tag
-        else:
+            var = Frequency.by_tag(var)
+        elif not isinstance(var, Frequency):
             raise ValidationError(
-                reason=f"Not a valid Frequency: '{var}'",
-                parameter=name
+                reason=f"Not a valid Frequency: '{var}'", parameter=name
             )
+        if allowed_values and var not in allowed_values:
+            allowed = ", ".join(f.tag for f in allowed_values)
+            raise ValidationError(
+                reason=(
+                    f"Frequency '{var.tag}' is not supported. "
+                    f"Allowed values are: {allowed}"
+                ),
+                parameter=name,
+            )
+        params[name] = var.tag
+
+    @staticmethod
+    def _add_frequency_list(params, name, var, allowed_values=None, required=False):
+        if (var is None or var == []) and not required:
+            return
+        if var is None or isinstance(var, (str, Frequency)):
+            var = [var]
+        if not isinstance(var, (list, tuple, set, frozenset)):
+            raise ValidationError(
+                reason="Provide a Frequency or a list of Frequency", parameter=name
+            )
+        tags = []
+        for element in var:
+            if isinstance(element, str):
+                if not Frequency.is_valid_tag(element):
+                    raise ValidationError(
+                        reason=f"Not a valid Frequency: '{element}'", parameter=name
+                    )
+                element = Frequency.by_tag(element)
+            elif not isinstance(element, Frequency):
+                raise ValidationError(
+                    reason=f"Not a valid Frequency: '{element}'", parameter=name
+                )
+            if allowed_values and element not in allowed_values:
+                allowed = ", ".join(f.tag for f in allowed_values)
+                raise ValidationError(
+                    reason=(
+                        f"Frequency '{element.tag}' is not supported. "
+                        f"Allowed values are: {allowed}"
+                    ),
+                    parameter=name,
+                )
+            tags.append(element.tag)
+        params[name] = tags
+
+    @staticmethod
+    def _add_duration(params, name, var, required=False, min=None, max=None):
+        if var is None and not required:
+            return
+        if isinstance(var, str):
+            params[name] = var
+            return
+        if not isinstance(var, timedelta):
+            raise ValidationError(
+                reason=(
+                    "Provide a datetime.timedelta or an ISO-8601 duration "
+                    "string (such as 'PT36H')"
+                ),
+                parameter=name,
+            )
+        if min is not None and var < min:
+            raise ValidationError(
+                reason=f"Must be at least {min}, but was {var}", parameter=name
+            )
+        if max is not None and var > max:
+            raise ValidationError(
+                reason=f"Must be at most {max}, but was {var}", parameter=name
+            )
+        total_seconds = var.total_seconds()
+        if total_seconds % 60 or var.microseconds:
+            raise ValidationError(
+                reason="Must be an exact multiple of one minute", parameter=name
+            )
+        params[name] = f"PT{int(total_seconds // 60)}M"
 
     @staticmethod
     def _add_aggregation(params, name, var, required=False):
@@ -402,16 +461,14 @@ class BaseAPI:
         if isinstance(var, str):
             if not Aggregation.is_valid_tag(var):
                 raise ValidationError(
-                    reason=f"Not a valid Aggregation: '{var}'",
-                    parameter=name
+                    reason=f"Not a valid Aggregation: '{var}'", parameter=name
                 )
             params[name] = var
         elif isinstance(var, Aggregation):
             params[name] = var.tag
         else:
             raise ValidationError(
-                reason=f"Not a valid Aggregation: '{var}'",
-                parameter=name
+                reason=f"Not a valid Aggregation: '{var}'", parameter=name
             )
 
     @staticmethod
@@ -421,17 +478,13 @@ class BaseAPI:
         if isinstance(var, str):
             if not Filter.is_valid_tag(var):
                 raise ValidationError(
-                    reason=f"Not a valid Filter: '{var}'",
-                    parameter=name
+                    reason=f"Not a valid Filter: '{var}'", parameter=name
                 )
             params[name] = var
         elif isinstance(var, Filter):
             params[name] = var.tag
         else:
-            raise ValidationError(
-                reason=f"Not a valid Filter: '{var}'",
-                parameter=name
-            )
+            raise ValidationError(reason=f"Not a valid Filter: '{var}'", parameter=name)
 
     @staticmethod
     def _add_contract_period(params, name, var, required=False):
@@ -440,17 +493,83 @@ class BaseAPI:
         if isinstance(var, str):
             if not ContractPeriod.is_valid_tag(var):
                 raise ValidationError(
-                    reason=f"Not a valid ContractPeriod: '{var}'",
-                    parameter=name
+                    reason=f"Not a valid ContractPeriod: '{var}'", parameter=name
                 )
             params[name] = var
         elif isinstance(var, ContractPeriod):
             params[name] = var.tag
         else:
             raise ValidationError(
-                reason=f"Not a valid ContractPeriod: '{var}'",
-                parameter=name
+                reason=f"Not a valid ContractPeriod: '{var}'", parameter=name
             )
+
+    @staticmethod
+    def _add_tag_enum_list(params, name, var, enum_type, required=False):
+        is_empty_list = isinstance(var, (list, tuple, set, frozenset)) and not var
+        if (var is None or is_empty_list) and not required:
+            return
+        if var is None or isinstance(var, (str, enum_type)):
+            var = [var]
+        if not isinstance(var, (list, tuple, set, frozenset)):
+            raise ValidationError(
+                reason=(
+                    f"Provide a {enum_type.__name__} or a list of {enum_type.__name__}"
+                ),
+                parameter=name,
+            )
+        tags = []
+        for element in var:
+            if isinstance(element, str) and enum_type.is_valid_tag(element):
+                element = enum_type.by_tag(element)
+            if not isinstance(element, enum_type):
+                raise ValidationError(
+                    reason=f"Not a valid {enum_type.__name__}: '{element}'",
+                    parameter=name,
+                )
+            tags.append(element.tag)
+        params[name] = tags
+
+    @staticmethod
+    def _add_technology_list(params, name, var, required=False):
+        BaseAPI._add_tag_enum_list(params, name, var, Technology, required=required)
+
+    @staticmethod
+    def _add_contract_structure_list(params, name, var, required=False):
+        BaseAPI._add_tag_enum_list(
+            params, name, var, ContractStructure, required=required
+        )
+
+    @staticmethod
+    def _add_ppa_duration_list(params, name, var, required=False):
+        is_empty_list = isinstance(var, (list, tuple, set, frozenset)) and not var
+        if (var is None or is_empty_list) and not required:
+            return
+        # numbers.Integral also covers NumPy integers (e.g. numpy.int64)
+        if var is None or isinstance(var, (numbers.Integral, PPADuration)):
+            var = [var]
+        if not isinstance(var, (list, tuple, set, frozenset)):
+            raise ValidationError(
+                reason="Provide a PPADuration or a list of PPADuration", parameter=name
+            )
+        years = []
+        for element in var:
+            if (
+                isinstance(element, numbers.Integral)
+                and not isinstance(element, bool)
+                and PPADuration.is_valid_years(element)
+            ):
+                element = PPADuration.by_years(element)
+            if not isinstance(element, PPADuration):
+                allowed = ", ".join(str(d.years) for d in PPADuration)
+                raise ValidationError(
+                    reason=(
+                        f"Not a valid PPADuration: '{element}'. Allowed "
+                        f"values are: {allowed} (years)"
+                    ),
+                    parameter=name,
+                )
+            years.append(element.years)
+        params[name] = years
 
     @staticmethod
     def _add_fill(params, name, var, required=False):
@@ -458,7 +577,7 @@ class BaseAPI:
             return
         if isinstance(var, str):
             var = var.lower()
-            if var in ('no-fill', 'fill-holes', 'forward-fill'):
+            if var in ("no-fill", "fill-holes", "forward-fill"):
                 params[name] = var
                 return
         raise ValidationError(
@@ -466,7 +585,7 @@ class BaseAPI:
                 f"Not a valid fill '{var}'. Allowed values "
                 f"are: 'no-fill', 'fill-holes', 'forward-fill'"
             ),
-            parameter=name
+            parameter=name,
         )
 
     @staticmethod
@@ -485,15 +604,14 @@ class BaseAPI:
                     f"Only one of '{threshold_name}' and '{threshold_pct_name}' "
                     f"may be provided"
                 ),
-                parameter=threshold_name
+                parameter=threshold_name,
             )
         if threshold is not None:
             if isinstance(threshold, int) and threshold >= 0:
                 params[name] = threshold
             else:
                 raise ValidationError(
-                    reason="Provide a non-negative integer",
-                    parameter=threshold_name
+                    reason="Provide a non-negative integer", parameter=threshold_name
                 )
         elif threshold_pct is not None:
             if (
@@ -511,8 +629,7 @@ class BaseAPI:
             if required:
                 raise ValidationError(
                     reason=(
-                        f"Provide either '{threshold_name}' "
-                        f"or '{threshold_pct_name}'"
+                        f"Provide either '{threshold_name}' or '{threshold_pct_name}'"
                     ),
                     parameter=threshold_name,
                 )

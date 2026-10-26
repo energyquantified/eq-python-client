@@ -6,15 +6,15 @@ from .utils import is_tz_aware
 
 
 def shift(
-        datetime_obj,
-        years=0,
-        months=0,
-        weeks=0,
-        days=0,
-        hours=0,
-        minutes=0,
-        seconds=0,
-        millis=0,
+    datetime_obj,
+    years=0,
+    months=0,
+    weeks=0,
+    days=0,
+    hours=0,
+    minutes=0,
+    seconds=0,
+    millis=0,
 ):
     """
     Shift a date by a certain amount of time, using a timedelta
@@ -65,7 +65,7 @@ def truncate_second(datetime_obj):
     return d
 
 
-def truncate_minute(datetime_obj):
+def truncate_1min(datetime_obj):
     """
     Truncates and returns new a datetime to minutes.
 
@@ -189,8 +189,7 @@ def truncate_month(datetime_obj):
     """
     if isinstance(datetime_obj, datetime):
         # Datetime
-        d = datetime_obj.replace(microsecond=0, second=0, minute=0, hour=0,
-                                 day=1)
+        d = datetime_obj.replace(microsecond=0, second=0, minute=0, hour=0, day=1)
         if is_tz_aware(datetime_obj):
             return datetime_obj.tzinfo.normalize(d)
         return d
@@ -243,8 +242,7 @@ def truncate_season(datetime_obj):
     if isinstance(datetime_obj, datetime):
         # Datetime
         d = datetime_obj.replace(
-            microsecond=0, second=0, minute=0, hour=0, day=1, month=new_month,
-            year=year
+            microsecond=0, second=0, minute=0, hour=0, day=1, month=new_month, year=year
         )
         if is_tz_aware(datetime_obj):
             return datetime_obj.tzinfo.normalize(d)

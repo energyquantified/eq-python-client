@@ -1,16 +1,18 @@
 from .api import (
+    EventsAPI,
     InstancesAPI,
     MetadataAPI,
-    RealtoMetadataAPI,
-    TimeseriesAPI,
-    PeriodsAPI,
-    PeriodInstancesAPI,
     OhlcAPI,
+    PeriodInstancesAPI,
+    PeriodsAPI,
+    PpaAPI,
+    RealtoMetadataAPI,
     SrmcAPI,
+    TimeseriesAPI,
+    TradesAPI,
     UserAPI,
-    EventsAPI,
 )
-from .exceptions import UnauthorizedError, InitializationError
+from .exceptions import InitializationError, UnauthorizedError
 from .http import Session
 
 # Defaults
@@ -55,14 +57,14 @@ class EnergyQuantified:
     """
 
     def __init__(
-            self,
-            api_key=None,
-            api_key_file=None,
-            ssl_verify=True,
-            timeout=20.0,
-            http_delay=0.0667,
-            api_url=BASE_PATH,
-            proxies=None,
+        self,
+        api_key=None,
+        api_key_file=None,
+        ssl_verify=True,
+        timeout=20.0,
+        http_delay=0.0667,
+        api_url=BASE_PATH,
+        proxies=None,
     ):
         # Simple validations
         assert api_key or api_key_file, "api_key is missing"
@@ -77,20 +79,19 @@ class EnergyQuantified:
                 "must be set at the same time, but both were given"
             )
         assert timeout >= 0, "timeout must be larger than 0s"
-        assert http_delay >= 0.05, (
-            "http_delay must be 0.05s or slower (20 req/s)"
-        )
+        assert http_delay >= 0.05, "http_delay must be 0.05s or slower (20 req/s)"
         assert api_url, "api_url is missing"
-        assert api_url.startswith(("http", "https")), f"api_url must start with 'http' or 'https'"
-        assert proxies is None or isinstance(proxies, dict), "proxies must be None or a dict"
+        assert api_url.startswith(("http", "https")), (
+            f"api_url must start with 'http' or 'https'"
+        )
+        assert proxies is None or isinstance(proxies, dict), (
+            "proxies must be None or a dict"
+        )
         # Attributes
         self._api_key = _find_api_key(api_key, api_key_file)
         self._api_url = api_url
         # Create websocket url (http -> ws, https -> wss)
-        events_ws_url = "".join([
-            self._api_url.replace('http', 'ws', 1),
-            "/events/"
-        ])
+        events_ws_url = "".join([self._api_url.replace("http", "ws", 1), "/events/"])
         # HTTP client
         self._session = Session(
             timeout=timeout,
@@ -121,6 +122,13 @@ class EnergyQuantified:
         #: See :py:class:`energyquantified.api.OhlcAPI`. For loading
         #: OHLC data in various ways
         self.ohlc = OhlcAPI(self)
+        #: See :py:class:`energyquantified.api.TradesAPI`. For listing trade
+        #: contracts. Intraday trade OHLC data is loaded through
+        #: ``eq.trades.ohlc.*``.
+        self.trades = TradesAPI(self)
+        #: See :py:class:`energyquantified.api.PpaAPI`. For loading power
+        #: purchase agreement (PPA) prices.
+        self.ppa = PpaAPI(self)
         #: See :py:class:`energyquantified.api.SrmcAPI`. For loading and
         #: calculating short-run marginal costs (SRMC) from OHLC data.
         self.srmc = SrmcAPI(self)
@@ -192,29 +200,29 @@ class RealtoConnection:
     """
 
     #: The base URL for the German data API on Realto.
-    API_URL_GERMANY = 'https://api.realto.io/energyquantified-germany'
+    API_URL_GERMANY = "https://api.realto.io/energyquantified-germany"
 
     #: The base URL for the French data API on Realto.
-    API_URL_FRANCE = 'https://api.realto.io/energyquantified-france'
+    API_URL_FRANCE = "https://api.realto.io/energyquantified-france"
 
     #: The base URL for the Netherlands data API on Realto.
-    API_URL_NETHERLANDS = 'https://api.realto.io/energyquantified-netherlands'
+    API_URL_NETHERLANDS = "https://api.realto.io/energyquantified-netherlands"
 
     #: The base URL for the UK data API on Realto.
-    API_URL_UK = 'https://api.realto.io/energyquantified-greatbritain'
+    API_URL_UK = "https://api.realto.io/energyquantified-greatbritain"
 
     #: The base URL for the Belgium data API on Realto.
-    API_URL_BELGIUM = 'https://api.realto.io/energyquantified-belgium'
+    API_URL_BELGIUM = "https://api.realto.io/energyquantified-belgium"
 
     def __init__(
-            self,
-            api_url=None,
-            api_key=None,
-            api_key_file=None,
-            ssl_verify=True,
-            timeout=20.0,
-            http_delay=0.1,
-            proxies=None,
+        self,
+        api_url=None,
+        api_key=None,
+        api_key_file=None,
+        ssl_verify=True,
+        timeout=20.0,
+        http_delay=0.1,
+        proxies=None,
     ):
         # Simple validations
         assert api_url, "api_url is missing"
@@ -230,10 +238,10 @@ class RealtoConnection:
                 "must be set at the same time, but both were given"
             )
         assert timeout >= 0, "timeout must be larger than 0s"
-        assert http_delay >= 0.05, (
-            "http_delay must be 0.05s or slower (20 req/s)"
+        assert http_delay >= 0.05, "http_delay must be 0.05s or slower (20 req/s)"
+        assert proxies is None or isinstance(proxies, dict), (
+            "proxies must be None or a dict"
         )
-        assert proxies is None or isinstance(proxies, dict), "proxies must be None or a dict"
         # Attributes
         self._api_url = api_url
         self._api_key = _find_api_key(api_key, api_key_file)
@@ -290,7 +298,7 @@ def _find_api_key(api_key, api_key_file):
         return api_key
     # Open the file and read the key
     try:
-        with open(api_key_file, mode='r', encoding='utf-8') as f:
+        with open(api_key_file, mode="r", encoding="utf-8") as f:
             api_key = f.read().strip()
             if not api_key:
                 raise InitializationError(
@@ -300,6 +308,5 @@ def _find_api_key(api_key, api_key_file):
             return api_key
     except IOError as e:
         raise InitializationError(
-            f"Could not read API key from file '{api_key_file}'. "
-            f"Reason: {e}"
+            f"Could not read API key from file '{api_key_file}'. Reason: {e}"
         ) from e

@@ -1,11 +1,13 @@
 from .classes import (
     _get_absolute_result_class,
     _get_ohlc_list_class,
+    _get_ppa_list_class,
     _get_timeseries_class,
+    _get_trade_ohlc_series_class,
+    _get_trade_ohlc_series_list_class,
     _get_value_type_class,
 )
 from .deprecation import deprecated
-
 
 pd = None
 _is_pandas_installed = None
@@ -62,12 +64,12 @@ def timeseries_to_pandas_dataframe(timeseries, name=None, single_level_header=Fa
     """
     # Checks
     assert_pandas_installed()
-    assert isinstance(
-        timeseries, _get_timeseries_class()
-    ), "timeseries must be an instance of energyquantified.data.Timeseries"
-    assert isinstance(
-        name, (type(None), str)
-    ), f"parameter name must be string or None, was {type(name)}"
+    assert isinstance(timeseries, _get_timeseries_class()), (
+        "timeseries must be an instance of energyquantified.data.Timeseries"
+    )
+    assert isinstance(name, (type(None), str)), (
+        f"parameter name must be string or None, was {type(name)}"
+    )
     if name is None:
         name = timeseries.name
         include_instance = True
@@ -101,7 +103,7 @@ def timeseries_to_pandas_dataframe(timeseries, name=None, single_level_header=Fa
             return _timeseries_to_dataframe_mean_and_scenarios(timeseries, name)
     # Unknown value type for time series
     raise ValueError(
-        "Unknown ValueType: timeseries.value_type = " f"{timeseries.value_type()}"
+        f"Unknown ValueType: timeseries.value_type = {timeseries.value_type()}"
     )
 
 
@@ -393,28 +395,66 @@ def ohlc_list_to_pandas_dataframe(ohlc_list):
     """
     # Checks
     assert_pandas_installed()
-    assert isinstance(
-        ohlc_list, _get_ohlc_list_class()
-    ), "ohlc_list must be an instance of energyquantified.data.OHLCList"
+    assert isinstance(ohlc_list, _get_ohlc_list_class()), (
+        "ohlc_list must be an instance of energyquantified.data.OHLCList"
+    )
+    # Conversion
+    return pd.DataFrame.from_records(
+        {
+            "traded": ohlc.product.traded,
+            "period": ohlc.product.period.tag,
+            "front": ohlc.product.front,
+            "delivery": ohlc.product.delivery,
+            "open": ohlc.open,
+            "high": ohlc.high,
+            "low": ohlc.low,
+            "close": ohlc.close,
+            "settlement": ohlc.settlement,
+            "volume": ohlc.volume,
+            "open_interest": ohlc.open_interest,
+        }
+        for ohlc in ohlc_list
+    )
+
+
+def ppa_list_to_pandas_dataframe(ppa_list):
+    """
+    Convert an :py:class:`energyquantified.data.PPAList` to a
+    ``pandas.DataFrame``.
+
+    :param ppa_list: A list of PPA objects
+    :type ppa_list: PPAList
+    :return: A DataFrame
+    :rtype: pandas.DataFrame
+    :raises ImportError: When pandas is not installed on the system
+    """
+    # Checks
+    assert_pandas_installed()
+    assert isinstance(ppa_list, _get_ppa_list_class()), (
+        "ppa_list must be an instance of energyquantified.data.PPAList"
+    )
     # Conversion
     return pd.DataFrame.from_records(
         (
             {
-                "traded": ohlc.product.traded,
-                "period": ohlc.product.period.tag,
-                "front": ohlc.product.front,
-                "delivery": ohlc.product.delivery,
-                "open": ohlc.open,
-                "high": ohlc.high,
-                "low": ohlc.low,
-                "close": ohlc.close,
-                "settlement": ohlc.settlement,
-                "volume": ohlc.volume,
-                "open_interest": ohlc.open_interest,
+                "date": ppa.product.date,
+                "technology": ppa.product.technology.tag,
+                "contract_structure": ppa.product.contract_structure.tag,
+                "delivery_begin": ppa.product.delivery_begin,
+                "duration": ppa.product.duration.years,
+                "price": ppa.price,
             }
-            for ohlc in ohlc_list
-        )
-    )
+            for ppa in ppa_list
+        ),
+        columns=[
+            "date",
+            "technology",
+            "contract_structure",
+            "delivery_begin",
+            "duration",
+            "price",
+        ],
+    ).astype({"duration": "int64", "price": "float64"})
 
 
 @deprecated(alt=ohlc_list_to_pandas_dataframe)
@@ -453,12 +493,12 @@ def absolute_result_to_pandas_dataframe(
     :raises ImportError: When pandas is not installed on the system
     """
     assert_pandas_installed()
-    assert isinstance(
-        absolute_result, _get_absolute_result_class()
-    ), "absolute_result must be an instance of energyquantified.data.AbsoluteResult"
-    assert isinstance(
-        name, (type(None), str)
-    ), f"parameter name must be string or None, was {type(name)}"
+    assert isinstance(absolute_result, _get_absolute_result_class()), (
+        "absolute_result must be an instance of energyquantified.data.AbsoluteResult"
+    )
+    assert isinstance(name, (type(None), str)), (
+        f"parameter name must be string or None, was {type(name)}"
+    )
     if name is None:
         name = absolute_result.curve.name
     if single_level_index:
@@ -526,3 +566,115 @@ def _absolute_result_to_dataframe_single_index(absolute_result, name):
     )
     df.index.name = "instance"
     return df
+
+
+def trade_ohlc_series_to_pandas_dataframe(series):
+    """
+    Convert an :py:class:`energyquantified.data.TradeOHLCSeries` to a
+    ``pandas.DataFrame``.
+
+    The frame is in a flat, CSV-like layout with one row per trading-time
+    bucket and columns for the contract (``period`` and ``delivery``), the
+    ``traded_at`` bucket, and the OHLC fields.
+
+    :param series: A trade OHLC series
+    :type series: TradeOHLCSeries
+    :return: A DataFrame
+    :rtype: pandas.DataFrame
+    :raises ImportError: When pandas is not installed on the system
+    """
+    # Checks
+    assert_pandas_installed()
+    assert isinstance(
+        series, _get_trade_ohlc_series_class()
+    ), "series must be an instance of energyquantified.data.TradeOHLCSeries"
+    # Conversion
+    return _trade_ohlc_pandas_dataframe(
+        _trade_ohlc_series_records(series), series.curve
+    )
+
+
+def trade_ohlc_series_list_to_pandas_dataframe(series_list):
+    """
+    Convert an :py:class:`energyquantified.data.TradeOHLCSeriesList` to a
+    ``pandas.DataFrame``.
+
+    The frame is in a flat, CSV-like layout with one row per contract and
+    trading-time bucket and columns for the contract (``period`` and
+    ``delivery``), the ``traded_at`` bucket, and the OHLC fields.
+
+    :param series_list: A list of trade OHLC series
+    :type series_list: TradeOHLCSeriesList
+    :return: A DataFrame
+    :rtype: pandas.DataFrame
+    :raises ImportError: When pandas is not installed on the system
+    """
+    # Checks
+    assert_pandas_installed()
+    assert isinstance(
+        series_list, _get_trade_ohlc_series_list_class()
+    ), (
+        "series_list must be an instance of "
+        "energyquantified.data.TradeOHLCSeriesList"
+    )
+    # Conversion
+    return _trade_ohlc_pandas_dataframe(
+        (
+            record
+            for series in series_list
+            for record in _trade_ohlc_series_records(series)
+        ),
+        series_list.curve,
+    )
+
+
+_TRADE_OHLC_COLUMNS = [
+    "period",
+    "delivery",
+    "traded_at",
+    "open",
+    "high",
+    "low",
+    "close",
+    "vwap",
+    "volume",
+    "count",
+]
+
+_TRADE_OHLC_DTYPES = {
+    "open": "float64",
+    "high": "float64",
+    "low": "float64",
+    "close": "float64",
+    "vwap": "float64",
+    "volume": "float64",
+    "count": "int64",
+}
+
+
+def _trade_ohlc_pandas_dataframe(records, curve):
+    df = pd.DataFrame.from_records(records, columns=_TRADE_OHLC_COLUMNS)
+    # Show datetimes in the curve's timezone, also when the frame is empty
+    timezone = curve.timezone.zone if curve and curve.timezone else "UTC"
+    for column in ("delivery", "traded_at"):
+        df[column] = pd.to_datetime(df[column], utc=True).dt.tz_convert(timezone)
+    return df.astype(_TRADE_OHLC_DTYPES)
+
+
+def _trade_ohlc_series_records(series):
+    contract = series.contract
+    period = contract.period.tag if contract else None
+    delivery = contract.delivery if contract else None
+    for ohlc in series.data:
+        yield {
+            "period": period,
+            "delivery": delivery,
+            "traded_at": ohlc.traded_at,
+            "open": ohlc.open,
+            "high": ohlc.high,
+            "low": ohlc.low,
+            "close": ohlc.close,
+            "vwap": ohlc.vwap,
+            "volume": ohlc.volume,
+            "count": ohlc.count,
+        }

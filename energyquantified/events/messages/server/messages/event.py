@@ -1,6 +1,7 @@
 from energyquantified.events.messages.server.base import _BaseServerMessage
 from energyquantified.events import CurveUpdateEvent, EventType
 from energyquantified.parser.metadata import parse_curve, parse_instance
+from energyquantified.parser.trades import parse_trade_contract
 from energyquantified.metadata import CurveType
 from dateutil.parser import isoparse
 from energyquantified.time import to_timezone
@@ -39,6 +40,12 @@ def _parse_curve_event(json):
     instance = json.get("instance")
     if instance is not None:
         instance = parse_instance(instance, curve=curve)
+    # Trade contract
+    trade_contract = json.get("trade_contract")
+    if trade_contract is not None:
+        trade_contract = parse_trade_contract(
+            trade_contract, timezone=curve.timezone
+        )
     return CurveUpdateEvent(
         json["id"],
         curve,
@@ -47,4 +54,5 @@ def _parse_curve_event(json):
         end=end,
         instance=instance,
         num_values=json.get("values_changed"),
+        trade_contract=trade_contract,
     )

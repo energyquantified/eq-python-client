@@ -114,10 +114,14 @@ class DataType(enum.Enum):
     FOREX = ("FOREX", "Forex")
     #: Closing data from the market.
     OHLC = ("OHLC", "OHLC")
+    #: Intraday trade data.
+    TRADES = ("TRADES", "Trades")
     #: Capacity data generated from REMIT outage messages.
     REMIT = ("REMIT", "REMIT")
     #: Total installed capacity.
     CAPACITY = ("CAPACITY", "Capacity")
+    #: Power purchase agreement (PPA) prices.
+    PPA = ("PPA", "PPA")
 
     def __init__(self, tag=None, label=None):
         self.tag = tag
@@ -175,6 +179,8 @@ class CurveType(enum.Enum):
        ``EnergyQuantified.instance_periods.*``.
      * OHLC means "open, high, low and close" data. To load data from
        these curves, use the OHLC operations.
+     * PPA means "power purchase agreement" prices. To load data from
+       these curves, use the ``EnergyQuantified.ppa.*`` operations.
     """
 
     #: Plain, fixed-interval time series data
@@ -189,6 +195,10 @@ class CurveType(enum.Enum):
     INSTANCE_PERIOD = ("INSTANCE_PERIOD", True)
     #: Closing prices for market data
     OHLC = ("OHLC", False)
+    #: Intraday trade contracts and OHLC data
+    TRADES = ("TRADES", False)
+    #: Power purchase agreement (PPA) prices
+    PPA = ("PPA", False)
 
     def __init__(self, tag=None, has_instances=False):
         self.tag = tag

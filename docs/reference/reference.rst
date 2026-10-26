@@ -72,6 +72,21 @@ Here are the different API section classes:
 
 ------
 
+.. autoclass:: energyquantified.api.TradesAPI
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.api.TradesOhlcAPI
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.api.PpaAPI
+   :inherited-members:
+
+------
+
 .. autoclass:: energyquantified.api.UserAPI
    :inherited-members:
 
@@ -84,8 +99,8 @@ Here are the different API section classes:
 Data types
 ----------
 
-There are three main groups of data types: Time series, period-based
-series and OHLC data:
+The main data type groups include time series, period-based series, OHLC data,
+intraday trade data, and PPA data:
 
 
 Time series classes
@@ -163,6 +178,45 @@ OHLC data classes
 ------
 
 .. autoclass:: energyquantified.data.OHLCList
+   :show-inheritance:
+   :members:
+
+
+Trade data classes
+^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: energyquantified.data.TradeContract
+
+------
+
+.. autoclass:: energyquantified.data.TradeOHLC
+
+------
+
+.. autoclass:: energyquantified.data.TradeOHLCSeries
+   :members:
+
+------
+
+.. autoclass:: energyquantified.data.TradeOHLCSeriesList
+   :show-inheritance:
+   :members:
+
+
+PPA data classes
+^^^^^^^^^^^^^^^^
+
+.. autoclass:: energyquantified.data.PPAProduct
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.data.PPA
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.data.PPAList
    :show-inheritance:
    :members:
 
@@ -257,6 +311,26 @@ Metadata
 ------
 
 .. autoclass:: energyquantified.metadata.OHLCField
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.TradeOHLCField
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.Technology
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.ContractStructure
+   :inherited-members:
+
+------
+
+.. autoclass:: energyquantified.metadata.PPADuration
    :inherited-members:
 
 ------
