@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-dev
+0.19
 ----
 
 **Improvements**
