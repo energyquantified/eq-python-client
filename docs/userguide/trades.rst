@@ -54,6 +54,8 @@ of trading time:
        volume: number
        count: int
 
+The parameters:
+
  * **traded_at** – The beginning of the trading-time bucket. This is when
    the trades happened, not when the contract is delivered.
  * **open**, **high**, **low** and **close** – The first, highest, lowest

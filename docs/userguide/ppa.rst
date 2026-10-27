@@ -39,6 +39,8 @@ The **product** field describes which agreement the price is for:
        delivery_begin: date
        duration: PPADuration
 
+The parameters:
+
  * **date** – The date the price was quoted.
  * **technology** – The generation technology: solar, onshore wind or
    offshore wind. See :py:class:`energyquantified.metadata.Technology`.
