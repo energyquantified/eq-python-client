@@ -33,6 +33,8 @@ and the start of delivery:
        period: Frequency
        delivery: datetime
 
+The parameters:
+
  * **period** – The length of the delivery interval: ``PT15M``, ``PT30M``
    or ``PT1H``.
  * **delivery** – The beginning of the delivery interval, in the curve's
